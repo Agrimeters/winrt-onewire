@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -216,8 +217,9 @@ namespace com.dalsemi.onewire.adapter
 		  // restart the packet to initialize
 		  restart();
 
-		  // Default on SunOS to bit-banging
-		  bitsOnly = (System.Environment.GetEnvironmentVariable("os.name").IndexOf("SunOS") != -1);
+          // Default on SunOS to bit-banging
+          //TODO bitsOnly = (System.Environment.GetEnvironmentVariable("os.name").IndexOf("SunOS") != -1);
+          bitsOnly = false;
 
 		  // check for a bits only property
 		  string bits = OneWireAccessProvider.getProperty("onewire.serial.forcebitsonly");
@@ -758,7 +760,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="len"> </param>
 	   public virtual void interpretDataBytes(char[] dataByteResponse, int responseOffset, sbyte[] result, int offset, int len)
 	   {
-		  char result_byte;
+		  byte result_byte;
 		  int temp_offset, i, j;
 
 		  for (i = 0; i < len; i++)
@@ -775,14 +777,14 @@ namespace com.dalsemi.onewire.adapter
 				}
 
 				// loop through and interpret each bit
-				result_byte = (char)0;
+				result_byte = 0;
 				for (j = 0; j < 8; j++)
 				{
-				   result_byte = (char)((int)((uint)result_byte >> 1));
+				   result_byte = (byte)((int)((uint)result_byte >> 1));
 
 				   if (interpretOneWireBit(dataByteResponse [temp_offset + j]))
 				   {
-					  result_byte |= 0x80;
+					  result_byte |= (byte)0x80;
 				   }
 				}
 
@@ -965,12 +967,12 @@ namespace com.dalsemi.onewire.adapter
 	   /// <returns> the byte representing the result of a 1-Wire data byte </returns>
 	   public virtual sbyte interpretPrimedByte(char[] primedDataResponse, int responseOffset)
 	   {
-		  char result_byte = (char)0;
+		  byte result_byte = 0;
 
 		  // loop through and interpret each bit
 		  for (int i = 0; i < 8; i++)
 		  {
-			 result_byte = (char)((int)((uint)result_byte >> 1));
+			 result_byte = (byte)((int)((uint)result_byte >> 1));
 
 			 if (interpretOneWireBit(primedDataResponse [responseOffset + i]))
 			 {

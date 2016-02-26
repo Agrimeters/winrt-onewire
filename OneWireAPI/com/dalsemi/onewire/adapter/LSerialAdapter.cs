@@ -523,7 +523,7 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// Field currentPosition </summary>
-	   internal int currentPosition; // the current position in the list of all devices.
+	   //TODO internal int currentPosition; // the current position in the list of all devices.
 
 	   /// <summary>
 	   ///  Returns <code>true</code> if the first iButton or 1-Wire device
@@ -826,7 +826,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </returns>
 	   ///  <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   ///  <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public override bool Bit
+	   public override bool getBit
 	   {
 		   get
 		   {
@@ -1165,8 +1165,8 @@ namespace com.dalsemi.onewire.adapter
 			 do
 			 {
 				// read a bit and its compliment
-				bit_test = (Bit ? 1 : 0) << 1;
-				bit_test |= (Bit ? 1 : 0);
+				bit_test = (getBit ? 1 : 0) << 1; //TODO Bit
+				bit_test |= (getBit ? 1 : 0); //TODO Bit
 
 				// check for no devices on 1-wire
 				if (bit_test == 3)
@@ -1270,7 +1270,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		  if (!adapterPresent_Renamed)
 		  {
-			 byte[] test_buf = new byte[] { 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE3, 0xC1, Convert.ToByte('A'), Convert.ToByte('T'), Convert.ToByte('E'), Convert.ToByte('0'), 0x0D, Convert.ToByte('A') };
+			 sbyte[] test_buf = new sbyte[] { -1, 0, -1, 0, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -29, -63, Convert.ToSByte('A'), Convert.ToSByte('T'), Convert.ToSByte('E'), Convert.ToSByte('0'), 0x0D, Convert.ToSByte('A') };
 
 			 try
 			 {

@@ -828,7 +828,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// This method does nothing in <code>DumbAdapter</code>.
 	   /// </summary>
 	   /// <returns>  <code>true</code> </returns>
-	   public override bool Bit
+	   public override bool getBit
 	   {
 		   get
 		   {

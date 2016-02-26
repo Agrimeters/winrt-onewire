@@ -1229,7 +1229,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public abstract bool Bit {get;}
+	   public abstract bool getBit {get;}
 
 	   /// <summary>
 	   /// Sends a byte to the 1-Wire Network.

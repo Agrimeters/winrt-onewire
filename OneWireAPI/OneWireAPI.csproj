@@ -109,10 +109,15 @@
   <ItemGroup>
     <Compile Include="com\dalsemi\onewire\adapter\DSPortAdapter.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\DumbAdapter.cs" />
+    <Compile Include="com\dalsemi\onewire\adapter\LSerialAdapter.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\OneWireIOException.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\OneWireState.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\RawSendPacket.cs" />
-    <Compile Include="com\dalsemi\onewire\adapter\TMEXAdapter.cs" />
+    <Compile Include="com\dalsemi\onewire\adapter\SerialService.cs" />
+    <Compile Include="com\dalsemi\onewire\adapter\UAdapterState.cs" />
+    <Compile Include="com\dalsemi\onewire\adapter\UPacketBuilder.cs" />
+    <Compile Include="com\dalsemi\onewire\adapter\UParameterSettings.cs" />
+    <Compile Include="com\dalsemi\onewire\adapter\USerialAdapter.cs" />
     <Compile Include="com\dalsemi\onewire\application\file\MemoryCache.cs" />
     <Compile Include="com\dalsemi\onewire\application\file\OWFile.cs" />
     <Compile Include="com\dalsemi\onewire\application\file\OWFileDescriptor.cs" />

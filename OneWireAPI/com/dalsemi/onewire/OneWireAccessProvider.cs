@@ -197,42 +197,42 @@ namespace com.dalsemi.onewire
 			 return (adapter_vector.GetEnumerator());
 		  }
 
-		  // only try native TMEX if on x86 Windows platform
-		  if ((System.Environment.GetEnvironmentVariable("os.arch").IndexOf("86") != -1) && 
-              (System.Environment.GetEnvironmentVariable("os.name").IndexOf("Windows") != -1))
-		  {
-			 // loop through the TMEX adapters
-			 for (int port_type = 0; port_type <= 15; port_type++)
-			 {
+#if false //TODO
+            // only try native TMEX if on x86 Windows platform
+            if ((System.Environment.GetEnvironmentVariable("os.arch").IndexOf("86") != -1) &&
+                (System.Environment.GetEnvironmentVariable("os.name").IndexOf("Windows") != -1))
+            {
+                // loop through the TMEX adapters
+                for (int port_type = 0; port_type <= 15; port_type++)
+                {
 
-				// try to load the adapter classes
-				try
-				{
-				   adapter_instance = (DSPortAdapter)(new com.dalsemi.onewire.adapter.TMEXAdapter(port_type));
+                    // try to load the adapter classes
+                    try
+                    {
+                        adapter_instance = (DSPortAdapter)(new com.dalsemi.onewire.adapter.TMEXAdapter(port_type));
 
-				   // only add it if it has some ports
-//JAVA TO C# CONVERTER TODO TASK: Java iterators are only converted within the context of 'while' and 'for' loops:
-				   if (adapter_instance.PortNames.Current != null) //.hasMoreElements()
-                   {
-					  adapter_vector.Add(adapter_instance);
-					  TMEX_loaded = true;
-				   }
-				}
-				catch (System.Exception)
-				{
-				   // DRAIN
-				}
-			 }
-		  }
+                        // only add it if it has some ports
+                        if (adapter_instance.PortNames.MoveNext()) //TODO .hasMoreElements()
+                        {
+                            adapter_vector.Add(adapter_instance);
+                            TMEX_loaded = true;
+                        }
+                    }
+                    catch (System.Exception)
+                    {
+                        // DRAIN
+                    }
+                }
+            }
+#endif
 
-		  // get the pure java adapter
-		  try
+          // get the pure java adapter
+          try
 		  {
 			 adapter_class = Type.GetType("com.dalsemi.onewire.adapter.USerialAdapter");
              adapter_instance = (DSPortAdapter) Activator.CreateInstance(adapter_class);
 
 			 // check if has any ports (common javax.comm problem)
-//JAVA TO C# CONVERTER TODO TASK: Java iterators are only converted within the context of 'while' and 'for' loops:
 			 if (!(adapter_instance.PortNames.Current != null)) //TODO .hasMoreElements()
              {
 				if (!TMEX_loaded)
@@ -283,8 +283,9 @@ namespace com.dalsemi.onewire
 			 Debug.WriteLine("");
 		  }
 
-		  // get the network adapter
-		  try
+#if false //TODO
+            // get the network adapter
+            try
 		  {
 			 adapter_class = Type.GetType("com.dalsemi.onewire.adapter.NetAdapter");
              adapter_instance = (DSPortAdapter)Activator.CreateInstance(adapter_class);
@@ -299,9 +300,10 @@ namespace com.dalsemi.onewire
              Debugger.Break();
 			 // DRAIN
 		  }
+#endif
 
-		  // get adapters from property file with keys 'onewire.register.adapter0-15'
-		  try
+          // get adapters from property file with keys 'onewire.register.adapter0-15'
+          try
 		  {
 			 // loop through the possible registered adapters
 			 for (int reg_num = 0; reg_num <= 15; reg_num++)
