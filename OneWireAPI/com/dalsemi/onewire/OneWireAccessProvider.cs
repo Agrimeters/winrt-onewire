@@ -188,43 +188,62 @@ namespace com.dalsemi.onewire
 		  ArrayList adapter_vector = new ArrayList(3);
 		  DSPortAdapter adapter_instance;
 		  bool serial_loaded = false;
+          bool usb_loaded = false;
 
-		  // check for override
-		  if (useOverrideAdapter)
+          // check for override
+          if (useOverrideAdapter)
 		  {
 			 adapter_vector.Add(overrideAdapter);
 			 return (adapter_vector.GetEnumerator());
 		  }
 
-          // get the pure C# adapter
+          // DS2490 - USB
           try
-		  {
-             adapter_instance = (DSPortAdapter)new USerialAdapter();
+          {
+              // add it to the enum
+              adapter_instance = (DSPortAdapter)new UsbAdapter();
 
-			 // check if any serial ports are available
-			 if (!adapter_instance.PortNames.MoveNext())
-             {
-				Debug.WriteLine("Warning: serial communications API not setup properly, no ports in enumeration ");
-				Debug.WriteLine("Pure-C# DS9097U adapter will not work, not added to adapter enum");
-			 }
-			 else
-			 {
-				adapter_vector.Add(adapter_instance);
-				serial_loaded = true;
-			 }
+              // check if any serial ports are available
+              if (adapter_instance.PortNames.MoveNext())
+              {
+                  adapter_vector.Add(adapter_instance);
+                  usb_loaded = true;
+              }
+          }
+          catch (System.Exception)
+          {
+              // DRAIN
+          }
+
+          // DS2480B - Serial
+          try
+          {
+              adapter_instance = (DSPortAdapter)new USerialAdapter();
+
+			  // check if any serial ports are available
+ 			  if (!adapter_instance.PortNames.MoveNext())
+              {
+			      Debug.WriteLine("Warning: serial communications API not setup properly, no ports in enumeration ");
+				  Debug.WriteLine("Pure-C# DS9097U adapter will not work, not added to adapter enum");
+			  }
+			  else
+			  {
+			      adapter_vector.Add(adapter_instance);
+			      serial_loaded = true;
+			  }
 		  }
 		  catch (System.Exception)
 		  {
 			 // DRAIN
 		  }
 
-		  if (!serial_loaded)
+		  if ((!usb_loaded) && (!serial_loaded))
 		  {
-			 Debug.WriteLine("");
-			 Debug.WriteLine("Standard drivers for 1-Wire are not found.");
-			 Debug.WriteLine("Please download the latest drivers from http://www.ibutton.com ");
-			 Debug.WriteLine("Or install RXTX Serial Communications API from http://www.rxtx.org ");
-			 Debug.WriteLine("");
+		      Debug.WriteLine("");
+			  Debug.WriteLine("Standard drivers for 1-Wire are not found.");
+			  Debug.WriteLine("Please download the latest drivers from http://www.ibutton.com ");
+ 			  Debug.WriteLine("Or install RXTX Serial Communications API from http://www.rxtx.org ");
+			  Debug.WriteLine("");
 		  }
 
 #if false //TODO
@@ -247,44 +266,8 @@ namespace com.dalsemi.onewire
 		  }
 #endif //TODO
 
-#if false //TODO
-            // get adapters from property file with keys 'onewire.register.adapter0-15'
-            try
-		  {
-			 // loop through the possible registered adapters
-			 for (int reg_num = 0; reg_num <= 15; reg_num++)
-			 {
-				class_name = getProperty("onewire.register.adapter" + reg_num);
-
-				// done if no property by that name
-				if (string.ReferenceEquals(class_name, null))
-				{
-				   break;
-				}
-
-				// add it to the enum
-				adapter_class = Type.GetType(class_name);
-                adapter_instance = (DSPortAdapter) Activator.CreateInstance(adapter_class);
-
-				adapter_vector.Add(adapter_instance);
-			 }
-		  }
-		  catch (System.MethodAccessException)
-		  {
-			 Debug.WriteLine("Warning: Adapter \"" + class_name + "\" was registered in " + "properties file, but the class could not be loaded");
-		  }
-		  catch (System.TypeLoadException)
-		  {
-			 Debug.WriteLine("Adapter \"" + class_name + "\" was registered in properties file, " + " but the class was not found");
-		  }
-		  catch (System.Exception)
-		  {
-			 // DRAIN
-		  }
-#endif //TODO
-
-            // check for no adapters
-            if (adapter_vector.Count == 0)
+          // check for no adapters
+          if (adapter_vector.Count == 0)
 		  {
 			 Debug.WriteLine("No 1-Wire adapter classes found");
 		  }

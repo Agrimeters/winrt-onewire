@@ -118,17 +118,17 @@ namespace Test
             {
                 //parse device instance
 
-                string[] st = args[0].Split(new char[] { '_' });
+                //string[] st = args[0].Split(new char[] { '_' });
 
-                if (st.Length != 2)
+                if (args.Length != 2)
                 {
                     printUsageString();
 
                     return;
                 }
 
-                adapter_name = st[0];
-                port_name = st[1];
+                adapter_name = args[0];
+                port_name = args[1];
 
                 Debug.WriteLine("Adapter Name: " + adapter_name);
                 Debug.WriteLine("Port Name: " + port_name);

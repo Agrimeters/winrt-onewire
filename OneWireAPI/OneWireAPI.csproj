@@ -108,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="com\dalsemi\onewire\adapter\DSPortAdapter.cs" />
+    <Compile Include="com\dalsemi\onewire\adapter\UsbAdapter.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\DumbAdapter.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\LSerialAdapter.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\OneWireIOException.cs" />

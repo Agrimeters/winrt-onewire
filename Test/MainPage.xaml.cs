@@ -13,6 +13,10 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
+//using Windows.Devices.I2c; //IoT only...
+using Windows.Devices.Usb;
+using Windows.Devices.Enumeration;
+
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace Test
@@ -26,9 +30,9 @@ namespace Test
         {
             this.InitializeComponent();
 
-            string[] args = null;
-            //string[] args = { "DS9097U_COM8" };
-            //string[] args = { "DS9490_USB",  };
+            //string[] args = null;
+            //string[] args = { "DS9097U", "COM8" };
+            string[] args = { "DS2490", @"USB\VID_04FA&PID_2490\6&f0f8e95&0&6",  };
 
             // Print default access provider settings
             com.dalsemi.onewire.OneWireAccessProvider.Main(args);
