@@ -67,7 +67,7 @@ namespace com.dalsemi.onewire.application.tag
 		  TemperatureContainer tc = (TemperatureContainer) DeviceContainer_Renamed;
 
 		  // read the device first before getting the temperature
-		  sbyte[] state = tc.readDevice();
+		  byte[] state = tc.readDevice();
 
 		  // perform a temperature conversion
 		  tc.doTemperatureConvert(state);

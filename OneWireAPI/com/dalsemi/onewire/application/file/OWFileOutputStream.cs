@@ -394,7 +394,7 @@ namespace com.dalsemi.onewire.application.file
 	   /// </summary>
 	   /// <param name="b">   the data. </param>
 	   /// <exception cref="IOException">  if an I/O error occurs. </exception>
-	   public virtual void write(sbyte[] b)
+	   public virtual void write(byte[] b)
 	   {
 		  if (fd != null)
 		  {
@@ -414,7 +414,7 @@ namespace com.dalsemi.onewire.application.file
 	   /// <param name="off">   the start offset in the data. </param>
 	   /// <param name="len">   the number of bytes to write. </param>
 	   /// <exception cref="IOException">  if an I/O error occurs. </exception>
-	   public virtual void write(sbyte[] b, int off, int len)
+	   public virtual void write(byte[] b, int off, int len)
 	   {
 		  if (fd != null)
 		  {

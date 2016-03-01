@@ -83,45 +83,45 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// DS18B20 writes data to scratchpad command </summary>
-	   public const sbyte WRITE_SCRATCHPAD_COMMAND = (sbyte) 0x4E;
+	   public const byte WRITE_SCRATCHPAD_COMMAND = (byte) 0x4E;
 
 	   /// <summary>
 	   /// DS18B20 reads data from scratchpad command </summary>
-	   public const sbyte READ_SCRATCHPAD_COMMAND = unchecked((sbyte) 0xBE);
+	   public const byte READ_SCRATCHPAD_COMMAND = unchecked((byte) 0xBE);
 
 	   /// <summary>
 	   /// DS18B20 copys data from scratchpad to E-squared memory command </summary>
-	   public const sbyte COPY_SCRATCHPAD_COMMAND = (sbyte) 0x48;
+	   public const byte COPY_SCRATCHPAD_COMMAND = (byte) 0x48;
 
 	   /// <summary>
 	   /// DS18B20 converts temperature command </summary>
-	   public const sbyte CONVERT_TEMPERATURE_COMMAND = (sbyte) 0x44;
+	   public const byte CONVERT_TEMPERATURE_COMMAND = (byte) 0x44;
 
 	   /// <summary>
 	   /// DS18B20 recalls E-squared memory command </summary>
-	   public const sbyte RECALL_E2MEMORY_COMMAND = unchecked((sbyte) 0xB8);
+	   public const byte RECALL_E2MEMORY_COMMAND = unchecked((byte) 0xB8);
 
 	   /// <summary>
 	   /// DS18B20 reads power supply command.  This command is used to determine
 	   /// if external power is supplied.
 	   /// </summary>
-	   public const sbyte READ_POWER_SUPPLY_COMMAND = unchecked((sbyte) 0xB4);
+	   public const byte READ_POWER_SUPPLY_COMMAND = unchecked((byte) 0xB4);
 
 	   /// <summary>
 	   /// DS18B20 12-bit resolution constant for CONFIG byte </summary>
-	   public const sbyte RESOLUTION_12_BIT = (sbyte) 0x7F;
+	   public const byte RESOLUTION_12_BIT = (byte) 0x7F;
 
 	   /// <summary>
 	   /// DS18B20 11-bit resolution constant for CONFIG byte </summary>
-	   public const sbyte RESOLUTION_11_BIT = (sbyte) 0x5F;
+	   public const byte RESOLUTION_11_BIT = (byte) 0x5F;
 
 	   /// <summary>
 	   /// DS18B20 10-bit resolution constant for CONFIG byte </summary>
-	   public const sbyte RESOLUTION_10_BIT = (sbyte) 0x3F;
+	   public const byte RESOLUTION_10_BIT = (byte) 0x3F;
 
 	   /// <summary>
 	   /// DS18B20 9-bit resolution constant for CONFIG byte </summary>
-	   public const sbyte RESOLUTION_9_BIT = (sbyte) 0x1F;
+	   public const byte RESOLUTION_9_BIT = (byte) 0x1F;
 
 	   /// <summary>
 	   /// Creates an empty <code>OneWireContainer28</code>.  Must call
@@ -156,7 +156,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #OneWireContainer28() </seealso>
 	   /// <seealso cref= #OneWireContainer28(DSPortAdapter,long) </seealso>
 	   /// <seealso cref= #OneWireContainer28(DSPortAdapter,String) </seealso>
-	   public OneWireContainer28(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer28(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 	   }
 
@@ -370,7 +370,7 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref=    #getTemperature </seealso>
-	   public virtual void doTemperatureConvert(sbyte[] state)
+	   public virtual void doTemperatureConvert(byte[] state)
 	   {
 		  int msDelay = 750; // in milliseconds
 
@@ -452,7 +452,7 @@ namespace com.dalsemi.onewire.container
 	   ///         'presence pulse'.
 	   /// </exception>
 	   /// <seealso cref=    #doTemperatureConvert </seealso>
-	   public virtual double getTemperature(sbyte[] state)
+	   public virtual double getTemperature(byte[] state)
 	   {
 
 		  // Take these three steps:
@@ -492,7 +492,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref=    #hasTemperatureAlarms </seealso>
 	   /// <seealso cref=    #setTemperatureAlarm </seealso>
-	   public virtual double getTemperatureAlarm(int alarmType, sbyte[] state)
+	   public virtual double getTemperatureAlarm(int alarmType, byte[] state)
 	   {
 		  return (double) state [alarmType == TemperatureContainer_Fields.ALARM_LOW ? 3 : 2];
 	   }
@@ -514,7 +514,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolutions </seealso>
 	   /// <seealso cref=    #setTemperatureResolution </seealso>
-	   public virtual double getTemperatureResolution(sbyte[] state)
+	   public virtual double getTemperatureResolution(byte[] state)
 	   {
 		  double tempres = (double) 0.0;
 
@@ -559,7 +559,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref=    #hasTemperatureAlarms </seealso>
 	   /// <seealso cref=    #getTemperatureAlarm </seealso>
-	   public virtual void setTemperatureAlarm(int alarmType, double alarmValue, sbyte[] state)
+	   public virtual void setTemperatureAlarm(int alarmType, double alarmValue, byte[] state)
 	   {
 		  if ((alarmType != TemperatureContainer_Fields.ALARM_LOW) && (alarmType != TemperatureContainer_Fields.ALARM_HIGH))
 		  {
@@ -571,7 +571,7 @@ namespace com.dalsemi.onewire.container
 			 throw new System.ArgumentException("Value for alarm not in accepted range.  Must be -55 C <-> +125 C.");
 		  }
 
-		  state [(alarmType == TemperatureContainer_Fields.ALARM_LOW) ? 3 : 2] = (sbyte) alarmValue;
+		  state [(alarmType == TemperatureContainer_Fields.ALARM_LOW) ? 3 : 2] = (byte) alarmValue;
 	   }
 
 	   /// <summary>
@@ -593,9 +593,9 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolutions </seealso>
-	   public virtual void setTemperatureResolution(double resolution, sbyte[] state)
+	   public virtual void setTemperatureResolution(double resolution, byte[] state)
 	   {
-		  sbyte configbyte = RESOLUTION_12_BIT;
+		  byte configbyte = RESOLUTION_12_BIT;
 
 		  lock (this)
 		  {
@@ -655,10 +655,10 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref=    #writeDevice </seealso>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
 
-		  sbyte[] data;
+		  byte[] data;
 
 		  data = recallE2();
 
@@ -682,9 +682,9 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref=    #readDevice </seealso>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
-		  sbyte[] temp = new sbyte [3];
+		  byte[] temp = new byte [3];
 
 		  temp [0] = state [2];
 		  temp [1] = state [3];
@@ -714,24 +714,24 @@ namespace com.dalsemi.onewire.container
 	   ///         'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readScratchpad()
+	   public virtual byte[] readScratchpad()
 	   {
-		  sbyte[] result_block;
+		  byte[] result_block;
 
 		  // select the device
 		  if (adapter.select(address))
 		  {
 
 			 // create a block to send that reads the scratchpad
-			 sbyte[] send_block = new sbyte [10];
+			 byte[] send_block = new byte [10];
 
 			 // read scratchpad command
-			 send_block [0] = (sbyte) READ_SCRATCHPAD_COMMAND;
+			 send_block [0] = (byte) READ_SCRATCHPAD_COMMAND;
 
 			 // now add the read bytes for data bytes and crc8
 			 for (int i = 1; i < 10; i++)
 			 {
-				send_block [i] = unchecked((sbyte) 0xFF);
+				send_block [i] = unchecked((byte) 0xFF);
 			 }
 
 			 // send the block
@@ -739,7 +739,7 @@ namespace com.dalsemi.onewire.container
 
 			 // now, send_block contains the 9-byte Scratchpad plus READ_SCRATCHPAD_COMMAND byte
 			 // convert the block to a 9-byte array representing Scratchpad (get rid of first byte)
-			 result_block = new sbyte [9];
+			 result_block = new byte [9];
 
 			 for (int i = 0; i < 9; i++)
 			 {
@@ -779,11 +779,11 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
 	   /// <exception cref="IllegalArgumentException"> when data is of invalid length </exception>
-	   public virtual void writeScratchpad(sbyte[] data)
+	   public virtual void writeScratchpad(byte[] data)
 	   {
 
 		  // setup buffer to write to scratchpad
-		  sbyte[] writeBuffer = new sbyte [4];
+		  byte[] writeBuffer = new byte [4];
 
 		  writeBuffer [0] = WRITE_SCRATCHPAD_COMMAND;
 		  writeBuffer [1] = data [0];
@@ -803,7 +803,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // double check by reading scratchpad
-		  sbyte[] readBuffer;
+		  byte[] readBuffer;
 
 		  readBuffer = readScratchpad();
 
@@ -833,7 +833,7 @@ namespace com.dalsemi.onewire.container
 	   {
 
 		  // first, let's read the scratchpad to compare later.
-		  sbyte[] readfirstbuffer;
+		  byte[] readfirstbuffer;
 
 		  readfirstbuffer = readScratchpad();
 
@@ -869,7 +869,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // third, let's read the scratchpad again with the recallE2 command and compare.
-		  sbyte[] readlastbuffer;
+		  byte[] readlastbuffer;
 
 		  readlastbuffer = recallE2();
 
@@ -897,9 +897,9 @@ namespace com.dalsemi.onewire.container
 	   ///         'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] recallE2()
+	   public virtual byte[] recallE2()
 	   {
-		  sbyte[] ScratchBuff;
+		  byte[] ScratchBuff;
 
 		  // select the device
 		  if (adapter.select(address))

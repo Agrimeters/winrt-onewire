@@ -83,7 +83,7 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// byte array containing the entire <code>ResponseAPDU</code> </summary>
-	   protected internal sbyte[] apduBuffer = null;
+	   protected internal byte[] apduBuffer = null;
 
 	   /// <summary>
 	   /// length of this <code>ResponseAPDU</code> currently in the 
@@ -103,7 +103,7 @@ namespace com.dalsemi.onewire.container
 	   ///                          < <code>2</code>.
 	   /// </exception>
 	   /// <seealso cref=    CommandAPDU </seealso>
-	   public ResponseAPDU(sbyte[] buffer)
+	   public ResponseAPDU(byte[] buffer)
 	   {
 		  if (buffer.Length < 2)
 		  {
@@ -111,7 +111,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  apduLength = buffer.Length;
-		  apduBuffer = new sbyte [apduLength];
+		  apduBuffer = new byte [apduLength];
 
 		  Array.Copy(buffer, 0, apduBuffer, 0, apduLength);
 	   } // ResponseAPDU
@@ -120,13 +120,13 @@ namespace com.dalsemi.onewire.container
 	   /// Gets the data field of this <code>ResponseAPDU</code>.
 	   /// </summary>
 	   /// <returns> a byte array containing this <code>ResponseAPDU</code> data field </returns>
-	   public virtual sbyte[] Data
+	   public virtual byte[] Data
 	   {
 		   get
 		   {
 			  if (apduLength > 2)
 			  {
-				 sbyte[] data = new sbyte [apduLength - 2];
+				 byte[] data = new byte [apduLength - 2];
     
 				 Array.Copy(apduBuffer, 0, data, 0, apduLength - 2);
     
@@ -157,7 +157,7 @@ namespace com.dalsemi.onewire.container
 	   /// Gets the value of SW1.
 	   /// </summary>
 	   /// <returns>    value of SW1 as a byte </returns>
-	   public sbyte SW1
+	   public byte SW1
 	   {
 		   get
 		   {
@@ -169,7 +169,7 @@ namespace com.dalsemi.onewire.container
 	   /// Gets the value of SW2.
 	   /// </summary>
 	   /// <returns>    value of SW2 as a byte </returns>
-	   public sbyte SW2
+	   public byte SW2
 	   {
 		   get
 		   {
@@ -186,11 +186,11 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= #getBytes </seealso>
 	   /// <seealso cref= #getLength </seealso>
-	   public sbyte getByte(int index)
+	   public byte getByte(int index)
 	   {
 		  if (index >= apduLength)
 		  {
-			 return (sbyte)-1; // read beyond end of ResponseAPDU
+			 return 0xFF; // read beyond end of ResponseAPDU
 		  }
 
 		  return (apduBuffer [index]);
@@ -204,11 +204,11 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= #getByte </seealso>
 	   /// <seealso cref= #getLength </seealso>
-	   public sbyte[] Bytes
+	   public byte[] Bytes
 	   {
 		   get
 		   {
-			  sbyte[] apdu = new sbyte [apduLength];
+			  byte[] apdu = new byte [apduLength];
     
 			  Array.Copy(apduBuffer, 0, apdu, 0, apduLength);
     
@@ -239,7 +239,7 @@ namespace com.dalsemi.onewire.container
 
 		  if (apduLength > 2)
 		  {
-			 sbyte[] dataBuffer = new sbyte [apduLength - 2];
+			 byte[] dataBuffer = new byte [apduLength - 2];
 
 			 dataBuffer = Data;
 			 apduString += "DATA = ";

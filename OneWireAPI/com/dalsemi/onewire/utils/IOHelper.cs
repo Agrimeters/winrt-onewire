@@ -106,7 +106,7 @@ namespace com.dalsemi.onewire.utils
 		   }
 	   }
 
-	   public static sbyte[] readBytes(int count, int pad, bool hex)
+	   public static byte[] readBytes(int count, int pad, bool hex)
 	   {
 		   lock (typeof(IOHelper))
 		   {
@@ -121,7 +121,7 @@ namespace com.dalsemi.onewire.utils
 		   }
 	   }
 
-	   public static sbyte[] readBytesHex(int count, int pad)
+	   public static byte[] readBytesHex(int count, int pad)
 	   {
 		   lock (typeof(IOHelper))
 		   {
@@ -129,18 +129,18 @@ namespace com.dalsemi.onewire.utils
 			  {
 				 string s = br.ReadLine();
 				 int len = s.Length > count ? count : s.Length;
-				 sbyte[] ret;
+				 byte[] ret;
         
 				 if (count > 0)
 				 {
-					ret = new sbyte [count];
+					ret = new byte [count];
 				 }
 				 else
 				 {
-					ret = new sbyte [s.Length];
+					ret = new byte [s.Length];
 				 }
         
-				 sbyte[] temp = parseHex(s, 0);
+				 byte[] temp = parseHex(s, 0);
         
 				 if (count == 0)
 				 {
@@ -153,19 +153,19 @@ namespace com.dalsemi.onewire.utils
         
 				 for (; len < count; len++)
 				 {
-					ret [len] = (sbyte) pad;
+					ret [len] = (byte) pad;
 				 }
         
 				 return ret;
 			  }
 			  catch (System.Exception)
 			  {
-				 return new sbyte [count];
+				 return new byte [count];
 			  }
 		   }
 	   }
 
-	   public static sbyte[] readBytesAsc(int count, int pad)
+	   public static byte[] readBytesAsc(int count, int pad)
 	   {
 		   lock (typeof(IOHelper))
 		   {
@@ -173,53 +173,53 @@ namespace com.dalsemi.onewire.utils
 			  {
 				 string s = br.ReadLine();
 				 int len = s.Length > count ? count : s.Length;
-				 sbyte[] ret;
+				 byte[] ret;
         
 				 if (count > 0)
 				 {
-					ret = new sbyte [count];
+					ret = new byte [count];
 				 }
 				 else
 				 {
-					ret = new sbyte [s.Length];
+					ret = new byte [s.Length];
 				 }
         
 				 if (count == 0)
 				 {
-					Array.Copy(s.GetBytes(), 0, ret, 0, s.Length);
+					Array.Copy(System.Text.Encoding.UTF8.GetBytes(s), 0, ret, 0, s.Length);
         
 					return ret;
 				 }
         
-				 Array.Copy(s.GetBytes(), 0, ret, 0, len);
+				 Array.Copy(System.Text.Encoding.UTF8.GetBytes(s), 0, ret, 0, len);
         
 				 for (; len < count; len++)
 				 {
-					ret [len] = (sbyte) pad;
+					ret [len] = (byte) pad;
 				 }
         
 				 return ret;
 			  }
 			  catch (System.IO.IOException)
 			  {
-				 return new sbyte [count];
+				 return new byte [count];
 			  }
 		   }
 	   }
 
-	   private static sbyte[] parseHex(string s, int size)
+	   private static byte[] parseHex(string s, int size)
 	   {
-		  sbyte[] temp;
+		  byte[] temp;
 		  int index = 0;
 		  char[] x = s.ToLower().ToCharArray();
 
 		  if (size > 0)
 		  {
-			 temp = new sbyte [size];
+			 temp = new byte [size];
 		  }
 		  else
 		  {
-			 temp = new sbyte [x.Length];
+			 temp = new byte [x.Length];
 		  }
 
 		  try
@@ -234,7 +234,7 @@ namespace com.dalsemi.onewire.utils
 				}
 				if (digit != -1)
 				{
-				   temp[index] = unchecked((sbyte)((digit << 4) & 0xF0));
+				   temp[index] = unchecked((byte)((digit << 4) & 0xF0));
 				}
 
 				digit = -1;
@@ -245,7 +245,7 @@ namespace com.dalsemi.onewire.utils
 				}
 				if (digit != -1)
 				{
-				  temp[index] |= (sbyte)(digit & 0x0F);
+				  temp[index] |= (byte)(digit & 0x0F);
 				}
 			 }
 		  }
@@ -254,11 +254,11 @@ namespace com.dalsemi.onewire.utils
 			  ;
 		  }
 
-		  sbyte[] t;
+		  byte[] t;
 
 		  if (size == 0 && temp.Length != index)
 		  {
-			 t = new sbyte [index];
+			 t = new byte [index];
 			 Array.Copy(temp, 0, t, 0, t.Length);
 		  }
 		  else
@@ -312,7 +312,7 @@ namespace com.dalsemi.onewire.utils
 		   }
 	   }
 
-	   public static void writeBytesHex(string delim, sbyte[] b, int offset, int cnt)
+	   public static void writeBytesHex(string delim, byte[] b, int offset, int cnt)
 	   {
 		   lock (typeof(IOHelper))
 		   {
@@ -330,14 +330,14 @@ namespace com.dalsemi.onewire.utils
 			  pw.Flush();
 		   }
 	   }
-	   public static void writeBytesHex(sbyte[] b, int offset, int cnt)
+	   public static void writeBytesHex(byte[] b, int offset, int cnt)
 	   {
 		   lock (typeof(IOHelper))
 		   {
 			  writeBytesHex(".", b, offset, cnt);
 		   }
 	   }
-	   public static void writeBytesHex(sbyte[] b)
+	   public static void writeBytesHex(byte[] b)
 	   {
 		   lock (typeof(IOHelper))
 		   {
@@ -355,7 +355,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="b"> the byte array to print out. </param>
 	   /// <param name="offset"> the starting location to begin printing </param>
 	   /// <param name="cnt"> the number of bytes to print. </param>
-	   public static void writeBytes(string delim, sbyte[] b, int offset, int cnt)
+	   public static void writeBytes(string delim, byte[] b, int offset, int cnt)
 	   {
 		   lock (typeof(IOHelper))
 		   {
@@ -398,7 +398,7 @@ namespace com.dalsemi.onewire.utils
 	   /// use <code>writeBytesHex(byte[],int,int)</code>.
 	   /// </summary>
 	   /// <param name="b"> the byte array to print out. </param>
-	   public static void writeBytes(sbyte[] b)
+	   public static void writeBytes(byte[] b)
 	   {
 		   lock (typeof(IOHelper))
 		   {
@@ -406,7 +406,7 @@ namespace com.dalsemi.onewire.utils
 		   }
 	   }
 
-	   public static void writeBytes(sbyte[] b, int offset, int cnt)
+	   public static void writeBytes(byte[] b, int offset, int cnt)
 	   {
 		   lock (typeof(IOHelper))
 		   {
@@ -489,7 +489,7 @@ namespace com.dalsemi.onewire.utils
 		   }
 	   }
 
-	   public static void writeHex(sbyte b)
+	   public static void writeHex(byte b)
 	   {
 		   lock (typeof(IOHelper))
 		   {
@@ -506,7 +506,7 @@ namespace com.dalsemi.onewire.utils
 		   }
 	   }
 
-	   public static void writeLineHex(sbyte b)
+	   public static void writeLineHex(byte b)
 	   {
 		   lock (typeof(IOHelper))
 		   {
@@ -524,7 +524,7 @@ namespace com.dalsemi.onewire.utils
 	   }
 
 	   private static readonly char[] hex = "0123456789ABCDEF".ToCharArray();
-	   private static string byteStr(sbyte b)
+	   private static string byteStr(byte b)
 	   {
 		  return "" + hex[((b >> 4) & 0x0F)] + hex[(b & 0x0F)];
 	   }

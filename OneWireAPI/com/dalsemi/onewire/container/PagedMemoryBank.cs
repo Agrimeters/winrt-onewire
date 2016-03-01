@@ -289,7 +289,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire 
 	   ///         adapter </exception>
-	   void readPage(int page, bool readContinue, sbyte[] readBuf, int offset);
+	   void readPage(int page, bool readContinue, byte[] readBuf, int offset);
 
 	   /// <summary>
 	   /// Reads a page in this memory bank with extra information with no
@@ -331,7 +331,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= #hasExtraInfo() hasExtraInfo </seealso>
 	   /// <seealso cref= #getExtraInfoLength() getExtraInfoLength  </seealso>
-	   void readPage(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo);
+	   void readPage(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo);
 
 	   /// <summary>
 	   /// Reads a Universal Data Packet.
@@ -379,7 +379,7 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref= #getMaxPacketDataLength() getMaxPacketDataLength  </seealso>
-	   int readPagePacket(int page, bool readContinue, sbyte[] readBuf, int offset);
+	   int readPagePacket(int page, bool readContinue, byte[] readBuf, int offset);
 
 	   /// <summary>
 	   /// Reads a Universal Data Packet and extra information.  See the
@@ -418,7 +418,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #hasExtraInfo() hasExtraInfo </seealso>
 	   /// <seealso cref= #getExtraInfoLength() getExtraInfoLength </seealso>
 	   /// <seealso cref= #getMaxPacketDataLength() getMaxPacketDataLength </seealso>
-	   int readPagePacket(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo);
+	   int readPagePacket(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo);
 
 	   /// <summary>
 	   /// Writes a Universal Data Packet.  See the method 
@@ -441,7 +441,7 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref= #getMaxPacketDataLength() getMaxPacketDataLength  </seealso>
-	   void writePagePacket(int page, sbyte[] writeBuf, int offset, int len);
+	   void writePagePacket(int page, byte[] writeBuf, int offset, int len);
 
 	   /// <summary>
 	   /// Reads a complete memory page with CRC verification provided by the
@@ -471,7 +471,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= #hasPageAutoCRC() hasPageAutoCRC </seealso>
 	   /// <seealso cref= #getPageLength() getPageLength </seealso>
-	   void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset);
+	   void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset);
 
 	   /// <summary>
 	   /// Reads a complete memory page with CRC verification provided by the
@@ -505,7 +505,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getExtraInfoLength() getExtraInfoLength </seealso>
 	   /// <seealso cref= #hasPageAutoCRC() hasPageAutoCRC </seealso>
 	   /// <seealso cref= #getPageLength() getPageLength </seealso>
-	   void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo);
+	   void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo);
 	}
 
 }

@@ -514,7 +514,7 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// </summary>
 	   /// <param name="address"> a byte array representing the address of the device </param>
 	   /// <returns> The OWPath representing the network path to the device. </returns>
-	   public virtual OWPath getDevicePath(sbyte[] address)
+	   public virtual OWPath getDevicePath(byte[] address)
 	   {
 		  return getDevicePath(Address.toLong(address));
 	   }
@@ -569,7 +569,7 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// <param name="adapter"> The DSPortAdapter that the device is connected to. </param>
 	   /// <param name="address"> a byte array representing the address of the device </param>
 	   /// <returns> The specific OneWireContainer object of the device </returns>
-	   public static OneWireContainer getDeviceContainer(DSPortAdapter adapter, sbyte[] address)
+	   public static OneWireContainer getDeviceContainer(DSPortAdapter adapter, byte[] address)
 	   {
 		  return getDeviceContainer(adapter, Address.toLong(address));
 	   }
@@ -621,7 +621,7 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// </summary>
 	   /// <param name="address"> a byte array object representing the address of the device </param>
 	   /// <param name="owc"> The specific OneWireContainer object of the device </param>
-	   public static void putDeviceContainer(sbyte[] address, OneWireContainer owc)
+	   public static void putDeviceContainer(byte[] address, OneWireContainer owc)
 	   {
 		  putDeviceContainer(Address.toLong(address),owc);
 	   }

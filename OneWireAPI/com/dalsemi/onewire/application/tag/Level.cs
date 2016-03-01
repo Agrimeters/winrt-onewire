@@ -68,7 +68,7 @@ namespace com.dalsemi.onewire.application.tag
 	   public virtual string readSensor()
 	   {
 		  string returnString = "";
-		  sbyte[] switchState;
+		  byte[] switchState;
 		  int switchChannel = Channel;
 		  SwitchContainer Container;
 		  Container = (SwitchContainer) DeviceContainer_Renamed;

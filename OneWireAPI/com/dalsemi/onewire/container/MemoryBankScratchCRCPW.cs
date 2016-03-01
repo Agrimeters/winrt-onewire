@@ -75,7 +75,7 @@ namespace com.dalsemi.onewire.container
 		  pageAutoCRC = true;
 
 		  // default copy scratchpad command (from DS1922)
-		  COPY_SCRATCHPAD_COMMAND = unchecked((sbyte) 0x99);
+		  COPY_SCRATCHPAD_COMMAND = 0x99;
 	   }
 
 	   //--------
@@ -99,9 +99,9 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
-		  sbyte[] extraInfo = new sbyte [extraInfoLength];
+		  byte[] extraInfo = new byte [extraInfoLength];
 
 		  readPageCRC(page, readContinue, readBuf, offset, extraInfo);
 	   }
@@ -126,7 +126,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
 
 		  // only needs to be implemented if supported by hardware
@@ -171,7 +171,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readScratchpad(sbyte[] readBuf, int offset, int len, sbyte[] extraInfo)
+	   public override void readScratchpad(byte[] readBuf, int offset, int len, byte[] extraInfo)
 	   {
 		  int blockLength = 0;
 		  int num_crc = 0;
@@ -201,7 +201,7 @@ namespace com.dalsemi.onewire.container
 			 blockLength = extraInfoLength + pageLength + 3;
 		  }
 
-		  sbyte[] raw_buf = new sbyte [blockLength];
+		  byte[] raw_buf = new byte [blockLength];
 
 		  raw_buf [0] = READ_SCRATCHPAD_COMMAND;
 
@@ -278,18 +278,18 @@ namespace com.dalsemi.onewire.container
 
 		  // build block to send (1 cmd, 3 data, 8 password, 4 verification)
 		  int raw_buf_length = 16;
-		  sbyte[] raw_buf = new sbyte [raw_buf_length];
+		  byte[] raw_buf = new byte [raw_buf_length];
 
 		  raw_buf [0] = COPY_SCRATCHPAD_COMMAND;
-		  raw_buf [1] = unchecked((sbyte)(startAddr & 0xFF));
-		  raw_buf [2] = unchecked((sbyte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF));
+		  raw_buf [1] = (byte)(startAddr & 0xFF);
+		  raw_buf [2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
 		  if (enablePower)
 		  {
-			 raw_buf [3] = (sbyte)((startAddr + len - 1) & 0x3F);
+			 raw_buf [3] = (byte)((startAddr + len - 1) & 0x3F);
 		  }
 		  else
 		  {
-			 raw_buf [3] = (sbyte)((startAddr + len - 1) & 0x1F);
+			 raw_buf [3] = (byte)((startAddr + len - 1) & 0x1F);
 		  }
 
 		  if (ibPass.ContainerReadWritePasswordSet)
@@ -312,9 +312,9 @@ namespace com.dalsemi.onewire.container
 
 			 ib.adapter.setPowerNormal();
 
-			 raw_buf[12] = (sbyte) ib.adapter.Byte;
+			 raw_buf[12] = (byte) ib.adapter.Byte;
 
-			 if (((raw_buf[12] & unchecked((sbyte)0xF0)) != unchecked((sbyte)0xA0)) && ((raw_buf[12] & unchecked((sbyte)0xF0)) != (sbyte)0x50))
+			 if (((raw_buf[12] & (byte)0xF0) != 0xA0) && ((raw_buf[12] & 0xF0) != 0x50))
 			 {
 				throw new OneWireIOException("Copy scratchpad complete not found");
 			 }
@@ -323,7 +323,7 @@ namespace com.dalsemi.onewire.container
 		  {
 			 ib.adapter.dataBlock(raw_buf, 0, raw_buf_length);
 
-			 sbyte verifyByte = (sbyte)(raw_buf[raw_buf_length - 1] & 0x0F);
+			 byte verifyByte = (byte)(raw_buf[raw_buf_length - 1] & 0x0F);
 			 if (verifyByte != 0x0A && verifyByte != 0x05)
 			 {
 				//forceVerify();
@@ -349,7 +349,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void writeScratchpad(int startAddr, sbyte[] writeBuf, int offset, int len)
+	   public override void writeScratchpad(int startAddr, byte[] writeBuf, int offset, int len)
 	   {
 		  if ((((startAddr + len) & 0x1F) != 0) && (!enablePower))
 		  {

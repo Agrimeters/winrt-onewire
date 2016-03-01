@@ -82,35 +82,35 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Memory functions.
 	   /// </summary>
-	   private static readonly sbyte WRITE_DATA_COMMAND = (sbyte) 0x6C;
-	   private static readonly sbyte READ_DATA_COMMAND = (sbyte) 0x69;
-	   private static readonly sbyte COPY_DATA_COMMAND = (sbyte) 0x48;
-	   private static readonly sbyte RECALL_DATA_COMMAND = unchecked((sbyte) 0xB8);
-	   private static readonly sbyte LOCK_COMMAND = (sbyte) 0x6A;
+	   private static readonly byte WRITE_DATA_COMMAND = (byte) 0x6C;
+	   private static readonly byte READ_DATA_COMMAND = (byte) 0x69;
+	   private static readonly byte COPY_DATA_COMMAND = (byte) 0x48;
+	   private static readonly byte RECALL_DATA_COMMAND = unchecked((byte) 0xB8);
+	   private static readonly byte LOCK_COMMAND = (byte) 0x6A;
 
 	   /// <summary>
 	   /// Address of the Protection Register. Used to set/check flags with
 	   /// <CODE>setFlag()/getFlag()</CODE>.
 	   /// </summary>
-	   public const sbyte PROTECTION_REGISTER = 0;
+	   public const byte PROTECTION_REGISTER = 0;
 
 	   /// <summary>
 	   /// Address of the Status Register. Used to set/check flags with
 	   /// <CODE>setFlag()/getFlag()</CODE>.
 	   /// </summary>
-	   public const sbyte STATUS_REGISTER = 1;
+	   public const byte STATUS_REGISTER = 1;
 
 	   /// <summary>
 	   /// Address of the EEPROM Register. Used to set/check flags with
 	   /// <CODE>setFlag()/getFlag()</CODE>.
 	   /// </summary>
-	   public const sbyte EEPROM_REGISTER = 7;
+	   public const byte EEPROM_REGISTER = 7;
 
 	   /// <summary>
 	   /// Address of the Special Feature Register (SFR). Used to check flags with
 	   /// <CODE>getFlag()</CODE>.
 	   /// </summary>
-	   public const sbyte SPECIAL_FEATURE_REGISTER = 8;
+	   public const byte SPECIAL_FEATURE_REGISTER = 8;
 
 	   /// <summary>
 	   /// PROTECTION REGISTER FLAG: When this flag is <CODE>true</CODE>, it
@@ -119,7 +119,7 @@ namespace com.dalsemi.onewire.container
 	   /// This flag must be reset!
 	   /// Accessed with <CODE>getFlag()</CODE>.
 	   /// </summary>
-	   public static readonly sbyte OVERVOLTAGE_FLAG = unchecked((sbyte) 128);
+	   public static readonly byte OVERVOLTAGE_FLAG = unchecked((byte) 128);
 
 	   /// <summary>
 	   /// PROTECTION REGISTER FLAG: When this flag is <CODE>true</CODE>, the
@@ -127,7 +127,7 @@ namespace com.dalsemi.onewire.container
 	   /// This flag must be reset!
 	   /// Accessed with <CODE>getFlag()</CODE>
 	   /// </summary>
-	   public const sbyte UNDERVOLTAGE_FLAG = 64;
+	   public const byte UNDERVOLTAGE_FLAG = 64;
 
 	   /// <summary>
 	   /// PROTECTION REGISTER FLAG: When this flag is <CODE>true</CODE> the
@@ -135,7 +135,7 @@ namespace com.dalsemi.onewire.container
 	   /// This flag must be reset!
 	   /// Accessed with <CODE>getFlag()</CODE>
 	   /// </summary>
-	   public const sbyte CHARGE_OVERCURRENT_FLAG = 32;
+	   public const byte CHARGE_OVERCURRENT_FLAG = 32;
 
 	   /// <summary>
 	   /// PROTECTION REGISTER FLAG: When this flag is <CODE>true</CODE> the
@@ -143,46 +143,46 @@ namespace com.dalsemi.onewire.container
 	   /// This flag must be <CODE>reset()</CODE>!
 	   /// Accessed with <CODE>getFlag()</CODE>
 	   /// </summary>
-	   public const sbyte DISCHARGE_OVERCURRENT_FLAG = 16;
+	   public const byte DISCHARGE_OVERCURRENT_FLAG = 16;
 
 	   /// <summary>
 	   /// PROTECTION REGISTER FLAG: Mirrors the !CC output pin.
 	   /// Accessed with <CODE>getFlag()</CODE>
 	   /// </summary>
-	   public const sbyte CC_PIN_STATE_FLAG = 8;
+	   public const byte CC_PIN_STATE_FLAG = 8;
 
 	   /// <summary>
 	   /// PROTECTION REGISTER FLAG: Mirrors the !DC output pin.
 	   /// Accessed with <CODE>getFlag()</CODE>
 	   /// </summary>
-	   public const sbyte DC_PIN_STATE_FLAG = 4;
+	   public const byte DC_PIN_STATE_FLAG = 4;
 
 	   /// <summary>
 	   /// PROTECTION REGISTER FLAG: Reseting this flag will disable charging
 	   /// regardless of cell or pack conditions.
 	   /// Accessed with <CODE>getFlag()/setFlag()</CODE>.
 	   /// </summary>
-	   public const sbyte CHARGE_ENABLE_FLAG = 2;
+	   public const byte CHARGE_ENABLE_FLAG = 2;
 
 	   /// <summary>
 	   /// PROTECTION REGISTER FLAG: Reseting this flag will disable discharging.
 	   /// Accessed with <CODE>getFlag()/setFlag()</CODE>.
 	   /// </summary>
-	   public const sbyte DISCHARGE_ENABLE_FLAG = 1;
+	   public const byte DISCHARGE_ENABLE_FLAG = 1;
 
 	   /// <summary>
 	   /// STATUS REGISTER FLAG: Enables/disables the DS2760 to enter sleep mode
 	   /// when the DQ line goes low for greater than 2 seconds.
 	   /// Accessed with <CODE>getFlag()/setFlag()</CODE>.
 	   /// </summary>
-	   public const sbyte SLEEP_MODE_ENABLE_FLAG = 32;
+	   public const byte SLEEP_MODE_ENABLE_FLAG = 32;
 
 	   /// <summary>
 	   /// STATUS REGISTER FLAG: If set, the opcode for the Read Net Address command
 	   /// will be set to 33h. If it is not set the opcode is set to 39h.
 	   /// Accessed with <CODE>getFlag()/setFlag()</CODE>.
 	   /// </summary>
-	   public const sbyte READ_NET_ADDRESS_OPCODE_FLAG = 16;
+	   public const byte READ_NET_ADDRESS_OPCODE_FLAG = 16;
 
 	   /// <summary>
 	   /// EEPROM REGISTER FLAG: This flag will be <CODE>true</CODE> if the Copy
@@ -190,7 +190,7 @@ namespace com.dalsemi.onewire.container
 	   /// reads <CODE>false</CODE>.
 	   /// Accessed with <CODE>getFlag()/setFlag()</CODE>.
 	   /// </summary>
-	   public static readonly sbyte EEPROM_COPY_FLAG = unchecked((sbyte) 128);
+	   public static readonly byte EEPROM_COPY_FLAG = unchecked((byte) 128);
 
 	   /// <summary>
 	   /// EEPROM REGISTER FLAG: When this flag is <CODE>true</CODE>, the Lock
@@ -198,27 +198,27 @@ namespace com.dalsemi.onewire.container
 	   /// read only.
 	   /// Accessed with <CODE>getFlag()/setFlag()</CODE>.
 	   /// </summary>
-	   public const sbyte EEPROM_LOCK_ENABLE_FLAG = 64;
+	   public const byte EEPROM_LOCK_ENABLE_FLAG = 64;
 
 	   /// <summary>
 	   /// EEPROM REGISTER FLAG: When this flag is <CODE>true</CODE>, Block 1
 	   /// of the EEPROM (addresses 48-63) is read-only.
 	   /// Accessed with <CODE>getFlag()</CODE>.
 	   /// </summary>
-	   public const sbyte EEPROM_BLOCK_1_LOCK_FLAG = 2;
+	   public const byte EEPROM_BLOCK_1_LOCK_FLAG = 2;
 
 	   /// <summary>
 	   /// EEPROM REGISTER FLAG: When this flag is <CODE>true</CODE>, Block 0
 	   /// of the EEPROM (addresses 32-47) is read-only.
 	   /// Accessed with <CODE>getFlag()</CODE>.
 	   /// </summary>
-	   public const sbyte EEPROM_BLOCK_0_LOCK_FLAG = 1;
+	   public const byte EEPROM_BLOCK_0_LOCK_FLAG = 1;
 
 	   /// <summary>
 	   /// SPECIAL FEATURE REGISTER FLAG: Mirrors the state of the !PS pin.
 	   /// Accessed with <CODE>getFlag()</CODE>.
 	   /// </summary>
-	   public static readonly sbyte PS_PIN_STATE_FLAG = unchecked((sbyte) 128);
+	   public static readonly byte PS_PIN_STATE_FLAG = unchecked((byte) 128);
 
 	   /// <summary>
 	   /// SPECIAL FEATURE REGISTER FLAG: Mirrors/sets the state of the PIO pin. The
@@ -226,7 +226,7 @@ namespace com.dalsemi.onewire.container
 	   /// output driver.
 	   /// Accessed with <CODE>getFlag()/setFlag()</CODE>.
 	   /// </summary>
-	   public const sbyte PIO_PIN_SENSE_AND_CONTROL_FLAG = 64;
+	   public const byte PIO_PIN_SENSE_AND_CONTROL_FLAG = 64;
 
 	   /// <summary>
 	   /// Holds the value of the sensor external resistance.
@@ -254,7 +254,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="sourceAdapter">     adapter object required to communicate with
 	   /// this 1-Wire device </param>
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
-	   public OneWireContainer30(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer30(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 
 		  internalResistor = true;
@@ -394,9 +394,9 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> Error reading data </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual sbyte readByte(int memAddr)
+	   public virtual byte readByte(int memAddr)
 	   {
-		  sbyte[] buffer = new sbyte [3];
+		  byte[] buffer = new byte [3];
 
 		  doSpeed();
 		  adapter.reset();
@@ -406,8 +406,8 @@ namespace com.dalsemi.onewire.container
 
 			 /* setup the read */
 			 buffer [0] = READ_DATA_COMMAND;
-			 buffer [1] = (sbyte) memAddr;
-			 buffer [2] = unchecked((sbyte) 0xFF);
+			 buffer [1] = (byte) memAddr;
+			 buffer [2] = unchecked((byte) 0xFF);
 
 			 adapter.dataBlock(buffer, 0, 3);
 
@@ -436,7 +436,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Error reading data </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual void readBytes(int memAddr, sbyte[] buffer, int start, int len)
+	   public virtual void readBytes(int memAddr, byte[] buffer, int start, int len)
 	   {
 		  doSpeed();
 		  adapter.reset();
@@ -445,7 +445,7 @@ namespace com.dalsemi.onewire.container
 		  {
 			 for (int i = start; i < start + len; i++)
 			 {
-				buffer [i] = unchecked((sbyte) 0x0ff);
+				buffer [i] = unchecked((byte) 0x0ff);
 			 }
 
 			 adapter.putByte(READ_DATA_COMMAND);
@@ -474,9 +474,9 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Error writing data </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual void writeByte(int memAddr, sbyte data)
+	   public virtual void writeByte(int memAddr, byte data)
 	   {
-		  sbyte[] buffer = new sbyte [3];
+		  byte[] buffer = new byte [3];
 
 		  doSpeed();
 		  adapter.reset();
@@ -486,7 +486,7 @@ namespace com.dalsemi.onewire.container
 
 			 /* first perform the write */
 			 buffer [0] = WRITE_DATA_COMMAND;
-			 buffer [1] = (sbyte) memAddr;
+			 buffer [1] = (byte) memAddr;
 			 buffer [2] = data;
 
 			 adapter.dataBlock(buffer, 0, 3);
@@ -513,13 +513,13 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> Error reading data </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual sbyte[] readEEPROMBlock(int blockNumber)
+	   public virtual byte[] readEEPROMBlock(int blockNumber)
 	   {
-		  sbyte[] buffer = new sbyte [18];
-		  sbyte[] result = new sbyte [16];
+		  byte[] buffer = new byte [18];
+		  byte[] result = new byte [16];
 
 		  // calculate the address (32 and 48 are valid addresses)
-		  sbyte memAddr = (sbyte)(32 + (blockNumber * 16));
+		  byte memAddr = (byte)(32 + (blockNumber * 16));
 
 		  /* check for valid parameters */
 		  if ((blockNumber != 0) & (blockNumber != 1))
@@ -549,7 +549,7 @@ namespace com.dalsemi.onewire.container
 			 // buffer[1] should still hold memAddr
 			 for (int i = 0; i < 16; i++)
 			 {
-				buffer [i + 2] = unchecked((sbyte) 0xff);
+				buffer [i + 2] = unchecked((byte) 0xff);
 			 }
 
 			 adapter.dataBlock(buffer, 0, 18);
@@ -577,12 +577,12 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Error writing data </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual void writeEEPROMBlock(int blockNumber, sbyte[] data)
+	   public virtual void writeEEPROMBlock(int blockNumber, byte[] data)
 	   {
-		  sbyte[] buffer = new sbyte [18];
+		  byte[] buffer = new byte [18];
 
 		  // the first block is at address 32 and the second is at address 48
-		  sbyte memAddr = (sbyte)(32 + (blockNumber * 16));
+		  byte memAddr = (byte)(32 + (blockNumber * 16));
 
 		  /* check for valid parameters */
 		  if (data.Length < 16)
@@ -628,7 +628,7 @@ namespace com.dalsemi.onewire.container
 			 // buffer[1] should still hold memAddr
 			 for (int i = 0; i < 16; i++)
 			 {
-				buffer [i + 2] = unchecked((sbyte) 0xff);
+				buffer [i + 2] = unchecked((byte) 0xff);
 			 }
 
 			 adapter.dataBlock(buffer, 0, 18);
@@ -669,7 +669,7 @@ namespace com.dalsemi.onewire.container
 	   {
 
 		  // compute the byte location
-		  sbyte memAddr = (sbyte)(32 + (blockNumber * 16));
+		  byte memAddr = (byte)(32 + (blockNumber * 16));
 
 		  /* check if the block is valid */
 		  if ((blockNumber != 0) & (blockNumber != 1))
@@ -710,11 +710,11 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> Error reading data </exception>
 	   /// <exception cref="OneWireException"> Could not find part
 	   ///  </exception>
-	   public virtual bool getFlag(int memAddr, sbyte flagToGet)
+	   public virtual bool getFlag(int memAddr, byte flagToGet)
 	   {
 
 		  // read the byte and perform a simple mask to determine if that byte is on
-		  sbyte data = readByte(memAddr);
+		  byte data = readByte(memAddr);
 
 		  if ((data & flagToGet) != 0)
 		  {
@@ -741,7 +741,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Error setting flag </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual void setFlag(int memAddr, sbyte flagToSet, bool flagValue)
+	   public virtual void setFlag(int memAddr, byte flagToSet, bool flagValue)
 	   {
 
 		  // the desired default value for the status register flags has to be
@@ -751,15 +751,15 @@ namespace com.dalsemi.onewire.container
 			 memAddr = 49;
 		  }
 
-		  sbyte data = readByte(memAddr);
+		  byte data = readByte(memAddr);
 
 		  if (flagValue)
 		  {
-			 data = (sbyte)(data | flagToSet);
+			 data = (byte)(data | flagToSet);
 		  }
 		  else
 		  {
-			 data = (sbyte)(data & ~(flagToSet));
+			 data = (byte)(data & ~(flagToSet));
 		  }
 
 		  writeByte(memAddr, data);
@@ -774,7 +774,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> Error reading data </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual double getCurrent(sbyte[] state)
+	   public virtual double getCurrent(byte[] state)
 	   {
 
 		  // grab the data
@@ -832,8 +832,8 @@ namespace com.dalsemi.onewire.container
 			  }
     
 			  // break into bytes and store
-			  writeByte(16, (sbyte)(data >> 8));
-			  writeByte(17, unchecked((sbyte)(data & 0xff)));
+			  writeByte(16, (byte)(data >> 8));
+			  writeByte(17, unchecked((byte)(data & 0xff)));
 		   }
 	   }
 
@@ -846,7 +846,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> Error reading data </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual double getRemainingCapacity(sbyte[] state)
+	   public virtual double getRemainingCapacity(byte[] state)
 	   {
 		  double result = 0;
 
@@ -885,7 +885,7 @@ namespace com.dalsemi.onewire.container
     
 			  //since bit 0 is read-only and bits 2-7 are don't cares,
 			  //we don't need to read location 8 first, we can just write
-			  writeByte(8, (sbyte)(value ? 0x40 : 0x00));
+			  writeByte(8, (byte)(value ? 0x40 : 0x00));
 		   }
 		   get
 		   {
@@ -904,9 +904,9 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireException"> Could not find part </exception>
 	   public virtual void clearConditions()
 	   {
-		  sbyte protect_reg = readByte(0);
+		  byte protect_reg = readByte(0);
 
-		  writeByte(0, (sbyte)(protect_reg & 0x0f));
+		  writeByte(0, (byte)(protect_reg & 0x0f));
 	   }
 
 	   /////////////////////////////////////////////////////////////////////
@@ -1003,7 +1003,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Error writting data </exception>
 	   /// <exception cref="OneWireException"> Could not find device </exception>
-	   public virtual void doADConvert(int channel, sbyte[] state)
+	   public virtual void doADConvert(int channel, byte[] state)
 	   {
 
 		  //this actually should be an airball as well...
@@ -1028,7 +1028,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Error writting data </exception>
 	   /// <exception cref="OneWireException"> Device does not support multi-channel reading </exception>
-	   public virtual void doADConvert(bool[] doConvert, sbyte[] state)
+	   public virtual void doADConvert(bool[] doConvert, byte[] state)
 	   {
 		  throw new OneWireException("This device does not support multi-channel reading");
 	   }
@@ -1046,7 +1046,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> Error writting data </exception>
 	   /// <exception cref="OneWireException"> Device does not support multi-channel reading </exception>
-	   public virtual double[] getADVoltage(sbyte[] state)
+	   public virtual double[] getADVoltage(byte[] state)
 	   {
 		  throw new OneWireException("This device does not support multi-channel reading");
 	   }
@@ -1070,7 +1070,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> Error reading data </exception>
 	   /// <exception cref="OneWireException"> Could not find device </exception>
-	   public virtual double getADVoltage(int channel, sbyte[] state)
+	   public virtual double getADVoltage(int channel, byte[] state)
 	   {
 		  if (channel < 0 || channel>1)
 		  {
@@ -1123,7 +1123,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> alarm_value in volts
 	   /// </returns>
 	   /// <exception cref="OneWireException"> Device does not support A/D alarms </exception>
-	   public virtual double getADAlarm(int channel, int alarmType, sbyte[] state)
+	   public virtual double getADAlarm(int channel, int alarmType, byte[] state)
 	   {
 		  throw new OneWireException("This device does not have AD alarms");
 	   }
@@ -1143,7 +1143,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> <CODE>true</CODE> if specified alarm is enabled
 	   /// </returns>
 	   /// <exception cref="OneWireException"> Device does not support A/D alarms </exception>
-	   public virtual bool getADAlarmEnable(int channel, int alarmType, sbyte[] state)
+	   public virtual bool getADAlarmEnable(int channel, int alarmType, byte[] state)
 	   {
 		  throw new OneWireException("This device does not have AD alarms");
 	   }
@@ -1163,7 +1163,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> <CODE>true</CODE> if specified alarm occurred
 	   /// </returns>
 	   /// <exception cref="OneWireException"> Device does not support A/D alarms </exception>
-	   public virtual bool hasADAlarmed(int channel, int alarmType, sbyte[] state)
+	   public virtual bool hasADAlarmed(int channel, int alarmType, byte[] state)
 	   {
 		  throw new OneWireException("This device does not have AD alarms");
 	   }
@@ -1179,7 +1179,7 @@ namespace com.dalsemi.onewire.container
 	   ///               returned from <CODE>readDevice()</CODE>
 	   /// </param>
 	   /// <returns> A/D resolution of channel in volts </returns>
-	   public virtual double getADResolution(int channel, sbyte[] state)
+	   public virtual double getADResolution(int channel, byte[] state)
 	   {
 		  if (channel == 0)
 		  {
@@ -1213,7 +1213,7 @@ namespace com.dalsemi.onewire.container
 	   ///                  returned from <CODE>readDevice()</CODE>
 	   /// </param>
 	   /// <returns> A/D input voltage range </returns>
-	   public virtual double getADRange(int channel, sbyte[] state)
+	   public virtual double getADRange(int channel, byte[] state)
 	   {
 		  return 5.0; //so is this one!
 	   }
@@ -1239,7 +1239,7 @@ namespace com.dalsemi.onewire.container
 	   ///               device returned from <CODE>readDevice()</CODE>
 	   /// </param>
 	   /// <exception cref="OneWireException"> Device does not support A/D alarms </exception>
-	   public virtual void setADAlarm(int channel, int alarmType, double alarm, sbyte[] state)
+	   public virtual void setADAlarm(int channel, int alarmType, double alarm, byte[] state)
 	   {
 		  throw new OneWireException("This device does not have AD alarms");
 	   }
@@ -1261,7 +1261,7 @@ namespace com.dalsemi.onewire.container
 	   ///               device returned from <CODE>readDevice()</CODE>
 	   /// </param>
 	   /// <exception cref="OneWireException"> Device does not support A/D alarms </exception>
-	   public virtual void setADAlarmEnable(int channel, int alarmType, bool alarmEnable, sbyte[] state)
+	   public virtual void setADAlarmEnable(int channel, int alarmType, bool alarmEnable, byte[] state)
 	   {
 		  throw new OneWireException("This device does not have AD alarms");
 	   }
@@ -1279,7 +1279,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="resolution"> A/D resolution in volts </param>
 	   /// <param name="state"> current state of the
 	   ///               device returned from <CODE>readDevice()</CODE> </param>
-	   public virtual void setADResolution(int channel, double resolution, sbyte[] state)
+	   public virtual void setADResolution(int channel, double resolution, byte[] state)
 	   {
 
 		  //airball! no resolutions to set!
@@ -1298,7 +1298,7 @@ namespace com.dalsemi.onewire.container
 	   ///                <CODE>getRanges()</CODE> method to get available ranges </param>
 	   /// <param name="state"> current state of the
 	   ///               device returned from <CODE>readDevice()</CODE> </param>
-	   public virtual void setADRange(int channel, double range, sbyte[] state)
+	   public virtual void setADRange(int channel, double range, byte[] state)
 	   {
 
 		  //yet another airball--YAAB...only one range on this part
@@ -1393,7 +1393,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Error writting data </exception>
 	   /// <exception cref="OneWireException"> Could not find device </exception>
-	   public virtual void doTemperatureConvert(sbyte[] state)
+	   public virtual void doTemperatureConvert(byte[] state)
 	   {
 
 		  //for the same reason we don't have to do an AD conversion,
@@ -1413,7 +1413,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <returns> temperature in degrees C from the last
 	   /// <CODE>doTemperatureConvert()</CODE> </returns>
-	   public virtual double getTemperature(sbyte[] state)
+	   public virtual double getTemperature(byte[] state)
 	   {
 		  double temperature;
 		  int data;
@@ -1440,7 +1440,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> alarm trip temperature in degrees C
 	   /// </returns>
 	   /// <exception cref="OneWireException"> Device does not support temerature alarms </exception>
-	   public virtual double getTemperatureAlarm(int alarmType, sbyte[] state)
+	   public virtual double getTemperatureAlarm(int alarmType, byte[] state)
 	   {
 		  throw new OneWireException("This device does not have temperature alarms");
 	   }
@@ -1452,7 +1452,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> device state
 	   /// </param>
 	   /// <returns> temperature resolution in degrees C </returns>
-	   public virtual double getTemperatureResolution(sbyte[] state)
+	   public virtual double getTemperatureResolution(byte[] state)
 	   {
 		  return 0.125;
 	   }
@@ -1473,7 +1473,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Error writting data </exception>
 	   /// <exception cref="OneWireException"> Device does not support temperature alarms </exception>
-	   public virtual void setTemperatureAlarm(int alarmType, double alarmValue, sbyte[] state)
+	   public virtual void setTemperatureAlarm(int alarmType, double alarmValue, byte[] state)
 	   {
 		  throw new OneWireException("This device does not have temperature alarms");
 	   }
@@ -1488,7 +1488,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Error writting data </exception>
 	   /// <exception cref="OneWireException"> Could not find device </exception>
-	   public virtual void setTemperatureResolution(double resolution, sbyte[] state)
+	   public virtual void setTemperatureResolution(double resolution, byte[] state)
 	   {
 
 		  //airball, there can be only ONE resolution!
@@ -1512,9 +1512,9 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> Error reading data </exception>
 	   /// <exception cref="OneWireException"> Could not find device </exception>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
-		  sbyte[] result = new sbyte [32];
+		  byte[] result = new byte [32];
 
 		  /* perform the read twice to ensure a good transmission */
 		  doSpeed();
@@ -1545,7 +1545,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Error writting data </exception>
 	   /// <exception cref="OneWireException"> Could not find device </exception>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
 
 		  /* need to write the following bytes:

@@ -110,7 +110,7 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Field cache -  2 dimentional array to contain the cache </summary>
-	   private sbyte[][] cache;
+	   private byte[][] cache;
 
 	   /// <summary>
 	   /// Field len - array of lengths of packets found </summary>
@@ -150,11 +150,11 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Field tempExtra - temporary buffer used to to read the extra information from a page read </summary>
-	   private sbyte[] tempExtra;
+	   private byte[] tempExtra;
 
 	   /// <summary>
 	   /// Field tempPage - temporary buffer the size of a page </summary>
-	   private sbyte[] tempPage;
+	   private byte[] tempPage;
 
 	   /// <summary>
 	   /// Field redirect - array of redirection bytes </summary>
@@ -186,11 +186,11 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Field pbmCache - buffer to cache the page bitmap </summary>
-	   private sbyte[] pbmCache;
+	   private byte[] pbmCache;
 
 	   /// <summary>
 	   /// Field pbmCacheModified - modifified version of the page bitmap </summary>
-	   private sbyte[] pbmCacheModified;
+	   private byte[] pbmCacheModified;
 
 	   /// <summary>
 	   /// Field pbmRead - flag indicating that the page bitmap has been read </summary>
@@ -356,10 +356,10 @@ namespace com.dalsemi.onewire.application.file
 		  if (pmb != null)
 		  {
 			 maxPacketDataLength = pmb.MaxPacketDataLength;
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: cache = new sbyte [totalPages][pmb.PageLength];
-			 cache = RectangularArrays.ReturnRectangularSbyteArray(totalPages, pmb.PageLength);
-			 tempPage = new sbyte [pmb.PageLength];
+             cache = new byte[totalPages][];
+             for(int i=0; i<totalPages; i++)
+                cache[i] = new byte[pmb.PageLength];
+			 tempPage = new byte [pmb.PageLength];
 		  }
 
 		  // initialize some of the flag arrays
@@ -373,9 +373,9 @@ namespace com.dalsemi.onewire.application.file
 		  // if getting redirection information, create necessarey arrays
 		  if (canRedirect)
 		  {
-			 tempExtra = new sbyte [pmb.ExtraInfoLength];
-			 pbmCache = new sbyte [pbmBank.Size];
-			 pbmCacheModified = new sbyte [pbmBank.Size];
+			 tempExtra = new byte [pmb.ExtraInfoLength];
+			 pbmCache = new byte [pbmBank.Size];
+			 pbmCacheModified = new byte [pbmBank.Size];
 			 pbmRead = false;
 		  }
 		  else
@@ -469,7 +469,7 @@ namespace com.dalsemi.onewire.application.file
 	   /// </returns>
 	   /// <exception cref="OneWireException"> when the adapter is not setup properly </exception>
 	   /// <exception cref="OneWireIOException"> when an 1-Wire IO error occures </exception>
-	   public virtual int readPagePacket(int page, sbyte[] readBuf, int offset)
+	   public virtual int readPagePacket(int page, byte[] readBuf, int offset)
 	   {
 
 		  //\\//\\//\\//\\//\\//\\//\\//
@@ -497,7 +497,7 @@ namespace com.dalsemi.onewire.application.file
 			 DSPortAdapter adapter = owd[0].Adapter;
 			 adapter.Speed = DSPortAdapter.SPEED_REGULAR;
 			 adapter.reset();
-			 adapter.putByte((sbyte) 0x3C);
+			 adapter.putByte((byte) 0x3C);
 			 adapter.Speed = DSPortAdapter.SPEED_OVERDRIVE;
 		  }
 
@@ -562,7 +562,7 @@ namespace com.dalsemi.onewire.application.file
 						 pmb.readPageCRC(page, (lastPageRead == (page - 1)), cache [page], 0);
 
 						 // get the redirection
-						 redirect[page] = (sbyte)(((OTPMemoryBank)pmb).getRedirectedPage(page));
+						 redirect[page] = (byte)(((OTPMemoryBank)pmb).getRedirectedPage(page));
 
 						 // last page can't be used due to redirect read
 						 lastPageRead = NONE;
@@ -753,7 +753,7 @@ namespace com.dalsemi.onewire.application.file
 	   /// <param name="writeBuf"> buffer container the data to write </param>
 	   /// <param name="offset"> offset into write buffer </param>
 	   /// <param name="buflen"> length of data to write </param>
-	   public virtual void writePagePacket(int page, sbyte[] writeBuf, int offset, int buflen)
+	   public virtual void writePagePacket(int page, byte[] writeBuf, int offset, int buflen)
 	   {
 		  int log;
 
@@ -815,10 +815,10 @@ namespace com.dalsemi.onewire.application.file
 				// Use the last_page since it was not redirected
 				Array.Copy(writeBuf, offset, cache[last_page], 1, buflen);
 				len [last_page] = buflen;
-				cache [last_page][0] = (sbyte) buflen;
+				cache [last_page][0] = (byte) buflen;
 				int crc = CRC16.compute(cache[last_page], 0, buflen + 1, last_page);
-				cache[last_page][buflen + 1] = unchecked((sbyte)(~crc & 0xFF));
-				cache[last_page][buflen + 2] = unchecked((sbyte)(((int)((uint)(~crc & 0xFFFF) >> 8)) & 0xFF));
+				cache[last_page][buflen + 1] = unchecked((byte)(~crc & 0xFF));
+				cache[last_page][buflen + 2] = unchecked((byte)(((int)((uint)(~crc & 0xFFFF) >> 8)) & 0xFF));
 
 				// set pageState flag
 				pageState [last_page] = VERIFY;
@@ -831,10 +831,10 @@ namespace com.dalsemi.onewire.application.file
 				// Use the page since it is not redirected
 				Array.Copy(writeBuf, offset, cache[page], 1, buflen);
 				len [page] = buflen;
-				cache [page][0] = (sbyte) buflen;
+				cache [page][0] = (byte) buflen;
 				int crc = CRC16.compute(cache[page], 0, buflen + 1, page);
-				cache[page][buflen + 1] = unchecked((sbyte)(~crc & 0xFF));
-				cache[page][buflen + 2] = unchecked((sbyte)(((int)((uint)(~crc & 0xFFFF) >> 8)) & 0xFF));
+				cache[page][buflen + 1] = unchecked((byte)(~crc & 0xFF));
+				cache[page][buflen + 2] = unchecked((byte)(((int)((uint)(~crc & 0xFFFF) >> 8)) & 0xFF));
 
 				// set pageState flag
 				pageState [page] = VERIFY;
@@ -847,7 +847,7 @@ namespace com.dalsemi.onewire.application.file
 			 Array.Copy(writeBuf, offset, cache [page], 1, buflen);
 
 			 len [page] = buflen;
-			 cache [page][0] = (sbyte) buflen;
+			 cache [page][0] = (byte) buflen;
 
 			 // set pageState flag
 			 pageState [page] = WRITE;
@@ -1007,7 +1007,7 @@ namespace com.dalsemi.onewire.application.file
 
 						 // set old page for redirect
 						 pageState[page] = REDIRECT;
-						 cache[page][0] = unchecked((sbyte)(new_page & 0xFF));
+						 cache[page][0] = unchecked((byte)(new_page & 0xFF));
 					  }
 					  // verify passed
 					  else
@@ -1081,12 +1081,12 @@ namespace com.dalsemi.onewire.application.file
 				numBytes = 1;
 			 }
 			 bool changed = false;
-			 sbyte[] temp_buf = new sbyte[numBytes];
+			 byte[] temp_buf = new byte[numBytes];
 
 			 for (int i = 0; i < numBytes; i++)
 			 {
-				temp_buf[i] = unchecked((sbyte)(~(pbmCache[i] ^ pbmCacheModified[i]) & 0x00FF));
-				if ((sbyte)temp_buf[i] != unchecked((sbyte)0xFF))
+				temp_buf[i] = (byte)(~(pbmCache[i] ^ pbmCacheModified[i]) & 0x00FF);
+				if ((byte)temp_buf[i] != (byte)0xFF)
 				{
 				   changed = true;
 				}
@@ -1555,7 +1555,7 @@ namespace com.dalsemi.onewire.application.file
 	   /// <param name="buf"> buffer to dump </param>
 	   /// <param name="offset"> offset to start in the buffer </param>
 	   /// <param name="len"> length to dump </param>
-	   private void debugDump(sbyte[] buf, int offset, int len)
+	   private void debugDump(byte[] buf, int offset, int len)
 	   {
 		  for (int i = offset; i < (offset + len); i++)
 		  {

@@ -56,46 +56,46 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// Load First Secret </summary>
-	   public static readonly sbyte LOAD_FIRST_SECRET = (sbyte) 0x5A;
+	   public static readonly byte LOAD_FIRST_SECRET = 0x5A;
 
 	   /// <summary>
 	   /// Compute next Secret command </summary>
-	   public static readonly sbyte COMPUTE_NEXT_SECRET = (sbyte) 0x33;
+	   public static readonly byte COMPUTE_NEXT_SECRET = 0x33;
 
 	   /// <summary>
 	   /// Refresh Scratchpad command </summary>
-	   public static readonly sbyte REFRESH_SCRATCHPAD = unchecked((sbyte) 0xA3);
+	   public static readonly byte REFRESH_SCRATCHPAD = 0xA3;
 
 	   /// <summary>
 	   /// cached byte[] for re-use in SHA debit applications, speeds up operation on TINI </summary>
-	   private readonly sbyte[] MT_buffer = new sbyte [64];
+	   private readonly byte[] MT_buffer = new byte [64];
 	   /// <summary>
 	   /// cached byte[] for re-use in SHA debit applications, speeds up operation on TINI </summary>
-	   private readonly sbyte[] MAC_buffer = new sbyte[20];
+	   private readonly byte[] MAC_buffer = new byte[20];
 	   /// <summary>
 	   /// cached byte[] for re-use in SHA debit applications, speeds up operation on TINI </summary>
-	   private readonly sbyte[] page_data_buffer = new sbyte [32];
+	   private readonly byte[] page_data_buffer = new byte [32];
 	   /// <summary>
 	   /// cached byte[] for re-use in SHA debit applications, speeds up operation on TINI </summary>
-	   private readonly sbyte[] scratchpad_buffer = new sbyte [8];
+	   private readonly byte[] scratchpad_buffer = new byte [8];
 	   /// <summary>
 	   /// cached byte[] for re-use in SHA debit applications, speeds up operation on TINI </summary>
-	   private readonly sbyte[] copy_scratchpad_buffer = new sbyte[4];
+	   private readonly byte[] copy_scratchpad_buffer = new byte[4];
 	   /// <summary>
 	   /// cached byte[] for re-use in SHA debit applications, speeds up operation on TINI </summary>
-	   private readonly sbyte[] read_scratchpad_buffer = new sbyte[8 + 3 + 3];
+	   private readonly byte[] read_scratchpad_buffer = new byte[8 + 3 + 3];
 
 	   /// <summary>
 	   /// block of 0xFF's used for faster read pre-fill of 1-Wire blocks
 	   /// Comes from OneWireContainer33 that this MemoryBank references.
 	   /// </summary>
-	   protected internal new static readonly sbyte[] ffBlock = OneWireContainer33.ffBlock;
+	   protected internal new static readonly byte[] ffBlock = OneWireContainer33.ffBlock;
 
 	   /// <summary>
 	   /// block of 0x00's used for faster read pre-fill of 1-Wire blocks
 	   /// Comes from OneWireContainer33 that this MemoryBank references.
 	   /// </summary>
-	   protected internal static readonly sbyte[] zeroBlock = OneWireContainer33.zeroBlock;
+	   protected internal static readonly byte[] zeroBlock = OneWireContainer33.zeroBlock;
 
 	   /// <summary>
 	   /// The Password container to acces the 8 byte passwords
@@ -128,7 +128,7 @@ namespace com.dalsemi.onewire.container
 		  extraInfoLength = 3;
 
 		  // COPY_SCRATCHPAD_WITH_MAC
-		  COPY_SCRATCHPAD_COMMAND = (sbyte) 0x55;
+		  COPY_SCRATCHPAD_COMMAND = 0x55;
 	   }
 
 	   //--------
@@ -152,7 +152,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
@@ -197,7 +197,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
@@ -260,7 +260,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readScratchpad(sbyte[] readBuf, int offset, int len, sbyte[] extraInfo)
+	   public override void readScratchpad(byte[] readBuf, int offset, int len, byte[] extraInfo)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
@@ -365,7 +365,7 @@ namespace com.dalsemi.onewire.container
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankScratchSHAEE.copyScratchpad(int, int) called");
 			 Debug.debug("  romID=" + owc33.AddressAsString);
-			 Debug.debug("  addr=0x" + Convert.toHexString((sbyte)addr));
+			 Debug.debug("  addr=0x" + Convert.toHexString(addr));
 			 Debug.debug("  len=" + len);
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
@@ -391,7 +391,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void copyScratchpad(int addr, sbyte[] scratchpad, int offset)
+	   public virtual void copyScratchpad(int addr, byte[] scratchpad, int offset)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
@@ -399,7 +399,7 @@ namespace com.dalsemi.onewire.container
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankScratchSHAEE.copyScratchpad(int, byte[], int) called");
 			 Debug.debug("  romID=" + owc33.AddressAsString);
-			 Debug.debug("  addr=0x" + Convert.toHexString((sbyte)addr));
+			 Debug.debug("  addr=0x" + Convert.toHexString((byte)addr));
 			 Debug.debug("  scratchpad", scratchpad, offset, 8);
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
@@ -431,7 +431,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void copyScratchpad(int addr, sbyte[] scratchpad, int scratchpadOffset, sbyte[] pageData, int pageDataOffset)
+	   public virtual void copyScratchpad(int addr, byte[] scratchpad, int scratchpadOffset, byte[] pageData, int pageDataOffset)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
@@ -439,7 +439,7 @@ namespace com.dalsemi.onewire.container
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankScratchSHAEE.copyScratchpad(int, byte[], int, byte[], int) called");
 			 Debug.debug("  romID=" + owc33.AddressAsString);
-			 Debug.debug("  addr=0x" + Convert.toHexString((sbyte)addr));
+			 Debug.debug("  addr=0x" + Convert.toHexString(addr));
 			 Debug.debug("  scratchpad", scratchpad, scratchpadOffset, 8);
 			 Debug.debug("  pageData", pageData, pageDataOffset, 32);
 		  }
@@ -455,15 +455,15 @@ namespace com.dalsemi.onewire.container
 
 			 Array.Copy(scratchpad,scratchpadOffset,MT_buffer,32,8);
 
-			 MT_buffer[40] = (sbyte)((int)((uint)(addr & 0x0E0) >> 5));
+			 MT_buffer[40] = (byte)((int)((uint)(addr & 0x0E0) >> 5));
 			 Array.Copy(owc33.Address,0,MT_buffer,41,7);
 			 Array.Copy(ffBlock,0,MT_buffer,52,3);
 
 			 // put in the padding
-			 MT_buffer[55] = unchecked((sbyte) 0x80);
+			 MT_buffer[55] = 0x80;
 			 Array.Copy(zeroBlock,0,MT_buffer,56,6);
-			 MT_buffer[62] = (sbyte) 0x01;
-			 MT_buffer[63] = unchecked((sbyte) 0xB8);
+			 MT_buffer[62] = 0x01;
+			 MT_buffer[63] = 0xB8;
 
 			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 			 if (DEBUG)
@@ -498,7 +498,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void copyScratchpadWithMAC(int addr, sbyte[] authMAC, int authOffset)
+	   public virtual void copyScratchpadWithMAC(int addr, byte[] authMAC, int authOffset)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
@@ -506,13 +506,13 @@ namespace com.dalsemi.onewire.container
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankScratchSHAEE.copyScratchpadWithMAC(int, byte[], int) called");
 			 Debug.debug("  romID=" + owc33.AddressAsString);
-			 Debug.debug("  addr=0x" + Convert.toHexString((sbyte)addr));
+			 Debug.debug("  addr=0x" + Convert.toHexString(addr));
 			 Debug.debug("  authMAC", authMAC, authOffset, 20);
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  lock (copy_scratchpad_buffer)
 		  {
-			 sbyte[] send_block = copy_scratchpad_buffer;
+			 byte[] send_block = copy_scratchpad_buffer;
 
 			 checkSpeed();
 
@@ -523,10 +523,10 @@ namespace com.dalsemi.onewire.container
 				send_block[3] = 0x5F; //ES - always 0x5F
 
 				// address 2
-				send_block[2] = unchecked((sbyte)((addr >> 8) & 0x0FF)); //TA2
+				send_block[2] = (byte)((addr >> 8) & 0x0FF); //TA2
 
 				// address 1
-				send_block[1] = unchecked((sbyte)((addr) & 0x0FF)); //TA1;
+				send_block[1] = (byte)((addr) & 0x0FF); //TA1;
 
 				// Copy command
 				send_block[0] = COPY_SCRATCHPAD_COMMAND;
@@ -570,22 +570,22 @@ namespace com.dalsemi.onewire.container
 				ib.adapter.setPowerNormal();
 
 				// get result
-				sbyte test = (sbyte) ib.adapter.Byte;
+				byte test = (byte)ib.adapter.Byte;
 
 				//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 				if (DEBUG)
 				{
-				   Debug.debug("  result=0x" + Convert.toHexString((sbyte)test));
+				   Debug.debug("  result=0x" + Convert.toHexString(test));
 				}
 				//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
-				if ((test != unchecked((sbyte) 0xAA)) && (test != (sbyte) 0x55))
+				if ((test != 0xAA) && (test != 0x55))
 				{
-				   if (test == unchecked((sbyte) 0xFF))
+				   if (test == 0xFF)
 				   {
 					  throw new OneWireException("That area of memory is write-protected.");
 				   }
-				   else if (test == (sbyte)0x00)
+				   else if (test == 0x00)
 				   {
 					  throw new OneWireIOException("Error due to not matching MAC.");
 				   }
@@ -614,7 +614,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void writeScratchpad(int addr, sbyte[] writeBuf, int offset, int len)
+	   public override void writeScratchpad(int addr, byte[] writeBuf, int offset, int len)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
@@ -622,7 +622,7 @@ namespace com.dalsemi.onewire.container
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankScratchSHAEE.writeScratchpad(int, byte[], int, int) called");
 			 Debug.debug("  romID=" + owc33.AddressAsString);
-			 Debug.debug("  addr=0x" + Convert.toHexString((sbyte)addr));
+			 Debug.debug("  addr=0x" + Convert.toHexString(addr));
 			 Debug.debug("  writeBuf", writeBuf, offset, len);
 			 Debug.stackTrace();
 		  }
@@ -662,7 +662,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void write(int addr, sbyte[] writeBuf, int offset, int len)
+	   public override void write(int addr, byte[] writeBuf, int offset, int len)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
@@ -670,7 +670,7 @@ namespace com.dalsemi.onewire.container
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankScratchSHAEE.write(int, byte[], int, int) called");
 			 Debug.debug("  romID=" + owc33.AddressAsString);
-			 Debug.debug("  addr=0x" + Convert.toHexString((sbyte)addr));
+			 Debug.debug("  addr=0x" + Convert.toHexString(addr));
 			 Debug.debug("  writeBuf", writeBuf, offset, len);
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
@@ -697,7 +697,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void loadFirstSecret(int addr, sbyte[] data, int offset)
+	   public virtual void loadFirstSecret(int addr, byte[] data, int offset)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
@@ -741,11 +741,11 @@ namespace com.dalsemi.onewire.container
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankScratchSHAEE.loadFirstSecret(int) called");
 			 Debug.debug("  romID=" + owc33.AddressAsString);
-			 Debug.debug("  addr=0x" + Convert.toHexString((sbyte)addr));
+			 Debug.debug("  addr=0x" + Convert.toHexString(addr));
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
-		  sbyte[] send_block = new sbyte[4];
+		  byte[] send_block = new byte[4];
 
 		  checkSpeed();
 
@@ -753,9 +753,9 @@ namespace com.dalsemi.onewire.container
 		  if (ib.adapter.select(ib.Address))
 		  {
 			 send_block [0] = LOAD_FIRST_SECRET;
-			 send_block [1] = unchecked((sbyte)(addr & 0x00FF));
-			 send_block [2] = unchecked((sbyte)(((int)((uint)addr >> 8)) & 0x00FF));
-			 send_block [3] = (sbyte) 0x5F; // Should be 0x5F,not ( byte ) ((addr + 7) & 0x01F);
+			 send_block [1] = (byte)(addr & 0x00FF);
+			 send_block [2] = (byte)(((int)((uint)addr >> 8)) & 0x00FF);
+			 send_block [3] = 0x5F; // Should be 0x5F,not ( byte ) ((addr + 7) & 0x01F);
 
 			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 			 if (DEBUG)
@@ -782,7 +782,7 @@ namespace com.dalsemi.onewire.container
 
 			 ib.adapter.setPowerNormal();
 
-			 sbyte test = (sbyte) ib.adapter.Byte;
+			 byte test = (byte) ib.adapter.Byte;
 
 			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 			 if (DEBUG)
@@ -791,7 +791,7 @@ namespace com.dalsemi.onewire.container
 			 }
 			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
-			 if ((test != unchecked((sbyte) 0xAA)) && (test != (sbyte) 0x55))
+			 if ((test != 0xAA) && (test != 0x55))
 			 {
 				throw new OneWireException("Error due to invalid load.");
 			 }
@@ -807,7 +807,7 @@ namespace com.dalsemi.onewire.container
 				}
 				//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
-				sbyte[] secret = new sbyte[8];
+				byte[] secret = new byte[8];
 				readScratchpad(secret, 0, 8, null);
 				owc33.setContainerSecret(secret, 0);
 			 }
@@ -840,13 +840,13 @@ namespace com.dalsemi.onewire.container
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankScratchSHAEE.computeNextSecret(int) called");
 			 Debug.debug("  romID=" + owc33.AddressAsString);
-			 Debug.debug("  addr=0x" + Convert.toHexString((sbyte)addr));
+			 Debug.debug("  addr=0x" + Convert.toHexString(addr));
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
-		  sbyte[] send_block = new sbyte [3];
-		  sbyte[] scratch = new sbyte [8];
-		  sbyte[] next_secret = null;
+		  byte[] send_block = new byte [3];
+		  byte[] scratch = new byte [8];
+		  byte[] next_secret = null;
 
 		  // check to see if secret is set
 		  if (owc33.ContainerSecretSet)
@@ -858,9 +858,9 @@ namespace com.dalsemi.onewire.container
 			 }
 			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
-			 sbyte[] memory = new sbyte [32];
-			 sbyte[] secret = new sbyte [8];
-			 sbyte[] MT = new sbyte [64];
+			 byte[] memory = new byte [32];
+			 byte[] secret = new byte [8];
+			 byte[] MT = new byte [64];
 
 			 readMemory(addr & 0xE0, false, memory, 0, 32);
 
@@ -877,15 +877,15 @@ namespace com.dalsemi.onewire.container
 			 Array.Copy(memory,0,MT,4,32);
 			 Array.Copy(ffBlock,0,MT,36,4);
 			 readScratchpad(MT, 40, 8, null);
-			 MT[40] = (sbyte)(MT[40] & (sbyte) 0x3F);
+			 MT[40] = (byte)(MT[40] & 0x3F);
 			 Array.Copy(secret,4,MT,48,4);
 			 Array.Copy(ffBlock,0,MT,52,3);
 
 			 // message padding
-			 MT[55] = unchecked((sbyte) 0x80);
+			 MT[55] = 0x80;
 			 Array.Copy(zeroBlock,0,MT,56,6);
-			 MT[62] = (sbyte) 0x01;
-			 MT[63] = unchecked((sbyte) 0xB8);
+			 MT[62] = 0x01;
+			 MT[63] = 0xB8;
 
 			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 			 if (DEBUG)
@@ -900,13 +900,13 @@ namespace com.dalsemi.onewire.container
 			 //copy E into secret
 			 for (int temp = AtoE[4],i = 0;i < 4;i++)
 			 {
-				secret[i] = unchecked((sbyte)(temp & 0x0FF));
+				secret[i] = unchecked((byte)(temp & 0x0FF));
 				temp >>= 8;
 			 }
 			 //copy D into secret
 			 for (int temp = AtoE[3],i = 4;i < 8;i++)
 			 {
-				secret[i] = unchecked((sbyte)(temp & 0x0FF));
+				secret[i] = unchecked((byte)(temp & 0x0FF));
 				temp >>= 8;
 			 }
 			 next_secret = secret;
@@ -927,9 +927,9 @@ namespace com.dalsemi.onewire.container
 			 // Next Secret command
 			 send_block[0] = COMPUTE_NEXT_SECRET;
 			 // address 1
-			 send_block[1] = unchecked((sbyte)(addr & 0xFF));
+			 send_block[1] = (byte)(addr & 0xFF);
 			 // address 2
-			 send_block[2] = unchecked((sbyte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
+			 send_block[2] = (byte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF);
 
 			 // now send the block
 			 ib.adapter.dataBlock(send_block,0,2);
@@ -959,7 +959,7 @@ namespace com.dalsemi.onewire.container
 			 readScratchpad(scratch,0,8,null);
 			 for (int i = 0;i < 8;i++)
 			 {
-				if (scratch[i] != unchecked((sbyte) 0xAA))
+				if (scratch[i] != 0xAA)
 				{
 				   throw new OneWireIOException("Next secret not calculated.");
 				}
@@ -997,7 +997,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void computeNextSecret(int addr, sbyte[] partialsecret, int offset)
+	   public virtual void computeNextSecret(int addr, byte[] partialsecret, int offset)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
@@ -1005,14 +1005,14 @@ namespace com.dalsemi.onewire.container
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankScratchSHAEE.computeNextSecret(int, byte[], int) called");
 			 Debug.debug("  romID=" + owc33.AddressAsString);
-			 Debug.debug("  addr=0x" + Convert.toHexString((sbyte)addr));
+			 Debug.debug("  addr=0x" + Convert.toHexString(addr));
 			 Debug.debug("  partialsecret", partialsecret, offset, 8);
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
-		  sbyte[] send_block = new sbyte [3];
-		  sbyte[] scratch = new sbyte [8];
-		  sbyte[] next_secret = null;
+		  byte[] send_block = new byte [3];
+		  byte[] scratch = new byte [8];
+		  byte[] next_secret = null;
 
 		  writeScratchpad(addr, partialsecret, 0, 8);
 
@@ -1026,9 +1026,9 @@ namespace com.dalsemi.onewire.container
 			 }
 			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
-			 sbyte[] memory = new sbyte [32];
-			 sbyte[] secret = new sbyte [8];
-			 sbyte[] MT = new sbyte [64];
+			 byte[] memory = new byte [32];
+			 byte[] secret = new byte [8];
+			 byte[] MT = new byte [64];
 
 			 readMemory(addr & 0xE0, false, memory, 0, 32);
 
@@ -1044,16 +1044,16 @@ namespace com.dalsemi.onewire.container
 			 Array.Copy(secret,0,MT,0,4);
 			 Array.Copy(memory,0,MT,4,32);
 			 Array.Copy(ffBlock,0,MT,36,4);
-			 MT[40] = (sbyte)(partialsecret[0] & (sbyte) 0x3F);
+			 MT[40] = (byte)(partialsecret[0] & 0x3F);
 			 Array.Copy(partialsecret,1,MT,41,7);
 			 Array.Copy(secret,4,MT,48,4);
 			 Array.Copy(ffBlock,0,MT,52,3);
 
 			 // message padding
-			 MT[55] = unchecked((sbyte) 0x80);
+			 MT[55] = 0x80;
 			 Array.Copy(zeroBlock,0,MT,56,6);
-			 MT[62] = (sbyte) 0x01;
-			 MT[63] = unchecked((sbyte) 0xB8);
+			 MT[62] = 0x01;
+			 MT[63] = 0xB8;
 
 			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 			 if (DEBUG)
@@ -1068,13 +1068,13 @@ namespace com.dalsemi.onewire.container
 			 //copy E into secret
 			 for (int temp = AtoE[4],i = 0;i < 4;i++)
 			 {
-				secret[i] = unchecked((sbyte)(temp & 0x0FF));
+				secret[i] = (byte)(temp & 0x0FF);
 				temp >>= 8;
 			 }
 			 //copy D into secret
 			 for (int temp = AtoE[3],i = 4;i < 8;i++)
 			 {
-				secret[i] = unchecked((sbyte)(temp & 0x0FF));
+				secret[i] = (byte)(temp & 0x0FF);
 				temp >>= 8;
 			 }
 			 next_secret = secret;
@@ -1093,9 +1093,9 @@ namespace com.dalsemi.onewire.container
 			 // Next Secret command
 			 send_block[0] = COMPUTE_NEXT_SECRET;
 			 // address 1
-			 send_block[1] = unchecked((sbyte)(addr & 0xFF));
+			 send_block[1] = (byte)(addr & 0xFF);
 			 // address 2
-			 send_block[2] = unchecked((sbyte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
+			 send_block[2] = (byte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF);
 
 			 // now send the block
 			 ib.adapter.dataBlock(send_block,0,2);
@@ -1125,7 +1125,7 @@ namespace com.dalsemi.onewire.container
 			 readScratchpad(scratch,0,8,null);
 			 for (int i = 0;i < 8;i++)
 			 {
-				if (scratch[i] != unchecked((sbyte) 0xAA))
+				if (scratch[i] != 0xAA)
 				{
 				   throw new OneWireIOException("Next secret not calculated.");
 				}
@@ -1175,7 +1175,7 @@ namespace com.dalsemi.onewire.container
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankScratchSHAEE.refreshScratchpad(int) called");
 			 Debug.debug("  romID=" + owc33.AddressAsString);
-			 Debug.debug("  addr=0x" + Convert.toHexString((sbyte)addr));
+			 Debug.debug("  addr=0x" + Convert.toHexString(addr));
 			 Debug.stackTrace();
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
@@ -1185,17 +1185,17 @@ namespace com.dalsemi.onewire.container
 		  // access the device
 		  if (ib.adapter.select(ib.Address))
 		  {
-			 sbyte[] send_block = new sbyte[13];
+			 byte[] send_block = new byte[13];
 
 			 send_block [0] = REFRESH_SCRATCHPAD;
-			 send_block [1] = unchecked((sbyte)(addr & 0x00FF));
-			 send_block [2] = unchecked((sbyte)(((int)((uint)addr >> 8)) & 0x00FF));
+			 send_block [1] = (byte)(addr & 0x00FF);
+			 send_block [2] = (byte)(((int)((uint)addr >> 8)) & 0x00FF);
 			 for (int i = 3; i < 11; i++)
 			 {
-				send_block[i] = (sbyte)0x00;
+				send_block[i] = 0x00;
 			 }
-			 send_block[11] = unchecked((sbyte)0xFF);
-			 send_block[12] = unchecked((sbyte)0xFF);
+			 send_block[11] = 0xFF;
+			 send_block[12] = 0xFF;
 
 			  // now send the block
 			 ib.adapter.dataBlock(send_block, 0, 13);
@@ -1259,7 +1259,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   private void readMemory(int startAddr, bool readContinue, sbyte[] readBuf, int offset, int len)
+	   private void readMemory(int startAddr, bool readContinue, byte[] readBuf, int offset, int len)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
@@ -1267,7 +1267,7 @@ namespace com.dalsemi.onewire.container
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankScratchSHAEE.readMemory(int, bool, byte[], int, int) called");
 			 Debug.debug("  romID=" + owc33.AddressAsString);
-			 Debug.debug("  startAddr=0x" + Convert.toHexString((sbyte)startAddr));
+			 Debug.debug("  startAddr=0x" + Convert.toHexString(startAddr));
 			 Debug.debug("  readContinue=" + readContinue);
 			 Debug.debug("  offset=" + offset);
 			 Debug.debug("  len=" + len);
@@ -1290,9 +1290,9 @@ namespace com.dalsemi.onewire.container
 			 }
 
 			 // build start reading memory block
-			 readBuf [offset] = unchecked((sbyte) 0xF0); // READ MEMORY, no CRC, no MAC
-			 readBuf [offset + 1] = unchecked((sbyte)(startAddr & 0xFF));
-			 readBuf [offset + 2] = unchecked((sbyte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF));
+			 readBuf [offset] = 0xF0; // READ MEMORY, no CRC, no MAC
+			 readBuf [offset + 1] = (byte)(startAddr & 0xFF);
+			 readBuf [offset + 2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
 
 			 // do the first block for command, address
 			 ib.adapter.dataBlock(readBuf, offset, 3);

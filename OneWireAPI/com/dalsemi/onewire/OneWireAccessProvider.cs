@@ -3,6 +3,7 @@ using System.Collections;
 using System.Diagnostics;
 using Windows.Storage;
 using System.Reflection;
+using Windows.Devices.Enumeration;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2005 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -164,9 +165,10 @@ namespace com.dalsemi.onewire
 	   /// <param name="args"> cmd-line arguments, ignored for now. </param>
 	   public static void Main(string[] args)
 	   {
-		  Debug.WriteLine("1-Wire API for Java (Desktop), v" + owapi_version);
+		  Debug.WriteLine("1-Wire API for C# (WinRT), v" + owapi_version);
 		  Debug.WriteLine("Copyright (C) 1999-2006 Dallas Semiconductor Corporation, All Rights Reserved.");
-		  Debug.WriteLine("");
+          Debug.WriteLine("Copyright (C) 2016 Joel Winarske, All Rights Reserved.");
+          Debug.WriteLine("");
 		  Debug.WriteLine("Default Adapter: " + getProperty("onewire.adapter.default"));
 		  Debug.WriteLine("   Default Port: " + getProperty("onewire.port.default"));
 		  Debug.WriteLine("");
@@ -185,9 +187,6 @@ namespace com.dalsemi.onewire
 	   {
 		  ArrayList adapter_vector = new ArrayList(3);
 		  DSPortAdapter adapter_instance;
-		  Type adapter_class;
-		  string class_name = null;
-		  bool TMEX_loaded = false;
 		  bool serial_loaded = false;
 
 		  // check for override
@@ -197,49 +196,16 @@ namespace com.dalsemi.onewire
 			 return (adapter_vector.GetEnumerator());
 		  }
 
-#if false //TODO
-            // only try native TMEX if on x86 Windows platform
-            if ((System.Environment.GetEnvironmentVariable("os.arch").IndexOf("86") != -1) &&
-                (System.Environment.GetEnvironmentVariable("os.name").IndexOf("Windows") != -1))
-            {
-                // loop through the TMEX adapters
-                for (int port_type = 0; port_type <= 15; port_type++)
-                {
-
-                    // try to load the adapter classes
-                    try
-                    {
-                        adapter_instance = (DSPortAdapter)(new com.dalsemi.onewire.adapter.TMEXAdapter(port_type));
-
-                        // only add it if it has some ports
-                        if (adapter_instance.PortNames.MoveNext()) //TODO .hasMoreElements()
-                        {
-                            adapter_vector.Add(adapter_instance);
-                            TMEX_loaded = true;
-                        }
-                    }
-                    catch (System.Exception)
-                    {
-                        // DRAIN
-                    }
-                }
-            }
-#endif
-
-          // get the pure java adapter
+          // get the pure C# adapter
           try
 		  {
-			 adapter_class = Type.GetType("com.dalsemi.onewire.adapter.USerialAdapter");
-             adapter_instance = (DSPortAdapter) Activator.CreateInstance(adapter_class);
+             adapter_instance = (DSPortAdapter)new USerialAdapter();
 
-			 // check if has any ports (common javax.comm problem)
-			 if (!(adapter_instance.PortNames.Current != null)) //TODO .hasMoreElements()
+			 // check if any serial ports are available
+			 if (!adapter_instance.PortNames.MoveNext())
              {
-				if (!TMEX_loaded)
-				{
-				   Debug.WriteLine("Warning: serial communications API not setup properly, no ports in enumeration ");
-				   Debug.WriteLine("Pure-Java DS9097U adapter will not work, not added to adapter enum");
-				}
+				Debug.WriteLine("Warning: serial communications API not setup properly, no ports in enumeration ");
+				Debug.WriteLine("Pure-C# DS9097U adapter will not work, not added to adapter enum");
 			 }
 			 else
 			 {
@@ -247,34 +213,12 @@ namespace com.dalsemi.onewire
 				serial_loaded = true;
 			 }
 		  }
-		  catch (System.TypeLoadException e)
-		  {
-			 if (!TMEX_loaded)
-			 {
-				Debug.WriteLine("");
-				Debug.WriteLine("WARNING: Could not load serial comm API for pure-Java DS9097U adapter: " + e);
-				Debug.WriteLine("This message can be safely ignored if you are using TMEX Drivers or");
-				Debug.WriteLine("the NetAdapter to connect to the 1-Wire Network.");
-				Debug.WriteLine("");
-			 }
-		  }
-		  catch (System.MemberAccessException e)
-		  {
-			 if (!TMEX_loaded)
-			 {
-				Debug.WriteLine("");
-				Debug.WriteLine("WARNING: Could not load serial comm API for pure-Java DS9097U adapter: " + e);
-				Debug.WriteLine("This message can be safely ignored if you are using TMEX Drivers or");
-				Debug.WriteLine("the NetAdapter to connect to the 1-Wire Network.");
-				Debug.WriteLine("");
-			 }
-		  }
 		  catch (System.Exception)
 		  {
 			 // DRAIN
 		  }
 
-		  if (!TMEX_loaded && !serial_loaded)
+		  if (!serial_loaded)
 		  {
 			 Debug.WriteLine("");
 			 Debug.WriteLine("Standard drivers for 1-Wire are not found.");
@@ -287,8 +231,9 @@ namespace com.dalsemi.onewire
             // get the network adapter
             try
 		  {
-			 adapter_class = Type.GetType("com.dalsemi.onewire.adapter.NetAdapter");
-             adapter_instance = (DSPortAdapter)Activator.CreateInstance(adapter_class);
+			 //adapter_class = Type.GetType("com.dalsemi.onewire.adapter.NetAdapter");
+             //adapter_instance = (DSPortAdapter)Activator.CreateInstance(adapter_class);
+             adapter_instance = (DSPortAdapter)new NetAdapter();
              adapter_vector.Add(adapter_instance);
 		  }
 		  catch (System.MemberAccessException e)
@@ -300,10 +245,11 @@ namespace com.dalsemi.onewire
              Debugger.Break();
 			 // DRAIN
 		  }
-#endif
+#endif //TODO
 
-          // get adapters from property file with keys 'onewire.register.adapter0-15'
-          try
+#if false //TODO
+            // get adapters from property file with keys 'onewire.register.adapter0-15'
+            try
 		  {
 			 // loop through the possible registered adapters
 			 for (int reg_num = 0; reg_num <= 15; reg_num++)
@@ -335,9 +281,10 @@ namespace com.dalsemi.onewire
 		  {
 			 // DRAIN
 		  }
+#endif //TODO
 
-		  // check for no adapters
-		  if (adapter_vector.Count == 0)
+            // check for no adapters
+            if (adapter_vector.Count == 0)
 		  {
 			 Debug.WriteLine("No 1-Wire adapter classes found");
 		  }
@@ -511,16 +458,15 @@ namespace com.dalsemi.onewire
                 //just drain it and let the normal method run...
             }
 
-            //Properties onewire_properties = new Properties();
-            //System.IO.FileStream prop_file = null;
             string ret_str = null;
             DSPortAdapter adapter_instance;
-            Type adapter_class;
 
             // try system properties
             try
             {
-                ret_str = System.Environment.GetEnvironmentVariable(propName);
+                // This doesn't work on WinRT...
+                var table = Environment.GetEnvironmentVariables();
+                ret_str = (string)table[propName];
             }
             catch (System.Exception)
             {
@@ -533,43 +479,14 @@ namespace com.dalsemi.onewire
 
                 // attempt to open the onewire.properties file in two locations
                 // .\onewire.properties (Local) or <java.home>\lib\onewire.properties (Roaming)
-                var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+                var localSettings = ApplicationData.Current.LocalSettings;
                 ret_str = (string)localSettings.Values[propName];
 
                 // check to see if we now have the value
                 if (string.ReferenceEquals(ret_str, null))
                 {
-                    var roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
+                    var roamingSettings = ApplicationData.Current.RoamingSettings;
                     ret_str = (string)roamingSettings.Values[propName];
-                }
-
-                // if defaults still not found then check TMEX default
-                if (string.ReferenceEquals(ret_str, null))
-                {
-                    try
-                    {
-                        if (propName.Equals("onewire.adapter.default"))
-                        {
-                            ret_str = "TMEXAdapter.DefaultAdapterName";
-                        }
-                        else if (propName.Equals("onewire.port.default"))
-                        {
-                            ret_str = "TMEXAdapter.DefaultPortName";
-                        }
-
-                        // if did not get real string then null out
-                        if (!string.ReferenceEquals(ret_str, null))
-                        {
-                            if (ret_str.Length <= 0)
-                            {
-                                ret_str = null;
-                            }
-                        }
-                    }
-                    catch (System.Exception)
-                    {
-                        // DRAIN
-                    }
                 }
 
                 // if STILL not found then just pick DS9097U on 'smartDefaultPort'
@@ -583,16 +500,14 @@ namespace com.dalsemi.onewire
                     {
                         try
                         {
-                            adapter_class = Type.GetType("com.dalsemi.onewire.adapter.USerialAdapter");
-                            adapter_instance = (DSPortAdapter)Activator.CreateInstance(adapter_class);
+                            adapter_instance = (DSPortAdapter)new USerialAdapter();
 
                             // check if has any ports (common javax.comm problem)
-                            //JAVA TO C# CONVERTER TODO TASK: Java iterators are only converted within the context of 'while' and 'for' loops:
-                            //				   if (adapter_instance.PortNames.hasMoreElements())
-                            //				   {
-                            ////JAVA TO C# CONVERTER TODO TASK: Java iterators are only converted within the context of 'while' and 'for' loops:
-                            //					  ret_str = (string) adapter_instance.PortNames.nextElement();
-                            //				   }
+                            IEnumerator list = adapter_instance.PortNames;
+                            if (list.MoveNext())
+                            {
+                                ret_str = ((DeviceInformation)list.Current).Id;
+                            }
                         }
                         catch (System.Exception)
                         {

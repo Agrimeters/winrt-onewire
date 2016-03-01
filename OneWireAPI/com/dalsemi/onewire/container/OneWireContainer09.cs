@@ -163,7 +163,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= #OneWireContainer09() OneWireContainer09 </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
-	   public OneWireContainer09(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer09(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 	   }
 
@@ -295,7 +295,7 @@ namespace com.dalsemi.onewire.container
 			  mn.extraInfoDescription = null;
 			  mn.numCRCBytes = 1;
 			  mn.normalReadCRC = true;
-			  mn.READ_PAGE_WITH_CRC = unchecked((sbyte) 0xC3);
+			  mn.READ_PAGE_WITH_CRC = 0xC3;
     
 			  bank_vector.Add(mn);
     

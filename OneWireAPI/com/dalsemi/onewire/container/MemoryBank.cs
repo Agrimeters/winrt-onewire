@@ -263,7 +263,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire 
 	   ///         adapter </exception>
-	   void read(int startAddr, bool readContinue, sbyte[] readBuf, int offset, int len);
+	   void read(int startAddr, bool readContinue, byte[] readBuf, int offset, int len);
 
 	   /// <summary>
 	   /// Writes memory in this bank. It is recommended that a structure with some
@@ -291,7 +291,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire 
 	   ///         adapter </exception>
-	   void write(int startAddr, sbyte[] writeBuf, int offset, int len);
+	   void write(int startAddr, byte[] writeBuf, int offset, int len);
 	}
 
 }

@@ -96,7 +96,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
 	   /// <seealso cref= #OneWireContainer01() </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address </seealso>
-	   public OneWireContainer01(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer01(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 	   }
 

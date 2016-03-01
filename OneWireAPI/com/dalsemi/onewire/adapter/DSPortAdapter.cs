@@ -187,19 +187,19 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// 1-Wire Network level, normal (weak 5Volt pullup) </summary>
-	   public const char LEVEL_NORMAL = (char)0;
+	   public const byte LEVEL_NORMAL = 0;
 
 	   /// <summary>
 	   /// 1-Wire Network level, (strong 5Volt pullup, used for power delivery) </summary>
-	   public const char LEVEL_POWER_DELIVERY = (char)1;
+	   public const byte LEVEL_POWER_DELIVERY = 1;
 
 	   /// <summary>
 	   /// 1-Wire Network level, (strong pulldown to 0Volts, reset 1-Wire) </summary>
-	   public const char LEVEL_BREAK = (char)2;
+	   public const byte LEVEL_BREAK = 2;
 
 	   /// <summary>
 	   /// 1-Wire Network level, (strong 12Volt pullup, used to program eprom ) </summary>
-	   public const char LEVEL_PROGRAM = (char)3;
+	   public const byte LEVEL_PROGRAM = 3;
 
 	   /// <summary>
 	   /// 1-Wire Network reset result = no presence </summary>
@@ -273,12 +273,12 @@ namespace com.dalsemi.onewire.adapter
 	   /// <summary>
 	   /// Byte array of families to include in search
 	   /// </summary>
-	   private sbyte[] include;
+	   private byte[] include;
 
 	   /// <summary>
 	   /// Byte array of families to exclude from search
 	   /// </summary>
-	   private sbyte[] exclude;
+	   private byte[] exclude;
 
 	   //--------
 	   //-------- Methods
@@ -709,7 +709,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   /// <param name="address"> An array to be filled with the current iButton address. </param>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public abstract void getAddress(sbyte[] address);
+	   public abstract void getAddress(byte[] address);
 
 	   /// <summary>
 	   /// Gets the 'current' 1-Wire device address being used by the adapter as a long.
@@ -722,7 +722,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		   get
 		   {
-			  sbyte[] address = new sbyte [8];
+			  byte[] address = new byte [8];
     
 			  getAddress(address);
     
@@ -741,7 +741,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		   get
 		   {
-			  sbyte[] address = new sbyte [8];
+			  byte[] address = new byte [8];
     
 			  getAddress(address);
     
@@ -763,7 +763,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter
 	   /// </exception>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public virtual bool isPresent(sbyte[] address)
+	   public virtual bool isPresent(byte[] address)
 	   {
 		  reset();
 		  putByte(0xF0); // Search ROM command
@@ -824,7 +824,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter
 	   /// </exception>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public virtual bool isAlarming(sbyte[] address)
+	   public virtual bool isAlarming(byte[] address)
 	   {
 		  reset();
 		  putByte(0xEC); // Conditional search commands
@@ -892,13 +892,13 @@ namespace com.dalsemi.onewire.adapter
 	   /// </exception>
 	   /// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter#isPresent(byte[]) </seealso>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public virtual bool select(sbyte[] address)
+	   public virtual bool select(byte[] address)
 	   {
 		  // send 1-Wire Reset
 		  int rslt = reset();
 
 		  // broadcast the MATCH ROM command and address
-		  sbyte[] send_packet = new sbyte [9];
+		  byte[] send_packet = new byte [9];
 
 		  send_packet [0] = 0x55; // MATCH ROM command
 
@@ -981,7 +981,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </exception>
 	   /// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter#isPresent(byte[]) </seealso>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public virtual void assertSelect(sbyte[] address)
+	   public virtual void assertSelect(byte[] address)
 	   {
 		  if (!select(address))
 		  {
@@ -1112,10 +1112,10 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		  if ((include == null) || (include.Length != 1))
 		  {
-			 include = new sbyte [1];
+			 include = new byte [1];
 		  }
 
-		  include [0] = (sbyte) family;
+		  include [0] = (byte) family;
 	   }
 
 	   /// <summary>
@@ -1126,11 +1126,11 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="family">  array of the family types to target for searches </param>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
 	   /// <seealso cref=    #targetAllFamilies </seealso>
-	   public virtual void targetFamily(sbyte[] family)
+	   public virtual void targetFamily(byte[] family)
 	   {
 		  if ((include == null) || (include.Length != family.Length))
 		  {
-			 include = new sbyte [family.Length];
+			 include = new byte [family.Length];
 		  }
 
 		  Array.Copy(family, 0, include, 0, family.Length);
@@ -1149,10 +1149,10 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		  if ((exclude == null) || (exclude.Length != 1))
 		  {
-			 exclude = new sbyte [1];
+			 exclude = new byte [1];
 		  }
 
-		  exclude [0] = (sbyte) family;
+		  exclude [0] = (byte) family;
 	   }
 
 	   /// <summary>
@@ -1163,11 +1163,11 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="family">  array of family cods NOT to target for searches </param>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
 	   /// <seealso cref=    #targetAllFamilies </seealso>
-	   public virtual void excludeFamily(sbyte[] family)
+	   public virtual void excludeFamily(byte[] family)
 	   {
 		  if ((exclude == null) || (exclude.Length != family.Length))
 		  {
-			 exclude = new sbyte [family.Length];
+			 exclude = new byte [family.Length];
 		  }
 
 		  Array.Copy(family, 0, exclude, 0, family.Length);
@@ -1258,7 +1258,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public abstract sbyte[] getBlock(int len);
+	   public abstract byte[] getBlock(int len);
 
 	   /// <summary>
 	   /// Gets a block of data from the 1-Wire Network and write it into
@@ -1269,7 +1269,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public abstract void getBlock(sbyte[] arr, int len);
+	   public abstract void getBlock(byte[] arr, int len);
 
 	   /// <summary>
 	   /// Gets a block of data from the 1-Wire Network and write it into
@@ -1281,7 +1281,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public abstract void getBlock(sbyte[] arr, int off, int len);
+	   public abstract void getBlock(byte[] arr, int off, int len);
 
 	   /// <summary>
 	   /// Sends a block of data and returns the data received in the same array.
@@ -1295,7 +1295,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public abstract void dataBlock(sbyte[] dataBlock, int off, int len);
+	   public abstract void dataBlock(byte[] dataBlock, int off, int len);
 
 	   /// <summary>
 	   /// Sends a Reset to the 1-Wire Network.
@@ -1531,7 +1531,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <returns>  The <code>OneWireContainer</code> object </returns>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public virtual OneWireContainer getDeviceContainer(sbyte[] address)
+	   public virtual OneWireContainer getDeviceContainer(byte[] address)
 	   {
 		  int family_code = address [0] & 0x7F;
 		  string family_string = ((family_code) < 16) ? ("0" + family_code.ToString("x")).ToUpper() : (family_code.ToString("x")).ToUpper();
@@ -1637,7 +1637,7 @@ namespace com.dalsemi.onewire.adapter
 		   {
     
 			  // Mask off the upper bit.
-			  sbyte[] address = new sbyte [8];
+			  byte[] address = new byte [8];
     
 			  getAddress(address);
     
@@ -1650,9 +1650,9 @@ namespace com.dalsemi.onewire.adapter
 	   /// include group.
 	   /// </summary>
 	   /// <returns>  <code>true</code> if in include group </returns>
-	   protected internal virtual bool isValidFamily(sbyte[] address)
+	   protected internal virtual bool isValidFamily(byte[] address)
 	   {
-		  sbyte familyCode = address [0];
+		  byte familyCode = address [0];
 
 		  if (exclude != null)
 		  {
@@ -1690,15 +1690,15 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <returns>  true if device participated and was present
 	   ///         in the strongAccess search </returns>
-	   private bool strongAccess(sbyte[] address)
+	   private bool strongAccess(byte[] address)
 	   {
-		  sbyte[] send_packet = new sbyte [24];
+		  byte[] send_packet = new byte [24];
 		  int i;
 
 		  // set all bits at first
 		  for (i = 0; i < 24; i++)
 		  {
-			 send_packet [i] = unchecked((sbyte) 0xFF);
+			 send_packet [i] = unchecked((byte) 0xFF);
 		  }
 
 		  // now set or clear apropriate bits for search
@@ -1741,18 +1741,18 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="state"> new state of the bit 1, 0 </param>
 	   /// <param name="index"> bit index into byte array </param>
 	   /// <param name="buf"> byte array to manipulate </param>
-	   private void arrayWriteBit(int state, int index, sbyte[] buf)
+	   private void arrayWriteBit(int state, int index, byte[] buf)
 	   {
 		  int nbyt = ((int)((uint)index >> 3));
 		  int nbit = index - (nbyt << 3);
 
 		  if (state == 1)
 		  {
-			 buf [nbyt] |= (sbyte)(0x01 << nbit);
+			 buf [nbyt] |= (byte)(0x01 << nbit);
 		  }
 		  else
 		  {
-			 buf [nbyt] &= (sbyte)(~(0x01 << nbit));
+			 buf [nbyt] &= (byte)(~(0x01 << nbit));
 		  }
 	   }
 
@@ -1763,7 +1763,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="buf"> byte array to read from
 	   /// </param>
 	   /// <returns> bit state 1 or 0 </returns>
-	   private int arrayReadBit(int index, sbyte[] buf)
+	   private int arrayReadBit(int index, byte[] buf)
 	   {
 		  int nbyt = ((int)((uint)index >> 3));
 		  int nbit = index - (nbyt << 3);

@@ -165,7 +165,7 @@ namespace com.dalsemi.onewire.application.sha
 	{
 	   /// <summary>
 	   /// Used for fast FF copy </summary>
-	   private static readonly sbyte[] ffBlock = new sbyte[] {unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF)};
+	   private static readonly byte[] ffBlock = new byte[] {0x0FF, 0x0FF, 0x0FF, 0x0FF, 0x0FF, 0x0FF, 0x0FF, 0x0FF };
 
 	   //---------
 	   // Type constants
@@ -303,17 +303,17 @@ namespace com.dalsemi.onewire.application.sha
 		  lastError = NO_ERROR;
 
 		  // not in critical path, so malloc'ing is okay
-		  sbyte[] accountData = new sbyte[32];
+		  byte[] accountData = new byte[32];
 
 		  return writeTransactionData(user, 0, this.initialAmount, accountData);
 	   }
 
 	   //prevent malloc'ing in the critical path
-	   private sbyte[] verifyUser_fullBindCode = new sbyte[15];
-	   private sbyte[] verifyUser_scratchpad = new sbyte[32];
-	   private sbyte[] verifyUser_accountData = new sbyte[32];
-	   private sbyte[] verifyUser_mac = new sbyte[20];
-	   private sbyte[] verifyUser_chlg = new sbyte[3];
+	   private byte[] verifyUser_fullBindCode = new byte[15];
+	   private byte[] verifyUser_scratchpad = new byte[32];
+	   private byte[] verifyUser_accountData = new byte[32];
+	   private byte[] verifyUser_mac = new byte[20];
+	   private byte[] verifyUser_chlg = new byte[3];
 	   /// <summary>
 	   /// <P>Verifies user's authentication response.  User is "authenticated" if
 	   /// and only if the digital signature generated the user iButton matches
@@ -342,11 +342,11 @@ namespace com.dalsemi.onewire.application.sha
 			  this.lastError = SHATransaction.NO_ERROR;
         
 			  //local vars
-			  sbyte[] fullBindCode = this.verifyUser_fullBindCode;
-			  sbyte[] scratchpad = this.verifyUser_scratchpad;
-			  sbyte[] accountData = this.verifyUser_accountData;
-			  sbyte[] mac = this.verifyUser_mac;
-			  sbyte[] chlg = this.verifyUser_chlg;
+			  byte[] fullBindCode = this.verifyUser_fullBindCode;
+			  byte[] scratchpad = this.verifyUser_scratchpad;
+			  byte[] accountData = this.verifyUser_accountData;
+			  byte[] mac = this.verifyUser_mac;
+			  byte[] chlg = this.verifyUser_chlg;
         
 			  int wcc;
         
@@ -417,7 +417,7 @@ namespace com.dalsemi.onewire.application.sha
 	   }
 
 	   //prevent malloc'ing in the critical path
-	   private sbyte[] verifyData_accountData = new sbyte[32];
+	   private byte[] verifyData_accountData = new byte[32];
 	   /// <summary>
 	   /// <P>Verifies user's account data.  Account data is "verified" if and
 	   /// only if the account balance is greater than zero.  No digital
@@ -449,7 +449,7 @@ namespace com.dalsemi.onewire.application.sha
 			  //clear any error
 			  this.lastError = NO_ERROR;
         
-			  sbyte[] accountData = this.verifyData_accountData;
+			  byte[] accountData = this.verifyData_accountData;
         
 			  //if verifyUser was called, this is a read of cached data
 			  user.readAccountData(accountData,0);
@@ -457,7 +457,7 @@ namespace com.dalsemi.onewire.application.sha
 			  // verify the A-B data scheme is valid
 			  bool validPtr = false, validA = false, validB = false;
         
-			  sbyte fileLength = accountData[I_FILE_LENGTH];
+			  byte fileLength = accountData[I_FILE_LENGTH];
 			  int crc16 = CRC16.compute(accountData, 0, fileLength + 3, user.AccountPageNumber);
         
 			  if (fileLength == RECORD_A_LENGTH || fileLength == RECORD_B_LENGTH)
@@ -486,8 +486,8 @@ namespace com.dalsemi.onewire.application.sha
         
 			  // restore the other header information
 			  accountData[I_DATA_TYPE_CODE] = 0x01;
-			  accountData[I_CONVERSION_FACTOR + 0] = unchecked((sbyte)0x8B);
-			  accountData[I_CONVERSION_FACTOR + 1] = (sbyte)0x48;
+			  accountData[I_CONVERSION_FACTOR + 0] = 0x8B;
+			  accountData[I_CONVERSION_FACTOR + 1] = 0x48;
 			  // zero-out the don't care bytes
 			  accountData[I_DONT_CARE] = 0x00;
 			  accountData[I_DONT_CARE+1] = 0x00;
@@ -599,9 +599,9 @@ namespace com.dalsemi.onewire.application.sha
 
 
 	   //prevent malloc'ing in critical path
-	   private sbyte[] executeTransaction_accountData = new sbyte[32];
-	   private sbyte[] executeTransaction_oldAcctData = new sbyte[32];
-	   private sbyte[] executeTransaction_newAcctData = new sbyte[32];
+	   private byte[] executeTransaction_accountData = new byte[32];
+	   private byte[] executeTransaction_oldAcctData = new byte[32];
+	   private byte[] executeTransaction_newAcctData = new byte[32];
 	   /// <summary>
 	   /// <P>Performs the unsigned debit, subtracting the debit amount from
 	   /// the user's balance and storing the new, unsigned account data on the
@@ -640,11 +640,11 @@ namespace com.dalsemi.onewire.application.sha
         
 			  //init local vars
 			  //holds the working copy of account data
-			  sbyte[] accountData = this.executeTransaction_accountData;
+			  byte[] accountData = this.executeTransaction_accountData;
 			  //holds the backup copy of account data before writing
-			  sbyte[] oldAcctData = this.executeTransaction_oldAcctData;
+			  byte[] oldAcctData = this.executeTransaction_oldAcctData;
 			  //holds the account data read back for checking
-			  sbyte[] newAcctData = this.executeTransaction_newAcctData;
+			  byte[] newAcctData = this.executeTransaction_newAcctData;
 			  //just make the transaction ID a random number, so it changes
 			  int transID = rand.Next();
         
@@ -802,7 +802,7 @@ namespace com.dalsemi.onewire.application.sha
 		   }
 	   }
 
-	   private sbyte[] writeTransactionData_scratchpad = new sbyte[32];
+	   private byte[] writeTransactionData_scratchpad = new byte[32];
 	   /// <summary>
 	   /// Does the writing of transaction data to the user button as well
 	   /// as actually signing the data with the coprocessor.
@@ -810,7 +810,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// No need to synchronize wince the methods that call this
 	   /// private method will be synchronized.
 	   /// </summary>
-	   private bool writeTransactionData(SHAiButtonUser user, int transID, int balance, sbyte[] accountData)
+	   private bool writeTransactionData(SHAiButtonUser user, int transID, int balance, byte[] accountData)
 	   {
 		  //init local vars
 		  int acctPageNum = user.AccountPageNumber;
@@ -819,8 +819,8 @@ namespace com.dalsemi.onewire.application.sha
 		  accountData[I_DATA_TYPE_CODE] = 0x01;
 
 		  // conversion factor - 2 data bytes
-		  accountData[I_CONVERSION_FACTOR + 0] = unchecked((sbyte)0x8B);
-		  accountData[I_CONVERSION_FACTOR + 1] = (sbyte)0x48;
+		  accountData[I_CONVERSION_FACTOR + 0] = 0x8B;
+		  accountData[I_CONVERSION_FACTOR + 1] = 0x48;
 
 		  // zero-out the don't care bytes
 		  accountData[I_DONT_CARE] = 0x00;
@@ -838,14 +838,14 @@ namespace com.dalsemi.onewire.application.sha
 			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
 			 // length of the TMEX file
-			 accountData[I_FILE_LENGTH] = (sbyte)RECORD_B_LENGTH;
+			 accountData[I_FILE_LENGTH] = RECORD_B_LENGTH;
 
 			 // account balance - 3 data bytes
 			 Convert.toByteArray(balance, accountData, I_BALANCE_B, 3);
 
 			 // transaction ID - 2 data bytes
-			 accountData[I_TRANSACTION_ID_B + 0] = (sbyte)transID;
-			 accountData[I_TRANSACTION_ID_B + 1] = (sbyte)((int)((uint)transID >> 8));
+			 accountData[I_TRANSACTION_ID_B + 0] = (byte)transID;
+			 accountData[I_TRANSACTION_ID_B + 1] = (byte)((int)((uint)transID >> 8));
 
 			 // continuation pointer for TMEX file
 			 accountData[I_CONTINUATION_PTR_B] = 0x00;
@@ -856,8 +856,8 @@ namespace com.dalsemi.onewire.application.sha
 
 			 // dump in the inverted CRC
 			 int crc = ~CRC16.compute(accountData, 0, accountData[I_FILE_LENGTH] + 1, acctPageNum);
-			 accountData[I_FILE_CRC16_B + 0] = (sbyte)crc;
-			 accountData[I_FILE_CRC16_B + 1] = (sbyte)(crc >> 8);
+			 accountData[I_FILE_CRC16_B + 0] = (byte)crc;
+			 accountData[I_FILE_CRC16_B + 1] = (byte)(crc >> 8);
 		  }
 		  else
 		  {
@@ -868,14 +868,14 @@ namespace com.dalsemi.onewire.application.sha
 			 }
 			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 			 // length of the TMEX file
-			 accountData[I_FILE_LENGTH] = (sbyte)RECORD_A_LENGTH;
+			 accountData[I_FILE_LENGTH] = RECORD_A_LENGTH;
 
 			 // account balance - 3 data bytes
 			 Convert.toByteArray(balance, accountData, I_BALANCE_A, 3);
 
 			 // transaction ID - 2 data bytes
-			 accountData[I_TRANSACTION_ID_A + 0] = (sbyte)transID;
-			 accountData[I_TRANSACTION_ID_A + 1] = (sbyte)((int)((uint)transID >> 8));
+			 accountData[I_TRANSACTION_ID_A + 0] = (byte)transID;
+			 accountData[I_TRANSACTION_ID_A + 1] = (byte)((int)((uint)transID >> 8));
 
 			 // continuation pointer for TMEX file
 			 accountData[I_CONTINUATION_PTR_A] = 0x00;
@@ -886,8 +886,8 @@ namespace com.dalsemi.onewire.application.sha
 
 			 // dump in the inverted CRC
 			 int crc = ~CRC16.compute(accountData, 0, accountData[I_FILE_LENGTH] + 1, acctPageNum);
-			 accountData[I_FILE_CRC16_A + 0] = (sbyte)crc;
-			 accountData[I_FILE_CRC16_A + 1] = (sbyte)(crc >> 8);
+			 accountData[I_FILE_CRC16_A + 0] = (byte)crc;
+			 accountData[I_FILE_CRC16_A + 1] = (byte)(crc >> 8);
 		  }
 
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//

@@ -121,7 +121,7 @@ namespace com.dalsemi.onewire.application.sha
 	{
 	   /// <summary>
 	   /// Used for fast FF copy </summary>
-	   private static readonly sbyte[] ffBlock = new sbyte[] {unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF)};
+	   private static readonly byte[] ffBlock = new byte[] {0x0FF, 0x0FF, 0x0FF, 0x0FF, 0x0FF, 0x0FF, 0x0FF, 0x0FF};
 
 	   // ************************************************************** //
 	   // Type constants
@@ -145,11 +145,11 @@ namespace com.dalsemi.onewire.application.sha
 	   // ************************************************************** //
 	   /// <summary>
 	   /// Data to be stored on the iButton for Verification </summary>
-	   private sbyte[] ver_data = new sbyte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	   private byte[] ver_data = new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 	   /// <summary>
 	   /// Data that is to be written to the iButton for Verification </summary>
-	   private sbyte[] master_ver_data = new sbyte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	   private byte[] master_ver_data = new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 
 	   /// <summary>
@@ -184,7 +184,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <param name="extra_data"> The 7 bytes of extra data to be used instead
 	   ///                   of the balance. </param>
 	   /// <param name="len">        The len, 7 or less of the data.  It is 0 padded. </param>
-	   public SHASoftAuth(SHAiButtonCopr copr, sbyte[] extra_data, int len) : base(copr)
+	   public SHASoftAuth(SHAiButtonCopr copr, byte[] extra_data, int len) : base(copr)
 	   {
 
 		  Array.Copy(extra_data,0,this.master_ver_data,0,len);
@@ -230,17 +230,17 @@ namespace com.dalsemi.onewire.application.sha
 		  lastError = NO_ERROR;
 
 		  // not in critical path, so malloc'ing is okay
-		  sbyte[] accountData = new sbyte[32];
+		  byte[] accountData = new byte[32];
 
 		  return writeTransactionData(user, this.master_ver_data, accountData);
 	   }
 
 	   //prevent malloc'ing in the critical path
-	   private sbyte[] verifyUser_fullBindCode = new sbyte[15];
-	   private sbyte[] verifyUser_scratchpad = new sbyte[32];
-	   private sbyte[] verifyUser_accountData = new sbyte[32];
-	   private sbyte[] verifyUser_mac = new sbyte[20];
-	   private sbyte[] verifyUser_chlg = new sbyte[3];
+	   private byte[] verifyUser_fullBindCode = new byte[15];
+	   private byte[] verifyUser_scratchpad = new byte[32];
+	   private byte[] verifyUser_accountData = new byte[32];
+	   private byte[] verifyUser_mac = new byte[20];
+	   private byte[] verifyUser_chlg = new byte[3];
 	   /// <summary>
 	   /// <P>Verifies user's authentication response.  User is "authenticated" if
 	   /// and only if the digital signature generated the user iButton matches
@@ -269,11 +269,11 @@ namespace com.dalsemi.onewire.application.sha
 			  this.lastError = SHATransaction.NO_ERROR;
         
 			  //local vars
-			  sbyte[] fullBindCode = this.verifyUser_fullBindCode;
-			  sbyte[] scratchpad = this.verifyUser_scratchpad;
-			  sbyte[] accountData = this.verifyUser_accountData;
-			  sbyte[] mac = this.verifyUser_mac;
-			  sbyte[] chlg = this.verifyUser_chlg;
+			  byte[] fullBindCode = this.verifyUser_fullBindCode;
+			  byte[] scratchpad = this.verifyUser_scratchpad;
+			  byte[] accountData = this.verifyUser_accountData;
+			  byte[] mac = this.verifyUser_mac;
+			  byte[] chlg = this.verifyUser_chlg;
         
         
         
@@ -344,10 +344,10 @@ namespace com.dalsemi.onewire.application.sha
 	   }
 
 	   //prevent malloc'ing in the critical path
-	   private sbyte[] verifyData_fullBindCode = new sbyte[32];
-	   private sbyte[] verifyData_scratchpad = new sbyte[32];
-	   private sbyte[] verifyData_accountData = new sbyte[32];
-	   private sbyte[] verifyData_mac = new sbyte[20];
+	   private byte[] verifyData_fullBindCode = new byte[32];
+	   private byte[] verifyData_scratchpad = new byte[32];
+	   private byte[] verifyData_accountData = new byte[32];
+	   private byte[] verifyData_mac = new byte[20];
 	   /// <summary>
 	   /// <P>Verifies user's account data.  Account data is "verified" if the
 	   /// digital signature matches the signature recreated by the 
@@ -383,9 +383,9 @@ namespace com.dalsemi.onewire.application.sha
 			  this.lastError = NO_ERROR;
         
 			  //init local vars
-			  sbyte[] scratchpad = this.verifyData_scratchpad;
-			  sbyte[] accountData = this.verifyData_accountData;
-			  sbyte[] verify_mac = this.verifyData_mac;
+			  byte[] scratchpad = this.verifyData_scratchpad;
+			  byte[] accountData = this.verifyData_accountData;
+			  byte[] verify_mac = this.verifyData_mac;
         
 			  //if verifyUser was called, this is a read of cached data
 			  int wcc = user.WriteCycleCounter;
@@ -402,8 +402,8 @@ namespace com.dalsemi.onewire.application.sha
 			  //now lets reset the mac
 			  copr.getInitialSignature(accountData, I_SIGNATURE);
 			  //and reset the CRC
-			  accountData[I_FILE_CRC16 + 0] = (sbyte)0;
-			  accountData[I_FILE_CRC16 + 1] = (sbyte)0;
+			  accountData[I_FILE_CRC16 + 0] = 0;
+			  accountData[I_FILE_CRC16 + 1] = 0;
         
 			  //now we also need to get things like wcc, user_page_number, user ID
 			  if (wcc < 0)
@@ -422,7 +422,7 @@ namespace com.dalsemi.onewire.application.sha
 				 //copy the write cycle counter into scratchpad
 				 Convert.toByteArray(wcc, scratchpad, 8, 4);
 			  }
-			  scratchpad[12] = (sbyte)user.AccountPageNumber;
+			  scratchpad[12] = (byte)user.AccountPageNumber;
 			  user.getAddress(scratchpad, 13, 7);
         
 			  copr.getSigningChallenge(scratchpad, 20);
@@ -438,9 +438,9 @@ namespace com.dalsemi.onewire.application.sha
 	   }
 
 	   //prevent malloc'ing in critical path
-	   private sbyte[] executeTransaction_accountData = new sbyte[32];
-	   private sbyte[] executeTransaction_oldAcctData = new sbyte[32];
-	   private sbyte[] executeTransaction_newAcctData = new sbyte[32];
+	   private byte[] executeTransaction_accountData = new byte[32];
+	   private byte[] executeTransaction_oldAcctData = new byte[32];
+	   private byte[] executeTransaction_newAcctData = new byte[32];
 	   //private byte[] executeTransaction_scratchpad = new byte[32];
 	   /// <summary>
 	   /// <P>Performs the signed debit, subtracting the debit amount from
@@ -484,11 +484,11 @@ namespace com.dalsemi.onewire.application.sha
         
 			  //init local vars
 			  //holds the working copy of account data
-			  sbyte[] accountData = this.executeTransaction_accountData;
+			  byte[] accountData = this.executeTransaction_accountData;
 			  //holds the backup copy of account data before writing
-			  sbyte[] oldAcctData = this.executeTransaction_oldAcctData;
+			  byte[] oldAcctData = this.executeTransaction_oldAcctData;
 			  //holds the account data read back for checking
-			  sbyte[] newAcctData = this.executeTransaction_newAcctData;
+			  byte[] newAcctData = this.executeTransaction_newAcctData;
         
 			  //if verifyUser was called, this is a read of cached data
 			  user.readAccountData(accountData,0);
@@ -560,20 +560,20 @@ namespace com.dalsemi.onewire.application.sha
 		   }
 	   }
 
-	   private sbyte[] writeTransactionData_scratchpad = new sbyte[32];
+	   private byte[] writeTransactionData_scratchpad = new byte[32];
 	   /// <summary>
 	   /// Does the writing of transaction data to the user button as well
 	   /// as actually signing the data with the coprocessor.
 	   /// </summary>
-	   private bool writeTransactionData(SHAiButtonUser user, sbyte[] ver_data, sbyte[] accountData)
+	   private bool writeTransactionData(SHAiButtonUser user, byte[] ver_data, byte[] accountData)
 	   {
 		  //init local vars
 		  SHAiButtonCopr copr = this.copr;
 		  int acctPageNum = user.AccountPageNumber;
-		  sbyte[] scratchpad = this.writeTransactionData_scratchpad;
+		  byte[] scratchpad = this.writeTransactionData_scratchpad;
 
 		  // length of the TMEX file - 28 data, 1 cont. ptr
-		  accountData[I_FILE_LENGTH] = (sbyte)29;
+		  accountData[I_FILE_LENGTH] = 29;
 
 		  Array.Copy(ver_data,0,accountData,I_VERDATA,7);
 
@@ -609,7 +609,7 @@ namespace com.dalsemi.onewire.application.sha
 		  }
 
 		  // svcPageNumber, followed by address of device
-		  scratchpad [12] = (sbyte)acctPageNum;
+		  scratchpad [12] = (byte)acctPageNum;
 		  user.getAddress(scratchpad, 13, 7);
 
 		  // copy in the signing challenge
@@ -622,8 +622,8 @@ namespace com.dalsemi.onewire.application.sha
 		  int crc = ~CRC16.compute(accountData, 0, accountData[I_FILE_LENGTH] + 1, acctPageNum);
 
 		  //set the the crc16 bytes
-		  accountData[I_FILE_CRC16 + 0] = (sbyte)crc;
-		  accountData[I_FILE_CRC16 + 1] = (sbyte)(crc >> 8);
+		  accountData[I_FILE_CRC16 + 0] = (byte)crc;
+		  accountData[I_FILE_CRC16 + 1] = (byte)(crc >> 8);
 
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
@@ -706,7 +706,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </returns>
 	   /// <exception cref="IllegalArgumentException"> if an invalid parameter type 
 	   ///         is requested. </exception>
-	   public virtual int getParameter(int type, sbyte[] data, int offset, int len)
+	   public virtual int getParameter(int type, byte[] data, int offset, int len)
 	   {
 		   lock (this)
 		   {
@@ -738,7 +738,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </returns>
 	   /// <exception cref="IllegalArgumentException"> if an invalid parameter type 
 	   ///         is requested. </exception>
-	   public virtual bool setParameter(int type, sbyte[] data, int offset, int len)
+	   public virtual bool setParameter(int type, byte[] data, int offset, int len)
 	   {
 		   lock (this)
 		   {

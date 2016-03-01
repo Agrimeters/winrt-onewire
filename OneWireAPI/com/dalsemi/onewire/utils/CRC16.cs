@@ -122,7 +122,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="dataToCrc">   array of data elements on which to perform the CRC16
 	   /// </param>
 	   /// <returns>  CRC16 value </returns>
-	   public static int compute(sbyte[] dataToCrc)
+	   public static int compute(byte[] dataToCrc)
 	   {
 		  return compute(dataToCrc, 0, dataToCrc.Length, 0);
 	   }
@@ -140,7 +140,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="len">         length of data to CRC16
 	   /// </param>
 	   /// <returns>  CRC16 value </returns>
-	   public static int compute(sbyte[] dataToCrc, int off, int len)
+	   public static int compute(byte[] dataToCrc, int off, int len)
 	   {
 		  return compute(dataToCrc, off, len, 0);
 	   }
@@ -159,7 +159,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="seed">        seed to use for CRC16
 	   /// </param>
 	   /// <returns>  CRC16 value </returns>
-	   public static int compute(sbyte[] dataToCrc, int off, int len, int seed)
+	   public static int compute(byte[] dataToCrc, int off, int len, int seed)
 	   {
 
 		  // loop to do the crc on each data element
@@ -182,7 +182,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="dataToCrc">   array of data elements on which to perform the CRC16 </param>
 	   /// <param name="seed">        seed to use for CRC16 </param>
 	   /// <returns>  CRC16 value </returns>
-	   public static int compute(sbyte[] dataToCrc, int seed)
+	   public static int compute(byte[] dataToCrc, int seed)
 	   {
 		  return compute(dataToCrc, 0, dataToCrc.Length, seed);
 	   }

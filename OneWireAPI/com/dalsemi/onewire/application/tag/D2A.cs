@@ -83,7 +83,7 @@ namespace com.dalsemi.onewire.application.tag
 			  int Index = 0;
 			  Index = ActuatorSelections.IndexOf(value);
 			  // must first read the device
-			  sbyte[] state = pc.readDevice();
+			  byte[] state = pc.readDevice();
 			  // set current wiper number from xml tag "channel"
 			  pc.setCurrentWiperNumber(Channel, state);
 			  // now, write to device to set the wiper number
@@ -125,7 +125,7 @@ namespace com.dalsemi.onewire.application.tag
 		  string selectionString;
 		  // initialize the ActuatorSelections Vector
 		  // must first read the device
-		  sbyte[] state = pc.readDevice();
+		  byte[] state = pc.readDevice();
 		  // set current wiper number from xml tag "channel"
 		  pc.setCurrentWiperNumber(Channel, state);
 		  // now, write to device to set the wiper number

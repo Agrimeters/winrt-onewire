@@ -215,22 +215,22 @@ namespace com.dalsemi.onewire.container
 	    */
 	   private bool doSpeedEnable = true;
 
-	   private sbyte[] byte_buffer = new sbyte [60]; //use this everywhere to communicate
-	   private sbyte[] private_address = null;
+	   private byte[] byte_buffer = new byte [60]; //use this everywhere to communicate
+	   private byte[] private_address = null;
 
 
-	   internal static sbyte[] FF = new sbyte [60]; //use this to fill an array with 0x0ff's
+	   internal static byte[] FF = new byte [60]; //use this to fill an array with 0x0ff's
 	   static OneWireContainer18()
 	   {
 		  for (int i = 0; i < FF.Length; i++)
 		  {
-			 FF [i] = unchecked((sbyte) 0x0ff);
+			 FF [i] = unchecked((byte) 0x0ff);
 		  }
 	   }
 	   //there's really no good reason for these to be public like they were in 0.00 OneWire release
-	   private sbyte TA1;
-	   private sbyte TA2;
-	   private sbyte ES;
+	   private byte TA1;
+	   private byte TA2;
+	   private byte ES;
 
 	   //--------
 	   //-------- PUBLIC STATIC FINAL's
@@ -241,14 +241,14 @@ namespace com.dalsemi.onewire.container
 	    *
 	    * @see #readMemoryPage(int,byte[],int)
 	    */
-	   public static readonly sbyte READ_MEMORY = unchecked((sbyte) 0xF0);
+	   public static readonly byte READ_MEMORY = unchecked((byte) 0xF0);
 
 	   /* 1-Wire Protocol command to write the DS1963S scratchpad.
 	    * See the datasheet for more information.
 	    *
 	    * @see #writeScratchPad(int,int,byte[],int,int)
 	    */
-	   public static readonly sbyte WRITE_SCRATCHPAD = (sbyte) 0x0F;
+	   public static readonly byte WRITE_SCRATCHPAD = (byte) 0x0F;
 
 	   /* 1-Wire Protocol command to match a signature to
 	    * the one in the DS1963S scratchpad.  To verify a signature,
@@ -257,7 +257,7 @@ namespace com.dalsemi.onewire.container
 	    *
 	    * @see #matchScratchPad(byte[])
 	    */
-	   public static readonly sbyte MATCH_SCRATCHPAD = (sbyte) 0x3C;
+	   public static readonly byte MATCH_SCRATCHPAD = (byte) 0x3C;
 
 	   /* 1-Wire Protocol command to erase the DS1963S scratchpad.
 	    * Also brings the device out of hidden mode and back to
@@ -265,14 +265,14 @@ namespace com.dalsemi.onewire.container
 	    *
 	    * @see #eraseScratchPad(int)
 	    */
-	   public static readonly sbyte ERASE_SCRATCHPAD = unchecked((sbyte) 0xC3);
+	   public static readonly byte ERASE_SCRATCHPAD = unchecked((byte) 0xC3);
 
 	   /* 1-Wire Protocol command to read the DS1963S scratchpad.
 	    * See the datasheet for more information.
 	    *
 	    * @see #readScratchPad(byte[],int)
 	    */
-	   public static readonly sbyte READ_SCRATCHPAD = unchecked((sbyte) 0xAA);
+	   public static readonly byte READ_SCRATCHPAD = unchecked((byte) 0xAA);
 
 	   /* 1-Wire Protocol command to read an authenticated
 	    * DS1963S memory page.  The device generates a signature for
@@ -281,14 +281,14 @@ namespace com.dalsemi.onewire.container
 	    *
 	    * @see #readAuthenticatedPage(int,byte[],int)
 	    */
-	   public static readonly sbyte READ_AUTHENTICATED_PAGE = unchecked((sbyte) 0xA5);
+	   public static readonly byte READ_AUTHENTICATED_PAGE = unchecked((byte) 0xA5);
 
 	   /* 1-Wire Protocol command to copy the DS1963S scratchpad
 	    * to a memory location.  See the datasheet for more information.
 	    *
 	    * @see #copyScratchPad()
 	    */
-	   public static readonly sbyte COPY_SCRATCHPAD = (sbyte) 0x55;
+	   public static readonly byte COPY_SCRATCHPAD = (byte) 0x55;
 
 	   /* 1-Wire Protocol command to perform a SHA cryptographic
 	    * function on the DS1963S.  See the datasheet for more information.
@@ -296,7 +296,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte,int)
 	    * @see #SHAFunction(byte)
 	    */
-	   public static readonly sbyte COMPUTE_SHA = (sbyte) 0x33;
+	   public static readonly byte COMPUTE_SHA = (byte) 0x33;
 
 	   //SHA commands
 
@@ -308,7 +308,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte)
 	    * @see #installMasterSecret(int,byte[],int)
 	    */
-	   public static readonly sbyte COMPUTE_FIRST_SECRET = (sbyte) 0x0F;
+	   public static readonly byte COMPUTE_FIRST_SECRET = (byte) 0x0F;
 
 	   /* 1-Wire Protocol command to compute a master secret
 	    * on the DS1963S.  See the datasheet for more information.
@@ -319,7 +319,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte)
 	    * @see #installMasterSecret(int,byte[],int)
 	    */
-	   public static readonly sbyte COMPUTE_NEXT_SECRET = unchecked((sbyte) 0xF0);
+	   public static readonly byte COMPUTE_NEXT_SECRET = unchecked((byte) 0xF0);
 
 	   /* 1-Wire Protocol command to verify signatures
 	    * on the DS1963S.  See the datasheet for more information.
@@ -329,7 +329,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte,int)
 	    * @see #SHAFunction(byte)
 	    */
-	   public static readonly sbyte VALIDATE_DATA_PAGE = (sbyte) 0x3C;
+	   public static readonly byte VALIDATE_DATA_PAGE = (byte) 0x3C;
 
 	   /* 1-Wire Protocol command to create a signature of a
 	    * selected data page on the DS1963S.  See the datasheet for more information.
@@ -337,7 +337,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte,int)
 	    * @see #SHAFunction(byte)
 	    */
-	   public static readonly sbyte SIGN_DATA_PAGE = unchecked((sbyte) 0xC3);
+	   public static readonly byte SIGN_DATA_PAGE = unchecked((byte) 0xC3);
 
 	   /* 1-Wire Protocol command to create a random challenge
 	    * using the DS1963S's pseudo random number generator.
@@ -347,7 +347,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte)
 	    * @see #SHAiButton#generateChallenge(int,int,byte[])
 	    */
-	   public static readonly sbyte COMPUTE_CHALLENGE = unchecked((sbyte) 0xCC);
+	   public static readonly byte COMPUTE_CHALLENGE = unchecked((byte) 0xCC);
 
 	   /* 1-Wire Protocol command to authenticate a host
 	    * on the DS1963S.  See the datasheet for more information.
@@ -355,7 +355,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte,int)
 	    * @see #SHAFunction(byte)
 	    */
-	   public static readonly sbyte AUTH_HOST = unchecked((sbyte) 0xAA);
+	   public static readonly byte AUTH_HOST = unchecked((byte) 0xAA);
 
 	   /* 1-Wire Protocol command that allows quick reselection
 	    * of the DS1963S.  Normally, selection involved a nine byte sequence:
@@ -366,7 +366,7 @@ namespace com.dalsemi.onewire.container
 	    *
 	    * @see #useResume(bool)
 	    */
-	   public static readonly sbyte RESUME = unchecked((sbyte) 0xA5);
+	   public static readonly byte RESUME = unchecked((byte) 0xA5);
 
 	   //--------
 	   //-------- Constructors
@@ -386,7 +386,7 @@ namespace com.dalsemi.onewire.container
 
 		  if (private_address == null)
 		  {
-			 private_address = new sbyte [8];
+			 private_address = new byte [8];
 		  }
 
 		  // initialize the memory banks
@@ -403,12 +403,12 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #OneWireContainer18() </seealso>
 	   /// <seealso cref= #OneWireContainer18(com.dalsemi.onewire.adapter.DSPortAdapter,long)   OneWireContainer18(DSPortAdapter,long) </seealso>
 	   /// <seealso cref= #OneWireContainer18(com.dalsemi.onewire.adapter.DSPortAdapter,java.lang.String) OneWireContainer18(DSPortAdapter,String) </seealso>
-	   public OneWireContainer18(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer18(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 
 		  if (private_address == null)
 		  {
-			 private_address = new sbyte [8];
+			 private_address = new byte [8];
 		  }
 
 		  // initialize the memory banks
@@ -430,7 +430,7 @@ namespace com.dalsemi.onewire.container
 
 		  if (private_address == null)
 		  {
-			 private_address = new sbyte [8];
+			 private_address = new byte [8];
 		  }
 
 		  // initialize the memory banks
@@ -452,7 +452,7 @@ namespace com.dalsemi.onewire.container
 
 		  if (private_address == null)
 		  {
-			 private_address = new sbyte [8];
+			 private_address = new byte [8];
 		  }
 
 		  // initialize the memory banks
@@ -477,7 +477,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="newAddress">        address of this 1-Wire device
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address </seealso>
-	   public override void setupContainer(DSPortAdapter sourceAdapter, sbyte[] newAddress)
+	   public override void setupContainer(DSPortAdapter sourceAdapter, byte[] newAddress)
 	   {
 		  // get a reference to the source adapter (will need this to communicate)
 		  this.adapter = sourceAdapter;
@@ -487,7 +487,7 @@ namespace com.dalsemi.onewire.container
 		  {
 			 if (private_address == null)
 			 {
-				private_address = new sbyte[8];
+				private_address = new byte[8];
 			 }
 
 			 Array.Copy(newAddress, 0, private_address, 0, 8);
@@ -725,11 +725,11 @@ namespace com.dalsemi.onewire.container
 			  }
         
 			  // build block to send
-			  sbyte[] buffer = byte_buffer;
+			  byte[] buffer = byte_buffer;
         
 			  buffer [0] = ERASE_SCRATCHPAD;
-			  buffer [1] = (sbyte)(page << 5);
-			  buffer [2] = (sbyte)(page >> 3);
+			  buffer [1] = (byte)(page << 5);
+			  buffer [2] = (byte)(page >> 3);
         
 			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 			  if (DEBUG)
@@ -739,8 +739,8 @@ namespace com.dalsemi.onewire.container
 				 IOHelper.writeLine("address");
 				 IOHelper.writeBytesHex(address);
 				 IOHelper.write("target address: 0x");
-				 IOHelper.writeHex((sbyte)buffer [2]);
-				 IOHelper.writeLineHex((sbyte)buffer [1]);
+				 IOHelper.writeHex(buffer [2]);
+				 IOHelper.writeLineHex(buffer [1]);
 				 IOHelper.writeLine("adapter.getSpeed()=" + adapter.Speed);
 				 IOHelper.writeLine("adapter.getPortTypeDescription()=" + adapter.PortTypeDescription);
 				 IOHelper.writeLine("this.speed=" + this.speed);
@@ -766,7 +766,7 @@ namespace com.dalsemi.onewire.container
 				 IOHelper.writeLine("------------------------------------");
 			  }
         
-			  if (buffer [5] == unchecked((sbyte) 0x0ff))
+			  if (buffer [5] == 0x0ff)
 			  {
 				 return waitForSuccessfulFinish();
 			  }
@@ -889,7 +889,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= #readAuthenticatedPage(int,byte[],int) </seealso>
 	   /// <seealso cref= #getMemoryBanks() </seealso>
-	   public virtual void readMemoryPage(int pageNum, sbyte[] data, int start)
+	   public virtual void readMemoryPage(int pageNum, byte[] data, int start)
 	   {
 
 		  //don't need to be synchronized, since readMemoryPage(int, byte, int, byte[], int) is
@@ -899,7 +899,7 @@ namespace com.dalsemi.onewire.container
 	   /*
 	    * read the contents of a data page
 	    */
-	   private void readMemoryPage(int pageNum, sbyte COMMAND, int bytes_to_read, sbyte[] data, int start)
+	   private void readMemoryPage(int pageNum, byte COMMAND, int bytes_to_read, byte[] data, int start)
 	   {
 		   lock (this)
 		   {
@@ -918,12 +918,12 @@ namespace com.dalsemi.onewire.container
 				 adapter.putByte(RESUME);
 			  }
         
-			  sbyte[] buffer = byte_buffer;
+			  byte[] buffer = byte_buffer;
 			  int addr = pageNum << 5; //pageNumber * 32
         
 			  buffer [0] = COMMAND;
-			  buffer [1] = (sbyte) addr;
-			  buffer [2] = (sbyte)(addr >> 8);
+			  buffer [1] = (byte) addr;
+			  buffer [2] = (byte)(addr >> 8);
         
 			  Array.Copy(FF, 0, buffer, 3, bytes_to_read);
 			  adapter.dataBlock(buffer, 0, 3 + bytes_to_read);
@@ -965,7 +965,7 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref= #readMemoryPage(int,byte[],int) </seealso>
-	   public virtual bool readAuthenticatedPage(int pageNum, sbyte[] data, int start)
+	   public virtual bool readAuthenticatedPage(int pageNum, byte[] data, int start)
 	   {
 
 		  //don't need to be synchronized, since readMemoryPage(int, byte, int, byte[], int) is
@@ -974,8 +974,8 @@ namespace com.dalsemi.onewire.container
 
 		  int crc = CRC16.compute(READ_AUTHENTICATED_PAGE);
 
-		  crc = CRC16.compute((sbyte)(pageNum << 5), crc); //(pagenumber*32 = address) lower 8 bits
-		  crc = CRC16.compute((sbyte)((int)((uint)pageNum >> 3)), crc); //pagenumber*32 is pagenumber<<5, but
+		  crc = CRC16.compute((byte)(pageNum << 5), crc); //(pagenumber*32 = address) lower 8 bits
+		  crc = CRC16.compute((byte)((int)((uint)pageNum >> 3)), crc); //pagenumber*32 is pagenumber<<5, but
 		  //we want the upper 8 bits, so we would just do
 		  // (pagenum<<5)>>>8, so just make it one op
 
@@ -1016,7 +1016,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #eraseScratchPad(int) </seealso>
 	   /// <seealso cref= #readScratchPad(byte[],int) </seealso>
 	   /// <seealso cref= #writeDataPage(int,byte[]) </seealso>
-	   public virtual bool writeScratchPad(int targetPage, int targetPageOffset, sbyte[] inputbuffer, int start, int length)
+	   public virtual bool writeScratchPad(int targetPage, int targetPageOffset, byte[] inputbuffer, int start, int length)
 	   {
 		   lock (this)
 		   {
@@ -1035,7 +1035,7 @@ namespace com.dalsemi.onewire.container
 				 adapter.putByte(RESUME);
 			  }
         
-			  sbyte[] buffer = byte_buffer;
+			  byte[] buffer = byte_buffer;
 			  int addr = (targetPage << 5) + targetPageOffset;
         
 			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
@@ -1048,8 +1048,8 @@ namespace com.dalsemi.onewire.container
 				 IOHelper.writeLine("targetPage: " + targetPage);
 				 IOHelper.writeLine("targetPageOffset: " + targetPageOffset);
 				 IOHelper.write("target address: 0x");
-				 IOHelper.writeHex((sbyte)(addr >> 8));
-				 IOHelper.writeLineHex((sbyte)addr);
+				 IOHelper.writeHex((byte)(addr >> 8));
+				 IOHelper.writeLineHex((byte)addr);
 				 IOHelper.writeLine("inputbuffer");
 				 IOHelper.writeBytesHex(inputbuffer);
 				 IOHelper.writeLine("start: " + start);
@@ -1060,8 +1060,8 @@ namespace com.dalsemi.onewire.container
         
         
 			  buffer [0] = WRITE_SCRATCHPAD;
-			  buffer [1] = (sbyte) addr;
-			  buffer [2] = (sbyte)(addr >> 8);
+			  buffer [1] = (byte) addr;
+			  buffer [2] = (byte)(addr >> 8);
         
 			  int maxbytes = 32 - (addr & 31);
         
@@ -1073,8 +1073,8 @@ namespace com.dalsemi.onewire.container
 			  //let's cut it
 			  Array.Copy(inputbuffer, start, buffer, 3, length);
         
-			  buffer [3 + length] = unchecked((sbyte) 0xff);
-			  buffer [4 + length] = unchecked((sbyte) 0xff); //leave space for the CRC
+			  buffer [3 + length] = unchecked((byte) 0xff);
+			  buffer [4 + length] = unchecked((byte) 0xff); //leave space for the CRC
         
 			  //this nasty statement sends the length depending on if we are
 			  //going to get a CRC back.  you only get a CRC if you get to the end of
@@ -1128,7 +1128,7 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref= #VALIDATE_DATA_PAGE </seealso>
-	   public virtual bool matchScratchPad(sbyte[] mac)
+	   public virtual bool matchScratchPad(byte[] mac)
 	   {
 		   lock (this)
 		   {
@@ -1147,15 +1147,15 @@ namespace com.dalsemi.onewire.container
 				 adapter.putByte(RESUME);
 			  }
         
-			  sbyte[] buffer = byte_buffer;
+			  byte[] buffer = byte_buffer;
         
 			  buffer [0] = MATCH_SCRATCHPAD;
         
 			  Array.Copy(mac, 0, buffer, 1, 20);
         
-			  buffer [21] = unchecked((sbyte) 0x0ff); //CRC1
-			  buffer [22] = unchecked((sbyte) 0x0ff); //CRC2
-			  buffer [23] = unchecked((sbyte) 0x0ff); //status
+			  buffer [21] = 0x0ff; //CRC1
+			  buffer [22] = 0x0ff; //CRC2
+			  buffer [23] = 0x0ff; //status
         
 			  adapter.dataBlock(buffer, 0, 24);
         
@@ -1179,7 +1179,7 @@ namespace com.dalsemi.onewire.container
 			  }
 			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
         
-			  if (buffer [23] != unchecked((sbyte) 0x0ff))
+			  if (buffer [23] != 0xff)
 			  {
 				 return true;
 			  }
@@ -1209,7 +1209,7 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref= #writeScratchPad(int,int,byte[],int,int) </seealso>
-	   public virtual int readScratchPad(sbyte[] data, int start)
+	   public virtual int readScratchPad(byte[] data, int start)
 	   {
 		   lock (this)
 		   {
@@ -1228,7 +1228,7 @@ namespace com.dalsemi.onewire.container
 				 adapter.putByte(RESUME);
 			  }
         
-			  sbyte[] buffer = byte_buffer;
+			  byte[] buffer = byte_buffer;
         
 			  buffer [0] = READ_SCRATCHPAD;
         
@@ -1249,10 +1249,10 @@ namespace com.dalsemi.onewire.container
 				 IOHelper.writeLine("address");
 				 IOHelper.writeBytesHex(address);
 				 IOHelper.write("target address: 0x");
-				 IOHelper.writeHex((sbyte)TA2);
-				 IOHelper.writeLineHex((sbyte)TA1);
+				 IOHelper.writeHex(TA2);
+				 IOHelper.writeLineHex(TA1);
 				 IOHelper.write("ES: 0x");
-				 IOHelper.writeLineHex((sbyte)ES);
+				 IOHelper.writeLineHex(ES);
 				 IOHelper.writeLine("data");
 				 IOHelper.writeBytesHex(buffer,4,length);
 				 IOHelper.writeLine("------------------------------------");
@@ -1312,7 +1312,7 @@ namespace com.dalsemi.onewire.container
 				 adapter.putByte(RESUME);
 			  }
         
-			  sbyte[] buffer = byte_buffer;
+			  byte[] buffer = byte_buffer;
         
 			  buffer [0] = COPY_SCRATCHPAD;
 			  buffer [1] = TA1;
@@ -1324,7 +1324,7 @@ namespace com.dalsemi.onewire.container
 			  //adapter.dataBlock(buffer,0,4);
 			  adapter.dataBlock(buffer, 0, 9);
         
-			  if (buffer [8] == unchecked((sbyte) 0x0ff))
+			  if (buffer [8] == 0x0ff)
 			  {
 				 return waitForSuccessfulFinish();
 			  }
@@ -1365,7 +1365,7 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref= #bindSecretToiButton(int,byte[],byte[],int) </seealso>
-	   public virtual bool installMasterSecret(int page, sbyte[] secret, int secret_number)
+	   public virtual bool installMasterSecret(int page, byte[] secret, int secret_number)
 	   {
 		   lock (this)
 		   {
@@ -1379,8 +1379,8 @@ namespace com.dalsemi.onewire.container
 				 return false;
 			  }
         
-			  sbyte[] input_secret = null;
-			  sbyte[] buffer = byte_buffer;
+			  byte[] input_secret = null;
+			  byte[] buffer = byte_buffer;
 			  int secret_mod_length = secret.Length % 47;
         
 			  if (secret_mod_length == 0) //if the length of the secret is divisible by 47
@@ -1394,7 +1394,7 @@ namespace com.dalsemi.onewire.container
 				    it will be quicker to just create a new array once and
 				    copy the data in, rather than on every partial secret
 				    calculation do bounds checking */
-				 input_secret = new sbyte [secret.Length + (47 - secret_mod_length)];
+				 input_secret = new byte [secret.Length + (47 - secret_mod_length)];
         
 				 Array.Copy(secret, 0, input_secret, 0, secret.Length);
 			  }
@@ -1425,7 +1425,7 @@ namespace com.dalsemi.onewire.container
 			  //each page has 4 secrets, so look at 2 LS bits
 			  int secret_offset = (secret_number & 3) << 3;
 			  int offset = 0; //the current offset into the input_secret buffer
-			  sbyte[] sp_buffer = new sbyte [32];
+			  byte[] sp_buffer = new byte [32];
         
 			  while (offset < input_secret.Length)
 			  {
@@ -1485,9 +1485,9 @@ namespace com.dalsemi.onewire.container
 	   }
 
 	   //local cahce to make TINI fast
-	   private sbyte[] bind_code_temp = new sbyte [32];
-	   private sbyte[] bind_code_alt_temp = new sbyte [32];
-	   private sbyte[] bind_data_temp = new sbyte [32];
+	   private byte[] bind_code_temp = new byte [32];
+	   private byte[] bind_code_alt_temp = new byte [32];
+	   private byte[] bind_data_temp = new byte [32];
 
 	   /// <summary>
 	   /// <para>Binds an installed secret to a DS1963S by using
@@ -1528,7 +1528,7 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref= #installMasterSecret(int,byte[],int) </seealso>
-	   public virtual bool bindSecretToiButton(int page, sbyte[] bind_data, sbyte[] bind_code, int secret_number)
+	   public virtual bool bindSecretToiButton(int page, byte[] bind_data, byte[] bind_code, int secret_number)
 	   {
 		   lock (this)
 		   {
@@ -1545,7 +1545,7 @@ namespace com.dalsemi.onewire.container
 				 {
 					Array.Copy(bind_code, 0, bind_code_alt_temp, 0, 4);
         
-					bind_code_alt_temp [4] = (sbyte) page;
+					bind_code_alt_temp [4] = (byte) page;
         
 					Array.Copy(address, 0, bind_code_alt_temp, 5, 7);
 					Array.Copy(bind_code, 4, bind_code_alt_temp, 12, 3);
@@ -1626,13 +1626,13 @@ namespace com.dalsemi.onewire.container
 			  //don't worry about doSpeed here, this should never be called before something else
 			  //that would call doSpeed
 			  int addr = (secret_page << 5) + secret_offset;
-			  sbyte[] buffer = byte_buffer;
+			  byte[] buffer = byte_buffer;
         
 			  //assume we can resume
-			  buffer [0] = (sbyte) RESUME;
-			  buffer [1] = (sbyte) WRITE_SCRATCHPAD;
-			  buffer [2] = (sbyte) addr; //(secret_page << 5);
-			  buffer [3] = (sbyte)(addr >> 8); // secret_offset;
+			  buffer [0] = RESUME;
+			  buffer [1] = WRITE_SCRATCHPAD;
+			  buffer [2] = (byte) addr; //(secret_page << 5);
+			  buffer [3] = (byte)(addr >> 8); // secret_offset;
         
 			  int length = 32 - secret_offset;
         
@@ -1645,8 +1645,8 @@ namespace com.dalsemi.onewire.container
 				 IOHelper.writeBytesHex(address);
 				 IOHelper.writeLine("write scratchpad");
 				 IOHelper.write("target address: 0x");
-				 IOHelper.writeHex((sbyte)(addr >> 8));
-				 IOHelper.writeLineHex((sbyte)addr);
+				 IOHelper.writeHex((byte)(addr >> 8));
+				 IOHelper.writeLineHex((byte)addr);
 			  }
 			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
         
@@ -1661,7 +1661,7 @@ namespace com.dalsemi.onewire.container
 			  }
         
 			  //here we want to read the scratchpad WITHOUT reading the rest of the data
-			  buffer [1] = (sbyte) READ_SCRATCHPAD;
+			  buffer [1] = (byte) READ_SCRATCHPAD;
         
 			  Array.Copy(FF, 0, buffer, 2, 8);
 			  adapter.reset();
@@ -1672,10 +1672,10 @@ namespace com.dalsemi.onewire.container
 			  {
 				 IOHelper.writeLine("read scratchpad");
 				 IOHelper.write("target address: 0x");
-				 IOHelper.writeHex((sbyte)buffer[3]);
-				 IOHelper.writeLineHex((sbyte)buffer[2]);
+				 IOHelper.writeHex((byte)buffer[3]);
+				 IOHelper.writeLineHex((byte)buffer[2]);
 				 IOHelper.write("ES: 0x");
-				 IOHelper.writeLineHex((sbyte)buffer[4]);
+				 IOHelper.writeLineHex((byte)buffer[4]);
 				 IOHelper.writeLine("------------------------------------");
 			  }
 			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
@@ -1688,7 +1688,7 @@ namespace com.dalsemi.onewire.container
 			  //adapter.dataBlock(buffer,0,5);
 			  adapter.dataBlock(buffer, 0, 8);
         
-			  if (buffer [7] == unchecked((sbyte) 0x0ff))
+			  if (buffer [7] == unchecked((byte) 0x0ff))
 			  {
 				 return waitForSuccessfulFinish();
 			  }
@@ -1729,7 +1729,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #writeScratchPad(int,int,byte[],int,int) </seealso>
 	   /// <seealso cref= #readScratchPad(byte[],int) </seealso>
 	   /// <seealso cref= #copyScratchPad() </seealso>
-	   public virtual bool writeDataPage(int page_number, sbyte[] page_data)
+	   public virtual bool writeDataPage(int page_number, byte[] page_data)
 	   {
 		   lock (this)
 		   {
@@ -1763,17 +1763,17 @@ namespace com.dalsemi.onewire.container
 				 adapter.putByte(RESUME);
 			  }
         
-			  sbyte[] buffer = byte_buffer;
+			  byte[] buffer = byte_buffer;
         
 			  buffer [1] = ERASE_SCRATCHPAD;
-			  buffer [2] = (sbyte) 0;
-			  buffer [3] = (sbyte) 0;
+			  buffer [2] = 0;
+			  buffer [3] = 0;
         
 			  // send block (check copy indication complete)
 			  Array.Copy(FF, 0, buffer, 4, 3);
 			  adapter.dataBlock(buffer, 1, 6);
         
-			  if (buffer [6] == unchecked((sbyte) 0x0ff))
+			  if (buffer [6] == 0xff)
 			  {
 				 if (!waitForSuccessfulFinish())
 				 {
@@ -1784,15 +1784,15 @@ namespace com.dalsemi.onewire.container
 			  //then we need to write the scratchpad
 			  int addr = page_number << 5;
         
-			  buffer [0] = (sbyte) RESUME;
+			  buffer [0] = RESUME;
 			  buffer [1] = WRITE_SCRATCHPAD;
-			  buffer [2] = (sbyte) addr;
-			  buffer [3] = (sbyte)(addr >> 8);
+			  buffer [2] = (byte) addr;
+			  buffer [3] = (byte)(addr >> 8);
         
 			  Array.Copy(page_data, 0, buffer, 4, 32);
         
-			  buffer [36] = unchecked((sbyte) 0xff);
-			  buffer [37] = unchecked((sbyte) 0xff); //leave space for the CRC
+			  buffer [36] = 0xff;
+			  buffer [37] = 0xff; //leave space for the CRC
         
 			  adapter.reset();
         
@@ -1843,7 +1843,7 @@ namespace com.dalsemi.onewire.container
 			  Array.Copy(FF, 0, buffer, 5, 3);
 			  adapter.dataBlock(buffer, 0, 8);
         
-			  if (buffer [7] == unchecked((sbyte) 0x0ff))
+			  if (buffer [7] == 0x0ff)
 			  {
 				 return waitForSuccessfulFinish();
 			  }
@@ -1886,7 +1886,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #SHAFunction(byte,int) </seealso>
 	   /// <seealso cref= #copyScratchPad() </seealso>
 	   /// <seealso cref= #readScratchPad(byte[],int) </seealso>
-	   public virtual bool SHAFunction(sbyte function)
+	   public virtual bool SHAFunction(byte function)
 	   {
 		  return SHAFunction(function, (TA1 & 0x0ff) | (TA2 << 8));
 	   }
@@ -1926,7 +1926,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #SHAFunction(byte) </seealso>
 	   /// <seealso cref= #copyScratchPad() </seealso>
 	   /// <seealso cref= #readScratchPad(byte[],int) </seealso>
-	   public virtual bool SHAFunction(sbyte function, int T)
+	   public virtual bool SHAFunction(byte function, int T)
 	   {
 		   lock (this)
 		   {
@@ -1944,8 +1944,8 @@ namespace com.dalsemi.onewire.container
 				 IOHelper.write("function: 0x");
 				 IOHelper.writeLineHex(function);
 				 IOHelper.write("target address: 0x");
-				 IOHelper.writeHex((sbyte)(T >> 8));
-				 IOHelper.writeLineHex((sbyte)T);
+				 IOHelper.writeHex((byte)(T >> 8));
+				 IOHelper.writeLineHex((byte)T);
 			  }
 			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
         
@@ -1964,11 +1964,11 @@ namespace com.dalsemi.onewire.container
 				 adapter.putByte(RESUME);
 			  }
         
-			  sbyte[] buffer = byte_buffer;
+			  byte[] buffer = byte_buffer;
         
 			  buffer [0] = COMPUTE_SHA;
-			  buffer [1] = (sbyte) T;
-			  buffer [2] = (sbyte)(T >> 8);
+			  buffer [1] = (byte) T;
+			  buffer [2] = (byte)(T >> 8);
 			  buffer [3] = function;
         
 			  Array.Copy(FF, 0, buffer, 4, 5);
@@ -1993,7 +1993,7 @@ namespace com.dalsemi.onewire.container
 				 return false;
 			  }
         
-			  if (buffer [8] == unchecked((sbyte) 0x0ff))
+			  if (buffer [8] == 0x0ff)
 			  {
 				 return waitForSuccessfulFinish();
 			  }

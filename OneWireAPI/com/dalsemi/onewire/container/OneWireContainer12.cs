@@ -179,21 +179,21 @@ namespace com.dalsemi.onewire.container
 	   /// conditional searches in the <code>setSearchConditions()</code> method.
 	   /// </summary>
 	   /// <seealso cref= #setSearchConditions(byte,byte,byte,byte[]) </seealso>
-	   public static readonly sbyte SOURCE_ACTIVITY_LATCH = (sbyte) 0x02;
+	   public static readonly byte SOURCE_ACTIVITY_LATCH = (byte) 0x02;
 
 	   /// <summary>
 	   /// Used to set the <code>source</code> to the flip-flop state for
 	   /// conditional searches in the <code>setSearchConditions()</code> method.
 	   /// </summary>
 	   /// <seealso cref= #setSearchConditions(byte,byte,byte,byte[]) </seealso>
-	   public static readonly sbyte SOURCE_FLIP_FLOP = (sbyte) 0x04;
+	   public static readonly byte SOURCE_FLIP_FLOP = (byte) 0x04;
 
 	   /// <summary>
 	   /// Used to set the <code>source</code> to the PIO status for
 	   /// conditional searches in the <code>setSearchConditions()</code> method.
 	   /// </summary>
 	   /// <seealso cref= #setSearchConditions(byte,byte,byte,byte[]) </seealso>
-	   public static readonly sbyte SOURCE_PIO = (sbyte) 0x06;
+	   public static readonly byte SOURCE_PIO = (byte) 0x06;
 
 
 	   /// <summary>
@@ -201,21 +201,21 @@ namespace com.dalsemi.onewire.container
 	   /// checking in the <code>setSearchConditions()</code> method.
 	   /// </summary>
 	   /// <seealso cref= #setSearchConditions(byte,byte,byte,byte[]) </seealso>
-	   public const sbyte POLARITY_ZERO = 0x00;
+	   public const byte POLARITY_ZERO = 0x00;
 
 	   /// <summary>
 	   /// Used to set the <code>polarity</code> to logical '1' for conditional search
 	   /// checking in the <code>setSearchConditions()</code> method.
 	   /// </summary>
 	   /// <seealso cref= #setSearchConditions(byte,byte,byte,byte[]) </seealso>
-	   public const sbyte POLARITY_ONE = 0x01;
+	   public const byte POLARITY_ONE = 0x01;
 
 	   /// <summary>
 	   /// Used to select neither channel as the source for alarm conditions in the
 	   /// <code>setSearchConditions()</code> method.
 	   /// </summary>
 	   /// <seealso cref= #setSearchConditions(byte,byte,byte,byte[]) </seealso>
-	   public const sbyte CHANNEL_NONE = 0x00;
+	   public const byte CHANNEL_NONE = 0x00;
 
 	   /// <summary>
 	   /// Used for options in the <code>setSearchConditions()</code> to
@@ -223,7 +223,7 @@ namespace com.dalsemi.onewire.container
 	   /// value.
 	   /// </summary>
 	   /// <seealso cref= #setSearchConditions(byte,byte,byte,byte[]) </seealso>
-	   public static readonly sbyte DONT_CHANGE = unchecked((sbyte)0x0ff);
+	   public static readonly byte DONT_CHANGE = unchecked((byte)0x0ff);
 
 	   /// <summary>
 	   /// <code>channelMode</code> for the <code>channelAccess</code> method.
@@ -233,7 +233,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <seealso cref= #channelAccess(byte[],bool,bool,int,int,bool,bool) </seealso>
 	   /// <seealso cref= #setSearchConditions(byte,byte,byte,byte[]) </seealso>
-	   public const sbyte CHANNEL_A_ONLY = 0x04;
+	   public const byte CHANNEL_A_ONLY = 0x04;
 
 	   /// <summary>
 	   /// <code>channelMode</code> for the <code>channelAccess</code> method.
@@ -243,7 +243,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <seealso cref= #channelAccess(byte[],bool,bool,int,int,bool,bool) </seealso>
 	   /// <seealso cref= #setSearchConditions(byte,byte,byte,byte[]) </seealso>
-	   public const sbyte CHANNEL_B_ONLY = 0x08;
+	   public const byte CHANNEL_B_ONLY = 0x08;
 
 	   /// <summary>
 	   /// <code>channelMode</code> for the <code>channelAccess</code> method.
@@ -253,46 +253,46 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <seealso cref= #channelAccess(byte[],bool,bool,int,int,bool,bool) </seealso>
 	   /// <seealso cref= #setSearchConditions(byte,byte,byte,byte[]) </seealso>
-	   public const sbyte CHANNEL_BOTH = 0x0c;
+	   public const byte CHANNEL_BOTH = 0x0c;
 
 	   /// <summary>
 	   /// <code>CRCMode</code> for the <code>channelAccess</code> method.
 	   /// Requests no CRC generation by the DS2406/2407.
 	   /// </summary>
 	   /// <seealso cref= #channelAccess(byte[],bool,bool,int,int,bool,bool) </seealso>
-	   public const sbyte CRC_DISABLE = 0x00;
+	   public const byte CRC_DISABLE = 0x00;
 
 	   /// <summary>
 	   /// <code>CRCMode</code> for the <code>channelAccess</code> method.
 	   /// Requests CRC generation after every byte transmitted.
 	   /// </summary>
 	   /// <seealso cref= #channelAccess(byte[],bool,bool,int,int,bool,bool) </seealso>
-	   public const sbyte CRC_EVERY_BYTE = 0x01;
+	   public const byte CRC_EVERY_BYTE = 0x01;
 
 	   /// <summary>
 	   /// <code>CRCMode</code> for the <code>channelAccess</code> method.
 	   /// Requests CRC generation after every 8 bytes transmitted.
 	   /// </summary>
 	   /// <seealso cref= #channelAccess(byte[],bool,bool,int,int,bool,bool) </seealso>
-	   public const sbyte CRC_EVERY_8_BYTES = 0x02;
+	   public const byte CRC_EVERY_8_BYTES = 0x02;
 
 	   /// <summary>
 	   /// <code>CRCMode</code> for the <code>channelAccess</code> method.
 	   /// Requests CRC generation after every 32 bytes transmitted.
 	   /// </summary>
 	   /// <seealso cref= #channelAccess(byte[],bool,bool,int,int,bool,bool) </seealso>
-	   public const sbyte CRC_EVERY_32_BYTES = 0x03;
+	   public const byte CRC_EVERY_32_BYTES = 0x03;
 
 
 
 	   // privates !
 
 	   /* DS2406 Write status command                                */
-	   private const sbyte WRITE_STATUS_COMMAND = 0x55;
+	   private const byte WRITE_STATUS_COMMAND = 0x55;
 	   /* DS2406 channel access command                              */
-	   private static readonly sbyte CHANNEL_ACCESS_COMMAND = unchecked((sbyte) 0xF5);
+	   private static readonly byte CHANNEL_ACCESS_COMMAND = unchecked((byte) 0xF5);
 	   /* internal buffer  */
-	   private sbyte[] buffer = new sbyte [7];
+	   private byte[] buffer = new byte [7];
 	   private bool clearactivity = false;
 	   private bool doSpeedEnable = true;
 
@@ -326,7 +326,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #OneWireContainer12() </seealso>
 	   /// <seealso cref= #OneWireContainer12(com.dalsemi.onewire.adapter.DSPortAdapter,long)   OneWireContainer12(DSPortAdapter,long) </seealso>
 	   /// <seealso cref= #OneWireContainer12(com.dalsemi.onewire.adapter.DSPortAdapter,java.lang.String) OneWireContainer12(DSPortAdapter,String) </seealso>
-	   public OneWireContainer12(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer12(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 	   }
 
@@ -469,7 +469,7 @@ namespace com.dalsemi.onewire.container
 	   /// power and <code>false</code> if the device is parasite powered
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
-	   public virtual bool isPowerSupplied(sbyte[] state)
+	   public virtual bool isPowerSupplied(byte[] state)
 	   {
 		  return ((state [0] & 0x80) == 0x80);
 	   }
@@ -486,7 +486,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> the number of channels for this device
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
-	   public virtual int getNumberChannels(sbyte[] state)
+	   public virtual int getNumberChannels(byte[] state)
 	   {
 		  return ((state [0] & 0x40) == 0x40) ? 2 : 1;
 	   }
@@ -589,7 +589,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #hasLevelSensing() </seealso>
-	   public virtual bool getLevel(int channel, sbyte[] state)
+	   public virtual bool getLevel(int channel, byte[] state)
 	   {
 		  if (channel == 0)
 		  {
@@ -615,7 +615,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #isHighSideSwitch() </seealso>
 	   /// <seealso cref= #setLatchState(int,bool,bool,byte[]) </seealso>
-	   public virtual bool getLatchState(int channel, sbyte[] state)
+	   public virtual bool getLatchState(int channel, byte[] state)
 	   {
 		  if (channel == 0)
 		  {
@@ -641,7 +641,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= #hasActivitySensing() </seealso>
 	   /// <seealso cref= #clearActivity() </seealso>
-	   public virtual bool getSensedActivity(int channel, sbyte[] state)
+	   public virtual bool getSensedActivity(int channel, byte[] state)
 	   {
 		  if (channel == 0)
 		  {
@@ -699,22 +699,22 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #hasSmartOn() </seealso>
 	   /// <seealso cref= #getLatchState(int,byte[]) </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
-	   public virtual void setLatchState(int channel, bool latchState, bool doSmart, sbyte[] state)
+	   public virtual void setLatchState(int channel, bool latchState, bool doSmart, byte[] state)
 	   {
 		  if (channel == 0)
 		  {
-			 state[1] &= unchecked((sbyte)0xdf);
+			 state[1] &= unchecked((byte)0xdf);
 			 if (!latchState)
 			 {
-				state [1] = (sbyte)(state [1] | 0x20);
+				state [1] = (byte)(state [1] | 0x20);
 			 }
 		  }
 		  else
 		  {
-			 state[1] &= unchecked((sbyte)0xbf);
+			 state[1] &= unchecked((byte)0xbf);
 			 if (!latchState)
 			 {
-				state [1] = (sbyte)(state [1] | 0x40);
+				state [1] = (byte)(state [1] | 0x40);
 			 }
 		  }
 	   }
@@ -733,9 +733,9 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
-		  sbyte[] state = new sbyte [2];
+		  byte[] state = new byte [2];
 
 		  //the first byte is the raw status
 		  //the second byte is for writing
@@ -759,20 +759,20 @@ namespace com.dalsemi.onewire.container
 				// send the control bytes
 				if (clearactivity)
 				{
-				   buffer [1] = unchecked((sbyte) 0xD5);
+				   buffer [1] = unchecked((byte) 0xD5);
 				   clearactivity = false;
 				}
 				else
 				{
-				   buffer [1] = (sbyte) 0x55;
+				   buffer [1] = (byte) 0x55;
 				}
 
-				buffer [2] = unchecked((sbyte) 0xFF);
+				buffer [2] = unchecked((byte) 0xFF);
 
 				// read the info, dummy and CRC16
 				for (int i = 3; i < 7; i++)
 				{
-				   buffer [i] = unchecked((sbyte) 0xFF);
+				   buffer [i] = unchecked((byte) 0xFF);
 				}
 
 				// send the block
@@ -784,12 +784,12 @@ namespace com.dalsemi.onewire.container
 				   state [0] = buffer [3];
 
 				   //let's read the status byte 7 and get the data there
-				   buffer[0] = unchecked((sbyte)0x0aa); //READ_STATUS
+				   buffer[0] = unchecked((byte)0x0aa); //READ_STATUS
 				   buffer[1] = 7; //address to read
 				   buffer[2] = 0;
 				   for (int i = 3;i < 6;i++) //plus room for the CRC
 				   {
-					   buffer[i] = unchecked((sbyte)0x0ff);
+					   buffer[i] = unchecked((byte)0x0ff);
 				   }
 				   adapter.reset();
 				   adapter.select(address);
@@ -821,7 +821,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
 		  if (doSpeedEnable)
 		  {
@@ -843,11 +843,11 @@ namespace com.dalsemi.onewire.container
 				buffer [2] = 0x00;
 
 				// write state
-				buffer [3] = (sbyte) state [1];
+				buffer [3] = (byte) state [1];
 
 				// read CRC16
-				buffer [4] = unchecked((sbyte) 0xFF);
-				buffer [5] = unchecked((sbyte) 0xFF);
+				buffer [4] = unchecked((byte) 0xFF);
+				buffer [5] = unchecked((byte) 0xFF);
 
 				// send the block
 				adapter.dataBlock(buffer, 0, 6);
@@ -948,16 +948,16 @@ namespace com.dalsemi.onewire.container
 		/// <seealso cref= #POLARITY_ONE </seealso>
 		/// <seealso cref= #POLARITY_ZERO </seealso>
 		/// <seealso cref= #DONT_CHANGE </seealso>
-		public virtual void setSearchConditions(sbyte channel, sbyte source, sbyte polarity, sbyte[] state)
+		public virtual void setSearchConditions(byte channel, byte source, byte polarity, byte[] state)
 		{
 			//state[1] bitmap
 			// SUP PIOB PIOA CSS4 CSS3 CSS2 CSS1  CSS0
 			//               [channel] [source ][polarity]
 			//so channel needs to be shifted left once, other's can be or-ed in
-			sbyte newstate = 0;
+			byte newstate = 0;
 			if (channel != DONT_CHANGE)
 			{
-				newstate = (sbyte)(channel << 1);
+				newstate = (byte)(channel << 1);
 			}
 			if (source != DONT_CHANGE)
 			{
@@ -967,7 +967,7 @@ namespace com.dalsemi.onewire.container
 			{
 				newstate |= polarity;
 			}
-			state[1] = unchecked((sbyte)(state[1] & 0xe0));
+			state[1] = unchecked((byte)(state[1] & 0xe0));
 			state[1] |= newstate;
 
 		}
@@ -1060,7 +1060,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #CRC_EVERY_BYTE </seealso>
 	   /// <seealso cref= #CRC_EVERY_8_BYTES </seealso>
 	   /// <seealso cref= #CRC_EVERY_32_BYTES </seealso>
-	   public virtual sbyte[] channelAccess(sbyte[] inbuffer, bool toggleRW, bool readInitially, int CRCMode, int channelMode, bool clearActivity, bool interleave)
+	   public virtual byte[] channelAccess(byte[] inbuffer, bool toggleRW, bool readInitially, int CRCMode, int channelMode, bool clearActivity, bool interleave)
 	   {
 		  CRCMode = CRCMode & 0x03; //MASK THIS TO ACCEPTABLE VALUE
 		  channelMode = channelMode & 0x0c; //MASK THIS TO ACCEPTABLE VALUE
@@ -1108,19 +1108,19 @@ namespace com.dalsemi.onewire.container
 				   break;
 			 }
 
-			 sbyte[] outputbuffer = new sbyte [inlength + 3 + 1]; //3 control bytes + 1 information byte
+			 byte[] outputbuffer = new byte [inlength + 3 + 1]; //3 control bytes + 1 information byte
 
 			 outputbuffer [0] = CHANNEL_ACCESS_COMMAND;
 			 crc16 = CRC16.compute(CHANNEL_ACCESS_COMMAND & 0x0FF);
 
 			 // send the control bytes
-			 outputbuffer [1] = (sbyte)(CRCMode | channelMode | (clearActivity ? 0x80 : 0x00) | (interleave ? 0x10 : 0x00) | (toggleRW ? 0x20 : 0x00) | (readInitially ? 0x40 : 0x00));
-			 outputbuffer [2] = unchecked((sbyte) 0xFF);
+			 outputbuffer [1] = (byte)(CRCMode | channelMode | (clearActivity ? 0x80 : 0x00) | (interleave ? 0x10 : 0x00) | (toggleRW ? 0x20 : 0x00) | (readInitially ? 0x40 : 0x00));
+			 outputbuffer [2] = unchecked((byte) 0xFF);
 			 crc16 = CRC16.compute(outputbuffer, 1, 2, crc16);
 
 			 for (i = 3; i < outputbuffer.Length; i++)
 			 {
-				outputbuffer [i] = unchecked((sbyte) 0xff);
+				outputbuffer [i] = unchecked((byte) 0xff);
 			 }
 
 			 //now for the hard part: putting the right outputbuffer into the array
@@ -1244,7 +1244,7 @@ namespace com.dalsemi.onewire.container
 
 			 int k = 0; //index into the return buffer
 			 bool fresh = false; //whether or not we need to reinitialize the CRC calculation
-			 sbyte[] returnbuffer = new sbyte [inbuffer.Length];
+			 byte[] returnbuffer = new byte [inbuffer.Length];
 
 			 for (i = 4; i < outputbuffer.Length; i++)
 			 {

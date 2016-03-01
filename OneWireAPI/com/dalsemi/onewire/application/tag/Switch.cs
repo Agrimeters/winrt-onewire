@@ -93,7 +93,7 @@ namespace com.dalsemi.onewire.application.tag
 					 switch_state = true;
 				 }
 				 // write to the device (but, read it first to get state)
-				 sbyte[] state = switchcontainer.readDevice();
+				 byte[] state = switchcontainer.readDevice();
 				 // set the switch's state to the value specified
 				 switchcontainer.setLatchState(channelValue,switch_state,false,state);
 				 switchcontainer.writeDevice(state);
@@ -131,7 +131,7 @@ namespace com.dalsemi.onewire.application.tag
 		  initValue = init.Value;
 		  channelValue = Channel;
 
-		  sbyte[] state = switchcontainer.readDevice();
+		  byte[] state = switchcontainer.readDevice();
 		  bool switch_state = switchcontainer.getLatchState(channelValue, state);
 		  if (switch_state)
 		  {

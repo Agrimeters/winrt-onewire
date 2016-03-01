@@ -307,7 +307,7 @@ namespace com.dalsemi.onewire.application.file
 	   ///             <code>-1</code> if there is no more data because the end of
 	   ///             the file has been reached. </returns>
 	   /// <exception cref="IOException">  if an I/O error occurs. </exception>
-	   public virtual int read(sbyte[] b)
+	   public virtual int read(byte[] b)
 	   {
 		  if (fd != null)
 		  {
@@ -331,7 +331,7 @@ namespace com.dalsemi.onewire.application.file
 	   ///             <code>-1</code> if there is no more data because the end of
 	   ///             the file has been reached. </returns>
 	   /// <exception cref="IOException">  if an I/O error occurs. </exception>
-	   public virtual int read(sbyte[] b, int off, int len)
+	   public virtual int read(byte[] b, int off, int len)
 	   {
 		  if (fd != null)
 		  {

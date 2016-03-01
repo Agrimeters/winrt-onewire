@@ -51,69 +51,69 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// DS9097U brick baud rate expressed for the DS2480 ichip, 9600 baud </summary>
-	   public const char BAUD_9600 = (char)0x00;
+	   public const byte BAUD_9600 = 0x00;
 
 	   /// <summary>
 	   /// DS9097U brick baud rate expressed for the DS2480 ichip, 19200 baud </summary>
-	   public const char BAUD_19200 = (char)0x02;
+	   public const byte BAUD_19200 = 0x02;
 
 	   /// <summary>
 	   /// DS9097U brick baud rate expressed for the DS2480 ichip, 57600 baud </summary>
-	   public const char BAUD_57600 = (char)0x04;
+	   public const byte BAUD_57600 = 0x04;
 
 	   /// <summary>
 	   /// DS9097U brick baud rate expressed for the DS2480 ichip, 115200 baud </summary>
-	   public const char BAUD_115200 = (char)0x06;
+	   public const byte BAUD_115200 = 0x06;
 
 	   //------- DS9097U speed modes
 
 	   /// <summary>
 	   /// DS9097U speed mode, regular speed </summary>
-	   public const char USPEED_REGULAR = (char)0x00;
+	   public const byte USPEED_REGULAR = 0x00;
 
 	   /// <summary>
 	   /// DS9097U speed mode, flexible speed for long lines </summary>
-	   public const char USPEED_FLEX = (char)0x04;
+	   public const byte USPEED_FLEX = 0x04;
 
 	   /// <summary>
 	   /// DS9097U speed mode, overdrive speed </summary>
-	   public const char USPEED_OVERDRIVE = (char)0x08;
+	   public const byte USPEED_OVERDRIVE = 0x08;
 
 	   /// <summary>
 	   /// DS9097U speed mode, pulse, for program and power delivery </summary>
-	   public const char USPEED_PULSE = (char)0x0C;
+	   public const byte USPEED_PULSE = 0x0C;
 
 	   //------- DS9097U modes
 
 	   /// <summary>
 	   /// DS9097U data mode </summary>
-	   public const char MODE_DATA = (char)0x00E1;
+	   public const byte MODE_DATA = 0xE1;
 
 	   /// <summary>
 	   /// DS9097U command mode </summary>
-	   public const char MODE_COMMAND = (char)0x00E3;
+	   public const byte MODE_COMMAND = 0xE3;
 
 	   /// <summary>
 	   /// DS9097U pulse mode </summary>
-	   public const char MODE_STOP_PULSE = (char)0x00F1;
+	   public const byte MODE_STOP_PULSE = 0xF1;
 
 	   /// <summary>
 	   /// DS9097U special mode (in revision 1 silicon only) </summary>
-	   public const char MODE_SPECIAL = (char)0x00F3;
+	   public const byte MODE_SPECIAL = 0xF3;
 
 	   //------- DS9097U chip revisions and state
 
 	   /// <summary>
 	   /// DS9097U chip revision 1 </summary>
-	   public const char CHIP_VERSION1 = (char)0x04;
+	   public const byte CHIP_VERSION1 = 0x04;
 
 	   /// <summary>
 	   /// DS9097U chip revision mask </summary>
-	   public const char CHIP_VERSION_MASK = (char)0x1C;
+	   public const byte CHIP_VERSION_MASK = 0x1C;
 
 	   /// <summary>
 	   /// DS9097U program voltage available mask </summary>
-	   public const char PROGRAM_VOLTAGE_MASK = (char)0x20;
+	   public const byte PROGRAM_VOLTAGE_MASK = 0x20;
 
 	   /// <summary>
 	   /// DS9097U program voltage available mask </summary>
@@ -165,7 +165,7 @@ namespace com.dalsemi.onewire.adapter
 	   ///  </ul>
 	   /// </para>
 	   /// </summary>
-	   public char ubaud;
+	   public byte ubaud;
 
 	   /// <summary>
 	   /// This is the current 'real' speed that the OneWire is operating at.
@@ -181,7 +181,7 @@ namespace com.dalsemi.onewire.adapter
 	   ///  </ul>
 	   /// </para>
 	   /// </summary>
-	   public char uSpeedMode;
+	   public byte uSpeedMode;
 
 	   /// <summary>
 	   /// This is the current state of the DS2480 adapter on program
@@ -198,7 +198,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <summary>
 	   /// The DS2480 revision number.  The current value values are 1 and 2.
 	   /// </summary>
-	   public char revision;
+	   public byte revision;
 
 	   /// <summary>
 	   /// Flag to indicate need to search for long alarm check
@@ -226,7 +226,7 @@ namespace com.dalsemi.onewire.adapter
 		  // set the defaults
 		  ubaud = BAUD_9600;
 		  uSpeedMode = USPEED_FLEX;
-		  revision = (char)0;
+		  revision = 0;
 		  inCommandMode = true;
 		  streamBits = true;
 		  streamBytes = true;

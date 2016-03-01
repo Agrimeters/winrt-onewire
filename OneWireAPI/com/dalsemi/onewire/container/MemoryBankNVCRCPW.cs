@@ -52,7 +52,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Read Memory (with CRC and Password) Command
 	   /// </summary>
-	   public static readonly sbyte READ_MEMORY_CRC_PW_COMMAND = (sbyte)0x69;
+	   public static readonly byte READ_MEMORY_CRC_PW_COMMAND = (byte)0x69;
 
 	   /// <summary>
 	   /// Scratchpad with Password.  Used as container for password.
@@ -106,7 +106,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
 		  readPageCRC(page, readContinue, readBuf, offset, extraInfo, extraInfoLength);
 	   }
@@ -130,11 +130,11 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   protected internal override void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo, int extraLength)
+	   protected internal override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo, int extraLength)
 	   {
 		  int last_crc = 0;
-		  sbyte[] raw_buf;
-		  sbyte temp;
+		  byte[] raw_buf;
+		  byte temp;
 
 		  // only needs to be implemented if supported by hardware
 		  if (!pageAutoCRC)
@@ -167,13 +167,13 @@ namespace com.dalsemi.onewire.container
 			 }
 
 			 // build start reading memory block
-			 raw_buf = new sbyte [11];
+			 raw_buf = new byte [11];
 			 raw_buf [0] = READ_MEMORY_CRC_PW_COMMAND;
 
 			 int addr = page * pageLength + startPhysicalAddress;
 
-			 raw_buf [1] = unchecked((sbyte)(addr & 0xFF));
-			 raw_buf [2] = unchecked((sbyte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
+			 raw_buf [1] = unchecked((byte)(addr & 0xFF));
+			 raw_buf [2] = unchecked((byte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
 
 			 if (ibPass.ContainerReadWritePasswordSet)
 			 {
@@ -208,7 +208,7 @@ namespace com.dalsemi.onewire.container
 			 if (enablePower)
 			 {
 				ib.adapter.startPowerDelivery(DSPortAdapter.CONDITION_AFTER_BYTE);
-				temp = (sbyte) ib.adapter.Byte;
+				temp = (byte) ib.adapter.Byte;
 			 }
 		  }
 
@@ -220,7 +220,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // pre-fill with 0xFF
-		  raw_buf = new sbyte [pageLength + extraLength + 2 + numVerifyBytes];
+		  raw_buf = new byte [pageLength + extraLength + 2 + numVerifyBytes];
 
 		  Array.Copy(ffBlock, 0, raw_buf, 0, raw_buf.Length);
 
@@ -280,10 +280,10 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void read(int startAddr, bool readContinue, sbyte[] readBuf, int offset, int len)
+	   public override void read(int startAddr, bool readContinue, byte[] readBuf, int offset, int len)
 	   {
 		  int i;
-		  sbyte[] raw_buf = new sbyte [64];
+		  byte[] raw_buf = new byte [64];
 
 		  // attempt to put device at max desired speed
 		  if (!readContinue)
@@ -314,8 +314,8 @@ namespace com.dalsemi.onewire.container
 
 			 raw_buf [0] = READ_MEMORY_CRC_PW_COMMAND;
 
-			 raw_buf [1] = unchecked((sbyte)(addr & 0xFF));
-			 raw_buf [2] = unchecked((sbyte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
+			 raw_buf [1] = unchecked((byte)(addr & 0xFF));
+			 raw_buf [2] = unchecked((byte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
 
 			 if (ibPass.ContainerReadWritePasswordSet)
 			 {
@@ -413,7 +413,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void write(int startAddr, sbyte[] writeBuf, int offset, int len)
+	   public override void write(int startAddr, byte[] writeBuf, int offset, int len)
 	   {
 		  // find the last (non-inclusive) address for this write
 		  int endingOffset = (startAddr + len);
@@ -428,7 +428,7 @@ namespace com.dalsemi.onewire.container
 				throw new OneWireException("Executing write would overwrite password control registers with " + "potentially invalid data.  Please ensure write does not occur over" + "password control register page, or the password control data is " + "specified exactly in the write buffer.");
 			 }
 
-			 sbyte[] tempBuf = new sbyte[len + numBytes];
+			 byte[] tempBuf = new byte[len + numBytes];
 			 Array.Copy(writeBuf, offset, tempBuf, 0, len);
 			 read(endingOffset, false, tempBuf, len, numBytes);
 

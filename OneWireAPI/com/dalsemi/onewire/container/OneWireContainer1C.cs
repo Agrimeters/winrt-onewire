@@ -72,7 +72,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Used for 0xFF array
 	   /// </summary>
-	   private sbyte[] FF = new sbyte [8];
+	   private byte[] FF = new byte [8];
 
 	   //--------
 	   //-------- Memory Banks
@@ -96,27 +96,27 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Reads the PIO logical status in an endless loops
 	   /// </summary>
-	   public static readonly sbyte PIO_ACCESS_READ = unchecked((sbyte) 0xF5);
+	   public static readonly byte PIO_ACCESS_READ = unchecked((byte) 0xF5);
 
 	   /// <summary>
 	   /// Writes the PIO output latch
 	   /// </summary>
-	   public static readonly sbyte PIO_ACCESS_WRITE = (sbyte) 0x5A;
+	   public static readonly byte PIO_ACCESS_WRITE = (byte) 0x5A;
 
 	   /// <summary>
 	   /// Generates a pulse on the selected PIOs
 	   /// </summary>
-	   public static readonly sbyte PIO_ACCESS_PULSE = unchecked((sbyte) 0xA5);
+	   public static readonly byte PIO_ACCESS_PULSE = unchecked((byte) 0xA5);
 
 	   /// <summary>
 	   /// Generates a pulse on the selected PIOs
 	   /// </summary>
-	   public static readonly sbyte RESET_ACTIVITY_LATCHES = unchecked((sbyte) 0xC3);
+	   public static readonly byte RESET_ACTIVITY_LATCHES = unchecked((byte) 0xC3);
 
 	   /// <summary>
 	   /// Writes the value to the Conditional Search registers or Control/Status register
 	   /// </summary>
-	   public static readonly sbyte WRITE_REGISTER = unchecked((sbyte) 0xCC);
+	   public static readonly byte WRITE_REGISTER = unchecked((byte) 0xCC);
 
 
 	   //--------
@@ -139,7 +139,7 @@ namespace com.dalsemi.onewire.container
 
 		  for (int i = 0; i < FF.Length; i++)
 		  {
-			 FF[i] = unchecked((sbyte) 0x0FF);
+			 FF[i] = unchecked((byte) 0x0FF);
 		  }
 	   }
 
@@ -153,14 +153,14 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #OneWireContainer1C() </seealso>
 	   /// <seealso cref= #OneWireContainer1C(com.dalsemi.onewire.adapter.DSPortAdapter,long) OneWireContainer1C(DSPortAdapter,long) </seealso>
 	   /// <seealso cref= #OneWireContainer1C(com.dalsemi.onewire.adapter.DSPortAdapter,java.lang.String) OneWireContainer1C(DSPortAdapter,String) </seealso>
-	   public OneWireContainer1C(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer1C(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 
 		  initmem();
 
 		  for (int i = 0; i < FF.Length; i++)
 		  {
-			 FF[i] = unchecked((sbyte) 0x0FF);
+			 FF[i] = unchecked((byte) 0x0FF);
 		  }
 	   }
 
@@ -181,7 +181,7 @@ namespace com.dalsemi.onewire.container
 
 		  for (int i = 0; i < FF.Length; i++)
 		  {
-			 FF[i] = unchecked((sbyte) 0x0FF);
+			 FF[i] = unchecked((byte) 0x0FF);
 		  }
 	   }
 
@@ -202,7 +202,7 @@ namespace com.dalsemi.onewire.container
 
 		  for (int i = 0; i < FF.Length; i++)
 		  {
-			 FF[i] = unchecked((sbyte) 0x0FF);
+			 FF[i] = unchecked((byte) 0x0FF);
 		  }
 	   }
 
@@ -290,7 +290,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> the number of channels for this device
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
-	   public virtual int getNumberChannels(sbyte[] state)
+	   public virtual int getNumberChannels(byte[] state)
 	   {
 		  return 2;
 	   }
@@ -393,9 +393,9 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #hasLevelSensing() </seealso>
-	   public virtual bool getLevel(int channel, sbyte[] state)
+	   public virtual bool getLevel(int channel, byte[] state)
 	   {
-		  sbyte level = (sbyte)(0x01 << channel);
+		  byte level = (byte)(0x01 << channel);
 		  return ((state[0] & level) == level);
 	   }
 
@@ -413,9 +413,9 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #isHighSideSwitch() </seealso>
 	   /// <seealso cref= #setLatchState(int,bool,bool,byte[]) </seealso>
-	   public virtual bool getLatchState(int channel, sbyte[] state)
+	   public virtual bool getLatchState(int channel, byte[] state)
 	   {
-		  sbyte latch = (sbyte)(0x01 << channel);
+		  byte latch = (byte)(0x01 << channel);
 		  return ((state [1] & latch) == latch);
 	   }
 
@@ -435,9 +435,9 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= #hasActivitySensing() </seealso>
 	   /// <seealso cref= #clearActivity() </seealso>
-	   public virtual bool getSensedActivity(int channel, sbyte[] state)
+	   public virtual bool getSensedActivity(int channel, byte[] state)
 	   {
-		  sbyte activity = (sbyte)(0x01 << channel);
+		  byte activity = (byte)(0x01 << channel);
 		  return ((state[2] & activity) == activity);
 	   }
 
@@ -454,14 +454,14 @@ namespace com.dalsemi.onewire.container
 	   {
 		  adapter.assertSelect(address);
 
-		  sbyte[] buffer = new sbyte[9];
+		  byte[] buffer = new byte[9];
 
 		  buffer[0] = RESET_ACTIVITY_LATCHES;
 		  Array.Copy(FF,0,buffer,1,8);
 
 		  adapter.dataBlock(buffer, 0, 9);
 
-		  if ((buffer[1] != unchecked((sbyte) 0xAA)) && (buffer[1] != (sbyte) 0x55))
+		  if ((buffer[1] != unchecked((byte) 0xAA)) && (buffer[1] != (byte) 0x55))
 		  {
 			 throw new OneWireException("Sense Activity was not cleared.");
 		  }
@@ -491,17 +491,17 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #hasSmartOn() </seealso>
 	   /// <seealso cref= #getLatchState(int,byte[]) </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
-	   public virtual void setLatchState(int channel, bool latchState, bool doSmart, sbyte[] state)
+	   public virtual void setLatchState(int channel, bool latchState, bool doSmart, byte[] state)
 	   {
-		  sbyte latch = (sbyte)(0x01 << channel);
+		  byte latch = (byte)(0x01 << channel);
 
 		  if (latchState)
 		  {
-			 state[1] = (sbyte)(state[1] | latch);
+			 state[1] = (byte)(state[1] | latch);
 		  }
 		  else
 		  {
-			 state[1] = (sbyte)(state[1] & ~latch);
+			 state[1] = (byte)(state[1] & ~latch);
 		  }
 	   }
 
@@ -516,9 +516,9 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= #getLatchState(int,byte[]) </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
-	   public virtual void setLatchState(sbyte set, sbyte[] state)
+	   public virtual void setLatchState(byte set, byte[] state)
 	   {
-		  state[1] = (sbyte) set;
+		  state[1] = (byte) set;
 	   }
 
 	   /// <summary>
@@ -535,9 +535,9 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
-		  sbyte[] state = new sbyte [3];
+		  byte[] state = new byte [3];
 
 		  Array.Copy(FF,0,state,0,3);
 		  pioMemory.read(0,false,state,0,3);
@@ -559,9 +559,9 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readRegister()
+	   public virtual byte[] readRegister()
 	   {
-		  sbyte[] register = new sbyte[3];
+		  byte[] register = new byte[3];
 
 		  searchMemory.read(0,false,register,0,3);
 
@@ -581,22 +581,22 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
 		  //channel Access Write
 		  adapter.assertSelect(address);
 
-		  sbyte[] buffer = new sbyte[5];
+		  byte[] buffer = new byte[5];
 
 		  buffer[0] = PIO_ACCESS_WRITE;
 		  buffer[1] = state[1];
-		  buffer[2] = (sbyte)~state[1];
-		  buffer[3] = unchecked((sbyte)0xFF);
-		  buffer[4] = unchecked((sbyte)0xFF);
+		  buffer[2] = (byte)~state[1];
+		  buffer[3] = unchecked((byte)0xFF);
+		  buffer[4] = unchecked((byte)0xFF);
 
 		  adapter.dataBlock(buffer, 0, 5);
 
-		  if (buffer[3] != unchecked((sbyte) 0x00AA))
+		  if (buffer[3] != unchecked((byte) 0x00AA))
 		  {
 			 throw new OneWireIOException("Failure to change latch state.");
 		  }
@@ -617,12 +617,12 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeRegister(sbyte[] register)
+	   public virtual void writeRegister(byte[] register)
 	   {
 		  //channel Access Write
 		  adapter.assertSelect(address);
 
-		  sbyte[] buffer = new sbyte[6];
+		  byte[] buffer = new byte[6];
 
 		  buffer[0] = WRITE_REGISTER;
 		  buffer[1] = 0x23;
@@ -647,9 +647,9 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual bool isVccPowered(sbyte[] register)
+	   public virtual bool isVccPowered(byte[] register)
 	   {
-		  if ((register[2] & unchecked((sbyte) 0x80)) == unchecked((sbyte) 0x80))
+		  if ((register[2] & unchecked((byte) 0x80)) == unchecked((byte) 0x80))
 		  {
 			 return true;
 		  }
@@ -657,9 +657,9 @@ namespace com.dalsemi.onewire.container
 		  return false;
 	   }
 
-	   public virtual bool getDefaultPolarity(sbyte[] register)
+	   public virtual bool getDefaultPolarity(byte[] register)
 	   {
-		  if ((register[2] & (sbyte) 0x40) == (sbyte) 0x40)
+		  if ((register[2] & (byte) 0x40) == (byte) 0x40)
 		  {
 			 return true;
 		  }
@@ -667,9 +667,9 @@ namespace com.dalsemi.onewire.container
 		  return false;
 	   }
 
-	   public virtual bool getPowerOnResetLatch(sbyte[] register)
+	   public virtual bool getPowerOnResetLatch(byte[] register)
 	   {
-		  if ((register[2] & (sbyte) 0x08) == (sbyte) 0x08)
+		  if ((register[2] & (byte) 0x08) == (byte) 0x08)
 		  {
 			 return true;
 		  }
@@ -682,11 +682,11 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="register"> current register for conditional search, which
 	   ///                 if returned from <code>readRegister()</code> </param>
-	   public virtual void clearPowerOnReset(sbyte[] register)
+	   public virtual void clearPowerOnReset(byte[] register)
 	   {
-		  if ((register[2] & (sbyte) 0x08) == (sbyte) 0x08)
+		  if ((register[2] & (byte) 0x08) == (byte) 0x08)
 		  {
-			 register[2] = (sbyte)((sbyte) register[2] & unchecked((sbyte) 0xF7));
+			 register[2] = (byte)((byte) register[2] & unchecked((byte) 0xF7));
 		  }
 	   }
 
@@ -695,11 +695,11 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="register"> current register for conditional search, which
 	   ///                 if returned from <code>readRegister()</code> </param>
-	   public virtual void orConditionalSearch(sbyte[] register)
+	   public virtual void orConditionalSearch(byte[] register)
 	   {
-		  if ((register[2] & (sbyte) 0x02) == (sbyte) 0x02)
+		  if ((register[2] & (byte) 0x02) == (byte) 0x02)
 		  {
-			 register[2] = (sbyte)((sbyte) register[2] & unchecked((sbyte) 0xFD));
+			 register[2] = (byte)((byte) register[2] & unchecked((byte) 0xFD));
 		  }
 	   }
 
@@ -708,11 +708,11 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="register"> current register for conditional search, which
 	   ///                 if returned from <code>readRegister()</code> </param>
-	   public virtual void andConditionalSearch(sbyte[] register)
+	   public virtual void andConditionalSearch(byte[] register)
 	   {
-		  if ((register[2] & (sbyte) 0x02) != (sbyte) 0x02)
+		  if ((register[2] & (byte) 0x02) != (byte) 0x02)
 		  {
-			 register[2] = (sbyte)((sbyte) register[2] | (sbyte) 0x02);
+			 register[2] = (byte)((byte) register[2] | (byte) 0x02);
 		  }
 	   }
 
@@ -724,13 +724,13 @@ namespace com.dalsemi.onewire.container
 	   ///                    pin is used for the conditional search. </param>
 	   /// <param name="register"> current register for conditional search, which
 	   ///                 if returned from <code>readRegister()</code> </param>
-	   public virtual sbyte[] ConditionalSearchLogicLevel
+	   public virtual byte[] ConditionalSearchLogicLevel
 	   {
 		   set
 		   {
-			  if ((value[2] & (sbyte) 0x01) == (sbyte) 0x01)
+			  if ((value[2] & (byte) 0x01) == (byte) 0x01)
 			  {
-				 value[2] = (sbyte)((sbyte) value[2] & unchecked((sbyte) 0xFE));
+				 value[2] = (byte)((byte) value[2] & unchecked((byte) 0xFE));
 			  }
 		   }
 	   }
@@ -740,13 +740,13 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="register"> current register for conditional search, which
 	   ///                 if returned from <code>readRegister()</code> </param>
-	   public virtual sbyte[] ConditionalSearchActivity
+	   public virtual byte[] ConditionalSearchActivity
 	   {
 		   set
 		   {
-			  if ((value[2] & (sbyte) 0x01) != (sbyte) 0x01)
+			  if ((value[2] & (byte) 0x01) != (byte) 0x01)
 			  {
-				 value[2] = (sbyte)((sbyte) value[2] | (sbyte) 0x01);
+				 value[2] = (byte)((byte) value[2] | (byte) 0x01);
 			  }
 		   }
 	   }
@@ -759,17 +759,17 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="set">      whether to turn the channel on/off for Conditional Search </param>
 	   /// <param name="register"> current register for conditional search, which
 	   ///                 if returned from <code>readRegister()</code> </param>
-	   public virtual void setChannelMask(int channel, bool set, sbyte[] register)
+	   public virtual void setChannelMask(int channel, bool set, byte[] register)
 	   {
-		  sbyte mask = (sbyte)(0x01 << channel);
+		  byte mask = (byte)(0x01 << channel);
 
 		  if (set)
 		  {
-			 register[0] = (sbyte)((sbyte) register[0] | (sbyte) mask);
+			 register[0] = (byte)((byte) register[0] | (byte) mask);
 		  }
 		  else
 		  {
-			 register[0] = (sbyte)((sbyte) register[0] & (sbyte)~mask);
+			 register[0] = (byte)((byte) register[0] & (byte)~mask);
 		  }
 	   }
 
@@ -782,17 +782,17 @@ namespace com.dalsemi.onewire.container
 	   ///                 Conditional Search </param>
 	   /// <param name="register"> current register for conditional search, which
 	   ///                 if returned from <code>readRegister()</code> </param>
-	   public virtual void setChannelPolarity(int channel, bool set, sbyte[] register)
+	   public virtual void setChannelPolarity(int channel, bool set, byte[] register)
 	   {
-		  sbyte polarity = (sbyte)(0x01 << channel);
+		  byte polarity = (byte)(0x01 << channel);
 
 		  if (set)
 		  {
-			 register[1] = (sbyte)((sbyte) register[1] | (sbyte) polarity);
+			 register[1] = (byte)((byte) register[1] | (byte) polarity);
 		  }
 		  else
 		  {
-			 register[1] = (sbyte)((sbyte) register[1] & (sbyte)~polarity);
+			 register[1] = (byte)((byte) register[1] & (byte)~polarity);
 		  }
 	   }
 
@@ -804,9 +804,9 @@ namespace com.dalsemi.onewire.container
 	   ///                 if returned from <code>readRegister()</code>
 	   /// </param>
 	   /// <returns> <code>true</code> if the channel is masked and <code>false</code> other wise. </returns>
-	   public virtual bool getChannelMask(int channel, sbyte[] register)
+	   public virtual bool getChannelMask(int channel, byte[] register)
 	   {
-		  sbyte mask = (sbyte)(0x01 << channel);
+		  byte mask = (byte)(0x01 << channel);
 
 		  return ((register[0] & mask) == mask);
 	   }
@@ -819,9 +819,9 @@ namespace com.dalsemi.onewire.container
 	   ///                 if returned from <code>readRegister()</code>
 	   /// </param>
 	   /// <returns> <code>true</code> if the channel is masked and <code>false</code> other wise. </returns>
-	   public virtual bool getChannelPolarity(int channel, sbyte[] register)
+	   public virtual bool getChannelPolarity(int channel, byte[] register)
 	   {
-		  sbyte polarity = (sbyte)(0x01 << channel);
+		  byte polarity = (byte)(0x01 << channel);
 
 		  return ((register[1] & polarity) == polarity);
 	   }

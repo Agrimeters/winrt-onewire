@@ -45,5 +45,18 @@
 
   <Capabilities>
     <Capability Name="internetClient" />
+    
+    <DeviceCapability Name="serialcommunication">
+      <Device Id="any">
+        <Function Type="name:serialPort" />
+      </Device>
+    </DeviceCapability>
+    
+    <DeviceCapability Name="usb">
+      <Device Id="vidpid:04FA 2490">
+        <Function Type="name:vendorSpecific"/>
+      </Device>
+    </DeviceCapability>
+    
   </Capabilities>
 </Package>

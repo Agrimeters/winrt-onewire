@@ -49,12 +49,12 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Copy Scratchpad Delay length
 	   /// </summary>
-	   protected internal sbyte COPY_DELAY_LEN;
+	   protected internal byte COPY_DELAY_LEN;
 
 	   /// <summary>
 	   /// Mask for ES byte during copy scratchpad
 	   /// </summary>
-	   protected internal sbyte ES_MASK;
+	   protected internal byte ES_MASK;
 
 	   /// <summary>
 	   /// Number of bytes to read for verification (only last one will be checked).
@@ -73,7 +73,7 @@ namespace com.dalsemi.onewire.container
 	   {
 
 		  // default copy scratchpad delay
-		  COPY_DELAY_LEN = (sbyte) 5;
+		  COPY_DELAY_LEN = (byte) 5;
 
 		  // default ES mask for copy scratchpad 
 		  ES_MASK = 0;
@@ -93,7 +93,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void writeScratchpad(int startAddr, sbyte[] writeBuf, int offset, int len)
+	   public override void writeScratchpad(int startAddr, byte[] writeBuf, int offset, int len)
 	   {
 		  bool calcCRC = false;
 
@@ -106,11 +106,11 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // build block to send
-		  sbyte[] raw_buf = new sbyte [37];
+		  byte[] raw_buf = new byte [37];
 
 		  raw_buf [0] = WRITE_SCRATCHPAD_COMMAND;
-		  raw_buf [1] = unchecked((sbyte)(startAddr & 0xFF));
-		  raw_buf [2] = unchecked((sbyte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF));
+		  raw_buf [1] = (byte)(startAddr & 0xFF);
+		  raw_buf [2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
 
 		  Array.Copy(writeBuf, offset, raw_buf, 3, len);
 
@@ -157,11 +157,11 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // build block to send
-		  sbyte[] raw_buf = new sbyte [3];
+		  byte[] raw_buf = new byte [3];
 
 		  raw_buf [0] = COPY_SCRATCHPAD_COMMAND;
-		  raw_buf [1] = unchecked((sbyte)(startAddr & 0xFF));
-		  raw_buf [2] = unchecked((sbyte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF));
+		  raw_buf [1] = (byte)(startAddr & 0xFF);
+		  raw_buf [2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
 
 		  // send block (command, address)
 		  ib.adapter.dataBlock(raw_buf, 0, 3);
@@ -175,7 +175,7 @@ namespace com.dalsemi.onewire.container
 
 
 			 // send the offset and start power delivery
-			 ib.adapter.putByte((sbyte)(((startAddr + len - 1) & (pageLength - 1))) | ES_MASK);
+			 ib.adapter.putByte((byte)(((startAddr + len - 1) & (pageLength - 1))) | ES_MASK);
 
 			 // delay for ms
 			 Thread.Sleep(COPY_DELAY_LEN);
@@ -184,19 +184,19 @@ namespace com.dalsemi.onewire.container
 			 ib.adapter.setPowerNormal();
 
 			 // check if complete
-			 sbyte rslt = 0;
+			 byte rslt = 0;
 			 if (numVerificationBytes == 1)
 			 {
-				rslt = (sbyte) ib.adapter.Byte;
+				rslt = (byte) ib.adapter.Byte;
 			 }
 			 else
 			 {
-				raw_buf = new sbyte[numVerificationBytes];
+				raw_buf = new byte[numVerificationBytes];
 				ib.adapter.getBlock(raw_buf, 0, numVerificationBytes);
 				rslt = raw_buf[numVerificationBytes - 1];
 			 }
 
-			 if ((unchecked((sbyte)(rslt & 0x0F0)) != unchecked((sbyte) 0xA0)) && (unchecked((sbyte)(rslt & 0x0F0)) != (sbyte) 0x50))
+			 if (((byte)(rslt & 0x0F0) != (byte) 0xA0) && ((byte)(rslt & 0x0F0) != 0x50))
 			 {
 				forceVerify();
 

@@ -51,7 +51,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <summary>
 	   /// CRC 8 lookup table
 	   /// </summary>
-	   private static sbyte[] dscrc_table;
+	   private static byte[] dscrc_table;
 
 	   /*
 	    * Create the lookup table
@@ -60,7 +60,7 @@ namespace com.dalsemi.onewire.utils
 	   {
 
 		  //Translated from the assembly code in iButton Standards, page 129.
-		  dscrc_table = new sbyte [256];
+		  dscrc_table = new byte [256];
 
 		  int acc;
 		  int crc;
@@ -84,7 +84,7 @@ namespace com.dalsemi.onewire.utils
 				acc = acc >> 1;
 			 }
 
-			 dscrc_table [i] = (sbyte) crc;
+			 dscrc_table [i] = (byte) crc;
 		  }
 	   }
 
@@ -142,7 +142,7 @@ namespace com.dalsemi.onewire.utils
 	   /// </summary>
 	   /// <param name="dataToCrc">   array of data elements on which to perform the CRC8 </param>
 	   /// <returns>  CRC8 value </returns>
-	   public static int compute(sbyte[] dataToCrc)
+	   public static int compute(byte[] dataToCrc)
 	   {
 		  return compute(dataToCrc, 0, dataToCrc.Length);
 	   }
@@ -159,7 +159,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="off">         offset into array </param>
 	   /// <param name="len">         length of data to crc </param>
 	   /// <returns>  CRC8 value </returns>
-	   public static int compute(sbyte[] dataToCrc, int off, int len)
+	   public static int compute(byte[] dataToCrc, int off, int len)
 	   {
 		  return compute(dataToCrc, off, len, 0);
 	   }
@@ -177,7 +177,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="len">         length of data to crc </param>
 	   /// <param name="seed">        seed to use for CRC8 </param>
 	   /// <returns>  CRC8 value </returns>
-	   public static int compute(sbyte[] dataToCrc, int off, int len, int seed)
+	   public static int compute(byte[] dataToCrc, int off, int len, int seed)
 	   {
 
 		  // loop to do the crc on each data element
@@ -202,7 +202,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="dataToCrc">   array of data elements on which to perform the CRC8 </param>
 	   /// <param name="seed">        seed to use for CRC8 </param>
 	   /// <returns>  CRC8 value </returns>
-	   public static int compute(sbyte[] dataToCrc, int seed)
+	   public static int compute(byte[] dataToCrc, int seed)
 	   {
 		  return compute(dataToCrc, 0, dataToCrc.Length, seed);
 	   }

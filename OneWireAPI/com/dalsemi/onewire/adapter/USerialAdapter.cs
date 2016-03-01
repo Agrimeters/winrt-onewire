@@ -185,11 +185,11 @@ namespace com.dalsemi.onewire.adapter
 
         /// <summary>
         /// Normal Search, all devices participate </summary>
-        private const char NORMAL_SEARCH_CMD = (char)0xF0;
+        private const byte NORMAL_SEARCH_CMD = 0xF0;
 
         /// <summary>
         /// Conditional Search, only 'alarming' devices participate </summary>
-        private const char ALARM_SEARCH_CMD = (char)0xEC;
+        private const byte ALARM_SEARCH_CMD = 0xEC;
 
         //--------
         //-------- Static Variables
@@ -236,17 +236,13 @@ namespace com.dalsemi.onewire.adapter
         private UAdapterState uState;
 
         /// <summary>
-        /// Input buffer to hold received data </summary>
-        private StringBuilder inBuffer;
-
-        /// <summary>
         /// Flag to indicate have a local begin/end Exclusive use of serial </summary>
         private bool haveLocalUse;
         private object syncObject;
 
         /// <summary>
         /// Enable/disable debug messages </summary>
-        private static bool doDebugMessages = false;
+        private static bool doDebugMessages = true;
 
         //--------
         //-------- Constructor
@@ -262,7 +258,6 @@ namespace com.dalsemi.onewire.adapter
             owState = new OneWireState();
             uState = new UAdapterState(owState);
             uBuild = new UPacketBuilder(uState);
-            inBuffer = new StringBuilder();
             adapterPresent = false;
             haveLocalUse = false;
             syncObject = new object();
@@ -301,7 +296,6 @@ namespace com.dalsemi.onewire.adapter
             SerialService.CleanUpByThread(t);
         }
 #endif
-
 
 
         /// <summary>
@@ -600,7 +594,7 @@ namespace com.dalsemi.onewire.adapter
                         this.targetFamily(ADAPTER_ID_FAMILY);
 
                         System.Collections.IEnumerator adapter_id_enum = this.AllDeviceContainers;
-                        sbyte[] address = new sbyte[8];
+                        byte[] address = new byte[8];
 
                         // loop through each of the DS1982's to find an adapter ID
                         while (adapter_id_enum.MoveNext())
@@ -614,12 +608,12 @@ namespace com.dalsemi.onewire.adapter
                             {
 
                                 // create a buffer to read the first page
-                                sbyte[] read_buffer = new sbyte[37];
+                                byte[] read_buffer = new byte[37];
                                 int cnt = 0;
                                 int i;
 
                                 // extended read memory command
-                                read_buffer[cnt++] = unchecked((sbyte)EXTENDED_READ_PAGE); //TODO - added unchecked
+                                read_buffer[cnt++] = unchecked((byte)EXTENDED_READ_PAGE); //TODO - added unchecked
 
                                 // address of first page
                                 read_buffer[cnt++] = 0;
@@ -628,7 +622,7 @@ namespace com.dalsemi.onewire.adapter
                                 // CRC, data of page and CRC from device
                                 for (i = 0; i < 34; i++)
                                 {
-                                    read_buffer[cnt++] = unchecked((sbyte)0xFF);
+                                    read_buffer[cnt++] = unchecked((byte)0xFF);
                                 }
 
                                 // perform CRC8 of the first chunk of known data
@@ -648,7 +642,7 @@ namespace com.dalsemi.onewire.adapter
                                         // now loop to see if all data is 0xFF
                                         for (i = 4; i < 36; i++)
                                         {
-                                            if ((sbyte)read_buffer[i] != unchecked((sbyte)0xFF))
+                                            if ((byte)read_buffer[i] != unchecked((byte)0xFF))
                                             {
                                                 continue;
                                             }
@@ -894,7 +888,7 @@ namespace com.dalsemi.onewire.adapter
                     owState.searchLastDiscrepancy = 64;
 
                     // create an id to set
-                    sbyte[] new_id = new sbyte[8];
+                    byte[] new_id = new byte[8];
 
                     // set the family code
                     new_id[0] = owState.searchIncludeFamilies[0];
@@ -993,7 +987,7 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         /// <param name="address"> An array to be filled with the current iButton address. </param>
         /// <seealso cref=    com.dalsemi.onewire.utils.Address </seealso>
-        public override void getAddress(sbyte[] address)
+        public override void getAddress(byte[] address)
         {
             Array.Copy(owState.ID, 0, address, 0, 8);
         }
@@ -1006,7 +1000,7 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         /// <param name="address"> An array to be copied into the current iButton
         ///         address. </param>
-        public virtual sbyte[] Address
+        public virtual byte[] Address
         {
             set
             {
@@ -1028,7 +1022,7 @@ namespace com.dalsemi.onewire.adapter
         /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter
         /// </exception>
         /// <seealso cref=    com.dalsemi.onewire.utils.Address </seealso>
-        public override bool isPresent(sbyte[] address)
+        public override bool isPresent(byte[] address)
         {
             try
             {
@@ -1112,7 +1106,7 @@ namespace com.dalsemi.onewire.adapter
         /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter
         /// </exception>
         /// <seealso cref=    com.dalsemi.onewire.utils.Address </seealso>
-        public override bool isAlarming(sbyte[] address)
+        public override bool isAlarming(byte[] address)
         {
             try
             {
@@ -1237,8 +1231,8 @@ namespace com.dalsemi.onewire.adapter
         {
 
             // clear the include and exclude family search lists
-            owState.searchIncludeFamilies = new sbyte[0];
-            owState.searchExcludeFamilies = new sbyte[0];
+            owState.searchIncludeFamilies = new byte[0];
+            owState.searchExcludeFamilies = new byte[0];
         }
 
         /// <summary>
@@ -1253,8 +1247,8 @@ namespace com.dalsemi.onewire.adapter
         {
 
             // replace include family array with 1 element array
-            owState.searchIncludeFamilies = new sbyte[1];
-            owState.searchIncludeFamilies[0] = (sbyte)familyID;
+            owState.searchIncludeFamilies = new byte[1];
+            owState.searchIncludeFamilies[0] = (byte)familyID;
         }
 
         /// <summary>
@@ -1265,11 +1259,11 @@ namespace com.dalsemi.onewire.adapter
         /// <param name="family">  array of the family types to target for searches </param>
         /// <seealso cref=    com.dalsemi.onewire.utils.Address </seealso>
         /// <seealso cref=    #targetAllFamilies </seealso>
-        public override void targetFamily(sbyte[] familyID)
+        public override void targetFamily(byte[] familyID)
         {
 
             // replace include family array with new array
-            owState.searchIncludeFamilies = new sbyte[familyID.Length];
+            owState.searchIncludeFamilies = new byte[familyID.Length];
 
             Array.Copy(familyID, 0, owState.searchIncludeFamilies, 0, familyID.Length);
         }
@@ -1287,8 +1281,8 @@ namespace com.dalsemi.onewire.adapter
         {
 
             // replace exclude family array with 1 element array
-            owState.searchExcludeFamilies = new sbyte[1];
-            owState.searchExcludeFamilies[0] = (sbyte)familyID;
+            owState.searchExcludeFamilies = new byte[1];
+            owState.searchExcludeFamilies[0] = (byte)familyID;
         }
 
         /// <summary>
@@ -1299,11 +1293,11 @@ namespace com.dalsemi.onewire.adapter
         /// <param name="family">  array of family cods NOT to target for searches </param>
         /// <seealso cref=    com.dalsemi.onewire.utils.Address </seealso>
         /// <seealso cref=    #targetAllFamilies </seealso>
-        public override void excludeFamily(sbyte[] familyID)
+        public override void excludeFamily(byte[] familyID)
         {
 
             // replace exclude family array with new array
-            owState.searchExcludeFamilies = new sbyte[familyID.Length];
+            owState.searchExcludeFamilies = new byte[familyID.Length];
 
             Array.Copy(familyID, 0, owState.searchExcludeFamilies, 0, familyID.Length);
         }
@@ -1453,7 +1447,7 @@ namespace com.dalsemi.onewire.adapter
                     }
 
                     // send and receive
-                    char[] result_array = uTransaction(uBuild);
+                    byte[] result_array = uTransaction(uBuild);
 
                     // check for echo
                     if (bitValue != uBuild.interpretOneWireBit(result_array[bit_offset]))
@@ -1525,7 +1519,7 @@ namespace com.dalsemi.onewire.adapter
                         }
 
                         // send and receive
-                        char[] result_array = uTransaction(uBuild);
+                        byte[] result_array = uTransaction(uBuild);
 
                         // check the result
                         if (result_array.Length == (bit_offset + 1))
@@ -1564,14 +1558,14 @@ namespace com.dalsemi.onewire.adapter
         /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
         public override void putByte(int byteValue)
         {
-            sbyte[] temp_block = new sbyte[1];
+            byte[] temp_block = new byte[1];
 
-            temp_block[0] = (sbyte)byteValue;
+            temp_block[0] = (byte)byteValue;
 
             dataBlock(temp_block, 0, 1);
 
             // check to make sure echo was what was sent
-            if (temp_block[0] != (sbyte)byteValue)
+            if (temp_block[0] != (byte)byteValue)
             {
                 throw new OneWireIOException("Error short on 1-Wire during putByte");
             }
@@ -1588,9 +1582,9 @@ namespace com.dalsemi.onewire.adapter
         {
             get
             {
-                sbyte[] temp_block = new sbyte[1];
+                byte[] temp_block = new byte[1];
 
-                temp_block[0] = unchecked((sbyte)0xFF);
+                temp_block[0] = (byte)0xFF;
 
                 dataBlock(temp_block, 0, 1);
 
@@ -1614,14 +1608,14 @@ namespace com.dalsemi.onewire.adapter
         /// </returns>
         /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
         /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-        public override sbyte[] getBlock(int len)
+        public override byte[] getBlock(int len)
         {
-            sbyte[] temp_block = new sbyte[len];
+            byte[] temp_block = new byte[len];
 
             // set block to read 0xFF
             for (int i = 0; i < len; i++)
             {
-                temp_block[i] = unchecked((sbyte)0xFF);
+                temp_block[i] = (byte)0xFF;
             }
 
             getBlock(temp_block, len);
@@ -1638,7 +1632,7 @@ namespace com.dalsemi.onewire.adapter
         /// </param>
         /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
         /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-        public override void getBlock(sbyte[] arr, int len)
+        public override void getBlock(byte[] arr, int len)
         {
             getBlock(arr, 0, len);
         }
@@ -1653,13 +1647,13 @@ namespace com.dalsemi.onewire.adapter
         /// </param>
         /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
         /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-        public override void getBlock(sbyte[] arr, int off, int len)
+        public override void getBlock(byte[] arr, int off, int len)
         {
 
             // set block to read 0xFF
             for (int i = off; i < len; i++)
             {
-                arr[i] = unchecked((sbyte)0xFF);
+                arr[i] = 0xFF;
             }
 
             dataBlock(arr, off, len);
@@ -1677,10 +1671,10 @@ namespace com.dalsemi.onewire.adapter
         /// </param>
         /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
         /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-        public override void dataBlock(sbyte[] dataBlock, int off, int len)
+        public override void dataBlock(byte[] dataBlock, int off, int len)
         {
             int data_offset;
-            char[] ret_data;
+            byte[] ret_data;
 
             try
             {
@@ -1796,7 +1790,7 @@ namespace com.dalsemi.onewire.adapter
                     int reset_offset = uBuild.oneWireReset();
 
                     // send and receive
-                    char[] result_array = uTransaction(uBuild);
+                    byte[] result_array = uTransaction(uBuild);
 
                     // check the result
                     if (result_array.Length == (reset_offset + 1))
@@ -1941,7 +1935,7 @@ namespace com.dalsemi.onewire.adapter
                         uBuild.sendCommand(UPacketBuilder.FUNCTION_5VPULSE_NOW, false);
 
                         // send and receive
-                        char[] result_array = uTransaction(uBuild);
+                        byte[] result_array = uTransaction(uBuild);
 
                         // check the result
                         if (result_array.Length == (set_SPUD_offset + 1))
@@ -2163,7 +2157,7 @@ namespace com.dalsemi.onewire.adapter
                         int pulse_response_offset = uBuild.sendCommand(UPacketBuilder.FUNCTION_STOP_PULSE, true);
 
                         // send and receive
-                        char[] result_array = uTransaction(uBuild);
+                        byte[] result_array = uTransaction(uBuild);
 
                         // check the result
                         if (result_array.Length == (pulse_response_offset + 1))
@@ -2259,7 +2253,7 @@ namespace com.dalsemi.onewire.adapter
                     {
 
                         // change 1-Wire value
-                        owState.oneWireSpeed = (char)value;
+                        owState.oneWireSpeed = (byte)value;
 
                         // set adapter to communicate at this new value (regular == flex for now)
                         if (value == SPEED_OVERDRIVE)
@@ -2340,7 +2334,7 @@ namespace com.dalsemi.onewire.adapter
                 int search_offset = uBuild.search(mState);
 
                 // send/receive the search
-                char[] result_array = uTransaction(uBuild);
+                byte[] result_array = uTransaction(uBuild);
 
                 // interpret search result and return
                 if (!mState.skipResetOnSearch)
@@ -2366,9 +2360,9 @@ namespace com.dalsemi.onewire.adapter
         /// </param>
         /// <returns>  true if device participated and was present
         ///         in the strongAccess search </returns>
-        private bool blockIsPresent(sbyte[] address, bool alarmOnly)
+        private bool blockIsPresent(byte[] address, bool alarmOnly)
         {
-            sbyte[] send_packet = new sbyte[24];
+            byte[] send_packet = new byte[24];
             int i;
 
             // reset the 1-Wire
@@ -2387,7 +2381,7 @@ namespace com.dalsemi.onewire.adapter
             // set all bits at first
             for (i = 0; i < 24; i++)
             {
-                send_packet[i] = unchecked((sbyte)0xFF);
+                send_packet[i] = 0xFF;
             }
 
             // now set or clear apropriate bits for search
@@ -2451,7 +2445,7 @@ namespace com.dalsemi.onewire.adapter
                 }
 
                 // convert this baud to 'u' baud
-                char ubaud;
+                byte ubaud;
 
                 switch (baud)
                 {
@@ -2490,12 +2484,10 @@ namespace com.dalsemi.onewire.adapter
                     // send command, no response at this baud rate
                     serial.flush();
 
-                    //JAVA TO C# CONVERTER TODO TASK: Java iterators are only converted within the context of 'while' and 'for' loops:
+                    uBuild.Packets.MoveNext();
                     RawSendPacket pkt = (RawSendPacket)uBuild.Packets.Current; //TODO .nextElement();
-                    char[] temp_buf = new char[pkt.buffer.Length];
-
-                    //TODO pkt.buffer = getChars(0, pkt.buffer.Length, temp_buf, 0);
-                    serial.write(pkt.buffer.ToString().ToCharArray()); //temp_buf
+                    pkt.writer.Flush();
+                    serial.write(pkt.buffer.ToArray());
 
                     // delay to let things settle
                     sleep(5);
@@ -2529,7 +2521,7 @@ namespace com.dalsemi.onewire.adapter
                     // send and receive
                     serial.flush();
 
-                    char[] result_array = uTransaction(uBuild);
+                    byte[] result_array = uTransaction(uBuild);
 
                     // check the result
                     if (result_array.Length == 1)
@@ -2643,7 +2635,7 @@ namespace com.dalsemi.onewire.adapter
                 uState.ubaud = UAdapterState.BAUD_9600;
 
                 // put back to standard speed
-                owState.oneWireSpeed = (char)SPEED_REGULAR;
+                owState.oneWireSpeed = SPEED_REGULAR;
                 uState.uSpeedMode = UAdapterState.USPEED_FLEX;
                 uState.ubaud = UAdapterState.BAUD_9600;
 
@@ -2686,7 +2678,7 @@ namespace com.dalsemi.onewire.adapter
                 uState.ubaud = UAdapterState.BAUD_9600;
 
                 // put back to standard speed
-                owState.oneWireSpeed = (char)SPEED_REGULAR;
+                owState.oneWireSpeed = SPEED_REGULAR;
                 uState.uSpeedMode = UAdapterState.USPEED_FLEX;
                 uState.ubaud = UAdapterState.BAUD_9600;
 
@@ -2737,7 +2729,7 @@ namespace com.dalsemi.onewire.adapter
                 int bit_offset = uBuild.dataBit(true, false);
 
                 // send and receive
-                char[] result_array = uTransaction(uBuild);
+                byte[] result_array = uTransaction(uBuild);
 
                 // check the result
                 if (result_array.Length == (bit_offset + 1))
@@ -2775,59 +2767,54 @@ namespace com.dalsemi.onewire.adapter
         /// <returns>  the result array
         /// </returns>
         /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
-        private char[] uTransaction(UPacketBuilder tempBuild)
+        private byte[] uTransaction(UPacketBuilder tempBuild)
         {
             int offset;
+            byte[] ret_buffer = null;
 
             try
             {
                 // clear the buffers
                 serial.flush();
-                inBuffer.Length = 0;
 
-                // loop to send all of the packets
-                for (System.Collections.IEnumerator packet_enum = tempBuild.Packets; packet_enum.MoveNext();)
+                using (MemoryStream inBuffer = new MemoryStream())
                 {
-
-                    // get the next packet
-                    RawSendPacket pkt = (RawSendPacket)packet_enum.Current;
-
-                    // bogus packet to indicate need to wait for long DS2480 alarm reset
-                    if ((pkt.buffer.Length == 0) && (pkt.returnLength == 0))
+                    // loop to send all of the packets
+                    for (System.Collections.IEnumerator packet_enum = tempBuild.Packets; packet_enum.MoveNext();)
                     {
-                        sleep(6);
-                        serial.flush();
 
-                        continue;
+                        // get the next packet
+                        RawSendPacket pkt = (RawSendPacket)packet_enum.Current;
+
+                        // bogus packet to indicate need to wait for long DS2480 alarm reset
+                        if ((pkt.buffer.Length == 0) && (pkt.returnLength == 0))
+                        {
+                            sleep(6);
+                            serial.flush();
+
+                            continue;
+                        }
+
+                        // remember number of bytes in input
+                        offset = (int)inBuffer.Length;
+
+                        // send the packet
+                        pkt.writer.Flush();
+                        serial.write(pkt.buffer.ToArray());
+
+                        // wait on returnLength bytes in inBound
+                        byte[] read = serial.readWithTimeout(pkt.returnLength);
+                        inBuffer.Write(read, 0, read.Length);
                     }
 
-                    // get the data
-                    //TODO char[] temp_buf = new char[pkt.buffer.Length];
+                    // read the return packet
+                    ret_buffer = new byte[inBuffer.Length];
 
-                    //TODO pkt.buffer.getChars(0, pkt.buffer.Length, temp_buf, 0);
+                    ret_buffer = inBuffer.ToArray();
 
-                    // remember number of bytes in input
-                    offset = inBuffer.Length;
-
-                    // send the packet
-                    //TODO serial.write(temp_buf);
-                    serial.write(pkt.buffer.ToString().ToCharArray());
-
-                    // wait on returnLength bytes in inBound
-                    inBuffer.Append(serial.readWithTimeout(pkt.returnLength));
+                    // check for extra bytes in inBuffer
+                    extraBytesReceived = (inBuffer.Length > tempBuild.totalReturnLength);
                 }
-
-                // read the return packet
-                char[] ret_buffer = new char[inBuffer.Length];
-
-                //TODO inBuffer.getChars(0, inBuffer.Length, ret_buffer, 0);
-                inBuffer.ToString().ToCharArray().CopyTo(ret_buffer, 0);
-
-                // check for extra bytes in inBuffer
-                extraBytesReceived = (inBuffer.Length > tempBuild.totalReturnLength);
-
-                // clear the inbuffer
-                inBuffer.Length = 0;
 
                 return ret_buffer;
             }
@@ -2880,12 +2867,12 @@ namespace com.dalsemi.onewire.adapter
             CommPortIdentifier port_id;
             SerialService      serial_instance;
 
-            // loop throught all of the serial port elements
-            while (com_enum.hasMoreElements())
+            // loop through all of the serial port elements
+            while (com_enum.NextElement())
             {
 
                // get the next com port
-               port_id = ( CommPortIdentifier ) com_enum.nextElement();
+               port_id = ( CommPortIdentifier ) com_enum.Current;
 
                // only collect the names of the serial ports
                if (port_id.getPortType() == CommPortIdentifier.PORT_SERIAL)

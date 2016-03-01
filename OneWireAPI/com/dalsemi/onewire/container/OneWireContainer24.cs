@@ -128,8 +128,8 @@ namespace com.dalsemi.onewire.container
 	   // finals
 	   protected internal const int RTC_OFFSET = 1;
 	   protected internal const int CONTROL_OFFSET = 0;
-	   protected internal static readonly sbyte READ_CLOCK_COMMAND = (sbyte)0x66;
-	   protected internal static readonly sbyte WRITE_CLOCK_COMMAND = unchecked((sbyte)0x99);
+	   protected internal static readonly byte READ_CLOCK_COMMAND = (byte)0x66;
+	   protected internal static readonly byte WRITE_CLOCK_COMMAND = unchecked((byte)0x99);
 
 	   //--- Constructors
 	   /// <summary>
@@ -162,7 +162,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= #OneWireContainer24() OneWireContainer24 </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
-	   public OneWireContainer24(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer24(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 	   }
 
@@ -310,9 +310,9 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
-		   sbyte[] state = new sbyte[5];
+		   byte[] state = new byte[5];
 		   if (adapter.select(address))
 		   {
 			   // send out the read clock command
@@ -343,18 +343,18 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
 		   if (adapter.select(address))
 		   {
-			   sbyte[] writeblock = new sbyte[6];
+			   byte[] writeblock = new byte[6];
 			   writeblock[0] = WRITE_CLOCK_COMMAND;
 			   Array.Copy(state,0,writeblock,1,5);
 			   // send the write clock command with the five bytes appended
 			   adapter.dataBlock(writeblock,0,6);
 
 			   // double check by reading the clock bytes back
-			   sbyte[] readblock = readDevice();
+			   byte[] readblock = readDevice();
 			   if ((readblock[0] & 0x0C) != (state[0] & 0x0C))
 			   {
 				  throw new OneWireIOException("Failed to write to the clock register page");
@@ -387,7 +387,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #setClock(long,byte[]) </seealso>
-	   public virtual long getClock(sbyte[] state)
+	   public virtual long getClock(byte[] state)
 	   {
 		  return Convert.toLong(state, RTC_OFFSET, 4) * 1000;
 	   }
@@ -407,7 +407,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual long getClockAlarm(sbyte[] state)
+	   public virtual long getClockAlarm(byte[] state)
 	   {
 		  throw new OneWireException("This device does not support clock alarms.");
 	   }
@@ -427,7 +427,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual bool isClockAlarming(sbyte[] state)
+	   public virtual bool isClockAlarming(byte[] state)
 	   {
 		   return false;
 	   }
@@ -445,7 +445,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual bool isClockAlarmEnabled(sbyte[] state)
+	   public virtual bool isClockAlarmEnabled(byte[] state)
 	   {
 		   return false;
 	   }
@@ -461,7 +461,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #canDisableClock() </seealso>
 	   /// <seealso cref= #setClockRunEnable(bool,byte[]) </seealso>
-	   public virtual bool isClockRunning(sbyte[] state)
+	   public virtual bool isClockRunning(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(3, CONTROL_OFFSET, state) == 1);
 	   }
@@ -482,7 +482,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #getClock(byte[]) </seealso>
-	   public virtual void setClock(long time, sbyte[] state)
+	   public virtual void setClock(long time, byte[] state)
 	   {
 		  Convert.toByteArray((time / 1000L), state, RTC_OFFSET, 4);
 	   }
@@ -507,7 +507,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual void setClockAlarm(long time, sbyte[] state)
+	   public virtual void setClockAlarm(long time, byte[] state)
 	   {
 		  throw new OneWireException("This device does not support clock alarms.");
 	   }
@@ -531,7 +531,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
-	   public virtual void setClockAlarmEnable(bool alarmEnable, sbyte[] state)
+	   public virtual void setClockAlarmEnable(bool alarmEnable, byte[] state)
 	   {
 		  throw new OneWireException("This device does not support clock alarms.");
 	   }
@@ -552,7 +552,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #canDisableClock() </seealso>
 	   /// <seealso cref= #isClockRunning(byte[]) </seealso>
-	   public virtual void setClockRunEnable(bool runEnable, sbyte[] state)
+	   public virtual void setClockRunEnable(bool runEnable, byte[] state)
 	   {
 		  /* When writing oscillator enable, both bits should have identical data. */
 		  Bit.arrayWriteBit(runEnable ? 1 : 0, 3, CONTROL_OFFSET, state);

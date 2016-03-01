@@ -143,7 +143,7 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// DS2450 Convert command </summary>
-	   private static readonly sbyte CONVERT_COMMAND = (sbyte) 0x3C;
+	   private static readonly byte CONVERT_COMMAND = 0x3C;
 
 	   //--------
 	   //-------- Variables
@@ -180,7 +180,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="sourceAdapter">     adapter required to communicate with
 	   /// this device </param>
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
-	   public OneWireContainer20(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer20(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 
 		  // initialize the memory banks
@@ -392,9 +392,9 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> Data was not read correctly </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
-		  sbyte[] read_buf = new sbyte [27];
+		  byte[] read_buf = new byte [27];
 		  MemoryBankAD mb;
 
 		  // read the banks, control/alarm/calibration
@@ -425,7 +425,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Data was not written correctly </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
 		  int start_offset, len, i, bank, index;
 		  bool got_block;
@@ -438,11 +438,11 @@ namespace com.dalsemi.onewire.container
 			 // check if POR or alarm high/low flag present
 			 index = i * 2 + 1;
 
-			 if ((state [index] & unchecked((sbyte) 0xB0)) != 0)
+			 if ((state [index] & 0xB0) != 0)
 			 {
 
 				// clear the bits
-				state [index] &= (sbyte) 0x0F;
+				state [index] &= (byte) 0x0F;
 
 				// set to write in bitmap
 				Bit.arrayWriteBit(1, index, BITMAP_OFFSET, state);
@@ -450,7 +450,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // only allow physical address 0x1C to be written in calibration bank
-		  state [BITMAP_OFFSET + 2] = (sbyte)(state [BITMAP_OFFSET + 2] & 0x10);
+		  state [BITMAP_OFFSET + 2] = (byte)(state [BITMAP_OFFSET + 2] & 0x10);
 
 		  // loop through the three memory banks collecting changes
 		  for (bank = 0; bank < 3; bank++)
@@ -518,9 +518,9 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> Data was not read correctly </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual double[] getADVoltage(sbyte[] state)
+	   public virtual double[] getADVoltage(byte[] state)
 	   {
-		  sbyte[] read_buf = new sbyte [8];
+		  byte[] read_buf = new byte [8];
 		  double[] ret_dbl = new double [4];
 
 		  // get readout page
@@ -554,7 +554,7 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> Data was not read correctly </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual double getADVoltage(int channel, sbyte[] state)
+	   public virtual double getADVoltage(int channel, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -564,7 +564,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // get readout page
-		  sbyte[] read_buf = new sbyte [8];
+		  byte[] read_buf = new byte [8];
 
 		  readout.readPageCRC(0, false, read_buf, 0);
 
@@ -583,7 +583,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Data was not written correctly </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual void doADConvert(int channel, sbyte[] state)
+	   public virtual void doADConvert(int channel, byte[] state)
 	   {
 
 		  // call with set presets to 0
@@ -603,7 +603,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Data was not written correctly </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual void doADConvert(bool[] doConvert, sbyte[] state)
+	   public virtual void doADConvert(bool[] doConvert, byte[] state)
 	   {
 
 		  // call with set presets to 0
@@ -631,7 +631,7 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> Data could not be written correctly </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual void doADConvert(int channel, int preset, sbyte[] state)
+	   public virtual void doADConvert(int channel, int preset, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -641,7 +641,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // perform the conversion (do fixed max conversion time)
-		  doADConvert((sbyte)(0x01 << channel), (sbyte)(preset << channel), 1440, state);
+		  doADConvert((byte)(0x01 << channel), (byte)(preset << channel), 1440, state);
 	   }
 
 	   /// <summary>
@@ -657,10 +657,10 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Data could not be written correctly </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
-	   public virtual void doADConvert(bool[] doConvert, int[] preset, sbyte[] state)
+	   public virtual void doADConvert(bool[] doConvert, int[] preset, byte[] state)
 	   {
-		  sbyte input_select_mask = 0;
-		  sbyte read_out_control = 0;
+		  byte input_select_mask = 0;
+		  byte read_out_control = 0;
 		  int time = 160; // Time required in micro Seconds to covert.
 
 		  // calculate the input mask, readout control, and conversion time
@@ -713,7 +713,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> alarm value in volts
 	   /// </returns>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual double getADAlarm(int channel, int alarmType, sbyte[] state)
+	   public virtual double getADAlarm(int channel, int alarmType, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -743,7 +743,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> <CODE>true</CODE> if specified alarm is enabled
 	   /// </returns>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual bool getADAlarmEnable(int channel, int alarmType, sbyte[] state)
+	   public virtual bool getADAlarmEnable(int channel, int alarmType, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -770,7 +770,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> <CODE>true</CODE> if specified alarm occurred
 	   /// </returns>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual bool hasADAlarmed(int channel, int alarmType, sbyte[] state)
+	   public virtual bool hasADAlarmed(int channel, int alarmType, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -795,7 +795,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> resolution of channel in volts
 	   /// </returns>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual double getADResolution(int channel, sbyte[] state)
+	   public virtual double getADResolution(int channel, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -828,7 +828,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> A/D input voltage range
 	   /// </returns>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual double getADRange(int channel, sbyte[] state)
+	   public virtual double getADRange(int channel, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -853,7 +853,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> <CODE>true</CODE> if output is enabled on specified channel
 	   /// </returns>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual bool isOutputEnabled(int channel, sbyte[] state)
+	   public virtual bool isOutputEnabled(int channel, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -879,7 +879,7 @@ namespace com.dalsemi.onewire.container
 	   ///         <CODE>true</CODE> if not conducting
 	   /// </returns>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual bool getOutputState(int channel, sbyte[] state)
+	   public virtual bool getOutputState(int channel, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -902,7 +902,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <returns> <CODE>false</CODE> if output is conducting to ground and
 	   ///         <CODE>true</CODE> if not conducting </returns>
-	   public virtual bool getDevicePOR(sbyte[] state)
+	   public virtual bool getDevicePOR(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(7, 1, state) == 1);
 	   }
@@ -917,7 +917,7 @@ namespace com.dalsemi.onewire.container
 	   ///               device returned from <CODE>readDevice()</CODE>
 	   /// </param>
 	   /// <returns> <CODE>true</CODE> if set to external power operation </returns>
-	   public virtual bool isPowerExternal(sbyte[] state)
+	   public virtual bool isPowerExternal(byte[] state)
 	   {
 		  return (state [EXPOWER_OFFSET] != 0);
 	   }
@@ -943,7 +943,7 @@ namespace com.dalsemi.onewire.container
 	   ///               device returned from <CODE>readDevice()</CODE>
 	   /// </param>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual void setADAlarm(int channel, int alarmType, double alarm, sbyte[] state)
+	   public virtual void setADAlarm(int channel, int alarmType, double alarm, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -954,7 +954,7 @@ namespace com.dalsemi.onewire.container
 
 		  int offset = ALARM_OFFSET + channel * 2 + alarmType;
 
-		  state [offset] = unchecked((sbyte)(((int)((uint)voltageToInt(alarm, getADRange(channel, state)) >> 8)) & 0x00FF));
+		  state [offset] = unchecked((byte)(((int)((uint)voltageToInt(alarm, getADRange(channel, state)) >> 8)) & 0x00FF));
 
 		  // set bitmap field to indicate this register has changed
 		  Bit.arrayWriteBit(1, offset, BITMAP_OFFSET, state);
@@ -977,7 +977,7 @@ namespace com.dalsemi.onewire.container
 	   ///               device returned from <CODE>readDevice()</CODE>
 	   /// </param>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual void setADAlarmEnable(int channel, int alarmType, bool alarmEnable, sbyte[] state)
+	   public virtual void setADAlarmEnable(int channel, int alarmType, bool alarmEnable, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -1008,7 +1008,7 @@ namespace com.dalsemi.onewire.container
 	   ///               device returned from <CODE>readDevice()</CODE>
 	   /// </param>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual void setADResolution(int channel, double resolution, sbyte[] state)
+	   public virtual void setADResolution(int channel, double resolution, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -1042,10 +1042,10 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // clear out the resolution
-		  state [channel * 2] &= unchecked((sbyte) 0xF0);
+		  state [channel * 2] &= 0xF0;
 
 		  // set the resolution
-		  state [channel * 2] |= (sbyte)((res_bits == 16) ? 0 : res_bits);
+		  state [channel * 2] |= (byte)((res_bits == 16) ? 0 : res_bits);
 
 		  // set bitmap field to indicate this register has changed
 		  Bit.arrayWriteBit(1, channel * 2, BITMAP_OFFSET, state);
@@ -1066,7 +1066,7 @@ namespace com.dalsemi.onewire.container
 	   ///               device returned from <CODE>readDevice()</CODE>
 	   /// </param>
 	   /// <exception cref="IllegalArgumentException"> Invalid channel number passed </exception>
-	   public virtual void setADRange(int channel, double range, sbyte[] state)
+	   public virtual void setADRange(int channel, double range, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -1115,7 +1115,7 @@ namespace com.dalsemi.onewire.container
 	   ///           <CODE>false</CODE> </param>
 	   /// <param name="state"> current state of the
 	   ///                device returned from <CODE>readDevice()</CODE> </param>
-	   public virtual void setOutput(int channel, bool outputEnable, bool outputState, sbyte[] state)
+	   public virtual void setOutput(int channel, bool outputEnable, bool outputState, byte[] state)
 	   {
 
 		  // check for valid channel value
@@ -1147,11 +1147,11 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="external"> <CODE>true</CODE> if setting external power is used </param>
 	   /// <param name="state"> current state of this
 	   ///               device returned from <CODE>readDevice()</CODE> </param>
-	   public virtual void setPower(bool external, sbyte[] state)
+	   public virtual void setPower(bool external, byte[] state)
 	   {
 
 		  // sed the flag
-		  state [EXPOWER_OFFSET] = (sbyte)(external ? 0x40 : 0);
+		  state [EXPOWER_OFFSET] = (byte)(external ? 0x40 : 0);
 
 		  // set bitmap field to indicate this register has changed
 		  Bit.arrayWriteBit(1, EXPOWER_OFFSET, BITMAP_OFFSET, state);
@@ -1248,7 +1248,7 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> Data was not written correctly </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
 	   /// <exception cref="IlleaglArgumentException"> Invalid channel number passed </exception>
-	   private void doADConvert(sbyte inputSelectMask, sbyte readOutControl, int timeUs, sbyte[] state)
+	   private void doADConvert(byte inputSelectMask, byte readOutControl, int timeUs, byte[] state)
 	   {
 
 		  // check if no conversions
@@ -1258,13 +1258,13 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // Create the command block to be sent.
-		  sbyte[] raw_buf = new sbyte [5];
+		  byte[] raw_buf = new byte [5];
 
 		  raw_buf [0] = CONVERT_COMMAND;
 		  raw_buf [1] = inputSelectMask;
-		  raw_buf [2] = (sbyte) readOutControl;
-		  raw_buf [3] = unchecked((sbyte) 0xFF);
-		  raw_buf [4] = unchecked((sbyte) 0xFF);
+		  raw_buf [2] = readOutControl;
+		  raw_buf [3] = 0xFF;
+		  raw_buf [4] = 0xFF;
 
 		  // calculate the CRC16 up to and including readOutControl
 		  int crc16 = CRC16.compute(raw_buf, 0, 3, 0);
@@ -1302,7 +1302,7 @@ namespace com.dalsemi.onewire.container
 				adapter.startPowerDelivery(DSPortAdapter.CONDITION_AFTER_BYTE);
 
 				// get the final CRC byte and start strong power delivery
-				raw_buf [4] = (sbyte) adapter.Byte;
+				raw_buf [4] = (byte) adapter.Byte;
 				crc16 = CRC16.compute(raw_buf, 3, 2, crc16);
 
 				// Wait for power delivery to complete the conversion

@@ -52,7 +52,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Write Scratchpad Command
 	   /// </summary>
-	   public static readonly sbyte READ_PAGE_WITH_CRC = unchecked((sbyte) 0xA5);
+	   public static readonly byte READ_PAGE_WITH_CRC = unchecked((byte) 0xA5);
 
 	   //--------
 	   //-------- Variables
@@ -111,7 +111,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPage(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public override void readPage(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
 
 		  // all other pages
@@ -143,7 +143,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPage(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public override void readPage(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
 
 		  // check if current bank is not scratchpad bank, or not page 0
@@ -176,9 +176,9 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override int readPagePacket(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public override int readPagePacket(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
-		  sbyte[] raw_buf = new sbyte [pageLength];
+		  byte[] raw_buf = new byte [pageLength];
 
 		  // read entire page with read page CRC
 		  readPageCRC(page, readContinue, raw_buf, 0, extraInfo, extraInfoLength);
@@ -227,7 +227,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
 		  readPageCRC(page, readContinue, readBuf, offset, null, extraInfoLength);
 	   }
@@ -252,7 +252,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
 		  readPageCRC(page, readContinue, readBuf, offset, extraInfo, extraInfoLength);
 	   }
@@ -276,10 +276,10 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   protected internal virtual void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo, int extraLength)
+	   protected internal virtual void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo, int extraLength)
 	   {
 		  int last_crc = 0;
-		  sbyte[] raw_buf;
+		  byte[] raw_buf;
 
 		  // only needs to be implemented if supported by hardware
 		  if (!pageAutoCRC)
@@ -312,13 +312,13 @@ namespace com.dalsemi.onewire.container
 			 }
 
 			 // build start reading memory block
-			 raw_buf = new sbyte [3];
+			 raw_buf = new byte [3];
 			 raw_buf [0] = READ_PAGE_WITH_CRC;
 
 			 int addr = page * pageLength + startPhysicalAddress;
 
-			 raw_buf [1] = unchecked((sbyte)(addr & 0xFF));
-			 raw_buf [2] = unchecked((sbyte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
+			 raw_buf [1] = unchecked((byte)(addr & 0xFF));
+			 raw_buf [2] = unchecked((byte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
 
 			 // perform CRC16 on first part
 			 last_crc = CRC16.compute(raw_buf, 0, raw_buf.Length, last_crc);
@@ -328,7 +328,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // pre-fill with 0xFF 
-		  raw_buf = new sbyte [pageLength + extraLength + 2 + numVerifyBytes];
+		  raw_buf = new byte [pageLength + extraLength + 2 + numVerifyBytes];
 
 		  Array.Copy(ffBlock, 0, raw_buf, 0, raw_buf.Length);
 

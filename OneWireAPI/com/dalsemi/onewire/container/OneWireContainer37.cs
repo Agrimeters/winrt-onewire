@@ -142,13 +142,13 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// The current password for readingfrom this device.
 	   /// </summary>
-	   protected internal readonly sbyte[] readPassword = new sbyte[8];
+	   protected internal readonly byte[] readPassword = new byte[8];
 	   protected internal bool readPasswordSet = false;
 
 	   /// <summary>
 	   /// The current password for reading/writing from/to this device.
 	   /// </summary>
-	   protected internal readonly sbyte[] readWritePassword = new sbyte[8];
+	   protected internal readonly byte[] readWritePassword = new byte[8];
 	   protected internal bool readWritePasswordSet = false;
 
 	   // used to tell if the passwords have been enabled
@@ -156,9 +156,9 @@ namespace com.dalsemi.onewire.container
 	   private bool readWritePasswordEnabled = false;
 
 	   // used to 'enable' passwords
-	   private static readonly sbyte ENABLE_BYTE = unchecked((sbyte)0xAA);
+	   private static readonly byte ENABLE_BYTE = unchecked((byte)0xAA);
 	   // used to 'disable' passwords
-	   private const sbyte DISABLE_BYTE = 0x00;
+	   private const byte DISABLE_BYTE = 0x00;
 
 	   private string descriptionString = "Rugged, self-sufficient 1-Wire device that, once setup can " + "store 32KB of password protected memory with a read only " + "and a read/write password.";
 
@@ -170,22 +170,22 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// 1-Wire command for Write Scratchpad </summary>
-	   public static readonly sbyte WRITE_SCRATCHPAD_COMMAND = (sbyte)0x0F;
+	   public static readonly byte WRITE_SCRATCHPAD_COMMAND = (byte)0x0F;
 	   /// <summary>
 	   /// 1-Wire command for Read Scratchpad </summary>
-	   public static readonly sbyte READ_SCRATCHPAD_COMMAND = unchecked((sbyte)0xAA);
+	   public static readonly byte READ_SCRATCHPAD_COMMAND = unchecked((byte)0xAA);
 	   /// <summary>
 	   /// 1-Wire command for Copy Scratchpad With Password </summary>
-	   public static readonly sbyte COPY_SCRATCHPAD_PW_COMMAND = unchecked((sbyte)0x99);
+	   public static readonly byte COPY_SCRATCHPAD_PW_COMMAND = unchecked((byte)0x99);
 	   /// <summary>
 	   /// 1-Wire command for Read Memory With Password </summary>
-	   public static readonly sbyte READ_MEMORY_PW_COMMAND = (sbyte)0x69;
+	   public static readonly byte READ_MEMORY_PW_COMMAND = (byte)0x69;
 	   /// <summary>
 	   /// 1-Wire command for Verifing the Password </summary>
-	   public static readonly sbyte VERIFY_PSW_COMMAND = unchecked((sbyte)0xC3);
+	   public static readonly byte VERIFY_PSW_COMMAND = unchecked((byte)0xC3);
 	   /// <summary>
 	   /// 1-Wire command for getting Read Version </summary>
-	   public static readonly sbyte READ_VERSION = unchecked((sbyte)0xCC);
+	   public static readonly byte READ_VERSION = unchecked((byte)0xCC);
 
 	// *****************************************************************************
 	//  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -245,7 +245,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #OneWireContainer37() </seealso>
 	   /// <seealso cref= #OneWireContainer37(com.dalsemi.onewire.adapter.DSPortAdapter,long)   OneWireContainer37(DSPortAdapter,long) </seealso>
 	   /// <seealso cref= #OneWireContainer37(com.dalsemi.onewire.adapter.DSPortAdapter,java.lang.String) OneWireContainer37(DSPortAdapter,String) </seealso>
-	   public OneWireContainer37(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer37(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 
 		  // initialize the memory banks
@@ -296,7 +296,7 @@ namespace com.dalsemi.onewire.container
 	   ///                           this iButton </param>
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address </seealso>
-	   public override void setupContainer(DSPortAdapter sourceAdapter, sbyte[] newAddress)
+	   public override void setupContainer(DSPortAdapter sourceAdapter, byte[] newAddress)
 	   {
 		  base.setupContainer(sourceAdapter, newAddress);
 
@@ -659,7 +659,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="password"> the new value of 8-byte device read password, to be copied
 	   ///        into the devices register. </param>
 	   /// <param name="offset"> the offset to start copying the 8 bytes from the array </param>
-	   public virtual void setDeviceReadOnlyPassword(sbyte[] password, int offset)
+	   public virtual void setDeviceReadOnlyPassword(byte[] password, int offset)
 	   {
 		  register.write(READ_ACCESS_PASSWORD & 0x3F, password, offset, 8);
 
@@ -678,7 +678,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="password"> the new value of 8-byte device read/write password, to be
 	   ///        copied into the devices register. </param>
 	   /// <param name="offset"> the offset to start copying the 8 bytes from the array </param>
-	   public virtual void setDeviceReadWritePassword(sbyte[] password, int offset)
+	   public virtual void setDeviceReadWritePassword(byte[] password, int offset)
 	   {
 		  register.write(READ_WRITE_ACCESS_PASSWORD & 0x3F, password, offset, 8);
 
@@ -697,7 +697,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="password"> the new value of 8-byte device read/write password, to be
 	   ///        copied into the devices register. </param>
 	   /// <param name="offset"> the offset to start copying the 8 bytes from the array </param>
-	   public virtual void setDeviceWriteOnlyPassword(sbyte[] password, int offset)
+	   public virtual void setDeviceWriteOnlyPassword(byte[] password, int offset)
 	   {
 		  throw new OneWireException("The DS1977 does not have a write only password.");
 	   }
@@ -739,7 +739,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // must write both passwords for this to work
-		  sbyte[] enableCommand = new sbyte[1];
+		  byte[] enableCommand = new byte[1];
 		  enableCommand[0] = (enableReadWrite?ENABLE_BYTE:DISABLE_BYTE);
 
 		  register.write(PASSWORD_CONTROL_REGISTER & 0x3F, enableCommand, 0, 1);
@@ -764,7 +764,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="password"> New 8-byte value of container's read password. </param>
 	   /// <param name="offset"> Index to start copying the password from the array. </param>
-	   public virtual void setContainerReadOnlyPassword(sbyte[] password, int offset)
+	   public virtual void setContainerReadOnlyPassword(byte[] password, int offset)
 	   {
 		  Array.Copy(password, offset, readPassword, 0, PASSWORD_LENGTH);
 		  readPasswordSet = true;
@@ -776,7 +776,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="password"> Holds the 8-byte value of container's read password. </param>
 	   /// <param name="offset"> Index to start copying the password into the array. </param>
-	   public virtual void getContainerReadOnlyPassword(sbyte[] password, int offset)
+	   public virtual void getContainerReadOnlyPassword(byte[] password, int offset)
 	   {
 		  Array.Copy(readPassword, 0, password, offset, PASSWORD_LENGTH);
 	   }
@@ -804,7 +804,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="password"> New 8-byte value of container's read/write password. </param>
 	   /// <param name="offset"> Index to start copying the password from the array. </param>
-	   public virtual void setContainerReadWritePassword(sbyte[] password, int offset)
+	   public virtual void setContainerReadWritePassword(byte[] password, int offset)
 	   {
 		  Array.Copy(password, offset, readWritePassword, 0, 8);
 		  readWritePasswordSet = true;
@@ -816,7 +816,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="password"> Holds the 8-byte value of container's read/write password. </param>
 	   /// <param name="offset"> Index to start copying the password into the array. </param>
-	   public virtual void getContainerReadWritePassword(sbyte[] password, int offset)
+	   public virtual void getContainerReadWritePassword(byte[] password, int offset)
 	   {
 		  Array.Copy(readWritePassword, 0, password, offset, PASSWORD_LENGTH);
 	   }
@@ -846,7 +846,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="password"> New 8-byte value of container's read/write password. </param>
 	   /// <param name="offset"> Index to start copying the password from the array. </param>
-	   public virtual void setContainerWriteOnlyPassword(sbyte[] password, int offset)
+	   public virtual void setContainerWriteOnlyPassword(byte[] password, int offset)
 	   {
 		  throw new OneWireException("The DS1977 does not have a write only password.");
 	   }
@@ -857,7 +857,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="password"> Holds the 8-byte value of container's read/write password. </param>
 	   /// <param name="offset"> Index to start copying the password into the array. </param>
-	   public virtual void getContainerWriteOnlyPassword(sbyte[] password, int offset)
+	   public virtual void getContainerWriteOnlyPassword(byte[] password, int offset)
 	   {
 		  throw new OneWireException("The DS1977 does not have a write only password.");
 	   }
@@ -878,15 +878,15 @@ namespace com.dalsemi.onewire.container
 		   }
 	   }
 
-	   public virtual bool verifyPassword(sbyte[] password, int offset, int type)
+	   public virtual bool verifyPassword(byte[] password, int offset, int type)
 	   {
-		  sbyte[] raw_buf = new sbyte [15];
+		  byte[] raw_buf = new byte [15];
 		  int addr = ((type == READ_ONLY_PWD) ? READ_ACCESS_PASSWORD : READ_WRITE_ACCESS_PASSWORD);
 
 		  // command, address, offset, password (except last byte)
 		  raw_buf [0] = VERIFY_PSW_COMMAND;
-		  raw_buf [1] = unchecked((sbyte)(addr & 0xFF));
-		  raw_buf [2] = unchecked((sbyte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
+		  raw_buf [1] = unchecked((byte)(addr & 0xFF));
+		  raw_buf [2] = unchecked((byte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
 
 		  Array.Copy(password, offset, raw_buf, 3, 8);
 

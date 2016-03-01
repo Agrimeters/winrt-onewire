@@ -121,7 +121,7 @@ namespace com.dalsemi.onewire.application.sha
 	{
 	   /// <summary>
 	   /// Used for fast FF copy </summary>
-	   private static readonly sbyte[] ffBlock = new sbyte[] {unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF), unchecked((sbyte)0xFF)};
+	   private static readonly byte[] ffBlock = new byte[] {0x0FF, 0x0FF, 0x0FF, 0x0FF, 0x0FF, 0x0FF, 0x0FF, 0x0FF};
 
 	   // ************************************************************** //
 	   // Type constants
@@ -241,17 +241,17 @@ namespace com.dalsemi.onewire.application.sha
 		  lastError = NO_ERROR;
 
 		  // not in critical path, so malloc'ing is okay
-		  sbyte[] accountData = new sbyte[32];
+		  byte[] accountData = new byte[32];
 
 		  return writeTransactionData(user, 0, this.initialAmount, accountData);
 	   }
 
 	   //prevent malloc'ing in the critical path
-	   private sbyte[] verifyUser_fullBindCode = new sbyte[15];
-	   private sbyte[] verifyUser_scratchpad = new sbyte[32];
-	   private sbyte[] verifyUser_accountData = new sbyte[32];
-	   private sbyte[] verifyUser_mac = new sbyte[20];
-	   private sbyte[] verifyUser_chlg = new sbyte[3];
+	   private byte[] verifyUser_fullBindCode = new byte[15];
+	   private byte[] verifyUser_scratchpad = new byte[32];
+	   private byte[] verifyUser_accountData = new byte[32];
+	   private byte[] verifyUser_mac = new byte[20];
+	   private byte[] verifyUser_chlg = new byte[3];
 	   /// <summary>
 	   /// <P>Verifies user's authentication response.  User is "authenticated" if
 	   /// and only if the digital signature generated the user iButton matches
@@ -280,11 +280,11 @@ namespace com.dalsemi.onewire.application.sha
 			  this.lastError = SHATransaction.NO_ERROR;
         
 			  //local vars
-			  sbyte[] fullBindCode = this.verifyUser_fullBindCode;
-			  sbyte[] scratchpad = this.verifyUser_scratchpad;
-			  sbyte[] accountData = this.verifyUser_accountData;
-			  sbyte[] mac = this.verifyUser_mac;
-			  sbyte[] chlg = this.verifyUser_chlg;
+			  byte[] fullBindCode = this.verifyUser_fullBindCode;
+			  byte[] scratchpad = this.verifyUser_scratchpad;
+			  byte[] accountData = this.verifyUser_accountData;
+			  byte[] mac = this.verifyUser_mac;
+			  byte[] chlg = this.verifyUser_chlg;
         
         
         
@@ -355,10 +355,10 @@ namespace com.dalsemi.onewire.application.sha
 	   }
 
 	   //prevent malloc'ing in the critical path
-	   private sbyte[] verifyData_fullBindCode = new sbyte[32];
-	   private sbyte[] verifyData_scratchpad = new sbyte[32];
-	   private sbyte[] verifyData_accountData = new sbyte[32];
-	   private sbyte[] verifyData_mac = new sbyte[20];
+	   private byte[] verifyData_fullBindCode = new byte[32];
+	   private byte[] verifyData_scratchpad = new byte[32];
+	   private byte[] verifyData_accountData = new byte[32];
+	   private byte[] verifyData_mac = new byte[20];
 	   /// <summary>
 	   /// <P>Verifies user's account data.  Account data is "verified" if and
 	   /// only if the account balance is greater than zero and the digital
@@ -396,9 +396,9 @@ namespace com.dalsemi.onewire.application.sha
 			  this.lastError = NO_ERROR;
         
 			  //init local vars
-			  sbyte[] scratchpad = this.verifyData_scratchpad;
-			  sbyte[] accountData = this.verifyData_accountData;
-			  sbyte[] verify_mac = this.verifyData_mac;
+			  byte[] scratchpad = this.verifyData_scratchpad;
+			  byte[] accountData = this.verifyData_accountData;
+			  byte[] verify_mac = this.verifyData_mac;
         
 			  //if verifyUser was called, this is a read of cached data
 			  int wcc = user.WriteCycleCounter;
@@ -421,8 +421,8 @@ namespace com.dalsemi.onewire.application.sha
 			  //now lets reset the mac
 			  copr.getInitialSignature(accountData, I_SIGNATURE);
 			  //and reset the CRC
-			  accountData[I_FILE_CRC16 + 0] = (sbyte)0;
-			  accountData[I_FILE_CRC16 + 1] = (sbyte)0;
+			  accountData[I_FILE_CRC16 + 0] = 0;
+			  accountData[I_FILE_CRC16 + 1] = 0;
         
 			  //now we also need to get things like wcc, user_page_number, user ID
 			  if (wcc < 0)
@@ -441,7 +441,7 @@ namespace com.dalsemi.onewire.application.sha
 				 //copy the write cycle counter into scratchpad
 				 Convert.toByteArray(wcc, scratchpad, 8, 4);
 			  }
-			  scratchpad[12] = (sbyte)user.AccountPageNumber;
+			  scratchpad[12] = (byte)user.AccountPageNumber;
 			  user.getAddress(scratchpad, 13, 7);
         
 			  copr.getSigningChallenge(scratchpad, 20);
@@ -457,9 +457,9 @@ namespace com.dalsemi.onewire.application.sha
 	   }
 
 	   //prevent malloc'ing in critical path
-	   private sbyte[] executeTransaction_accountData = new sbyte[32];
-	   private sbyte[] executeTransaction_oldAcctData = new sbyte[32];
-	   private sbyte[] executeTransaction_newAcctData = new sbyte[32];
+	   private byte[] executeTransaction_accountData = new byte[32];
+	   private byte[] executeTransaction_oldAcctData = new byte[32];
+	   private byte[] executeTransaction_newAcctData = new byte[32];
 	   //private byte[] executeTransaction_scratchpad = new byte[32];
 	   /// <summary>
 	   /// <P>Performs the signed debit, subtracting the debit amount from
@@ -504,11 +504,11 @@ namespace com.dalsemi.onewire.application.sha
         
 			  //init local vars
 			  //holds the working copy of account data
-			  sbyte[] accountData = this.executeTransaction_accountData;
+			  byte[] accountData = this.executeTransaction_accountData;
 			  //holds the backup copy of account data before writing
-			  sbyte[] oldAcctData = this.executeTransaction_oldAcctData;
+			  byte[] oldAcctData = this.executeTransaction_oldAcctData;
 			  //holds the account data read back for checking
-			  sbyte[] newAcctData = this.executeTransaction_newAcctData;
+			  byte[] newAcctData = this.executeTransaction_newAcctData;
 			  //just make the transaction ID a random number, so it changes
 			  int transID = rand.Next();
         
@@ -592,28 +592,28 @@ namespace com.dalsemi.onewire.application.sha
 		   }
 	   }
 
-	   private sbyte[] writeTransactionData_scratchpad = new sbyte[32];
+	   private byte[] writeTransactionData_scratchpad = new byte[32];
 	   /// <summary>
 	   /// Does the writing of transaction data to the user button as well
 	   /// as actually signing the data with the coprocessor.
 	   /// </summary>
-	   private bool writeTransactionData(SHAiButtonUser user, int transID, int balance, sbyte[] accountData)
+	   private bool writeTransactionData(SHAiButtonUser user, int transID, int balance, byte[] accountData)
 	   {
 		  //init local vars
 		  SHAiButtonCopr copr = this.copr;
 		  int acctPageNum = user.AccountPageNumber;
-		  sbyte[] scratchpad = this.writeTransactionData_scratchpad;
+		  byte[] scratchpad = this.writeTransactionData_scratchpad;
 
 		  // length of the TMEX file - 28 data, 1 cont. ptr
-		  accountData[I_FILE_LENGTH] = (sbyte)29;
+		  accountData[I_FILE_LENGTH] = (byte)29;
 
 		  // transaction ID - 2 data bytes
-		  accountData[I_TRANSACTION_ID + 0] = (sbyte)transID;
-		  accountData[I_TRANSACTION_ID + 1] = (sbyte)((int)((uint)transID >> 8));
+		  accountData[I_TRANSACTION_ID + 0] = (byte)transID;
+		  accountData[I_TRANSACTION_ID + 1] = (byte)((int)((uint)transID >> 8));
 
 		  // conversion factor - 2 data bytes
-		  accountData[I_CONVERSION_FACTOR + 0] = unchecked((sbyte)0x8B);
-		  accountData[I_CONVERSION_FACTOR + 1] = (sbyte)0x48;
+		  accountData[I_CONVERSION_FACTOR + 0] = 0x8B;
+		  accountData[I_CONVERSION_FACTOR + 1] = 0x48;
 
 		  // account balance - 3 data bytes
 		  Convert.toByteArray(balance, accountData, I_BALANCE, 3);
@@ -650,7 +650,7 @@ namespace com.dalsemi.onewire.application.sha
 		  }
 
 		  // svcPageNumber, followed by address of device
-		  scratchpad [12] = (sbyte)acctPageNum;
+		  scratchpad [12] = (byte)acctPageNum;
 		  user.getAddress(scratchpad, 13, 7);
 
 		  // copy in the signing challenge
@@ -663,8 +663,8 @@ namespace com.dalsemi.onewire.application.sha
 		  int crc = ~CRC16.compute(accountData, 0, accountData[I_FILE_LENGTH] + 1, acctPageNum);
 
 		  //set the the crc16 bytes
-		  accountData[I_FILE_CRC16 + 0] = (sbyte)crc;
-		  accountData[I_FILE_CRC16 + 1] = (sbyte)(crc >> 8);
+		  accountData[I_FILE_CRC16 + 0] = (byte)crc;
+		  accountData[I_FILE_CRC16 + 1] = (byte)(crc >> 8);
 
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)

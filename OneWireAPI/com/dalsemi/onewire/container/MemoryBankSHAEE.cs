@@ -56,11 +56,11 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// Read Memory Command </summary>
-	   public static readonly sbyte READ_MEMORY = unchecked((sbyte) 0xF0);
+	   public static readonly byte READ_MEMORY = 0xF0;
 
 	   /// <summary>
 	   /// Read Authenticate Page </summary>
-	   public static readonly sbyte READ_AUTH_PAGE = unchecked((sbyte) 0xA5);
+	   public static readonly byte READ_AUTH_PAGE = 0xA5;
 
 	   //--------
 	   //-------- Protected Variables for MemoryBank implementation
@@ -168,13 +168,13 @@ namespace com.dalsemi.onewire.container
 	   /// block of 0xFF's used for faster read pre-fill of 1-Wire blocks
 	   /// Comes from OneWireContainer33 that this MemoryBank references.
 	   /// </summary>
-	   protected internal static readonly sbyte[] ffBlock = OneWireContainer33.ffBlock;
+	   protected internal static readonly byte[] ffBlock = OneWireContainer33.ffBlock;
 
 	   /// <summary>
 	   /// block of 0x00's used for faster read pre-fill of 1-Wire blocks
 	   /// Comes from OneWireContainer33 that this MemoryBank references.
 	   /// </summary>
-	   protected internal static readonly sbyte[] zeroBlock = OneWireContainer33.zeroBlock;
+	   protected internal static readonly byte[] zeroBlock = OneWireContainer33.zeroBlock;
 
 	   internal MemoryBankScratchSHAEE scratchpad;
 
@@ -486,18 +486,18 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void read(int startAddr, bool readContinue, sbyte[] readBuf, int offset, int len)
+	   public virtual void read(int startAddr, bool readContinue, byte[] readBuf, int offset, int len)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		  if (DEBUG)
 		  {
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankSHAEE.read(int, bool, byte[], int, int) called");
-			 Debug.debug("  startAddr=0x" + Convert.toHexString((sbyte)startAddr));
+			 Debug.debug("  startAddr=0x" + Convert.toHexString((byte)startAddr));
 			 Debug.debug("  readContinue=" + readContinue);
 			 Debug.debug("  offset=" + offset);
 			 Debug.debug("  len=" + len);
-			 Debug.debug("  this.startPhysicalAddress=0x" + Convert.toHexString((sbyte)startPhysicalAddress));
+			 Debug.debug("  this.startPhysicalAddress=0x" + Convert.toHexString((byte)startPhysicalAddress));
 			 Debug.debug("  this.pageLength=" + this.pageLength);
 			 Debug.debug("  this.numberPages=" + this.numberPages);
 			 Debug.stackTrace();
@@ -527,11 +527,11 @@ namespace com.dalsemi.onewire.container
 
 			 // build start reading memory block
 			 int addr = startAddr + startPhysicalAddress;
-			 sbyte[] raw_buf = new sbyte[3];
+			 byte[] raw_buf = new byte[3];
 
 			 raw_buf [0] = READ_MEMORY;
-			 raw_buf [1] = unchecked((sbyte)(addr & 0xFF));
-			 raw_buf [2] = unchecked((sbyte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
+			 raw_buf [1] = (byte)(addr & 0xFF);
+			 raw_buf [2] = (byte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF);
 
 			 // do the first block for command, address
 			 adapter.dataBlock(raw_buf, 0, 3);
@@ -586,16 +586,16 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void write(int startAddr, sbyte[] writeBuf, int offset, int len)
+	   public virtual void write(int startAddr, byte[] writeBuf, int offset, int len)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  if (DEBUG)
 		  {
 			 Debug.debug("-----------------------------------------------------------");
 			 Debug.debug("MemoryBankSHAEE.write(int,byte[],int,int) called");
-			 Debug.debug("  startAddr=0x" + Convert.toHexString((sbyte)startAddr));
+			 Debug.debug("  startAddr=0x" + Convert.toHexString((byte)startAddr));
 			 Debug.debug("  writeBuf", writeBuf, offset, len);
-			 Debug.debug("  startPhysicalAddress=0x" + Convert.toHexString((sbyte)startPhysicalAddress));
+			 Debug.debug("  startPhysicalAddress=0x" + Convert.toHexString((byte)startPhysicalAddress));
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  int room_left;
@@ -634,8 +634,8 @@ namespace com.dalsemi.onewire.container
 
 		  // loop while still have pages to write
 		  int startx = 0, nextx = 0; // (start and next index into writeBuf)
-		  sbyte[] raw_buf = new sbyte [8];
-		  sbyte[] memory = new sbyte [(size - (startAddr & 0xE0))]; // till end of memory
+		  byte[] raw_buf = new byte [8];
+		  byte[] memory = new byte [(size - (startAddr & 0xE0))]; // till end of memory
 		  int abs_addr = startPhysicalAddress + startAddr;
 		  int pl = 8;
 
@@ -743,7 +743,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readPage(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public virtual void readPage(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
 		  read(page * pageLength, readContinue, readBuf, offset, pageLength);
 	   }
@@ -773,9 +773,9 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readPage(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public virtual void readPage(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
-		  sbyte[] pg = new sbyte [32];
+		  byte[] pg = new byte [32];
 
 		  if (!@checked)
 		  {
@@ -830,9 +830,9 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual int readPagePacket(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public virtual int readPagePacket(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
-		  sbyte[] raw_buf = new sbyte [pageLength];
+		  byte[] raw_buf = new byte [pageLength];
 
 		  // read the  page
 		  readPage(page, readContinue, raw_buf, 0);
@@ -881,9 +881,9 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual int readPagePacket(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public virtual int readPagePacket(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
-		  sbyte[] raw_buf = new sbyte [pageLength];
+		  byte[] raw_buf = new byte [pageLength];
 
 		  if (!@checked)
 		  {
@@ -931,7 +931,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void writePagePacket(int page, sbyte[] writeBuf, int offset, int len)
+	   public virtual void writePagePacket(int page, byte[] writeBuf, int offset, int len)
 	   {
 
 		  // make sure length does not exceed max
@@ -947,16 +947,16 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // construct the packet to write
-		  sbyte[] raw_buf = new sbyte [len + 3];
+		  byte[] raw_buf = new byte [len + 3];
 
-		  raw_buf [0] = (sbyte) len;
+		  raw_buf [0] = (byte) len;
 
 		  Array.Copy(writeBuf, offset, raw_buf, 1, len);
 
 		  int crc = CRC16.compute(raw_buf, 0, len + 1, page);
 
-		  raw_buf [len + 1] = unchecked((sbyte)(~crc & 0xFF));
-		  raw_buf [len + 2] = unchecked((sbyte)(((int)((uint)(~crc & 0xFFFF) >> 8)) & 0xFF));
+		  raw_buf [len + 1] = unchecked((byte)(~crc & 0xFF));
+		  raw_buf [len + 2] = unchecked((byte)(((int)((uint)(~crc & 0xFFFF) >> 8)) & 0xFF));
 
 		  // write the packet, return result
 		  write(page * pageLength, raw_buf, 0, len + 3);
@@ -979,10 +979,10 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public virtual void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
-		  sbyte[] extra = new sbyte [20];
-		  sbyte[] pg = new sbyte [32];
+		  byte[] extra = new byte [20];
+		  byte[] pg = new byte [32];
 
 		  if (!@checked)
 		  {
@@ -1022,9 +1022,9 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public virtual void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
-		  sbyte[] pg = new sbyte [32];
+		  byte[] pg = new byte [32];
 
 		  if (!@checked)
 		  {
@@ -1102,10 +1102,10 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual bool readAuthenticatedPage(int page, sbyte[] data, int dataStart, sbyte[] extra_info, int extraStart)
+	   public virtual bool readAuthenticatedPage(int page, byte[] data, int dataStart, byte[] extra_info, int extraStart)
 	   {
-		  sbyte[] send_block = new sbyte [40];
-		  sbyte[] challenge = new sbyte [8];
+		  byte[] send_block = new byte [40];
+		  byte[] challenge = new byte [8];
 
 		  int addr = (page * pageLength) + startPhysicalAddress;
 
@@ -1121,9 +1121,9 @@ namespace com.dalsemi.onewire.container
 		  // Read Authenticated Command
 		  send_block[0] = READ_AUTH_PAGE;
 		  // address 1
-		  send_block[1] = unchecked((sbyte)(addr & 0xFF));
+		  send_block[1] = unchecked((byte)(addr & 0xFF));
 		  // address 2
-		  send_block[2] = unchecked((sbyte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
+		  send_block[2] = unchecked((byte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
 
 		  // data + FF byte
 		  Array.Copy(ffBlock,0,send_block,3,35);

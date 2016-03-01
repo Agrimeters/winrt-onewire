@@ -113,28 +113,28 @@ namespace com.dalsemi.onewire.container
 	{
 	   /// <summary>
 	   /// Passed to setInterruptInterval to set the interrupt interval to 1 second. </summary>
-	   public static readonly sbyte INTERRUPT_INTERVAL_1 = (sbyte)0x00;
+	   public static readonly byte INTERRUPT_INTERVAL_1 = (byte)0x00;
 	   /// <summary>
 	   /// Passed to setInterruptInterval to set the interrupt interval to 4 seconds. </summary>
-	   public static readonly sbyte INTERRUPT_INTERVAL_4 = (sbyte)0x01;
+	   public static readonly byte INTERRUPT_INTERVAL_4 = (byte)0x01;
 	   /// <summary>
 	   /// Passed to setInterruptInterval to set the interrupt interval to 32 seconds. </summary>
-	   public static readonly sbyte INTERRUPT_INTERVAL_32 = (sbyte)0x02;
+	   public static readonly byte INTERRUPT_INTERVAL_32 = (byte)0x02;
 	   /// <summary>
 	   /// Passed to setInterruptInterval to set the interrupt interval to 64 seconds. </summary>
-	   public static readonly sbyte INTERRUPT_INTERVAL_64 = (sbyte)0x03;
+	   public static readonly byte INTERRUPT_INTERVAL_64 = (byte)0x03;
 	   /// <summary>
 	   /// Passed to setInterruptInterval to set the interrupt interval to 2048 seconds. </summary>
-	   public static readonly sbyte INTERRUPT_INTERVAL_2048 = (sbyte)0x04;
+	   public static readonly byte INTERRUPT_INTERVAL_2048 = (byte)0x04;
 	   /// <summary>
 	   /// Passed to setInterruptInterval to set the interrupt interval to 1 seconds. </summary>
-	   public static readonly sbyte INTERRUPT_INTERVAL_4096 = (sbyte)0x05;
+	   public static readonly byte INTERRUPT_INTERVAL_4096 = (byte)0x05;
 	   /// <summary>
 	   /// Passed to setInterruptInterval to set the interrupt interval to 65536 seconds. </summary>
-	   public static readonly sbyte INTERRUPT_INTERVAL_65536 = (sbyte)0x06;
+	   public static readonly byte INTERRUPT_INTERVAL_65536 = (byte)0x06;
 	   /// <summary>
 	   /// Passed to setInterruptInterval to set the interrupt interval to 131072 seconds. </summary>
-	   public static readonly sbyte INTERRUPT_INTERVAL_131072 = (sbyte)0x07;
+	   public static readonly byte INTERRUPT_INTERVAL_131072 = (byte)0x07;
 
 
 	   //--- Constructors
@@ -168,7 +168,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= #OneWireContainer27() OneWireContainer27 </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
-	   public OneWireContainer27(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer27(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 	   }
 
@@ -273,7 +273,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #getClock(byte[]) </seealso>
-	   public virtual long getInterruptInterval(sbyte[] state)
+	   public virtual long getInterruptInterval(byte[] state)
 	   {
 		   long ret = 0;
 		   switch (((int)((uint)(state[CONTROL_OFFSET] & 0x70) >> 4)))
@@ -320,7 +320,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #canDisableClock() </seealso>
 	   /// <seealso cref= #setClockRunEnable(bool,byte[]) </seealso>
-	   public virtual bool isInterruptEnabled(sbyte[] state)
+	   public virtual bool isInterruptEnabled(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(7, CONTROL_OFFSET, state) == 1);
 	   }
@@ -351,10 +351,10 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #getClock(byte[]) </seealso>
-	   public virtual void setInterruptInterval(sbyte intervalValue, sbyte[] state)
+	   public virtual void setInterruptInterval(byte intervalValue, byte[] state)
 	   {
-		   state[CONTROL_OFFSET] &= unchecked((sbyte)0x8F);
-		   state[CONTROL_OFFSET] |= (sbyte)(intervalValue << 4);
+		   state[CONTROL_OFFSET] &= unchecked((byte)0x8F);
+		   state[CONTROL_OFFSET] |= (byte)(intervalValue << 4);
 	   }
 
 	   /// <summary>
@@ -368,7 +368,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #canDisableClock() </seealso>
 	   /// <seealso cref= #isClockRunning(byte[]) </seealso>
-	   public virtual void setInterruptEnable(bool iEnable, sbyte[] state)
+	   public virtual void setInterruptEnable(bool iEnable, byte[] state)
 	   {
 		  Bit.arrayWriteBit(iEnable ? 1 : 0, 7, CONTROL_OFFSET, state);
 	   }

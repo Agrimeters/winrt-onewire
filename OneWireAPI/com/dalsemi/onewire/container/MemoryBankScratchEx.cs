@@ -60,7 +60,7 @@ namespace com.dalsemi.onewire.container
 		  bankDescription = "Scratchpad Ex";
 
 		  // change copy scratchpad command
-		  COPY_SCRATCHPAD_COMMAND = (sbyte) 0x5A;
+		  COPY_SCRATCHPAD_COMMAND = 0x5A;
 	   }
 
 	   //--------
@@ -77,7 +77,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void writeScratchpad(int startAddr, sbyte[] writeBuf, int offset, int len)
+	   public override void writeScratchpad(int startAddr, byte[] writeBuf, int offset, int len)
 	   {
 		  bool calcCRC = false;
 
@@ -95,11 +95,11 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // build block to send
-		  sbyte[] raw_buf = new sbyte[pageLength + 5]; //[37];
+		  byte[] raw_buf = new byte[pageLength + 5]; //[37];
 
 		  raw_buf [0] = WRITE_SCRATCHPAD_COMMAND;
-		  raw_buf [1] = unchecked((sbyte)(startAddr & 0xFF));
-		  raw_buf [2] = unchecked((sbyte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF));
+		  raw_buf [1] = (byte)(startAddr & 0xFF);
+		  raw_buf [2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
 
 		  Array.Copy(writeBuf, offset, raw_buf, 3, len);
 
@@ -147,19 +147,19 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // build block to send
-		  sbyte[] raw_buf = new sbyte [6];
+		  byte[] raw_buf = new byte [6];
 
 		  raw_buf [0] = COPY_SCRATCHPAD_COMMAND;
-		  raw_buf [1] = unchecked((sbyte)(startAddr & 0xFF));
-		  raw_buf [2] = unchecked((sbyte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF));
-		  raw_buf [3] = (sbyte)((startAddr + len - 1) & 0x1F);
+		  raw_buf [1] = (byte)(startAddr & 0xFF);
+		  raw_buf [2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
+		  raw_buf [3] = (byte)((startAddr + len - 1) & 0x1F);
 
 		  Array.Copy(ffBlock, 0, raw_buf, 4, 2);
 
 		  // send block (check copy indication complete)
 		  ib.adapter.dataBlock(raw_buf, 0, raw_buf.Length);
 
-		  if ((unchecked((sbyte)(raw_buf [raw_buf.Length - 1] & 0x0F0)) != unchecked((sbyte) 0xA0)) && (unchecked((sbyte)(raw_buf [raw_buf.Length - 1] & 0x0F0)) != (sbyte) 0x50))
+		  if (((byte)(raw_buf [raw_buf.Length - 1] & 0x0F0) != (byte) 0xA0) && ((byte)(raw_buf [raw_buf.Length - 1] & 0x0F0) != (byte) 0x50))
 		  {
 			 forceVerify();
 

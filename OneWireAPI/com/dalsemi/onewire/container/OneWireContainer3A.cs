@@ -77,17 +77,17 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// PIO Access read command
 	   /// </summary>
-	   public static readonly sbyte PIO_ACCESS_READ = unchecked((sbyte) 0xF5);
+	   public static readonly byte PIO_ACCESS_READ = unchecked((byte) 0xF5);
 
 	   /// <summary>
 	   /// PIO Access read command
 	   /// </summary>
-	   public static readonly sbyte PIO_ACCESS_WRITE = (sbyte) 0x5A;
+	   public static readonly byte PIO_ACCESS_WRITE = (byte) 0x5A;
 
 	   /// <summary>
 	   /// Used for 0xFF array
 	   /// </summary>
-	   private sbyte[] FF = new sbyte [8];
+	   private byte[] FF = new byte [8];
 
 
 	   //--------
@@ -108,7 +108,7 @@ namespace com.dalsemi.onewire.container
 
 		  for (int i = 0; i < FF.Length; i++)
 		  {
-			 FF[i] = unchecked((sbyte) 0x0FF);
+			 FF[i] = unchecked((byte) 0x0FF);
 		  }
 	   }
 
@@ -122,12 +122,12 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #OneWireContainer3A() </seealso>
 	   /// <seealso cref= #OneWireContainer3A(com.dalsemi.onewire.adapter.DSPortAdapter,long) OneWireContainer3A(DSPortAdapter,long) </seealso>
 	   /// <seealso cref= #OneWireContainer3A(com.dalsemi.onewire.adapter.DSPortAdapter,java.lang.String) OneWireContainer3A(DSPortAdapter,String) </seealso>
-	   public OneWireContainer3A(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer3A(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 
 		  for (int i = 0; i < FF.Length; i++)
 		  {
-			 FF[i] = unchecked((sbyte) 0x0FF);
+			 FF[i] = unchecked((byte) 0x0FF);
 		  }
 	   }
 
@@ -146,7 +146,7 @@ namespace com.dalsemi.onewire.container
 
 		  for (int i = 0; i < FF.Length; i++)
 		  {
-			 FF[i] = unchecked((sbyte) 0x0FF);
+			 FF[i] = unchecked((byte) 0x0FF);
 		  }
 	   }
 
@@ -165,7 +165,7 @@ namespace com.dalsemi.onewire.container
 
 		  for (int i = 0; i < FF.Length; i++)
 		  {
-			 FF[i] = unchecked((sbyte) 0x0FF);
+			 FF[i] = unchecked((byte) 0x0FF);
 		  }
 	   }
 
@@ -246,7 +246,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> the number of channels for this device
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
-	   public virtual int getNumberChannels(sbyte[] state)
+	   public virtual int getNumberChannels(byte[] state)
 	   {
 		  return 2;
 	   }
@@ -349,9 +349,9 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #hasLevelSensing() </seealso>
-	   public virtual bool getLevel(int channel, sbyte[] state)
+	   public virtual bool getLevel(int channel, byte[] state)
 	   {
-		  sbyte level = (sbyte)(0x01 << (channel * 2));
+		  byte level = (byte)(0x01 << (channel * 2));
 		  return ((state[1] & level) == level);
 	   }
 
@@ -369,9 +369,9 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #isHighSideSwitch() </seealso>
 	   /// <seealso cref= #setLatchState(int,bool,bool,byte[]) </seealso>
-	   public virtual bool getLatchState(int channel, sbyte[] state)
+	   public virtual bool getLatchState(int channel, byte[] state)
 	   {
-		  sbyte latch = (sbyte)(0x01 << ((channel * 2) + 1));
+		  byte latch = (byte)(0x01 << ((channel * 2) + 1));
 		  return ((state [1] & latch) == latch);
 	   }
 
@@ -391,7 +391,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= #hasActivitySensing() </seealso>
 	   /// <seealso cref= #clearActivity() </seealso>
-	   public virtual bool getSensedActivity(int channel, sbyte[] state)
+	   public virtual bool getSensedActivity(int channel, byte[] state)
 	   {
 		  return false;
 	   }
@@ -433,32 +433,32 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #hasSmartOn() </seealso>
 	   /// <seealso cref= #getLatchState(int,byte[]) </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
-	   public virtual void setLatchState(int channel, bool latchState, bool doSmart, sbyte[] state)
+	   public virtual void setLatchState(int channel, bool latchState, bool doSmart, byte[] state)
 	   {
-		  sbyte latch = (sbyte)(0x01 << channel);
-		  sbyte temp;
+		  byte latch = (byte)(0x01 << channel);
+		  byte temp;
 
-		  state[0] = unchecked((sbyte) 0x00FC);
+		  state[0] = unchecked((byte) 0x00FC);
 
 		  if (getLatchState(0,state))
 		  {
-			 temp = (sbyte) 0x01;
-			 state[0] = (sbyte)(((sbyte) state[0]) | temp);
+			 temp = (byte) 0x01;
+			 state[0] = (byte)(((byte) state[0]) | temp);
 		  }
 
 		  if (getLatchState(1,state))
 		  {
-			 temp = (sbyte) 0x02;
-			 state[0] = (sbyte)(((sbyte) state[0]) | temp);
+			 temp = (byte) 0x02;
+			 state[0] = (byte)(((byte) state[0]) | temp);
 		  }
 
 		  if (latchState)
 		  {
-			 state[0] = (sbyte)(state[0] | latch);
+			 state[0] = (byte)(state[0] | latch);
 		  }
 		  else
 		  {
-			 state[0] = (sbyte)(state[0] & ~latch);
+			 state[0] = (byte)(state[0] & ~latch);
 		  }
 	   }
 
@@ -473,9 +473,9 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= #getLatchState(int,byte[]) </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
-	   public virtual void setLatchState(sbyte set, sbyte[] state)
+	   public virtual void setLatchState(byte set, byte[] state)
 	   {
-		  state[0] = (sbyte) set;
+		  state[0] = (byte) set;
 	   }
 
 	   /// <summary>
@@ -492,12 +492,12 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
-		  sbyte[] buff = new sbyte [2];
+		  byte[] buff = new byte [2];
 
-		  buff[0] = unchecked((sbyte) 0xF5); // PIO Access Read Command
-		  buff[1] = unchecked((sbyte) 0xFF); // Used to read the PIO Status Bit Assignment
+		  buff[0] = unchecked((byte) 0xF5); // PIO Access Read Command
+		  buff[1] = unchecked((byte) 0xFF); // Used to read the PIO Status Bit Assignment
 
 		  // select the device
 		  if (adapter.select(address))
@@ -526,9 +526,9 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readRegister()
+	   public virtual byte[] readRegister()
 	   {
-		  sbyte[] register = new sbyte[3];
+		  byte[] register = new byte[3];
 
 		  return register;
 	   }
@@ -547,15 +547,15 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
-		  sbyte[] buff = new sbyte [5];
+		  byte[] buff = new byte [5];
 
-		  buff[0] = (sbyte) 0x5A; // PIO Access Write Command
-		  buff[1] = (sbyte) state[0]; // Channel write information
-		  buff[2] = (sbyte)~state[0]; // Inverted write byte
-		  buff[3] = unchecked((sbyte) 0xFF); // Confirmation Byte
-		  buff[4] = unchecked((sbyte) 0xFF); // PIO Pin Status
+		  buff[0] = (byte) 0x5A; // PIO Access Write Command
+		  buff[1] = (byte) state[0]; // Channel write information
+		  buff[2] = (byte)~state[0]; // Inverted write byte
+		  buff[3] = unchecked((byte) 0xFF); // Confirmation Byte
+		  buff[4] = unchecked((byte) 0xFF); // PIO Pin Status
 
 		  // select the device
 		  if (adapter.select(address))
@@ -567,7 +567,7 @@ namespace com.dalsemi.onewire.container
 			 throw new OneWireIOException("Device select failed");
 		  }
 
-		  if (buff[3] != unchecked((sbyte) 0x00AA))
+		  if (buff[3] != unchecked((byte) 0x00AA))
 		  {
 			 throw new OneWireIOException("Failure to change latch state.");
 		  }
@@ -585,7 +585,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeRegister(sbyte[] register)
+	   public virtual void writeRegister(byte[] register)
 	   {
 	   }
 

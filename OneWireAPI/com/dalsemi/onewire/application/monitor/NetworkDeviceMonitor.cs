@@ -235,7 +235,7 @@ using System.Collections;
 						 if (this.branchAutoSearching && (owc is SwitchContainer))
 						 {
 							SwitchContainer sc = (SwitchContainer)owc;
-							sbyte[] state = sc.readDevice();
+							byte[] state = sc.readDevice();
 							for (int j = 0; j < sc.getNumberChannels(state); j++)
 							{
 							   OWPath tmp = new OWPath(adapter, path);

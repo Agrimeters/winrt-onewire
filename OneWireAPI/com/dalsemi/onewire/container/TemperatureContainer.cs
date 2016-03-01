@@ -235,7 +235,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireException">         Part could not be found [ fatal ] </exception>
 	   /// <exception cref="OneWireIOException">       Data wasn't transferred properly [ recoverable ] </exception>
-	   void doTemperatureConvert(sbyte[] state);
+	   void doTemperatureConvert(byte[] state);
 
 	   //--------
 	   //-------- Temperature 'get' Methods
@@ -251,7 +251,7 @@ namespace com.dalsemi.onewire.container
 	   ///                     <code>doTemperatureConvert()</code>
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> In the case of invalid temperature data </exception>
-	   double getTemperature(sbyte[] state);
+	   double getTemperature(byte[] state);
 
 	   /// <summary>
 	   /// Gets the specified temperature alarm value in Celsius from the
@@ -269,7 +269,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref=    #hasTemperatureAlarms </seealso>
 	   /// <seealso cref=    #setTemperatureAlarm </seealso>
-	   double getTemperatureAlarm(int alarmType, sbyte[] state);
+	   double getTemperatureAlarm(int alarmType, byte[] state);
 
 	   /// <summary>
 	   /// Gets the current temperature resolution in Celsius from the
@@ -283,7 +283,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolutions </seealso>
 	   /// <seealso cref=    #setTemperatureResolution </seealso>
-	   double getTemperatureResolution(sbyte[] state);
+	   double getTemperatureResolution(byte[] state);
 
 	   //--------
 	   //-------- Temperature 'set' Methods
@@ -305,7 +305,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref=    #hasTemperatureAlarms </seealso>
 	   /// <seealso cref=    #getTemperatureAlarm </seealso>
-	   void setTemperatureAlarm(int alarmType, double alarmValue, sbyte[] state);
+	   void setTemperatureAlarm(int alarmType, double alarmValue, byte[] state);
 
 	   /// <summary>
 	   /// Sets the current temperature resolution in Celsius in the provided
@@ -321,7 +321,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolutions </seealso>
-	   void setTemperatureResolution(double resolution, sbyte[] state);
+	   void setTemperatureResolution(double resolution, byte[] state);
 	}
 
 	public static class TemperatureContainer_Fields

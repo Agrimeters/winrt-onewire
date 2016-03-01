@@ -330,7 +330,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= #OneWireContainer04() OneWireContainer04 </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
-	   public OneWireContainer04(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer04(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 
 		  // initialize the clock memory bank
@@ -515,12 +515,13 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: sbyte[][] read_buf = new sbyte [2][36];
-		  sbyte[][] read_buf = RectangularArrays.ReturnRectangularSbyteArray(2, 36);
+          byte[][] read_buf = new byte[2][];
+          for(int j=0; j<2; j++)
+             read_buf[j] = new byte[36];
 		  bool alarming;
+          read_buf[0] = new byte[36];
 		  int buf_num = 0, attempt = 0, i ;
 
 		  // put zero's in the bitmap of changed bytes
@@ -592,7 +593,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
 		  int start_offset = 0, len = 0, i ;
 		  bool got_block = false;
@@ -674,7 +675,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #setClock(long,byte[]) </seealso>
-	   public virtual long getClock(sbyte[] state)
+	   public virtual long getClock(byte[] state)
 	   {
 		  return Convert.toLong(state, RTC_OFFSET, 5) * 1000 / 256;
 	   }
@@ -694,7 +695,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual long getClockAlarm(sbyte[] state)
+	   public virtual long getClockAlarm(byte[] state)
 	   {
 		  return Convert.toLong(state, RTC_ALARM_OFFSET, 5) * 1000 / 256;
 	   }
@@ -714,7 +715,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual bool isClockAlarming(sbyte[] state)
+	   public virtual bool isClockAlarming(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(0, STATUS_OFFSET, state) == 1);
 	   }
@@ -732,7 +733,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual bool isClockAlarmEnabled(sbyte[] state)
+	   public virtual bool isClockAlarmEnabled(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(3, STATUS_OFFSET, state) == 0);
 	   }
@@ -748,7 +749,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #canDisableClock() </seealso>
 	   /// <seealso cref= #setClockRunEnable(bool,byte[]) </seealso>
-	   public virtual bool isClockRunning(sbyte[] state)
+	   public virtual bool isClockRunning(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(4, CONTROL_OFFSET, state) == 1);
 	   }
@@ -767,7 +768,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #setIntervalTimer(long,byte[]) </seealso>
-	   public virtual long getIntervalTimer(sbyte[] state)
+	   public virtual long getIntervalTimer(byte[] state)
 	   {
 		  return Convert.toLong(state, INTERVAL_OFFSET, 5) * 1000 / 256;
 	   }
@@ -782,7 +783,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #setCycleCounter(long,byte[]) setCycleCounter </seealso>
-	   public virtual long getCycleCounter(sbyte[] state)
+	   public virtual long getCycleCounter(byte[] state)
 	   {
 		  return Convert.toLong(state, COUNTER_OFFSET, 4);
 	   }
@@ -797,7 +798,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #setIntervalTimerAlarm(long,byte[]) setIntervalTimerAlarm </seealso>
-	   public virtual long getIntervalTimerAlarm(sbyte[] state)
+	   public virtual long getIntervalTimerAlarm(byte[] state)
 	   {
 		  return Convert.toLong(state, INTERVAL_ALARM_OFFSET, 5) * 1000 / 256;
 	   }
@@ -812,7 +813,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #setCycleCounterAlarm(long,byte[]) setCycleCounterAlarm </seealso>
-	   public virtual long getCycleCounterAlarm(sbyte[] state)
+	   public virtual long getCycleCounterAlarm(byte[] state)
 	   {
 		  return Convert.toLong(state, COUNTER_ALARM_OFFSET, 4);
 	   }
@@ -827,7 +828,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #isIntervalTimerAlarmEnabled(byte[]) isIntervalTimerAlarmEnabled </seealso>
 	   /// <seealso cref= #setIntervalTimerAlarmEnable(bool,byte[]) setIntervalTimerAlarmEnable </seealso>
-	   public virtual bool isIntervalTimerAlarming(sbyte[] state)
+	   public virtual bool isIntervalTimerAlarming(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(1, STATUS_OFFSET, state) == 1);
 	   }
@@ -842,7 +843,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #isCycleCounterAlarmEnabled(byte[]) isCycleCounterAlarmEnabled </seealso>
 	   /// <seealso cref= #setCycleCounterAlarmEnable(bool,byte[]) setCycleCounterAlarmEnable </seealso>
-	   public virtual bool isCycleCounterAlarming(sbyte[] state)
+	   public virtual bool isCycleCounterAlarming(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(2, STATUS_OFFSET, state) == 1);
 	   }
@@ -857,7 +858,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #isIntervalTimerAlarming(byte[]) isIntervalTimerAlarming </seealso>
 	   /// <seealso cref= #setIntervalTimerAlarmEnable(bool,byte[]) setIntervalTimerAlarmEnable </seealso>
-	   public virtual bool isIntervalTimerAlarmEnabled(sbyte[] state)
+	   public virtual bool isIntervalTimerAlarmEnabled(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(4, STATUS_OFFSET, state) == 0);
 	   }
@@ -872,7 +873,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #isCycleCounterAlarming(byte[]) isCycleCounterAlarming </seealso>
 	   /// <seealso cref= #setCycleCounterAlarmEnable(bool,byte[]) setCycleCounterAlarmEnable </seealso>
-	   public virtual bool isCycleCounterAlarmEnabled(sbyte[] state)
+	   public virtual bool isCycleCounterAlarmEnabled(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(5, STATUS_OFFSET, state) == 0);
 	   }
@@ -887,7 +888,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #writeProtectClock(byte[]) writeProtectClock </seealso>
-	   public virtual bool isClockWriteProtected(sbyte[] state)
+	   public virtual bool isClockWriteProtected(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(0, CONTROL_OFFSET, state) == 1);
 	   }
@@ -903,7 +904,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #writeProtectIntervalTimer(byte[]) writeProtectIntervalTimer </seealso>
-	   public virtual bool isIntervalTimerWriteProtected(sbyte[] state)
+	   public virtual bool isIntervalTimerWriteProtected(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(1, CONTROL_OFFSET, state) == 1);
 	   }
@@ -918,7 +919,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #writeProtectCycleCounter(byte[]) writeProtectCycleCounter </seealso>
-	   public virtual bool isCycleCounterWriteProtected(sbyte[] state)
+	   public virtual bool isCycleCounterWriteProtected(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(2, CONTROL_OFFSET, state) == 1);
 	   }
@@ -934,7 +935,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #setReadAfterExpire(bool, byte[]) setReadAfterExpire </seealso>
-	   public virtual bool canReadAfterExpire(sbyte[] state)
+	   public virtual bool canReadAfterExpire(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(3, CONTROL_OFFSET, state) == 1);
 	   }
@@ -952,7 +953,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #setIntervalTimerAutomatic(bool, byte[]) setIntervalTimerAutomatic </seealso>
-	   public virtual bool isIntervalTimerAutomatic(sbyte[] state)
+	   public virtual bool isIntervalTimerAutomatic(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(5, CONTROL_OFFSET, state) == 1);
 	   }
@@ -969,7 +970,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #isIntervalTimerAutomatic(byte[]) isIntervalTimerAutomatic </seealso>
 	   /// <seealso cref= #setIntervalTimerAutomatic(bool, byte[]) setIntervalTimerAutomatic </seealso>
 	   /// <seealso cref= #setIntervalTimerRunState(bool, byte[]) setIntervalTimerRunState </seealso>
-	   public virtual bool isIntervalTimerStopped(sbyte[] state)
+	   public virtual bool isIntervalTimerStopped(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(6, CONTROL_OFFSET, state) == 1);
 	   }
@@ -985,7 +986,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #setAutomaticDelayLong(bool,byte[]) setAutomaticDelayLong </seealso>
-	   public virtual bool isAutomaticDelayLong(sbyte[] state)
+	   public virtual bool isAutomaticDelayLong(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(7, CONTROL_OFFSET, state) == 1);
 	   }
@@ -1006,7 +1007,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #getClock(byte[]) </seealso>
-	   public virtual void setClock(long time, sbyte[] state)
+	   public virtual void setClock(long time, byte[] state)
 	   {
 		  Convert.toByteArray(time * 256 / 1000, state, RTC_OFFSET, 5);
 
@@ -1037,7 +1038,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual void setClockAlarm(long time, sbyte[] state)
+	   public virtual void setClockAlarm(long time, byte[] state)
 	   {
 		  Convert.toByteArray(time * 256 / 1000, state, RTC_ALARM_OFFSET, 5);
 
@@ -1064,7 +1065,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #canDisableClock() </seealso>
 	   /// <seealso cref= #isClockRunning(byte[]) </seealso>
-	   public virtual void setClockRunEnable(bool runEnable, sbyte[] state)
+	   public virtual void setClockRunEnable(bool runEnable, byte[] state)
 	   {
 		  Bit.arrayWriteBit(runEnable ? 1 : 0, 4, CONTROL_OFFSET, state);
 
@@ -1091,7 +1092,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
-	   public virtual void setClockAlarmEnable(bool alarmEnable, sbyte[] state)
+	   public virtual void setClockAlarmEnable(bool alarmEnable, byte[] state)
 	   {
 		  Bit.arrayWriteBit(alarmEnable ? 0 : 1, 3, STATUS_OFFSET, state);
 
@@ -1114,7 +1115,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #getIntervalTimer(byte[]) getIntervalTimer </seealso>
-	   public virtual void setIntervalTimer(long time, sbyte[] state)
+	   public virtual void setIntervalTimer(long time, byte[] state)
 	   {
 		  Convert.toByteArray(time * 256 / 1000, state, INTERVAL_OFFSET, 5);
 
@@ -1136,7 +1137,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #getCycleCounter(byte[]) getCycleCounter </seealso>
-	   public virtual void setCycleCounter(long cycles, sbyte[] state)
+	   public virtual void setCycleCounter(long cycles, byte[] state)
 	   {
 		  Convert.toByteArray(cycles, state, COUNTER_OFFSET, 4);
 
@@ -1158,7 +1159,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #getIntervalTimerAlarm(byte[]) getIntervalTimerAlarm </seealso>
-	   public virtual void setIntervalTimerAlarm(long time, sbyte[] state)
+	   public virtual void setIntervalTimerAlarm(long time, byte[] state)
 	   {
 		  Convert.toByteArray(time * 256 / 1000, state, INTERVAL_ALARM_OFFSET, 5);
 
@@ -1182,7 +1183,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #getCycleCounterAlarm(byte[]) getCycleCounterAlarm </seealso>
-	   public virtual void setCycleCounterAlarm(long cycles, sbyte[] state)
+	   public virtual void setCycleCounterAlarm(long cycles, byte[] state)
 	   {
 		  Convert.toByteArray(cycles, state, COUNTER_ALARM_OFFSET, 4);
 
@@ -1208,7 +1209,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #isClockWriteProtected(byte[]) isClockWriteProtected </seealso>
-	   public virtual void writeProtectClock(sbyte[] state)
+	   public virtual void writeProtectClock(byte[] state)
 	   {
 		  Bit.arrayWriteBit(1, 0, CONTROL_OFFSET, state);
 
@@ -1231,7 +1232,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #isIntervalTimerWriteProtected(byte[]) isIntervalTimerWriteProtected </seealso>
-	   public virtual void writeProtectIntervalTimer(sbyte[] state)
+	   public virtual void writeProtectIntervalTimer(byte[] state)
 	   {
 		  Bit.arrayWriteBit(1, 1, CONTROL_OFFSET, state);
 
@@ -1254,7 +1255,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #isCycleCounterWriteProtected(byte[]) isCycleCounterWriteProtected </seealso>
-	   public virtual void writeProtectCycleCounter(sbyte[] state)
+	   public virtual void writeProtectCycleCounter(byte[] state)
 	   {
 		  Bit.arrayWriteBit(1, 2, CONTROL_OFFSET, state);
 
@@ -1275,7 +1276,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #canReadAfterExpire(byte[]) canReadAfterExpire </seealso>
-	   public virtual void setReadAfterExpire(bool readAfter, sbyte[] state)
+	   public virtual void setReadAfterExpire(bool readAfter, byte[] state)
 	   {
 		  Bit.arrayWriteBit(readAfter ? 1 : 0, 3, CONTROL_OFFSET, state);
 
@@ -1299,7 +1300,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #isIntervalTimerAutomatic(byte[]) isIntervalTimerAutomatic </seealso>
-	   public virtual void setIntervalTimerAutomatic(bool autoTimer, sbyte[] state)
+	   public virtual void setIntervalTimerAutomatic(bool autoTimer, byte[] state)
 	   {
 		  Bit.arrayWriteBit(autoTimer ? 1 : 0, 5, CONTROL_OFFSET, state);
 
@@ -1322,7 +1323,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #isIntervalTimerAutomatic(byte[]) isIntervalTimerAutomatic </seealso>
 	   /// <seealso cref= #isIntervalTimerStopped(byte[]) isIntervalTimerStopped </seealso>
-	   public virtual void setIntervalTimerRunState(bool runState, sbyte[] state)
+	   public virtual void setIntervalTimerRunState(bool runState, byte[] state)
 	   {
 		  Bit.arrayWriteBit(runState ? 1 : 0, 6, CONTROL_OFFSET, state);
 
@@ -1344,7 +1345,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #isAutomaticDelayLong(byte[]) isAutomaticDelayLong </seealso>
-	   public virtual void setAutomaticDelayLong(bool delayLong, sbyte[] state)
+	   public virtual void setAutomaticDelayLong(bool delayLong, byte[] state)
 	   {
 		  Bit.arrayWriteBit(delayLong ? 1 : 0, 7, CONTROL_OFFSET, state);
 
@@ -1363,7 +1364,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #isIntervalTimerAlarmEnabled(byte[]) isIntervalTimerAlarmEnabled </seealso>
-	   public virtual void setIntervalTimerAlarmEnable(bool alarmEnable, sbyte[] state)
+	   public virtual void setIntervalTimerAlarmEnable(bool alarmEnable, byte[] state)
 	   {
 		  Bit.arrayWriteBit(alarmEnable ? 0 : 1, 4, STATUS_OFFSET, state);
 
@@ -1383,7 +1384,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #isCycleCounterAlarmEnabled(byte[]) isCycleCounterAlarmEnabled </seealso>
-	   public virtual void setCycleCounterAlarmEnable(bool alarmEnable, sbyte[] state)
+	   public virtual void setCycleCounterAlarmEnable(bool alarmEnable, byte[] state)
 	   {
 		  Bit.arrayWriteBit(alarmEnable ? 0 : 1, 5, STATUS_OFFSET, state);
 

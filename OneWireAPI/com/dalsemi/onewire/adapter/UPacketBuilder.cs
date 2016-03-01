@@ -61,107 +61,107 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// Max bytes to stream at once </summary>
-	   public const char MAX_BYTES_STREAMED = (char)64;
+	   public const byte MAX_BYTES_STREAMED = 64;
 
 	   //-------- DS9097U function commands
 
 	   /// <summary>
 	   /// DS9097U funciton command, single bit </summary>
-	   public const char FUNCTION_BIT = (char)0x81;
+	   public const byte FUNCTION_BIT = 0x81;
 
 	   /// <summary>
 	   /// DS9097U funciton command, turn search mode on </summary>
-	   public const char FUNCTION_SEARCHON = (char)0xB1;
+	   public const byte FUNCTION_SEARCHON = 0xB1;
 
 	   /// <summary>
 	   /// DS9097U funciton command, turn search mode off </summary>
-	   public const char FUNCTION_SEARCHOFF = (char)0xA1;
+	   public const byte FUNCTION_SEARCHOFF = 0xA1;
 
 	   /// <summary>
 	   /// DS9097U funciton command, OneWire reset </summary>
-	   public const char FUNCTION_RESET = (char)0xC1;
+	   public const byte FUNCTION_RESET = 0xC1;
 
 	   /// <summary>
 	   /// DS9097U funciton command, 5V pulse imediate </summary>
-	   public const char FUNCTION_5VPULSE_NOW = (char)0xED;
+	   public const byte FUNCTION_5VPULSE_NOW = 0xED;
 
 	   /// <summary>
 	   /// DS9097U funciton command, 12V pulse imediate </summary>
-	   public const char FUNCTION_12VPULSE_NOW = (char)0xFD;
+	   public const byte FUNCTION_12VPULSE_NOW = 0xFD;
 
 	   /// <summary>
 	   /// DS9097U funciton command, 5V pulse after next byte </summary>
-	   public const char FUNCTION_5VPULSE_ARM = (char)0xEF;
+	   public const byte FUNCTION_5VPULSE_ARM = 0xEF;
 
 	   /// <summary>
 	   /// DS9097U funciton command to stop an ongoing pulse </summary>
-	   public const char FUNCTION_STOP_PULSE = (char)0xF1;
+	   public const byte FUNCTION_STOP_PULSE = 0xF1;
 
 	   //-------- DS9097U bit polarity settings for doing bit operations
 
 	   /// <summary>
 	   /// DS9097U bit polarity one for function FUNCTION_BIT </summary>
-	   public const char BIT_ONE = (char)0x10;
+	   public const byte BIT_ONE = 0x10;
 
 	   /// <summary>
 	   /// DS9097U bit polarity zero  for function FUNCTION_BIT </summary>
-	   public const char BIT_ZERO = (char)0x00;
+	   public const byte BIT_ZERO = 0x00;
 
 	   //-------- DS9097U 5V priming values
 
 	   /// <summary>
 	   /// DS9097U 5V prime on for function FUNCTION_BIT </summary>
-	   public const char PRIME5V_TRUE = (char)0x02;
+	   public const byte PRIME5V_TRUE = 0x02;
 
 	   /// <summary>
 	   /// DS9097U 5V prime off for function FUNCTION_BIT </summary>
-	   public const char PRIME5V_FALSE = (char)0x00;
+	   public const byte PRIME5V_FALSE = 0x00;
 
 	   //-------- DS9097U command masks
 
 	   /// <summary>
 	   /// DS9097U mask to read or write a configuration parameter </summary>
-	   public const char CONFIG_MASK = (char)0x01;
+	   public const byte CONFIG_MASK = 0x01;
 
 	   /// <summary>
 	   /// DS9097U mask to read the OneWire reset response byte </summary>
-	   public const char RESPONSE_RESET_MASK = (char)0x03;
+	   public const byte RESPONSE_RESET_MASK = 0x03;
 
 	   //-------- DS9097U reset results
 
 	   /// <summary>
 	   /// DS9097U  OneWire reset result = shorted </summary>
-	   public const char RESPONSE_RESET_SHORT = (char)0x00;
+	   public const byte RESPONSE_RESET_SHORT = 0x00;
 
 	   /// <summary>
 	   /// DS9097U  OneWire reset result = presence </summary>
-	   public const char RESPONSE_RESET_PRESENCE = (char)0x01;
+	   public const byte RESPONSE_RESET_PRESENCE = 0x01;
 
 	   /// <summary>
 	   /// DS9097U  OneWire reset result = alarm </summary>
-	   public const char RESPONSE_RESET_ALARM = (char)0x02;
+	   public const byte RESPONSE_RESET_ALARM = 0x02;
 
 	   /// <summary>
 	   /// DS9097U  OneWire reset result = no presence </summary>
-	   public const char RESPONSE_RESET_NOPRESENCE = (char)0x03;
+	   public const byte RESPONSE_RESET_NOPRESENCE = 0x03;
 
 	   //-------- DS9097U bit interpretation
 
 	   /// <summary>
 	   /// DS9097U mask to read bit operation result </summary>
-	   public const char RESPONSE_BIT_MASK = (char)0x03;
+	   public const byte RESPONSE_BIT_MASK = 0x03;
 
 	   /// <summary>
 	   /// DS9097U read bit operation 1 </summary>
-	   public const char RESPONSE_BIT_ONE = (char)0x03;
+	   public const byte RESPONSE_BIT_ONE = 0x03;
 
 	   /// <summary>
 	   /// DS9097U read bit operation 0 </summary>
-	   public const char RESPONSE_BIT_ZERO = (char)0x00;
+	   public const byte RESPONSE_BIT_ZERO = 0x00;
 
 	   /// <summary>
 	   /// Enable/disable debug messages </summary>
-	   public static bool doDebugMessages = false;
+	   public static bool doDebugMessages = true;
 
 	   //--------
 	   //-------- Variables
@@ -250,7 +250,7 @@ namespace com.dalsemi.onewire.adapter
 		  packetsVector.Clear();
 
 		  // truncate the packet to 0 length
-		  packet.buffer.Length = 0;
+		  packet.buffer.Flush(); //TODO .buffer.Length = 0;
 
 		  packet.returnLength = 0;
 
@@ -308,7 +308,7 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
 		  // append the reset command at the current speed
-		  packet.buffer.Append((char)(FUNCTION_RESET | uState.uSpeedMode));
+		  packet.writer.Write((byte)(FUNCTION_RESET | uState.uSpeedMode)); //TODO .Append
 
 		  // count this as a return
 		  totalReturnLength++;
@@ -336,9 +336,9 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <returns> the number offset in the return packet to get the
 	   ///          result of this operation </returns>
-	   public virtual int dataBytes(char[] dataBytesValue)
+	   public virtual int dataBytes(byte[] dataBytesValue)
 	   {
-		  char byte_value;
+		  byte byte_value;
 		  int i, j;
 
 		  // set to data mode
@@ -367,13 +367,14 @@ namespace com.dalsemi.onewire.adapter
 				for (j = 0; j < 8; j++)
 				{
 				   dataBit(((byte_value & 0x01) == 0x01), false);
-				   byte_value = (char)((int)((uint)byte_value >> 1));
+				   byte_value = (byte)((int)((uint)byte_value >> 1));
 				}
 			 }
 			 else
 			 {
 				// append the data
-				packet.buffer.Append(dataBytesValue [i]);
+                packet.writer.Write(dataBytesValue[i]);
+				//TODO packet.buffer.Append(dataBytesValue [i]);
 
 				// provide debug output
 				if (doDebugMessages)
@@ -382,10 +383,11 @@ namespace com.dalsemi.onewire.adapter
 				}
 
 				// check for duplicates needed for special characters
-				if (((char)(dataBytesValue [i] & 0x00FF) == UAdapterState.MODE_COMMAND) || (((char)(dataBytesValue [i] & 0x00FF) == UAdapterState.MODE_SPECIAL) && (uState.revision == UAdapterState.CHIP_VERSION1)))
+				if (((byte)(dataBytesValue [i] & 0x00FF) == UAdapterState.MODE_COMMAND) || (((byte)(dataBytesValue [i] & 0x00FF) == UAdapterState.MODE_SPECIAL) && (uState.revision == UAdapterState.CHIP_VERSION1)))
 				{
 				   // duplicate this data byte
-				   packet.buffer.Append(dataBytesValue [i]);
+                   packet.writer.Write(dataBytesValue[i]);
+				   //TODO packet.buffer.Append(dataBytesValue [i]);
 				}
 
 				// add to the return number of bytes
@@ -418,13 +420,13 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <returns> the number offset in the return packet to get the
 	   ///          result of this operation </returns>
-	   public virtual int dataBytes(sbyte[] dataBytesValue, int off, int len)
+	   public virtual int dataBytes(byte[] dataBytesValue, int off, int len)
 	   {
-		  char[] temp_ch = new char [len];
+		  byte[] temp_ch = new byte [len];
 
 		  for (int i = 0; i < len; i++)
 		  {
-			 temp_ch [i] = (char) dataBytesValue [off + i];
+			 temp_ch [i] = (byte) dataBytesValue [off + i];
 		  }
 
 		  return dataBytes(temp_ch);
@@ -437,14 +439,14 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <returns> the number offset in the return packet to get the
 	   ///          result of this operation </returns>
-	   public virtual int dataByte(char dataByteValue)
+	   public virtual int dataByte(byte dataByteValue)
 	   {
 
 		  // contruct a temporary array of characters of lenght 1
 		  // to use the dataBytes method
-		  char[] temp_char_array = new char [1];
+		  byte[] temp_byte_array = new byte [1];
 
-		  temp_char_array [0] = dataByteValue;
+		  temp_byte_array [0] = dataByteValue;
 
 		  // provide debug output
 		  if (doDebugMessages)
@@ -452,7 +454,7 @@ namespace com.dalsemi.onewire.adapter
 			 Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes [" + ((int) dataByteValue & 0x00FF).ToString("x") + "]");
 		  }
 
-		  return dataBytes(temp_char_array);
+		  return dataBytes(temp_byte_array);
 	   }
 
 	   /// <summary>
@@ -463,7 +465,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <returns> the number offset in the return packet to get the
 	   ///          result of this operation </returns>
-	   public virtual int primedDataByte(sbyte dataByteValue)
+	   public virtual int primedDataByte(byte dataByteValue)
 	   {
 		  int offset , start_offset = 0;
 
@@ -471,7 +473,7 @@ namespace com.dalsemi.onewire.adapter
 		  for (int i = 0; i < 8; i++)
 		  {
 			 offset = dataBit(((dataByteValue & 0x01) == 0x01), (i == 7));
-			 dataByteValue = (sbyte)((uint)dataByteValue >> 1);
+			 dataByteValue = (byte)((uint)dataByteValue >> 1);
 
 			 // record the starting offset
 			 if (i == 0)
@@ -498,10 +500,11 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
 		  // append the bit with polarity and strong5V options
-		  packet.buffer.Append((char)(FUNCTION_BIT | uState.uSpeedMode | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
+          packet.writer.Write((byte)(FUNCTION_BIT | uState.uSpeedMode | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
+          //TODOpacket.buffer.Append((FUNCTION_BIT | uState.uSpeedMode | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
 
-		  // add to the return number of bytes
-		  totalReturnLength++;
+          // add to the return number of bytes
+          totalReturnLength++;
 		  packet.returnLength++;
 
 		  // check for packet too large or not streaming bits
@@ -528,27 +531,28 @@ namespace com.dalsemi.onewire.adapter
 		  // set to command mode
 		  setToCommandMode();
 
-		  // search mode on
-		  packet.buffer.Append((char)(FUNCTION_SEARCHON | uState.uSpeedMode));
+          // search mode on
+          packet.writer.Write((byte)(FUNCTION_SEARCHON | uState.uSpeedMode));
+		  //TODO packet.buffer.Append((FUNCTION_SEARCHON | uState.uSpeedMode));
 
 		  // set to data mode
 		  setToDataMode();
 
 		  // create the search sequence character array
-		  char[] search_sequence = new char [16];
+		  byte[] search_sequence = new byte [16];
 
 		  // get a copy of the current ID
-		  char[] id = new char [8];
+		  byte[] id = new byte [8];
 
 		  for (int i = 0; i < 8; i++)
 		  {
-			 id [i] = (char)(mState.ID [i] & 0xFF);
+			 id [i] = (byte)(mState.ID [i] & 0xFF);
 		  }
 
 		  // clear the string
 		  for (int i = 0; i < 16; i++)
 		  {
-			 search_sequence [i] = (char)0;
+			 search_sequence [i] = (byte)0;
 		  }
 
 		  // provide debug output
@@ -584,14 +588,16 @@ namespace com.dalsemi.onewire.adapter
 		  // remember this position
 		  int return_position = totalReturnLength;
 
-		  // add this sequence
-		  packet.buffer.Append(search_sequence);
+          // add this sequence
+          packet.writer.Write(search_sequence);
+		  //TODO packet.buffer.Append(search_sequence);
 
 		  // set to command mode
 		  setToCommandMode();
 
-		  // search mode off
-		  packet.buffer.Append((char)(FUNCTION_SEARCHOFF | uState.uSpeedMode));
+          // search mode off
+          packet.writer.Write((byte)(FUNCTION_SEARCHOFF | uState.uSpeedMode));
+		  //TODO packet.buffer.Append((FUNCTION_SEARCHOFF | uState.uSpeedMode));
 
 		  // add to the return number of bytes
 		  totalReturnLength += 16;
@@ -610,7 +616,8 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
 		  // search mode off and change speed
-		  packet.buffer.Append((char)(FUNCTION_SEARCHOFF | uState.uSpeedMode));
+          packet.writer.Write((byte)(FUNCTION_SEARCHOFF | uState.uSpeedMode));
+		  //TODO packet.buffer.Append((FUNCTION_SEARCHOFF | uState.uSpeedMode));
 
 		  // no return byte
 	   }
@@ -628,7 +635,8 @@ namespace com.dalsemi.onewire.adapter
 		  {
 
 			 // append the command to switch
-			 packet.buffer.Append(UAdapterState.MODE_COMMAND);
+             packet.writer.Write(UAdapterState.MODE_COMMAND);
+			 //TODO packet.buffer.Append(UAdapterState.MODE_COMMAND);
 
 			 // switch the state
 			 uState.inCommandMode = true;
@@ -644,7 +652,8 @@ namespace com.dalsemi.onewire.adapter
 		  {
 
 			 // append the command to switch
-			 packet.buffer.Append(UAdapterState.MODE_DATA);
+             packet.writer.Write(UAdapterState.MODE_DATA);
+			 //TODO packet.buffer.Append(UAdapterState.MODE_DATA);
 
 			 // switch the state
 			 uState.inCommandMode = false;
@@ -665,7 +674,8 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
 		  // append paramter get
-		  packet.buffer.Append((char)(CONFIG_MASK | parameter >> 3));
+          packet.writer.Write((byte)(CONFIG_MASK | parameter >> 3));
+		  //TODO packet.buffer.Append((CONFIG_MASK | parameter >> 3));
 
 		  // add to the return number of bytes
 		  totalReturnLength++;
@@ -688,14 +698,15 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <returns> the number offset in the return packet to get the
 	   ///          result of this operation </returns>
-	   public virtual int setParameter(char parameter, char parameterValue)
+	   public virtual int setParameter(byte parameter, byte parameterValue)
 	   {
 
 		  // set to command mode
 		  setToCommandMode();
 
 		  // append the paramter set with value
-		  packet.buffer.Append((char)((CONFIG_MASK | parameter) | parameterValue));
+          packet.writer.Write((byte)((CONFIG_MASK | parameter) | parameterValue));
+		  //TODO packet.buffer.Append(((CONFIG_MASK | parameter) | parameterValue));
 
 		  // add to the return number of bytes
 		  totalReturnLength++;
@@ -719,14 +730,15 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <returns> the number offset in the return packet to get the
 	   ///          result of this operation (if there is one) </returns>
-	   public virtual int sendCommand(char command, bool expectResponse)
+	   public virtual int sendCommand(byte command, bool expectResponse)
 	   {
 
 		  // set to command mode
 		  setToCommandMode();
 
 		  // append the paramter set with value
-		  packet.buffer.Append(command);
+          packet.writer.Write(command);
+		  //TODO packet.buffer.Append(command);
 
 		  // check for response
 		  if (expectResponse)
@@ -758,7 +770,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="result"> </param>
 	   /// <param name="offset"> </param>
 	   /// <param name="len"> </param>
-	   public virtual void interpretDataBytes(char[] dataByteResponse, int responseOffset, sbyte[] result, int offset, int len)
+	   public virtual void interpretDataBytes(byte[] dataByteResponse, int responseOffset, byte[] result, int offset, int len)
 	   {
 		  byte result_byte;
 		  int temp_offset, i, j;
@@ -788,11 +800,11 @@ namespace com.dalsemi.onewire.adapter
 				   }
 				}
 
-				result[offset + i] = unchecked((sbyte)(result_byte & 0xFF));
+				result[offset + i] = (byte)(result_byte & 0xFF);
 			 }
 			 else
 			 {
-				result[offset + i] = (sbyte)dataByteResponse[responseOffset + i];
+				result[offset + i] = (byte)dataByteResponse[responseOffset + i];
 			 }
 		  }
 	   }
@@ -803,7 +815,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="resetResponse">  reset response byte from U
 	   /// </param>
 	   /// <returns> the number representing the result of a 1-Wire reset </returns>
-	   public virtual int interpretOneWireReset(char resetResponse)
+	   public virtual int interpretOneWireReset(byte resetResponse)
 	   {
 
 		  // make sure the response byte structure is correct
@@ -811,7 +823,7 @@ namespace com.dalsemi.onewire.adapter
 		  {
 
 			 // retrieve the chip version and program voltage state
-			 uState.revision = (char)(UAdapterState.CHIP_VERSION_MASK & resetResponse);
+			 uState.revision = (byte)(UAdapterState.CHIP_VERSION_MASK & resetResponse);
 			 uState.programVoltageAvailable = ((UAdapterState.PROGRAM_VOLTAGE_MASK & resetResponse) != 0);
 
 			 // provide debug output
@@ -864,7 +876,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="bitResponse">  bit response byte from U
 	   /// </param>
 	   /// <returns> bool representing the result of a 1-Wire bit operation </returns>
-	   public virtual bool interpretOneWireBit(char bitResponse)
+	   public virtual bool interpretOneWireBit(byte bitResponse)
 	   {
 
 		  // interpret the bit
@@ -889,9 +901,9 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <returns> bool return is true if a valid ID was found when
 	   ///                 interpreting the search results </returns>
-	   public virtual bool interpretSearch(OneWireState mState, char[] searchResponse, int responseOffset)
+	   public virtual bool interpretSearch(OneWireState mState, byte[] searchResponse, int responseOffset)
 	   {
-		  char[] temp_id = new char [8];
+		  byte[] temp_id = new byte [8];
 
 		  // change byte offset to bit offset
 		  int bit_offset = responseOffset * 8;
@@ -921,11 +933,11 @@ namespace com.dalsemi.onewire.adapter
 		  }
 
 		  // check
-		  sbyte[] id = new sbyte [8];
+		  byte[] id = new byte [8];
 
 		  for (int i = 0; i < 8; i++)
 		  {
-			 id [i] = (sbyte) temp_id [i];
+			 id [i] = temp_id [i];
 		  }
 
 		  // check results
@@ -947,7 +959,7 @@ namespace com.dalsemi.onewire.adapter
 			 // copy the ID number to the buffer
 			 for (int i = 0; i < 8; i++)
 			 {
-				mState.ID [i] = (sbyte) temp_id [i];
+				mState.ID [i] = temp_id [i];
 			 }
 
 			 // set the count
@@ -965,7 +977,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="responseOffset">
 	   /// </param>
 	   /// <returns> the byte representing the result of a 1-Wire data byte </returns>
-	   public virtual sbyte interpretPrimedByte(char[] primedDataResponse, int responseOffset)
+	   public virtual byte interpretPrimedByte(byte[] primedDataResponse, int responseOffset)
 	   {
 		  byte result_byte = 0;
 
@@ -980,7 +992,7 @@ namespace com.dalsemi.onewire.adapter
 			 }
 		  }
 
-		  return unchecked((sbyte)(result_byte & 0xFF));
+		  return (byte)(result_byte & 0xFF);
 	   }
 
 	   //--------
@@ -1035,14 +1047,14 @@ namespace com.dalsemi.onewire.adapter
 	   ///                    is postion 0)
 	   /// </param>
 	   /// <returns> the bool value of the bit position </returns>
-	   public virtual bool bitRead(char[] bitBuffer, int address)
+	   public virtual bool bitRead(byte[] bitBuffer, int address)
 	   {
 		  int byte_number, bit_number;
 
 		  byte_number = (address / 8);
 		  bit_number = address - (byte_number * 8);
 
-		  return (((char)((bitBuffer [byte_number] >> bit_number) & 0x01)) == 0x01);
+		  return (((byte)((bitBuffer [byte_number] >> bit_number) & 0x01)) == 0x01);
 	   }
 
 	   /// <summary>
@@ -1052,7 +1064,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="address">   bit location to write (LSBit of first Byte in bitBuffer
 	   ///                    is postion 0) </param>
 	   /// <param name="newBitState"> new bit state </param>
-	   public virtual void bitWrite(char[] bitBuffer, int address, bool newBitState)
+	   public virtual void bitWrite(byte[] bitBuffer, int address, bool newBitState)
 	   {
 		  int byte_number, bit_number;
 
@@ -1061,11 +1073,11 @@ namespace com.dalsemi.onewire.adapter
 
 		  if (newBitState)
 		  {
-			 bitBuffer [byte_number] |= (char)(0x01 << bit_number);
+			 bitBuffer [byte_number] |= (byte)(0x01 << bit_number);
 		  }
 		  else
 		  {
-			 bitBuffer [byte_number] &= (char)(~(0x01 << bit_number));
+			 bitBuffer [byte_number] &= (byte)(~(0x01 << bit_number));
 		  }
 	   }
 	}

@@ -222,7 +222,7 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// current device </summary>
-	   private sbyte[] CurrentDevice = new sbyte[8];
+	   private byte[] CurrentDevice = new byte[8];
 
 
 	   /// <summary>
@@ -420,7 +420,7 @@ namespace com.dalsemi.onewire.adapter
 
 			 adapterPresent_Renamed = false;
 
-			 // attempt to open the port
+			 // attempt to close the port
 			 serial.closePort();
 		  }
 		  catch (IOException)
@@ -599,7 +599,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   ///  <param name="address"> An array to be filled with the current iButton address. </param>
 	   ///  <seealso cref=    com.dalsemi.onewire.utils.Address </seealso>
-	   public override void getAddress(sbyte[] address)
+	   public override void getAddress(byte[] address)
 	   {
 		  Array.Copy(CurrentDevice, 0, address, 0, 8);
 	   }
@@ -612,7 +612,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   ///  <param name="address"> An array to be copied into the current iButton
 	   ///          address. </param>
-	   public virtual sbyte[] Address
+	   public virtual byte[] Address
 	   {
 		   set
 		   {
@@ -774,7 +774,7 @@ namespace com.dalsemi.onewire.adapter
 	   ///  <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
 	   public override void putBit(bool bitValue)
 	   {
-		  char send_byte;
+		  byte send_byte;
 
 		  try
 		  {
@@ -786,17 +786,17 @@ namespace com.dalsemi.onewire.adapter
 			 {
 				if (bitValue)
 				{
-				   send_byte = (char) 0xFF;
+				   send_byte = 0xFF;
 				}
 				else
 				{
-				   send_byte = (char) 0x00;
+				   send_byte = 0x00;
 				}
 
 				serial.flush();
 
 				serial.write(send_byte);
-				char[] result = serial.readWithTimeout(1);
+				byte[] result = serial.readWithTimeout(1);
 
 				if (result[0] != send_byte)
 				{
@@ -840,8 +840,8 @@ namespace com.dalsemi.onewire.adapter
 				 {
 					serial.flush();
     
-					serial.write((char)0x00FF);
-					char[] result = serial.readWithTimeout(1);
+					serial.write(0xFF);
+					byte[] result = serial.readWithTimeout(1);
     
 					return (result[0] == 0xFF);
 				 }
@@ -871,9 +871,9 @@ namespace com.dalsemi.onewire.adapter
 	   ///  <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
 	   public override void putByte(int byteValue)
 	   {
-		  sbyte[] temp_block = new sbyte [1];
+		  byte[] temp_block = new byte [1];
 
-		  temp_block [0] = (sbyte) byteValue;
+		  temp_block [0] = (byte) byteValue;
 
 		  dataBlock(temp_block, 0, 1);
 	   }
@@ -889,9 +889,9 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		   get
 		   {
-			  sbyte[] temp_block = new sbyte [1];
+			  byte[] temp_block = new byte [1];
     
-			  temp_block [0] = unchecked((sbyte) 0xFF);
+			  temp_block [0] = 0xFF;
     
 			  dataBlock(temp_block, 0, 1);
     
@@ -915,14 +915,14 @@ namespace com.dalsemi.onewire.adapter
 	   /// </returns>
 	   ///  <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   ///  <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public override sbyte[] getBlock(int len)
+	   public override byte[] getBlock(int len)
 	   {
-		  sbyte[] temp_block = new sbyte [len];
+		  byte[] temp_block = new byte [len];
 
 		  // set block to read 0xFF
 		  for (int i = 0; i < len; i++)
 		  {
-			 temp_block [i] = unchecked((sbyte) 0xFF);
+			 temp_block [i] = 0xFF;
 		  }
 
 		  getBlock(temp_block, len);
@@ -939,7 +939,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   ///  <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   ///  <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public override void getBlock(sbyte[] arr, int len)
+	   public override void getBlock(byte[] arr, int len)
 	   {
 		  getBlock(arr, 0, len);
 	   }
@@ -954,12 +954,12 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   ///  <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   ///  <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public override void getBlock(sbyte[] arr, int off, int len)
+	   public override void getBlock(byte[] arr, int off, int len)
 	   {
 		  // set block to read 0xFF
 		  for (int i = off; i < len; i++)
 		  {
-			 arr [i] = unchecked((sbyte) 0xFF);
+			 arr [i] = 0xFF;
 		  }
 
 		  dataBlock(arr, off, len);
@@ -977,7 +977,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   ///  <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   ///  <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public override void dataBlock(sbyte[] dataBlock, int off, int len)
+	   public override void dataBlock(byte[] dataBlock, int off, int len)
 	   {
 		  try
 		  {
@@ -999,14 +999,14 @@ namespace com.dalsemi.onewire.adapter
 					  t_len = 128;
 				   }
 
-				   char[] send_block = constructSendBlock(dataBlock, t_off, t_len);
+				   byte[] send_block = constructSendBlock(dataBlock, t_off, t_len);
 
 				   serial.flush();
 
 				   serial.write(send_block);
-				   char[] raw_recv = serial.readWithTimeout(send_block.Length);
+				   byte[] raw_recv = serial.readWithTimeout(send_block.Length);
 
-				   sbyte[] recv = interpretRecvBlock(raw_recv);
+				   byte[] recv = interpretRecvBlock(raw_recv);
 
 				   Array.Copy(recv, 0, dataBlock, t_off, t_len);
 
@@ -1065,7 +1065,7 @@ namespace com.dalsemi.onewire.adapter
 				serial.sendBreak(1);
 
 				// get the result
-				char[] c = serial.readWithTimeout(1);
+				byte[] c = serial.readWithTimeout(1);
 
 				// does not work:  return ((c.length > 1) ? RESET_PRESENCE : RESET_NOPRESENCE);
 
@@ -1211,11 +1211,11 @@ namespace com.dalsemi.onewire.adapter
 				   // with mask serial_byte_mask
 				   if (search_direction)
 				   {
-					 CurrentDevice[serial_byte_number] |= (sbyte)serial_byte_mask;
+					 CurrentDevice[serial_byte_number] |= (byte)serial_byte_mask;
 				   }
 				   else
 				   {
-					 CurrentDevice[serial_byte_number] &= (sbyte)(~serial_byte_mask);
+					 CurrentDevice[serial_byte_number] &= (byte)(~serial_byte_mask);
 				   }
 
 				   // serial number search direction write bit
@@ -1270,7 +1270,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		  if (!adapterPresent_Renamed)
 		  {
-			 sbyte[] test_buf = new sbyte[] { -1, 0, -1, 0, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -29, -63, Convert.ToSByte('A'), Convert.ToSByte('T'), Convert.ToSByte('E'), Convert.ToSByte('0'), 0x0D, Convert.ToSByte('A') };
+			 byte[] test_buf = new byte[] { 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xe3, 0xc1, Convert.ToByte('A'), Convert.ToByte('T'), Convert.ToByte('E'), Convert.ToByte('0'), 0x0D, Convert.ToByte('A') };
 
 			 try
 			 {
@@ -1281,14 +1281,14 @@ namespace com.dalsemi.onewire.adapter
 				serial.sendBreak(1);
 
 				// get the result
-				char[] c = serial.readWithTimeout(1);
+				byte[] c = serial.readWithTimeout(1);
 
 				// send the test message
 				serial.flush();
 				serial.write(test_buf);
 
 				// get echo
-				char[] result = serial.readWithTimeout(test_buf.Length);
+				byte[] result = serial.readWithTimeout(test_buf.Length);
 
 				serial.flush();
 
@@ -1313,10 +1313,10 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="len"> length of data array to send
 	   /// </param>
 	   /// <returns> character array send block </returns>
-	   private char[] constructSendBlock(sbyte[] data, int off, int len)
+	   private byte[] constructSendBlock(byte[] data, int off, int len)
 	   {
 		  int shift_byte , cnt = 0;
-		  char[] send_block = new char[len * 8];
+		  byte[] send_block = new byte[len * 8];
 
 		  for (int i = 0; i < len; i++)
 		  {
@@ -1326,11 +1326,11 @@ namespace com.dalsemi.onewire.adapter
 			 {
 				if ((shift_byte & 0x01) == 0x01)
 				{
-				   send_block[cnt++] = (char)0x00FF;
+				   send_block[cnt++] = 0xFF;
 				}
 				else
 				{
-				   send_block[cnt++] = (char)0x00;
+				   send_block[cnt++] = 0x00;
 				}
 
 				shift_byte = (int)((uint)shift_byte >> 1);
@@ -1347,10 +1347,10 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="rawBlock"> character array of raw communication
 	   /// </param>
 	   /// <returns> byte array of data recieved </returns>
-	   private sbyte[] interpretRecvBlock(char[] rawBlock)
+	   private byte[] interpretRecvBlock(byte[] rawBlock)
 	   {
 		  int shift_byte = 0, bit_cnt = 0, byte_cnt = 0;
-		  sbyte[] recv_block = new sbyte[rawBlock.Length / 8];
+		  byte[] recv_block = new byte[rawBlock.Length / 8];
 
 		  for (int i = 0; i < rawBlock.Length; i++)
 		  {
@@ -1366,7 +1366,7 @@ namespace com.dalsemi.onewire.adapter
 			 if (bit_cnt == 8)
 			 {
 				bit_cnt = 0;
-				recv_block[byte_cnt++] = (sbyte)shift_byte;
+				recv_block[byte_cnt++] = (byte)shift_byte;
 				shift_byte = 0;
 			 }
 		  }

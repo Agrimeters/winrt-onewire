@@ -82,37 +82,37 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// DS1991 Write Scratchpad Command
 	   /// </summary>
-	   private static readonly sbyte WRITE_SCRATCHPAD_COMMAND = unchecked((sbyte) 0x96);
+	   private static readonly byte WRITE_SCRATCHPAD_COMMAND = 0x96;
 
 	   /// <summary>
 	   /// DS1991 Read Scratchpad Command
 	   /// </summary>
-	   private const sbyte READ_SCRATCHPAD_COMMAND = 0x69;
+	   private const byte READ_SCRATCHPAD_COMMAND = 0x69;
 
 	   /// <summary>
 	   /// DS1991 Copy Scratchpad Command
 	   /// </summary>
-	   private const sbyte COPY_SCRATCHPAD_COMMAND = 0x3C;
+	   private const byte COPY_SCRATCHPAD_COMMAND = 0x3C;
 
 	   /// <summary>
 	   /// DS1991 Write Password Command
 	   /// </summary>
-	   private const sbyte WRITE_PASSWORD_COMMAND = 0x5A;
+	   private const byte WRITE_PASSWORD_COMMAND = 0x5A;
 
 	   /// <summary>
 	   /// DS1991 Write SubKey Command
 	   /// </summary>
-	   private static readonly sbyte WRITE_SUBKEY_COMMAND = unchecked((sbyte) 0x99);
+	   private static readonly byte WRITE_SUBKEY_COMMAND = 0x99;
 
 	   /// <summary>
 	   /// DS1991 Read SubKey Command
 	   /// </summary>
-	   private const sbyte READ_SUBKEY_COMMAND = 0x66;
+	   private const byte READ_SUBKEY_COMMAND = 0x66;
 
 	   /// <summary>
 	   /// DS1991 Block code commands
 	   /// </summary>
-	   private static sbyte[][] blockCodes = null;
+	   private static byte[][] blockCodes = null;
 
 	   //--------
 	   //-------- Variables
@@ -121,16 +121,16 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// General purpose buffer
 	   /// </summary>
-	   private sbyte[] buffer = new sbyte [82];
+	   private byte[] buffer = new byte [82];
 
 	   //--------
 	   //-------- Constructor
 	   //--------
 	   static OneWireContainer02()
 	   {
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: blockCodes = new sbyte [9][8];
-		  blockCodes = RectangularArrays.ReturnRectangularSbyteArray(9, 8);
+          blockCodes = new byte[9][];
+          for(int i = 0; i<9; i++)
+              blockCodes[i] = new byte[8];
 
 		  initBlockCodes(blockCodes);
 	   }
@@ -168,7 +168,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
 	   /// <seealso cref= #OneWireContainer02() </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address </seealso>
-	   public OneWireContainer02(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer02(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 	   }
 
@@ -252,7 +252,7 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> If device is not found on the 1-Wire network </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeScratchpad(int addr, sbyte[] data)
+	   public virtual void writeScratchpad(int addr, byte[] data)
 	   {
 
 		  //confirm that data will fit
@@ -269,8 +269,8 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  buffer [0] = WRITE_SCRATCHPAD_COMMAND;
-		  buffer [1] = unchecked((sbyte)(addr | 0xC0));
-		  buffer [2] = (sbyte)(~buffer [1]);
+		  buffer [1] = unchecked((byte)(addr | 0xC0));
+		  buffer [2] = (byte)(~buffer [1]);
 
 		  Array.Copy(data, 0, buffer, 3, data.Length);
 
@@ -296,15 +296,15 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> If device is not found on the 1-Wire network </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readScratchpad()
+	   public virtual byte[] readScratchpad()
 	   {
 		  buffer [0] = READ_SCRATCHPAD_COMMAND;
-		  buffer [1] = unchecked((sbyte) 0xC0); //Starting address of scratchpad
+		  buffer [1] = 0xC0; //Starting address of scratchpad
 		  buffer [2] = 0x3F;
 
 		  for (int i = 3; i < 67; i++)
 		  {
-			 buffer [i] = unchecked((sbyte) 0xFF);
+			 buffer [i] = 0xFF;
 		  }
 
 		  //send command block
@@ -312,7 +312,7 @@ namespace com.dalsemi.onewire.container
 		  {
 			 adapter.dataBlock(buffer, 0, 67);
 
-			 sbyte[] retData = new sbyte [64];
+			 byte[] retData = new byte [64];
 
 			 Array.Copy(buffer, 3, retData, 0, 64);
 
@@ -342,7 +342,7 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> If device is not found on the 1-Wire network </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void copyScratchpad(int key, sbyte[] passwd, int blockNum)
+	   public virtual void copyScratchpad(int key, byte[] passwd, int blockNum)
 	   {
 
 		  //confirm that input is OK
@@ -362,8 +362,8 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  buffer [0] = COPY_SCRATCHPAD_COMMAND;
-		  buffer [1] = (sbyte)(key << 6);
-		  buffer [2] = (sbyte)(~buffer [1]);
+		  buffer [1] = (byte)(key << 6);
+		  buffer [2] = (byte)(~buffer [1]);
 
 		  //set up block selector code
 		  Array.Copy(blockCodes [blockNum], 0, buffer, 3, 8);
@@ -406,11 +406,11 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> If device is not found on the 1-Wire network </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readSubkey(int key, sbyte[] passwd)
+	   public virtual byte[] readSubkey(int key, byte[] passwd)
 	   {
 
 		  //create block to send back
-		  sbyte[] retData = new sbyte [64];
+		  byte[] retData = new byte [64];
 
 		  readSubkey(retData, key, passwd);
 
@@ -436,7 +436,7 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> If device is not found on the 1-Wire network </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void readSubkey(sbyte[] data, int key, sbyte[] passwd)
+	   public virtual void readSubkey(byte[] data, int key, byte[] passwd)
 	   {
 
 		  //confirm key and passwd within legal parameters
@@ -456,13 +456,13 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  buffer [0] = READ_SUBKEY_COMMAND;
-		  buffer [1] = (sbyte)((key << 6) | 0x10);
-		  buffer [2] = (sbyte)(~buffer [1]);
+		  buffer [1] = (byte)((key << 6) | 0x10);
+		  buffer [2] = (byte)(~buffer [1]);
 
 		  //prepare buffer to receive
 		  for (int i = 3; i < 67; i++)
 		  {
-			 buffer [i] = unchecked((sbyte) 0xFF);
+			 buffer [i] = 0xFF;
 		  }
 
 		  //insert password data
@@ -502,7 +502,7 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> If device is not found on the 1-Wire network </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writePassword(int key, sbyte[] oldName, sbyte[] newName, sbyte[] newPasswd)
+	   public virtual void writePassword(int key, byte[] oldName, byte[] newName, byte[] newPasswd)
 	   {
 
 		  //confirm key names and passwd within legal parameters
@@ -527,13 +527,13 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  buffer [0] = WRITE_PASSWORD_COMMAND;
-		  buffer [1] = (sbyte)(key << 6);
-		  buffer [2] = (sbyte)(~buffer [1]);
+		  buffer [1] = (byte)(key << 6);
+		  buffer [2] = (byte)(~buffer [1]);
 
 		  //prepare buffer to receive 8 bytes of the identifier
 		  for (int i = 3; i < 11; i++)
 		  {
-			 buffer [i] = unchecked((sbyte) 0xFF);
+			 buffer [i] = 0xFF;
 		  }
 
 		  //prepare same subkey identifier for confirmation
@@ -573,7 +573,7 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> If device is not found on the 1-Wire network </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeSubkey(int key, int addr, sbyte[] passwd, sbyte[] data)
+	   public virtual void writeSubkey(int key, int addr, byte[] passwd, byte[] data)
 	   {
 
 		  //confirm key names and passwd within legal parameters
@@ -598,13 +598,13 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  buffer [0] = WRITE_SUBKEY_COMMAND;
-		  buffer [1] = (sbyte)((key << 6) | addr);
-		  buffer [2] = (sbyte)(~buffer [1]);
+		  buffer [1] = (byte)((key << 6) | addr);
+		  buffer [2] = (byte)(~buffer [1]);
 
 		  //prepare buffer to receive 8 bytes of the identifier
 		  for (int i = 3; i < 11; i++)
 		  {
-			 buffer [i] = unchecked((sbyte) 0xFF);
+			 buffer [i] = 0xFF;
 		  }
 
 		  //prepare same subkey identifier for confirmation
@@ -632,7 +632,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="codes"> a 2 dimensional array [9][8] to contain the
 	   /// codes. </param>
-	   private static void initBlockCodes(sbyte[][] codes)
+	   private static void initBlockCodes(byte[][] codes)
 	   {
 		  codes [8][0] = 0x56; //ALL 64 bytes address 0x00 to 0x3F
 		  codes [8][1] = 0x56;
@@ -642,29 +642,29 @@ namespace com.dalsemi.onewire.container
 		  codes [8][5] = 0x5D;
 		  codes [8][6] = 0x5A;
 		  codes [8][7] = 0x7F;
-		  codes [0][0] = unchecked((sbyte) 0x9A); //identifier (block 0)
-		  codes [0][1] = unchecked((sbyte) 0x9A);
-		  codes [0][2] = unchecked((sbyte) 0xB3);
-		  codes [0][3] = unchecked((sbyte) 0x9D);
+		  codes [0][0] = 0x9A; //identifier (block 0)
+		  codes [0][1] = 0x9A;
+		  codes [0][2] = 0xB3;
+		  codes [0][3] = 0x9D;
 		  codes [0][4] = 0x64;
 		  codes [0][5] = 0x6E;
 		  codes [0][6] = 0x69;
 		  codes [0][7] = 0x4C;
-		  codes [1][0] = unchecked((sbyte) 0x9A); //password  (block 1)
-		  codes [1][1] = unchecked((sbyte) 0x9A);
+		  codes [1][0] = 0x9A; //password  (block 1)
+		  codes [1][1] = 0x9A;
 		  codes [1][2] = 0x4C;
 		  codes [1][3] = 0x62;
-		  codes [1][4] = unchecked((sbyte) 0x9B);
-		  codes [1][5] = unchecked((sbyte) 0x91);
+		  codes [1][4] = 0x9B;
+		  codes [1][5] = 0x91;
 		  codes [1][6] = 0x69;
 		  codes [1][7] = 0x4C;
-		  codes [2][0] = unchecked((sbyte) 0x9A); //address 0x10 to 0x17  (block 2)
+		  codes [2][0] = 0x9A; //address 0x10 to 0x17  (block 2)
 		  codes [2][1] = 0x65;
-		  codes [2][2] = unchecked((sbyte) 0xB3);
+		  codes [2][2] = 0xB3;
 		  codes [2][3] = 0x62;
-		  codes [2][4] = unchecked((sbyte) 0x9B);
+		  codes [2][4] = 0x9B;
 		  codes [2][5] = 0x6E;
-		  codes [2][6] = unchecked((sbyte) 0x96);
+		  codes [2][6] = 0x96;
 		  codes [2][7] = 0x4C;
 		  codes [3][0] = 0x6A; //address 0x18 to 0x1F  (block 3)
 		  codes [3][1] = 0x6A;
@@ -674,38 +674,38 @@ namespace com.dalsemi.onewire.container
 		  codes [3][5] = 0x61;
 		  codes [3][6] = 0x66;
 		  codes [3][7] = 0x43;
-		  codes [4][0] = unchecked((sbyte) 0x95); //address 0x20 to 0x27  (block 4)
-		  codes [4][1] = unchecked((sbyte) 0x95);
-		  codes [4][2] = unchecked((sbyte) 0xBC);
-		  codes [4][3] = unchecked((sbyte) 0x92);
-		  codes [4][4] = unchecked((sbyte) 0x94);
-		  codes [4][5] = unchecked((sbyte) 0x9E);
-		  codes [4][6] = unchecked((sbyte) 0x99);
-		  codes [4][7] = unchecked((sbyte) 0xBC);
+		  codes [4][0] = 0x95; //address 0x20 to 0x27  (block 4)
+		  codes [4][1] = 0x95;
+		  codes [4][2] = 0xBC;
+		  codes [4][3] = 0x92;
+		  codes [4][4] = 0x94;
+		  codes [4][5] = 0x9E;
+		  codes [4][6] = 0x99;
+		  codes [4][7] = 0xBC;
 		  codes [5][0] = 0x65; //address 0x28 to 0x2F  (block 5)
-		  codes [5][1] = unchecked((sbyte) 0x9A);
+		  codes [5][1] = 0x9A;
 		  codes [5][2] = 0x4C;
-		  codes [5][3] = unchecked((sbyte) 0x9D);
+		  codes [5][3] = 0x9D;
 		  codes [5][4] = 0x64;
-		  codes [5][5] = unchecked((sbyte) 0x91);
+		  codes [5][5] = 0x91;
 		  codes [5][6] = 0x69;
-		  codes [5][7] = unchecked((sbyte) 0xB3);
+		  codes [5][7] = 0xB3;
 		  codes [6][0] = 0x65; //address 0x30 to 0x37  (block 6)
 		  codes [6][1] = 0x65;
-		  codes [6][2] = unchecked((sbyte) 0xB3);
-		  codes [6][3] = unchecked((sbyte) 0x9D);
+		  codes [6][2] = 0xB3;
+		  codes [6][3] = 0x9D;
 		  codes [6][4] = 0x64;
 		  codes [6][5] = 0x6E;
-		  codes [6][6] = unchecked((sbyte) 0x96);
-		  codes [6][7] = unchecked((sbyte) 0xB3);
+		  codes [6][6] = 0x96;
+		  codes [6][7] = 0xB3;
 		  codes [7][0] = 0x65; //address 0x38 to 0x3F  (block 7)
 		  codes [7][1] = 0x65;
 		  codes [7][2] = 0x4C;
 		  codes [7][3] = 0x62;
-		  codes [7][4] = unchecked((sbyte) 0x9B);
-		  codes [7][5] = unchecked((sbyte) 0x91);
-		  codes [7][6] = unchecked((sbyte) 0x96);
-		  codes [7][7] = unchecked((sbyte) 0xB3);
+		  codes [7][4] = 0x9B;
+		  codes [7][5] = 0x91;
+		  codes [7][6] = 0x96;
+		  codes [7][7] = 0xB3;
 	   }
 	}
 

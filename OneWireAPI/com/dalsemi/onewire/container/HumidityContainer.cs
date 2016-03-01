@@ -187,7 +187,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire 
 	   ///         adapter </exception>
-	   void doHumidityConvert(sbyte[] state);
+	   void doHumidityConvert(byte[] state);
 
 	   //--------
 	   //-------- Humidity 'get' Methods
@@ -202,7 +202,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableHumidityResolution </seealso>
 	   /// <seealso cref=    #getHumidityResolution </seealso>
 	   /// <seealso cref=    #setHumidityResolution </seealso>
-	   double getHumidity(sbyte[] state);
+	   double getHumidity(byte[] state);
 
 	   /// <summary>
 	   /// Gets the current Humidity resolution in percent from the
@@ -216,7 +216,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableHumidityResolution </seealso>
 	   /// <seealso cref=    #getHumidityResolutions </seealso>
 	   /// <seealso cref=    #setHumidityResolution </seealso>
-	   double getHumidityResolution(sbyte[] state);
+	   double getHumidityResolution(byte[] state);
 
 	   /// <summary>
 	   /// Gets the specified Humidity alarm value in percent from the
@@ -234,7 +234,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref=    #hasHumidityAlarms </seealso>
 	   /// <seealso cref=    #setHumidityAlarm </seealso>
-	   double getHumidityAlarm(int alarmType, sbyte[] state);
+	   double getHumidityAlarm(int alarmType, byte[] state);
 
 	   //--------
 	   //-------- Humidity 'set' Methods
@@ -256,7 +256,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref=    #hasHumidityAlarms </seealso>
 	   /// <seealso cref=    #getHumidityAlarm </seealso>
-	   void setHumidityAlarm(int alarmType, double alarmValue, sbyte[] state);
+	   void setHumidityAlarm(int alarmType, double alarmValue, byte[] state);
 
 	   /// <summary>
 	   /// Sets the current Humidity resolution in percent in the provided
@@ -272,7 +272,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableHumidityResolution </seealso>
 	   /// <seealso cref=    #getHumidityResolution </seealso>
 	   /// <seealso cref=    #getHumidityResolutions </seealso>
-	   void setHumidityResolution(double resolution, sbyte[] state);
+	   void setHumidityResolution(double resolution, byte[] state);
 
 	}
 

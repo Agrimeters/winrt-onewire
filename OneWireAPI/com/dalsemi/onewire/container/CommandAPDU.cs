@@ -117,7 +117,7 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// Byte array containing the entire <code>CommandAPDU</code>. </summary>
-	   protected internal sbyte[] apduBuffer = null;
+	   protected internal byte[] apduBuffer = null;
 
 	   /// <summary>
 	   /// Length of this <code>CommandAPDU</code> currently in the 
@@ -129,10 +129,10 @@ namespace com.dalsemi.onewire.container
 	   /// Constructs a new ISO 7816-4 <code>CommandAPDU</code>.
 	   /// </summary>
 	   /// <param name="buffer">  the entire <code>CommandAPDU</code> as a byte array </param>
-	   public CommandAPDU(sbyte[] buffer)
+	   public CommandAPDU(byte[] buffer)
 	   {
 		  apduLength = buffer.Length;
-		  apduBuffer = new sbyte [apduLength];
+		  apduBuffer = new byte [apduLength];
 
 		  Array.Copy(buffer, 0, apduBuffer, 0, apduLength);
 	   } // CommandAPDU
@@ -144,7 +144,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="ins">  <code>INS</code> byte </param>
 	   /// <param name="p1">   parameter byte <code>P1</code> </param>
 	   /// <param name="p2">   parameter byte <code>P2</code> </param>
-	   public CommandAPDU(sbyte cla, sbyte ins, sbyte p1, sbyte p2) : this(cla, ins, p1, p2, null, -1)
+	   public CommandAPDU(byte cla, byte ins, byte p1, byte p2) : this(cla, ins, p1, p2, null, -1)
 	   {
 	   } // CommandAPDU
 
@@ -162,7 +162,7 @@ namespace com.dalsemi.onewire.container
 	   ///                 supported
 	   /// </param>
 	   /// <seealso cref=       ResponseAPDU </seealso>
-	   public CommandAPDU(sbyte cla, sbyte ins, sbyte p1, sbyte p2, int le) : this(cla, ins, p1, p2, null, le)
+	   public CommandAPDU(byte cla, byte ins, byte p1, byte p2, int le) : this(cla, ins, p1, p2, null, le)
 	   {
 	   } // CommandAPDU
 
@@ -176,7 +176,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="data"> this <code>CommandAPDU</code> data as a byte array,
 	   ///                 <code>LC</code> is derived from this data 
 	   ///                 array length </param>
-	   public CommandAPDU(sbyte cla, sbyte ins, sbyte p1, sbyte p2, sbyte[] data) : this(cla, ins, p1, p2, data, -1)
+	   public CommandAPDU(byte cla, byte ins, byte p1, byte p2, byte[] data) : this(cla, ins, p1, p2, data, -1)
 	   {
 	   } // CommandAPDU
 
@@ -197,7 +197,7 @@ namespace com.dalsemi.onewire.container
 	   ///                 supported
 	   /// </param>
 	   /// <seealso cref=       ResponseAPDU </seealso>
-	   public CommandAPDU(sbyte cla, sbyte ins, sbyte p1, sbyte p2, sbyte[] data, int le)
+	   public CommandAPDU(byte cla, byte ins, byte p1, byte p2, byte[] data, int le)
 	   {
 
 		  // KLA ... changed 7-18-02.  We always need that
@@ -221,7 +221,7 @@ namespace com.dalsemi.onewire.container
 			 apduLength++; // add one byte for LE
 		  }
 
-		  apduBuffer = new sbyte [apduLength];
+		  apduBuffer = new byte [apduLength];
 
 		  // fill CommandAPDU buffer body
 		  apduBuffer [CLA_Renamed] = cla;
@@ -231,19 +231,19 @@ namespace com.dalsemi.onewire.container
 
 		  if (data != null)
 		  {
-			 apduBuffer [LC_Renamed] = (sbyte) data.Length;
+			 apduBuffer [LC_Renamed] = (byte) data.Length;
 
 			 Array.Copy(data, 0, apduBuffer, LC_Renamed + 1, data.Length);
 		  }
 		  else
 		  {
 			 // fill in the LC byte anyhoo
-			 apduBuffer[LC_Renamed] = (sbyte)0;
+			 apduBuffer[LC_Renamed] = (byte)0;
 		  }
 
 		  if (le >= 0)
 		  {
-			 apduBuffer [apduLength - 1] = (sbyte) le;
+			 apduBuffer [apduLength - 1] = (byte) le;
 		  }
 	   } // CommandAPDU
 
@@ -251,7 +251,7 @@ namespace com.dalsemi.onewire.container
 	   /// Gets the <code>CLA</code> byte value.
 	   /// </summary>
 	   /// <returns> <code>CLA</code> byte of this <code>CommandAPDU</code> </returns>
-	   public virtual sbyte CLA
+	   public virtual byte CLA
 	   {
 		   get
 		   {
@@ -263,7 +263,7 @@ namespace com.dalsemi.onewire.container
 	   /// Gets the <code>INS</code> byte value.
 	   /// </summary>
 	   /// <returns> <code>INS</code> byte of this <code>CommandAPDU</code> </returns>
-	   public virtual sbyte INS
+	   public virtual byte INS
 	   {
 		   get
 		   {
@@ -275,7 +275,7 @@ namespace com.dalsemi.onewire.container
 	   /// Gets the first parameter (<code>P1</code>) byte value.
 	   /// </summary>
 	   /// <returns> <code>P1</code> byte of this <code>CommandAPDU</code> </returns>
-	   public virtual sbyte P1
+	   public virtual byte P1
 	   {
 		   get
 		   {
@@ -287,7 +287,7 @@ namespace com.dalsemi.onewire.container
 	   /// Gets the second parameter (<code>P2</code>) byte value.
 	   /// </summary>
 	   /// <returns> <code>P2</code> byte of this <code>CommandAPDU</code> </returns>
-	   public virtual sbyte P2
+	   public virtual byte P2
 	   {
 		   get
 		   {
@@ -347,7 +347,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= #getBytes
 	   ///  </seealso>
-	   public sbyte[] Buffer
+	   public byte[] Buffer
 	   {
 		   get
 		   {
@@ -368,11 +368,11 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= #setByte </seealso>
 	   /// <seealso cref= #getLength </seealso>
-	   public sbyte getByte(int index)
+	   public byte getByte(int index)
 	   {
 		  if (index >= apduLength)
 		  {
-			 return (sbyte) -1; // read beyond end of CommandAPDU
+			 return 0xFF; // read beyond end of CommandAPDU
 		  }
 		  else
 		  {
@@ -389,11 +389,11 @@ namespace com.dalsemi.onewire.container
 	   /// <returns>  the buffered <code>CommandAPDU</code> copied into a new array
 	   /// </returns>
 	   /// <seealso cref= #getBuffer </seealso>
-	   public sbyte[] Bytes
+	   public byte[] Bytes
 	   {
 		   get
 		   {
-			  sbyte[] apdu = new sbyte [apduLength];
+			  byte[] apdu = new byte [apduLength];
     
 			  Array.Copy(apduBuffer, 0, apdu, 0, apduLength);
     
@@ -426,7 +426,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getByte </seealso>
 	   /// <seealso cref= #getLength
 	   ///  </seealso>
-	   public void setByte(int index, sbyte value)
+	   public void setByte(int index, byte value)
 	   {
 		  if (index < apduLength)
 		  {

@@ -71,7 +71,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="MT"> The message block (padded if necessary). </param>
 	   /// <param name="result"> The byte[] into which the result will be copied. </param>
 	   /// <param name="offset"> The starting location in 'result' to start copying. </param>
-	   public static sbyte[] ComputeSHA(sbyte[] MT, sbyte[] result, int offset)
+	   public static byte[] ComputeSHA(byte[] MT, byte[] result, int offset)
 	   {
 		   lock (typeof(SHA))
 		   {
@@ -82,10 +82,10 @@ namespace com.dalsemi.onewire.utils
 			  {
 				 word = H[4 - i];
 				 j = (i << 2) + offset;
-				 result[j + 0] = unchecked((sbyte)((word) & 0x00FF));
-				 result[j + 1] = unchecked((sbyte)(((int)((uint)word >> 8)) & 0x00FF));
-				 result[j + 2] = unchecked((sbyte)(((int)((uint)word >> 16)) & 0x00FF));
-				 result[j + 3] = unchecked((sbyte)(((int)((uint)word >> 24)) & 0x00FF));
+				 result[j + 0] = (byte)((word) & 0x00FF);
+				 result[j + 1] = (byte)(((int)((uint)word >> 8)) & 0x00FF);
+				 result[j + 2] = (byte)(((int)((uint)word >> 16)) & 0x00FF);
+				 result[j + 3] = (byte)(((int)((uint)word >> 24)) & 0x00FF);
 			  }
         
 			  return result;
@@ -100,7 +100,7 @@ namespace com.dalsemi.onewire.utils
 	   /// </summary>
 	   /// <param name="MT"> The message block (padded if necessary). </param>
 	   /// <param name="ABCDE"> The result will be copied into this 5-int array. </param>
-	   public static void ComputeSHA(sbyte[] MT, int[] ABCDE)
+	   public static void ComputeSHA(byte[] MT, int[] ABCDE)
 	   {
 		   lock (typeof(SHA))
 		   {

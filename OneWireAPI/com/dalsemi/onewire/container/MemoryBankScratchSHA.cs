@@ -52,7 +52,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Erase Scratchpad Command
 	   /// </summary>
-	   public static readonly sbyte ERASE_SCRATCHPAD_COMMAND = unchecked((sbyte) 0xC3);
+	   public static readonly byte ERASE_SCRATCHPAD_COMMAND = 0xC3;
 
 	   //--------
 	   //-------- Constructor
@@ -83,10 +83,10 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void writeScratchpad(int startAddr, sbyte[] writeBuf, int offset, int len)
+	   public override void writeScratchpad(int startAddr, byte[] writeBuf, int offset, int len)
 	   {
 		  bool calcCRC = false;
-		  sbyte[] raw_buf = new sbyte [37];
+		  byte[] raw_buf = new byte [37];
 
 		  // select the device
 		  if (!ib.adapter.select(ib.address))
@@ -102,7 +102,7 @@ namespace com.dalsemi.onewire.container
 		  Array.Copy(ffBlock, 0, raw_buf, 1, 8);
 		  ib.adapter.dataBlock(raw_buf, 0, 9);
 
-		  if ((unchecked((sbyte)(raw_buf [8] & 0x0F0)) != unchecked((sbyte) 0xA0)) && (unchecked((sbyte)(raw_buf [8] & 0x0F0)) != (sbyte) 0x50))
+		  if (((byte)(raw_buf [8] & 0x0F0) != (byte) 0xA0) && ((byte)(raw_buf [8] & 0x0F0) != 0x50))
 		  {
 			 forceVerify();
 
@@ -119,8 +119,8 @@ namespace com.dalsemi.onewire.container
 
 		  // build block to send
 		  raw_buf [0] = WRITE_SCRATCHPAD_COMMAND;
-		  raw_buf [1] = unchecked((sbyte)(startAddr & 0xFF));
-		  raw_buf [2] = unchecked((sbyte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF));
+		  raw_buf [1] = (byte)(startAddr & 0xFF);
+		  raw_buf [2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
 
 		  Array.Copy(writeBuf, offset, raw_buf, 3, len);
 

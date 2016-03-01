@@ -26,7 +26,9 @@ namespace Test
         {
             this.InitializeComponent();
 
-            string[] args = { "DS9097U_COM1" }; //"DS2490_USB1" "DS2482_I2C1"
+            string[] args = null;
+            //string[] args = { "DS9097U_COM8" };
+            //string[] args = { "DS9490_USB",  };
 
             // Print default access provider settings
             com.dalsemi.onewire.OneWireAccessProvider.Main(args);

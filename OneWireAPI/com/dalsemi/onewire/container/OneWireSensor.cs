@@ -117,7 +117,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire 
 	   ///         adapter </exception>
-	   sbyte[] readDevice();
+	   byte[] readDevice();
 
 	   /// <summary>
 	   /// Writes the 1-Wire device sensor state that
@@ -133,7 +133,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire 
 	   ///         adapter </exception>
-	   void writeDevice(sbyte[] state);
+	   void writeDevice(byte[] state);
 	}
 
 }

@@ -103,7 +103,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <returns> <code>true</code> if the family code is non-zero and the
 	   /// CRC8 calculation is correct. </returns>
 	   /// <seealso cref=        com.dalsemi.onewire.utils.CRC8 </seealso>
-	   public static bool isValid(sbyte[] address)
+	   public static bool isValid(byte[] address)
 	   {
 		  if ((address [0] != 0) && (CRC8.compute(address) == 0))
 		  {
@@ -165,12 +165,12 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="address"> family code first.
 	   /// </param>
 	   /// <returns> address represented in a String, family code last. </returns>
-	   public static string ToString(sbyte[] address)
+	   public static string ToString(byte[] address)
 	   {
 		  // When displaying, the CRC is first, family code is last so
 		  // that the center 6 bytes are a real serial number (not byte reversed).
 
-		  sbyte[] barr = new sbyte[16];
+		  byte[] barr = new byte[16];
 		  int index = 0;
 		  int ch;
 
@@ -178,13 +178,13 @@ namespace com.dalsemi.onewire.utils
 		  {
 			ch = (address[i] >> 4) & 0x0F;
 			ch += ((ch > 9) ? 'A' - 10 : '0');
-			barr[index++] = (sbyte)ch;
+			barr[index++] = (byte)ch;
 			ch = address[i] & 0x0F;
 			ch += ((ch > 9) ? 'A' - 10 : '0');
-			barr[index++] = (sbyte)ch;
+			barr[index++] = (byte)ch;
 		  }
 
-		  return StringHelperClass.NewString(barr);
+		  return System.Text.Encoding.Unicode.GetString(barr);
 	   }
 
 	   /// <summary>
@@ -207,13 +207,13 @@ namespace com.dalsemi.onewire.utils
 	   /// </param>
 	   /// <returns> address represented in a byte array, family
 	   ///                 code (LS byte) first. </returns>
-	   public static sbyte[] toByteArray(string address)
+	   public static byte[] toByteArray(string address)
 	   {
-		  sbyte[] address_byte = new sbyte [8];
+		  byte[] address_byte = new byte [8];
 
 		  for (int i = 0; i < 8; i++)
 		  {
-			 address_byte [7 - i] = (sbyte)((Character.digit((address[i * 2]), 16) << 4) | (Character.digit(address[i * 2 + 1], 16)));
+			 address_byte [7 - i] = (byte)((Character.digit((address[i * 2]), 16) << 4) | (Character.digit(address[i * 2 + 1], 16)));
 		  }
 
 		  return address_byte;
@@ -223,30 +223,30 @@ namespace com.dalsemi.onewire.utils
 	   /// Convert an iButton or 1-Wire device address as a long
 	   /// (little endian) into an array of bytes.
 	   /// </summary>
-	   public static sbyte[] toByteArray(long address)
+	   public static byte[] toByteArray(long address)
 	   {
 
 		  /* This looks funny, but it should actually take
 		     less time since I do 7 eight bit shifts instead
 		     of 8+16+24+32+40+48+56 shifts.
 		  */
-		  sbyte[] address_byte = new sbyte [8];
+		  byte[] address_byte = new byte [8];
 
-		  address_byte [0] = (sbyte) address;
+		  address_byte [0] = (byte) address;
 		  address = (long)((ulong)address >> 8);
-		  address_byte [1] = (sbyte) address;
+		  address_byte [1] = (byte) address;
 		  address = (long)((ulong)address >> 8);
-		  address_byte [2] = (sbyte) address;
+		  address_byte [2] = (byte) address;
 		  address = (long)((ulong)address >> 8);
-		  address_byte [3] = (sbyte) address;
+		  address_byte [3] = (byte) address;
 		  address = (long)((ulong)address >> 8);
-		  address_byte [4] = (sbyte) address;
+		  address_byte [4] = (byte) address;
 		  address = (long)((ulong)address >> 8);
-		  address_byte [5] = (sbyte) address;
+		  address_byte [5] = (byte) address;
 		  address = (long)((ulong)address >> 8);
-		  address_byte [6] = (sbyte) address;
+		  address_byte [6] = (byte) address;
 		  address = (long)((ulong)address >> 8);
-		  address_byte [7] = (sbyte) address;
+		  address_byte [7] = (byte) address;
 
 		  return address_byte;
 	   }
@@ -255,7 +255,7 @@ namespace com.dalsemi.onewire.utils
 	   /// Converts a 1-Wire Network Address to a long (little endian).
 	   /// </summary>
 	   /// <returns> address represented as a long. </returns>
-	   public static long toLong(sbyte[] address)
+	   public static long toLong(byte[] address)
 	   {
 		  /* This looks funny, but it should actually take
 		     less time since I do 7 eight bit shifts instead

@@ -234,8 +234,6 @@
     <Compile Include="com\dalsemi\onewire\utils\OWPathElement.cs" />
     <Compile Include="com\dalsemi\onewire\utils\SHA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RectangularArrays.cs" />
-    <Compile Include="StringHelperClass.cs" />
     <EmbeddedResource Include="Properties\OneWireAPI.rd.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -244,6 +242,9 @@
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

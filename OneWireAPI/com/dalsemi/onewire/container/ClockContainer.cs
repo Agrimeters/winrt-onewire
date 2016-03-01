@@ -138,7 +138,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #setClock(long,byte[]) </seealso>
-	   long getClock(sbyte[] state);
+	   long getClock(byte[] state);
 
 	   /// <summary>
 	   /// Extracts the clock alarm value for the Real-Time clock.
@@ -155,7 +155,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   long getClockAlarm(sbyte[] state);
+	   long getClockAlarm(byte[] state);
 
 	   /// <summary>
 	   /// Checks if the clock alarm flag has been set.
@@ -172,7 +172,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   bool isClockAlarming(sbyte[] state);
+	   bool isClockAlarming(byte[] state);
 
 	   /// <summary>
 	   /// Checks if the clock alarm is enabled.
@@ -187,7 +187,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   bool isClockAlarmEnabled(sbyte[] state);
+	   bool isClockAlarmEnabled(byte[] state);
 
 	   /// <summary>
 	   /// Checks if the device's oscillator is enabled.  The clock
@@ -200,7 +200,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #canDisableClock() </seealso>
 	   /// <seealso cref= #setClockRunEnable(bool,byte[]) </seealso>
-	   bool isClockRunning(sbyte[] state);
+	   bool isClockRunning(byte[] state);
 
 	   //--------
 	   //-------- Clock 'set' Methods
@@ -218,7 +218,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #getClock(byte[]) </seealso>
-	   void setClock(long time, sbyte[] state);
+	   void setClock(long time, byte[] state);
 
 	   /// <summary>
 	   /// Sets the clock alarm.
@@ -240,7 +240,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   void setClockAlarm(long time, sbyte[] state);
+	   void setClockAlarm(long time, byte[] state);
 
 	   /// <summary>
 	   /// Enables or disables the oscillator, turning the clock 'on' and 'off'.
@@ -258,7 +258,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #canDisableClock() </seealso>
 	   /// <seealso cref= #isClockRunning(byte[]) </seealso>
-	   void setClockRunEnable(bool runEnable, sbyte[] state);
+	   void setClockRunEnable(bool runEnable, byte[] state);
 
 	   /// <summary>
 	   /// Enables or disables the clock alarm. 
@@ -279,7 +279,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
-	   void setClockAlarmEnable(bool alarmEnable, sbyte[] state);
+	   void setClockAlarmEnable(bool alarmEnable, byte[] state);
 	}
 
 }

@@ -52,7 +52,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </ul>
 	   /// </para>
 	   /// </summary>
-	   public char oneWireSpeed;
+	   public byte oneWireSpeed;
 
 	   /// <summary>
 	   /// This is the current logical 1-Wire Network pullup level.<para>
@@ -65,7 +65,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </ul>
 	   /// </para>
 	   /// </summary>
-	   public char oneWireLevel;
+	   public byte oneWireLevel;
 
 	   /// <summary>
 	   /// True if programming voltage is available
@@ -97,7 +97,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </ul>
 	   /// </para>
 	   /// </summary>
-	   public char primedLevelValue;
+	   public byte primedLevelValue;
 
 	   /// <summary>
 	   /// The amount of time that the 'level' value will be on for. <para>
@@ -136,17 +136,17 @@ namespace com.dalsemi.onewire.adapter
 	   /// <summary>
 	   /// ID number of the current iButton found.
 	   /// </summary>
-	   public sbyte[] ID;
+	   public byte[] ID;
 
 	   /// <summary>
 	   /// Array of iButton families to include in any search.
 	   /// </summary>
-	   public sbyte[] searchIncludeFamilies;
+	   public byte[] searchIncludeFamilies;
 
 	   /// <summary>
 	   /// Array of iButton families to exclude in any search.
 	   /// </summary>
-	   public sbyte[] searchExcludeFamilies;
+	   public byte[] searchExcludeFamilies;
 
 	   /// <summary>
 	   /// Flag to indicate the conditional search is to be performed so that
@@ -170,7 +170,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 
 		  // speed, level
-		  oneWireSpeed = (char)DSPortAdapter.SPEED_REGULAR;
+		  oneWireSpeed = DSPortAdapter.SPEED_REGULAR;
 		  oneWireLevel = DSPortAdapter.LEVEL_NORMAL;
 
 		  // level primed
@@ -183,13 +183,13 @@ namespace com.dalsemi.onewire.adapter
 		  canProgram = false;
 
 		  // search options 
-		  searchIncludeFamilies = new sbyte [0];
-		  searchExcludeFamilies = new sbyte [0];
+		  searchIncludeFamilies = new byte [0];
+		  searchExcludeFamilies = new byte [0];
 		  searchOnlyAlarmingButtons = false;
 		  skipResetOnSearch = false;
 
 		  // new iButton object
-		  ID = new sbyte [8];
+		  ID = new byte [8];
 
 		  // search state
 		  searchLastDiscrepancy = 0;

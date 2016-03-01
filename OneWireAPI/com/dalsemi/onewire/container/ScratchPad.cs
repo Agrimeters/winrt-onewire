@@ -57,7 +57,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   void readScratchpad(sbyte[] readBuf, int offset, int len, sbyte[] extraInfo);
+	   void readScratchpad(byte[] readBuf, int offset, int len, byte[] extraInfo);
 
 	   /// <summary>
 	   /// Write to the scratchpad page of memory a NVRAM device.
@@ -69,7 +69,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   void writeScratchpad(int startAddr, sbyte[] writeBuf, int offset, int len);
+	   void writeScratchpad(int startAddr, byte[] writeBuf, int offset, int len);
 
 	   /// <summary>
 	   /// Copy the scratchpad page to memory.

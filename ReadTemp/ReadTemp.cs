@@ -209,7 +209,7 @@ namespace ReadTemp
 
                     double high = 0.0;
                     double low = 0.0;
-                    sbyte[] state = tc.readDevice();
+                    byte[] state = tc.readDevice();
 
                     if (hasAlarms)
                     {

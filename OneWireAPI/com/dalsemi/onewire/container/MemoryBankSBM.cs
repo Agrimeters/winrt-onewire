@@ -51,22 +51,22 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Read scratchpad command
 	   /// </summary>
-	   private static readonly sbyte READ_SCRATCHPAD_COMMAND = unchecked((sbyte) 0xBE);
+	   private static readonly byte READ_SCRATCHPAD_COMMAND = unchecked((byte) 0xBE);
 
 	   /// <summary>
 	   /// Recall memory command
 	   /// </summary>
-	   private static readonly sbyte RECALL_MEMORY_COMMAND = unchecked((sbyte) 0xB8);
+	   private static readonly byte RECALL_MEMORY_COMMAND = unchecked((byte) 0xB8);
 
 	   /// <summary>
 	   /// Copy scratchpad command
 	   /// </summary>
-	   private static readonly sbyte COPY_SCRATCHPAD_COMMAND = (sbyte) 0x48;
+	   private static readonly byte COPY_SCRATCHPAD_COMMAND = (byte) 0x48;
 
 	   /// <summary>
 	   /// Write scratchpad command
 	   /// </summary>
-	   private static readonly sbyte WRITE_SCRATCHPAD_COMMAND = (sbyte) 0x4E;
+	   private static readonly byte WRITE_SCRATCHPAD_COMMAND = (byte) 0x4E;
 
 	   //--------
 	   //-------- Protected Variables for MemoryBank implementation
@@ -133,7 +133,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// block of 0xFF's used for faster read pre-fill of 1-Wire blocks
 	   /// </summary>
-	   protected internal sbyte[] ffBlock;
+	   protected internal byte[] ffBlock;
 
 	   /// <summary>
 	   /// Flag if read back verification is enabled in 'write()'.
@@ -170,11 +170,11 @@ namespace com.dalsemi.onewire.container
 		  writeVerification = true;
 
 		  // create the ffblock (used for faster 0xFF fills)
-		  ffBlock = new sbyte [20];
+		  ffBlock = new byte [20];
 
 		  for (int i = 0; i < 20; i++)
 		  {
-			 ffBlock [i] = unchecked((sbyte) 0xFF);
+			 ffBlock [i] = unchecked((byte) 0xFF);
 		  }
 
 		  // indicate speed has not been set
@@ -351,9 +351,9 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void read(int startAddr, bool readContinue, sbyte[] readBuf, int offset, int len)
+	   public virtual void read(int startAddr, bool readContinue, byte[] readBuf, int offset, int len)
 	   {
-		  sbyte[] temp_buf;
+		  byte[] temp_buf;
 
 		  // check for valid address
 		  if ((startAddr < 0) || ((startAddr + len) > size))
@@ -422,9 +422,9 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void write(int startAddr, sbyte[] writeBuf, int offset, int len)
+	   public virtual void write(int startAddr, byte[] writeBuf, int offset, int len)
 	   {
-		  sbyte[] temp_buf;
+		  byte[] temp_buf;
 
 		  // return if nothing to do
 		  if (len == 0)
@@ -451,7 +451,7 @@ namespace com.dalsemi.onewire.container
 		  }
 		  int page_cnt = 0;
 		  int data_written = 0;
-		  sbyte[] page_buf = new sbyte[8];
+		  byte[] page_buf = new byte[8];
 
 		  // loop while writing pages
 		  while (data_written < len)
@@ -497,17 +497,17 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> Error reading data </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
 	   /// <exception cref="IllegalArgumentException"> Bad parameters passed </exception>
-	   protected internal virtual sbyte[] readRawPage(int page)
+	   protected internal virtual byte[] readRawPage(int page)
 	   {
-		  sbyte[] buffer = new sbyte [11];
-		  sbyte[] result = new sbyte [8];
+		  byte[] buffer = new byte [11];
+		  byte[] result = new byte [8];
 		  int crc8; // this device uses a crc 8
 
 		  if (ib.adapter.select(ib.address))
 		  {
 			 /* recall memory to the scratchpad */
 			 buffer [0] = RECALL_MEMORY_COMMAND;
-			 buffer [1] = (sbyte) page;
+			 buffer [1] = (byte) page;
 
 			 ib.adapter.dataBlock(buffer, 0, 2);
 
@@ -515,11 +515,11 @@ namespace com.dalsemi.onewire.container
 			 ib.adapter.select(ib.address);
 
 			 buffer [0] = READ_SCRATCHPAD_COMMAND;
-			 buffer [1] = (sbyte) page;
+			 buffer [1] = (byte) page;
 
 			 for (int i = 2; i < 11; i++)
 			 {
-				buffer [i] = unchecked((sbyte) 0x0ff);
+				buffer [i] = unchecked((byte) 0x0ff);
 			 }
 
 			 ib.adapter.dataBlock(buffer, 0, 11);
@@ -557,16 +557,16 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireIOException"> Error reading data </exception>
 	   /// <exception cref="OneWireException"> Could not find part </exception>
 	   /// <exception cref="IllegalArgumentException"> Bad parameters passed </exception>
-	   protected internal virtual void writeRawPage(int page, sbyte[] source, int offset)
+	   protected internal virtual void writeRawPage(int page, byte[] source, int offset)
 	   {
-		  sbyte[] buffer = new sbyte [12];
+		  byte[] buffer = new byte [12];
 		  int crc8;
 
 		  if (ib.adapter.select(ib.address))
 		  {
 			 // write the page to the scratchpad first
 			 buffer [0] = WRITE_SCRATCHPAD_COMMAND;
-			 buffer [1] = (sbyte) page;
+			 buffer [1] = (byte) page;
 
 			 Array.Copy(source, offset, buffer, 2, 8);
 			 ib.adapter.dataBlock(buffer, 0, 10);
@@ -576,7 +576,7 @@ namespace com.dalsemi.onewire.container
 			 {
 				// write the page to the scratchpad first
 				buffer [0] = READ_SCRATCHPAD_COMMAND;
-				buffer [1] = (sbyte) page;
+				buffer [1] = (byte) page;
 
 				Array.Copy(ffBlock, 0, buffer, 2, 9);
 				ib.adapter.dataBlock(buffer, 0, 11);
@@ -593,7 +593,7 @@ namespace com.dalsemi.onewire.container
 				if (ib.adapter.select(ib.address))
 				{
 				   buffer [0] = COPY_SCRATCHPAD_COMMAND;
-				   buffer [1] = (sbyte) page;
+				   buffer [1] = (byte) page;
 
 				   ib.adapter.dataBlock(buffer, 0, 2);
 
@@ -607,7 +607,7 @@ namespace com.dalsemi.onewire.container
 				   }
 
 				   // check the result
-				   if ((sbyte)ib.adapter.Byte != unchecked((sbyte)0xFF))
+				   if ((byte)ib.adapter.Byte != unchecked((byte)0xFF))
 				   {
 					  throw new OneWireIOException("Copy scratchpad verification not found.");
 				   }

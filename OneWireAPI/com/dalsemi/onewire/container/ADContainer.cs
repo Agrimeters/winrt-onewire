@@ -188,7 +188,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #getADVoltage(int,byte[]) </seealso>
-	   void doADConvert(int channel, sbyte[] state);
+	   void doADConvert(int channel, byte[] state);
 
 	   /// <summary>
 	   /// Performs voltage conversion on one or more specified
@@ -211,7 +211,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #getADVoltage(byte[]) </seealso>
 	   /// <seealso cref= #canADMultiChannelRead() </seealso>
-	   void doADConvert(bool[] doConvert, sbyte[] state);
+	   void doADConvert(bool[] doConvert, byte[] state);
 
 	   /// <summary>
 	   /// Reads the value of the voltages after a <code>doADConvert(bool[],byte[])</code>
@@ -232,7 +232,7 @@ namespace com.dalsemi.onewire.container
 	   ///         1-Wire adapter.  This is usually a non-recoverable error.
 	   /// </exception>
 	   /// <seealso cref= #doADConvert(bool[],byte[]) </seealso>
-	   double[] getADVoltage(sbyte[] state);
+	   double[] getADVoltage(byte[] state);
 
 	   /// <summary>
 	   /// Reads the value of the voltages after a <code>doADConvert(int,byte[])</code>
@@ -255,7 +255,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= #doADConvert(int,byte[]) </seealso>
 	   /// <seealso cref= #getADVoltage(byte[]) </seealso>
-	   double getADVoltage(int channel, sbyte[] state);
+	   double getADVoltage(int channel, byte[] state);
 
 	   //--------
 	   //-------- A/D 'get' Methods
@@ -276,7 +276,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #hasADAlarms() </seealso>
-	   double getADAlarm(int channel, int alarmType, sbyte[] state);
+	   double getADAlarm(int channel, int alarmType, byte[] state);
 
 	   /// <summary>
 	   /// Checks to see if the specified alarm on the specified channel is enabled.
@@ -293,7 +293,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #hasADAlarms() </seealso>
-	   bool getADAlarmEnable(int channel, int alarmType, sbyte[] state);
+	   bool getADAlarmEnable(int channel, int alarmType, byte[] state);
 
 	   /// <summary>
 	   /// Checks the state of the specified alarm on the specified channel.
@@ -312,7 +312,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #hasADAlarms() </seealso>
 	   /// <seealso cref= #getADAlarmEnable(int,int,byte[]) </seealso>
 	   /// <seealso cref= #setADAlarmEnable(int,int,bool,byte[]) </seealso>
-	   bool hasADAlarmed(int channel, int alarmType, sbyte[] state);
+	   bool hasADAlarmed(int channel, int alarmType, byte[] state);
 
 	   /// <summary>
 	   /// Returns the currently selected resolution for the specified
@@ -326,7 +326,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= #getADResolutions(int,double) </seealso>
 	   /// <seealso cref= #setADResolution(int,double,byte[]) </seealso>
-	   double getADResolution(int channel, sbyte[] state);
+	   double getADResolution(int channel, byte[] state);
 
 	   /// <summary>
 	   /// Returns the currently selected range for the specified
@@ -340,7 +340,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= #getADRanges(int) </seealso>
 	   /// <seealso cref= #setADRange(int,double,byte[]) </seealso>
-	   double getADRange(int channel, sbyte[] state);
+	   double getADRange(int channel, byte[] state);
 
 	   //--------
 	   //-------- A/D 'set' Methods
@@ -367,7 +367,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getADAlarmEnable(int,int,byte[]) </seealso>
 	   /// <seealso cref= #setADAlarmEnable(int,int,bool,byte[]) </seealso>
 	   /// <seealso cref= #hasADAlarmed(int,int,byte[]) </seealso>
-	   void setADAlarm(int channel, int alarmType, double alarm, sbyte[] state);
+	   void setADAlarm(int channel, int alarmType, double alarm, byte[] state);
 
 	   /// <summary>
 	   /// Enables or disables the specified alarm on the specified channel.
@@ -390,7 +390,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #setADAlarm(int,int,double,byte[]) </seealso>
 	   /// <seealso cref= #getADAlarmEnable(int,int,byte[]) </seealso>
 	   /// <seealso cref= #hasADAlarmed(int,int,byte[]) </seealso>
-	   void setADAlarmEnable(int channel, int alarmType, bool alarmEnable, sbyte[] state);
+	   void setADAlarmEnable(int channel, int alarmType, bool alarmEnable, byte[] state);
 
 	   /// <summary>
 	   /// Sets the conversion resolution value for the specified channel.
@@ -407,7 +407,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getADResolutions(int,double) </seealso>
 	   /// <seealso cref= #getADResolution(int,byte[])
 	   ///  </seealso>
-	   void setADResolution(int channel, double resolution, sbyte[] state);
+	   void setADResolution(int channel, double resolution, byte[] state);
 
 	   /// <summary>
 	   /// Sets the input range for the specified channel.
@@ -423,7 +423,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= #getADRanges(int) </seealso>
 	   /// <seealso cref= #getADRange(int,byte[]) </seealso>
-	   void setADRange(int channel, double range, sbyte[] state);
+	   void setADRange(int channel, double range, byte[] state);
 	}
 
 	public static class ADContainer_Fields

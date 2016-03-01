@@ -161,7 +161,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// DS2423 read memory command
 	   /// </summary>
-	   private static readonly sbyte READ_MEMORY_COMMAND = unchecked((sbyte) 0xA5);
+	   private static readonly byte READ_MEMORY_COMMAND = unchecked((byte) 0xA5);
 
 	   //--------
 	   //-------- Variables
@@ -170,7 +170,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Internal buffer
 	   /// </summary>
-	   private sbyte[] buffer = new sbyte [14];
+	   private byte[] buffer = new byte [14];
 
 	   //--------
 	   //-------- Constructors
@@ -206,7 +206,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= #OneWireContainer1D() OneWireContainer1D </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
-	   public OneWireContainer1D(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer1D(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 	   }
 
@@ -398,15 +398,15 @@ namespace com.dalsemi.onewire.container
 			 int address = (counterPage << 5) + 31;
 
 			 // append the address
-			 buffer [1] = (sbyte) address;
+			 buffer [1] = (byte) address;
 			 crc16 = CRC16.compute(buffer [1], crc16);
-			 buffer [2] = (sbyte)((int)((uint)address >> 8));
+			 buffer [2] = (byte)((int)((uint)address >> 8));
 			 crc16 = CRC16.compute(buffer [2], crc16);
 
 			 // now add the read bytes for data byte,counter,zero bits, crc16
 			 for (int i = 3; i < 14; i++)
 			 {
-				buffer [i] = unchecked((sbyte) 0xFF);
+				buffer [i] = unchecked((byte) 0xFF);
 			 }
 
 			 // send the block

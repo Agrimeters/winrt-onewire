@@ -196,7 +196,7 @@ namespace com.dalsemi.onewire.container
 	   ///        password register.  Length must be 
 	   ///        <code>(offset + getReadOnlyPasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying from the given password array </param>
-	   void setDeviceReadOnlyPassword(sbyte[] password, int offset);
+	   void setDeviceReadOnlyPassword(byte[] password, int offset);
 
 	   /// <summary>
 	   /// <para>Writes the given password to the device's Read/Write password register.  Note
@@ -211,7 +211,7 @@ namespace com.dalsemi.onewire.container
 	   ///        password register.  Length must be 
 	   ///        <code>(offset + getReadWritePasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying from the given password array </param>
-	   void setDeviceReadWritePassword(sbyte[] password, int offset);
+	   void setDeviceReadWritePassword(byte[] password, int offset);
 
 	   /// <summary>
 	   /// <para>Writes the given password to the device's Write-Only password register.  Note
@@ -226,7 +226,7 @@ namespace com.dalsemi.onewire.container
 	   ///        password register.  Length must be 
 	   ///        <code>(offset + getWriteOnlyPasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying from the given password array </param>
-	   void setDeviceWriteOnlyPassword(sbyte[] password, int offset);
+	   void setDeviceWriteOnlyPassword(byte[] password, int offset);
 
 	   // -----------------------------------------------------------------
 
@@ -240,7 +240,7 @@ namespace com.dalsemi.onewire.container
 	   ///        reading from the device's memory.  Length must be 
 	   ///        <code>(offset + getReadOnlyPasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying from the given password array </param>
-	   void setContainerReadOnlyPassword(sbyte[] password, int offset);
+	   void setContainerReadOnlyPassword(byte[] password, int offset);
 
 	   /// <summary>
 	   /// Sets the Read/Write password used by the API when reading from  or
@@ -252,7 +252,7 @@ namespace com.dalsemi.onewire.container
 	   ///        reading from or writing to the device's memory.  Length must be 
 	   ///        <code>(offset + getReadWritePasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying from the given password array </param>
-	   void setContainerReadWritePassword(sbyte[] password, int offset);
+	   void setContainerReadWritePassword(byte[] password, int offset);
 
 	   /// <summary>
 	   /// Sets the Write-Only password used by the API when writing to the
@@ -264,7 +264,7 @@ namespace com.dalsemi.onewire.container
 	   ///        writing to the device's memory.  Length must be 
 	   ///        <code>(offset + getWriteOnlyPasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying from the given password array </param>
-	   void setContainerWriteOnlyPassword(sbyte[] password, int offset);
+	   void setContainerWriteOnlyPassword(byte[] password, int offset);
 
 	   // -----------------------------------------------------------------
 
@@ -312,7 +312,7 @@ namespace com.dalsemi.onewire.container
 	   ///        API when reading from the device's memory.  Length must be 
 	   ///        <code>(offset + getWriteOnlyPasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying into the given password array </param>
-	   void getContainerReadOnlyPassword(sbyte[] password, int offset);
+	   void getContainerReadOnlyPassword(byte[] password, int offset);
 
 	   /// <summary>
 	   /// Gets the Read/Write password used by the API when reading from or 
@@ -325,7 +325,7 @@ namespace com.dalsemi.onewire.container
 	   ///        API when reading from or writing to the device's memory.  Length must be 
 	   ///        <code>(offset + getReadWritePasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying into the given password array </param>
-	   void getContainerReadWritePassword(sbyte[] password, int offset);
+	   void getContainerReadWritePassword(byte[] password, int offset);
 
 	   /// <summary>
 	   /// Gets the Write-Only password used by the API when writing to the
@@ -338,7 +338,7 @@ namespace com.dalsemi.onewire.container
 	   ///        API when writing to the device's memory.  Length must be 
 	   ///        <code>(offset + getWriteOnlyPasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying into the given password array </param>
-	   void getContainerWriteOnlyPassword(sbyte[] password, int offset);
+	   void getContainerWriteOnlyPassword(byte[] password, int offset);
 
 	   // -----------------------------------------------------------------
 	}

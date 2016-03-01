@@ -108,13 +108,13 @@ namespace com.dalsemi.onewire.container
 	   /// device.
 	   /// Family code is byte at offset 0. </summary>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address </seealso>
-	   protected internal sbyte[] address;
+	   protected internal byte[] address;
 
 	   /// <summary>
 	   /// Temporary copy of 1-Wire Network Address of this
 	   /// iButton or 1-Wire device. </summary>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address </seealso>
-	   private sbyte[] addressCopy;
+	   private byte[] addressCopy;
 
 	   /// <summary>
 	   /// Communication speed requested.
@@ -172,7 +172,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
 	   /// <seealso cref= #OneWireContainer() </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address </seealso>
-	   public OneWireContainer(DSPortAdapter sourceAdapter, sbyte[] newAddress)
+	   public OneWireContainer(DSPortAdapter sourceAdapter, byte[] newAddress)
 	   {
 		  this.setupContainer(sourceAdapter, newAddress);
 	   }
@@ -227,7 +227,7 @@ namespace com.dalsemi.onewire.container
 	   ///                           this iButton </param>
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address </seealso>
-	   public virtual void setupContainer(DSPortAdapter sourceAdapter, sbyte[] newAddress)
+	   public virtual void setupContainer(DSPortAdapter sourceAdapter, byte[] newAddress)
 	   {
 
 		  // get a reference to the source adapter (will need this to communicate)
@@ -236,8 +236,8 @@ namespace com.dalsemi.onewire.container
 		  // set the Address
 		  lock (this)
 		  {
-			 address = new sbyte [8];
-			 addressCopy = new sbyte [8];
+			 address = new byte [8];
+			 addressCopy = new byte [8];
 
 			 Array.Copy(newAddress, 0, address, 0, 8);
 		  }
@@ -265,7 +265,7 @@ namespace com.dalsemi.onewire.container
 		  lock (this)
 		  {
 			 address = com.dalsemi.onewire.utils.Address.toByteArray(newAddress);
-			 addressCopy = new sbyte [8];
+			 addressCopy = new byte [8];
 		  }
 
 		  // set desired speed to be SPEED_REGULAR by default with no fallback
@@ -291,7 +291,7 @@ namespace com.dalsemi.onewire.container
 		  lock (this)
 		  {
 			 address = com.dalsemi.onewire.utils.Address.toByteArray(newAddress);
-			 addressCopy = new sbyte [8];
+			 addressCopy = new byte [8];
 		  }
 
 		  // set desired speed to be SPEED_REGULAR by default with no fallback
@@ -407,7 +407,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <returns> 1-Wire address </returns>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address </seealso>
-	   public virtual sbyte[] Address
+	   public virtual byte[] Address
 	   {
 		   get
 		   {
@@ -536,7 +536,7 @@ namespace com.dalsemi.onewire.container
 				// get this device and adapter to overdrive
 				adapter.Speed = DSPortAdapter.SPEED_REGULAR;
 				adapter.reset();
-				adapter.putByte((sbyte) 0x69);
+				adapter.putByte((byte) 0x69);
 				adapter.Speed = DSPortAdapter.SPEED_OVERDRIVE;
 			 }
 			 catch (OneWireIOException)

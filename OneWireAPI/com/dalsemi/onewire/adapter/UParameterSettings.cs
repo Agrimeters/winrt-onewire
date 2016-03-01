@@ -45,201 +45,201 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// Parameter selection, pull-down slew rate </summary>
-	   public const char PARAMETER_SLEW = (char)0x10;
+	   public const byte PARAMETER_SLEW = 0x10;
 
 	   /// <summary>
 	   /// Parameter selection, 12 volt pulse time </summary>
-	   public const char PARAMETER_12VPULSE = (char)0x20;
+	   public const byte PARAMETER_12VPULSE = 0x20;
 
 	   /// <summary>
 	   /// Parameter selection, 5 volt pulse time </summary>
-	   public const char PARAMETER_5VPULSE = (char)0x30;
+	   public const byte PARAMETER_5VPULSE = 0x30;
 
 	   /// <summary>
 	   /// Parameter selection, write 1 low time </summary>
-	   public const char PARAMETER_WRITE1LOW = (char)0x40;
+	   public const byte PARAMETER_WRITE1LOW = 0x40;
 
 	   /// <summary>
 	   /// Parameter selection, sample offset </summary>
-	   public const char PARAMETER_SAMPLEOFFSET = (char)0x50;
+	   public const byte PARAMETER_SAMPLEOFFSET = 0x50;
 
 	   /// <summary>
 	   /// Parameter selection, baud rate </summary>
-	   public const char PARAMETER_BAUDRATE = (char)0x70;
+	   public const byte PARAMETER_BAUDRATE = 0x70;
 
 	   // Pull down slew rate times 
 
 	   /// <summary>
 	   /// Pull down slew rate, 15V/us </summary>
-	   public const char SLEWRATE_15Vus = (char)0x00;
+	   public const byte SLEWRATE_15Vus = 0x00;
 
 	   /// <summary>
 	   /// Pull down slew rate, 2.2V/us </summary>
-	   public const char SLEWRATE_2p2Vus = (char)0x02;
+	   public const byte SLEWRATE_2p2Vus = 0x02;
 
 	   /// <summary>
 	   /// Pull down slew rate, 1.65V/us </summary>
-	   public const char SLEWRATE_1p65Vus = (char)0x04;
+	   public const byte SLEWRATE_1p65Vus = 0x04;
 
 	   /// <summary>
 	   /// Pull down slew rate, 1.37V/us </summary>
-	   public const char SLEWRATE_1p37Vus = (char)0x06;
+	   public const byte SLEWRATE_1p37Vus = 0x06;
 
 	   /// <summary>
 	   /// Pull down slew rate, 1.1V/us </summary>
-	   public const char SLEWRATE_1p1Vus = (char)0x08;
+	   public const byte SLEWRATE_1p1Vus = 0x08;
 
 	   /// <summary>
 	   /// Pull down slew rate, 0.83V/us </summary>
-	   public const char SLEWRATE_0p83Vus = (char)0x0A;
+	   public const byte SLEWRATE_0p83Vus = 0x0A;
 
 	   /// <summary>
 	   /// Pull down slew rate, 0.7V/us </summary>
-	   public const char SLEWRATE_0p7Vus = (char)0x0C;
+	   public const byte SLEWRATE_0p7Vus = 0x0C;
 
 	   /// <summary>
 	   /// Pull down slew rate, 0.55V/us </summary>
-	   public const char SLEWRATE_0p55Vus = (char)0x0E;
+	   public const byte SLEWRATE_0p55Vus = 0x0E;
 
 	   // 12 Volt programming pulse times 
 
 	   /// <summary>
 	   /// 12 Volt programming pulse, time 32us </summary>
-	   public const char TIME12V_32us = (char)0x00;
+	   public const byte TIME12V_32us = 0x00;
 
 	   /// <summary>
 	   /// 12 Volt programming pulse, time 64us </summary>
-	   public const char TIME12V_64us = (char)0x02;
+	   public const byte TIME12V_64us = 0x02;
 
 	   /// <summary>
 	   /// 12 Volt programming pulse, time 128us </summary>
-	   public const char TIME12V_128us = (char)0x04;
+	   public const byte TIME12V_128us = 0x04;
 
 	   /// <summary>
 	   /// 12 Volt programming pulse, time 256us </summary>
-	   public const char TIME12V_256us = (char)0x06;
+	   public const byte TIME12V_256us = 0x06;
 
 	   /// <summary>
 	   /// 12 Volt programming pulse, time 512us </summary>
-	   public const char TIME12V_512us = (char)0x08;
+	   public const byte TIME12V_512us = 0x08;
 
 	   /// <summary>
 	   /// 12 Volt programming pulse, time 1024us </summary>
-	   public const char TIME12V_1024us = (char)0x0A;
+	   public const byte TIME12V_1024us = 0x0A;
 
 	   /// <summary>
 	   /// 12 Volt programming pulse, time 2048us </summary>
-	   public const char TIME12V_2048us = (char)0x0C;
+	   public const byte TIME12V_2048us = 0x0C;
 
 	   /// <summary>
 	   /// 12 Volt programming pulse, time (infinite) </summary>
-	   public const char TIME12V_infinite = (char)0x0E;
+	   public const byte TIME12V_infinite = 0x0E;
 
 	   // 5 Volt programming pulse times 
 
 	   /// <summary>
 	   /// 5 Volt programming pulse, time 16.4ms </summary>
-	   public const char TIME5V_16p4ms = (char)0x00;
+	   public const byte TIME5V_16p4ms = 0x00;
 
 	   /// <summary>
 	   /// 5 Volt programming pulse, time 65.5ms </summary>
-	   public const char TIME5V_65p5ms = (char)0x02;
+	   public const byte TIME5V_65p5ms = 0x02;
 
 	   /// <summary>
 	   /// 5 Volt programming pulse, time 131ms </summary>
-	   public const char TIME5V_131ms = (char)0x04;
+	   public const byte TIME5V_131ms = 0x04;
 
 	   /// <summary>
 	   /// 5 Volt programming pulse, time 262ms </summary>
-	   public const char TIME5V_262ms = (char)0x06;
+	   public const byte TIME5V_262ms = 0x06;
 
 	   /// <summary>
 	   /// 5 Volt programming pulse, time 524ms </summary>
-	   public const char TIME5V_524ms = (char)0x08;
+	   public const byte TIME5V_524ms = 0x08;
 
 	   /// <summary>
 	   /// 5 Volt programming pulse, time 1.05s </summary>
-	   public const char TIME5V_1p05s = (char)0x0A;
+	   public const byte TIME5V_1p05s = 0x0A;
 
 	   /// <summary>
 	   /// 5 Volt programming pulse, time 2.10sms </summary>
-	   public const char TIME5V_2p10s = (char)0x0C;
+	   public const byte TIME5V_2p10s = 0x0C;
 
 	   /// <summary>
 	   /// 5 Volt programming pulse, dynamic current detect </summary>
-	   public const char TIME5V_dynamic = (char)0x0C;
+	   public const byte TIME5V_dynamic = 0x0C;
 
 	   /// <summary>
 	   /// 5 Volt programming pulse, time (infinite) </summary>
-	   public const char TIME5V_infinite = (char)0x0E;
+	   public const byte TIME5V_infinite = 0x0E;
 
 	   // Write 1 low time 
 
 	   /// <summary>
 	   /// Write 1 low time, 8us </summary>
-	   public const char WRITE1TIME_8us = (char)0x00;
+	   public const byte WRITE1TIME_8us = 0x00;
 
 	   /// <summary>
 	   /// Write 1 low time, 9us </summary>
-	   public const char WRITE1TIME_9us = (char)0x02;
+	   public const byte WRITE1TIME_9us = 0x02;
 
 	   /// <summary>
 	   /// Write 1 low time, 10us </summary>
-	   public const char WRITE1TIME_10us = (char)0x04;
+	   public const byte WRITE1TIME_10us = 0x04;
 
 	   /// <summary>
 	   /// Write 1 low time, 11us </summary>
-	   public const char WRITE1TIME_11us = (char)0x06;
+	   public const byte WRITE1TIME_11us = 0x06;
 
 	   /// <summary>
 	   /// Write 1 low time, 12us </summary>
-	   public const char WRITE1TIME_12us = (char)0x08;
+	   public const byte WRITE1TIME_12us = 0x08;
 
 	   /// <summary>
 	   /// Write 1 low time, 13us </summary>
-	   public const char WRITE1TIME_13us = (char)0x0A;
+	   public const byte WRITE1TIME_13us = 0x0A;
 
 	   /// <summary>
 	   /// Write 1 low time, 14us </summary>
-	   public const char WRITE1TIME_14us = (char)0x0C;
+	   public const byte WRITE1TIME_14us = 0x0C;
 
 	   /// <summary>
 	   /// Write 1 low time, 15us </summary>
-	   public const char WRITE1TIME_15us = (char)0x0E;
+	   public const byte WRITE1TIME_15us = 0x0E;
 
 	   // Data sample offset and write 0 recovery times 
 
 	   /// <summary>
 	   /// Data sample offset and Write 0 recovery time, 4us </summary>
-	   public const char SAMPLEOFFSET_TIME_4us = (char)0x00;
+	   public const byte SAMPLEOFFSET_TIME_4us = 0x00;
 
 	   /// <summary>
 	   /// Data sample offset and Write 0 recovery time, 5us </summary>
-	   public const char SAMPLEOFFSET_TIME_5us = (char)0x02;
+	   public const byte SAMPLEOFFSET_TIME_5us = 0x02;
 
 	   /// <summary>
 	   /// Data sample offset and Write 0 recovery time, 6us </summary>
-	   public const char SAMPLEOFFSET_TIME_6us = (char)0x04;
+	   public const byte SAMPLEOFFSET_TIME_6us = 0x04;
 
 	   /// <summary>
 	   /// Data sample offset and Write 0 recovery time, 7us </summary>
-	   public const char SAMPLEOFFSET_TIME_7us = (char)0x06;
+	   public const byte SAMPLEOFFSET_TIME_7us = 0x06;
 
 	   /// <summary>
 	   /// Data sample offset and Write 0 recovery time, 8us </summary>
-	   public const char SAMPLEOFFSET_TIME_8us = (char)0x08;
+	   public const byte SAMPLEOFFSET_TIME_8us = 0x08;
 
 	   /// <summary>
 	   /// Data sample offset and Write 0 recovery time, 9us </summary>
-	   public const char SAMPLEOFFSET_TIME_9us = (char)0x0A;
+	   public const byte SAMPLEOFFSET_TIME_9us = 0x0A;
 
 	   /// <summary>
 	   /// Data sample offset and Write 0 recovery time, 10us </summary>
-	   public const char SAMPLEOFFSET_TIME_10us = (char)0x0C;
+	   public const byte SAMPLEOFFSET_TIME_10us = 0x0C;
 
 	   /// <summary>
 	   /// Data sample offset and Write 0 recovery time, 11us </summary>
-	   public const char SAMPLEOFFSET_TIME_11us = (char)0x0E;
+	   public const byte SAMPLEOFFSET_TIME_11us = 0x0E;
 
 	   //--------
 	   //-------- Variables
@@ -260,7 +260,7 @@ namespace com.dalsemi.onewire.adapter
 	   ///  </ul>
 	   /// </para>
 	   /// </summary>
-	   public char pullDownSlewRate;
+	   public byte pullDownSlewRate;
 
 	   /// <summary>
 	   /// 12 Volt programming pulse time expressed in micro-seconds.
@@ -275,7 +275,7 @@ namespace com.dalsemi.onewire.adapter
 	   ///  <li> TIME12V_infinite
 	   ///  </ul>
 	   /// </summary>
-	   public char pulse12VoltTime;
+	   public byte pulse12VoltTime;
 
 	   /// <summary>
 	   /// 5 Volt programming pulse time expressed in milli-seconds.
@@ -291,7 +291,7 @@ namespace com.dalsemi.onewire.adapter
 	   ///  <li> TIME5V_infinite
 	   ///  </ul>
 	   /// </summary>
-	   public char pulse5VoltTime;
+	   public byte pulse5VoltTime;
 
 	   /// <summary>
 	   /// Write 1 low time expressed in micro-seconds.
@@ -307,7 +307,7 @@ namespace com.dalsemi.onewire.adapter
 	   ///  <li> WRITE1TIME_15us
 	   ///  </ul>
 	   /// </summary>
-	   public char write1LowTime;
+	   public byte write1LowTime;
 
 	   /// <summary>
 	   /// Data sample offset and write 0 recovery time expressed in micro-seconds.
@@ -323,7 +323,7 @@ namespace com.dalsemi.onewire.adapter
 	   ///  <li> SAMPLEOFFSET_TIME_11us
 	   ///  </ul>
 	   /// </summary>
-	   public char sampleOffsetTime;
+	   public byte sampleOffsetTime;
 
 	   //--------
 	   //-------- Constructors

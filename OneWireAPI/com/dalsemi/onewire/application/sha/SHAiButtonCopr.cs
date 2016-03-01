@@ -119,7 +119,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <summary>
 	   /// Cache of 1-Wire Address
 	   /// </summary>
-	   protected internal sbyte[] address = null;
+	   protected internal byte[] address = null;
 
 	   /// <summary>
 	   /// Page used for generating user authentication secret.
@@ -134,12 +134,12 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <summary>
 	   /// 7 bytes of binding data for scratchpad to bind secret installation
 	   /// </summary>
-	   protected internal sbyte[] bindCode = new sbyte [7];
+	   protected internal byte[] bindCode = new byte [7];
 
 	   /// <summary>
 	   /// 32 bytes of binding data to bind secret installation
 	   /// </summary>
-	   protected internal sbyte[] bindData = new sbyte [32];
+	   protected internal byte[] bindData = new byte [32];
 
 	   /// <summary>
 	   /// Specifies whether or not this coprocessor is compatible with
@@ -157,12 +157,12 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <summary>
 	   /// Filename, including extension, for user's service file
 	   /// </summary>
-	   protected internal sbyte[] filename = new sbyte[5];
+	   protected internal byte[] filename = new byte[5];
 
 	   /// <summary>
 	   /// 20 byte initial signature, used for signing user account data
 	   /// </summary>
-	   protected internal sbyte[] initialSignature = new sbyte [20];
+	   protected internal byte[] initialSignature = new byte [20];
 
 	   /// <summary>
 	   /// The Provider name of the coprocessor's service
@@ -172,7 +172,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <summary>
 	   /// 3 byte challenge, used for signing user account data
 	   /// </summary>
-	   protected internal sbyte[] signingChallenge = new sbyte [3];
+	   protected internal byte[] signingChallenge = new byte [3];
 
 	   /// <summary>
 	   /// Page used for signing user account data.
@@ -262,7 +262,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref= #SHAiButtonCopr(OneWireContainer18,String) </seealso>
-	   public SHAiButtonCopr(OneWireContainer18 l_owc, string coprFilename, bool l_formatDevice, int l_signPageNumber, int l_authPageNumber, int l_wspcPageNumber, int l_version, int l_encCode, sbyte l_serviceFileExt, sbyte[] l_serviceFilename, sbyte[] l_providerName, sbyte[] l_bindData, sbyte[] l_bindCode, sbyte[] l_auxData, sbyte[] l_initialSignature, sbyte[] l_signingChlg, sbyte[] l_signingSecret, sbyte[] l_authSecret)
+	   public SHAiButtonCopr(OneWireContainer18 l_owc, string coprFilename, bool l_formatDevice, int l_signPageNumber, int l_authPageNumber, int l_wspcPageNumber, int l_version, int l_encCode, byte l_serviceFileExt, byte[] l_serviceFilename, byte[] l_providerName, byte[] l_bindData, byte[] l_bindCode, byte[] l_auxData, byte[] l_initialSignature, byte[] l_signingChlg, byte[] l_signingSecret, byte[] l_authSecret)
 	   {
 		  //clear any errors
 		  this.lastError = SHAiButtonCopr.NO_ERROR;
@@ -298,11 +298,11 @@ namespace com.dalsemi.onewire.application.sha
 			 int offset = 47 * j;
 			 for (int i = 32; i < 36 && this.DS1961Scompatible_Renamed; i++)
 			 {
-				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == unchecked((sbyte)0x0FF));
+				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == unchecked((byte)0x0FF));
 			 }
 			 for (int i = 44; i < 47 && this.DS1961Scompatible_Renamed; i++)
 			 {
-				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == unchecked((sbyte)0x0FF));
+				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == unchecked((byte)0x0FF));
 			 }
 		  }
 
@@ -311,8 +311,8 @@ namespace com.dalsemi.onewire.application.sha
 		  int month = c.Month + 1;
 		  int date = c.Day;
 		  int year = c.Year - 1900;
-		  sbyte yearMSB = unchecked((sbyte)((year >> 8) & 0x0FF));
-		  sbyte yearLSB = unchecked((sbyte)(year & 0x0FF));
+		  byte yearMSB = (byte)((year >> 8) & 0x0FF);
+		  byte yearLSB = (byte)(year & 0x0FF);
 
 		  try
 		  {
@@ -338,12 +338,12 @@ namespace com.dalsemi.onewire.application.sha
 			 fos.write(l_bindData);
 			 fos.write(l_bindCode);
 			 fos.write(l_signingChlg);
-			 fos.write((sbyte)l_providerName.Length);
-			 fos.write((sbyte)l_initialSignature.Length);
-			 fos.write((sbyte)l_auxData.Length);
-			 fos.write(l_providerName,0,(sbyte)l_providerName.Length);
-			 fos.write(l_initialSignature,0,(sbyte)l_initialSignature.Length);
-			 fos.write(l_auxData,0,(sbyte)l_auxData.Length);
+			 fos.write((byte)l_providerName.Length);
+			 fos.write((byte)l_initialSignature.Length);
+			 fos.write((byte)l_auxData.Length);
+			 fos.write(l_providerName,0,(byte)l_providerName.Length);
+			 fos.write(l_initialSignature,0,(byte)l_initialSignature.Length);
+			 fos.write(l_auxData,0,(byte)l_auxData.Length);
 			 fos.write(l_encCode);
 			 fos.write(DS1961Scompatible_Renamed?0x55:0x00);
 			 fos.Flush();
@@ -603,11 +603,11 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </summary>
 	   /// <returns> 8 byte array containing family code, address, and
 	   ///         crc8 of the OneWire device. </returns>
-	   public virtual sbyte[] Address
+	   public virtual byte[] Address
 	   {
 		   get
 		   {
-			  sbyte[] data = new sbyte[8];
+			  byte[] data = new byte[8];
 			  Array.Copy(address,0,data,0,8);
 			  return data;
 		   }
@@ -619,7 +619,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </summary>
 	   /// <param name="data"> array with at least 8 bytes after offset </param>
 	   /// <param name="offset"> the index at which copying starts </param>
-	   public virtual void getAddress(sbyte[] data, int offset)
+	   public virtual void getAddress(byte[] data, int offset)
 	   {
 		  Array.Copy(address, 0, data, offset, 8);
 	   }
@@ -632,7 +632,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <param name="data"> array with at least cnt bytes after offset </param>
 	   /// <param name="offset"> the index at which copying starts </param>
 	   /// <param name="cnt"> the number of bytes to copy </param>
-	   public virtual void getAddress(sbyte[] data, int offset, int cnt)
+	   public virtual void getAddress(byte[] data, int offset, int cnt)
 	   {
 		  Array.Copy(address, 0, data, offset, cnt);
 	   }
@@ -676,11 +676,11 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </summary>
 	   /// <returns> the binding code for user's scratchpad </returns>
 	   /// <seealso cref= OneWireContainer18#bindSecretToiButton(int,byte[],byte[],int) </seealso>
-	   public virtual sbyte[] BindCode
+	   public virtual byte[] BindCode
 	   {
 		   get
 		   {
-			  sbyte[] data = new sbyte[7];
+			  byte[] data = new byte[7];
 			  Array.Copy(bindCode, 0, data, 0, 7);
 			  return data;
 		   }
@@ -697,7 +697,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///        scratchpad </param>
 	   /// <param name="offset"> the index at which to start copying. </param>
 	   /// <seealso cref= OneWireContainer18#bindSecretToiButton(int,byte[],byte[],int) </seealso>
-	   public virtual void getBindCode(sbyte[] data, int offset)
+	   public virtual void getBindCode(byte[] data, int offset)
 	   {
 		  Array.Copy(bindCode, 0, data, offset, 7);
 	   }
@@ -710,11 +710,11 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </summary>
 	   /// <returns> the binding data for user's data page </returns>
 	   /// <seealso cref= OneWireContainer18#bindSecretToiButton(int,byte[],byte[],int) </seealso>
-	   public virtual sbyte[] BindData
+	   public virtual byte[] BindData
 	   {
 		   get
 		   {
-			  sbyte[] data = new sbyte[32];
+			  byte[] data = new byte[32];
 			  Array.Copy(bindData, 0, data, 0, 32);
 			  return data;
 		   }
@@ -730,7 +730,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///        data page </param>
 	   /// <param name="offset"> the index at which to start copying. </param>
 	   /// <seealso cref= OneWireContainer18#bindSecretToiButton(int,byte[],byte[],int) </seealso>
-	   public virtual void getBindData(sbyte[] data, int offset)
+	   public virtual void getBindData(byte[] data, int offset)
 	   {
 		  Array.Copy(bindData, 0, data, offset, 32);
 	   }
@@ -758,7 +758,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <param name="l_filename"> the array into which the filename will be
 	   ///        copied. </param>
 	   /// <param name="offset"> the starting index for copying the filename. </param>
-	   public virtual void getFilename(sbyte[] l_filename, int offset)
+	   public virtual void getFilename(byte[] l_filename, int offset)
 	   {
 		  int cnt = Math.Min(l_filename.Length - offset, 4);
 		  Array.Copy(filename, offset, l_filename, offset, cnt);
@@ -770,7 +770,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// e-cash application, the file extension will be decimal 102.</P>
 	   /// </summary>
 	   /// <returns> proper file extension for user's account data file. </returns>
-	   public virtual sbyte FilenameExt
+	   public virtual byte FilenameExt
 	   {
 		   get
 		   {
@@ -783,11 +783,11 @@ namespace com.dalsemi.onewire.application.sha
 	   /// for signing account data.</P>
 	   /// </summary>
 	   /// <returns> 20-byte initial signature. </returns>
-	   public virtual sbyte[] InitialSignature
+	   public virtual byte[] InitialSignature
 	   {
 		   get
 		   {
-			  sbyte[] data = new sbyte[20];
+			  byte[] data = new byte[20];
 			  Array.Copy(initialSignature, 0, data, 0, 20);
 			  return data;
 		   }
@@ -800,7 +800,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </summary>
 	   /// <param name="data"> arry for copying the 20-byte initial signature. </param>
 	   /// <param name="offset"> the index at which to start copying. </param>
-	   public virtual void getInitialSignature(sbyte[] data, int offset)
+	   public virtual void getInitialSignature(byte[] data, int offset)
 	   {
 		  Array.Copy(initialSignature, 0, data, offset, 20);
 	   }
@@ -836,11 +836,11 @@ namespace com.dalsemi.onewire.application.sha
 	   /// for data validation.</P>
 	   /// </summary>
 	   /// <returns> 3-byte challenge </returns>
-	   public virtual sbyte[] SigningChallenge
+	   public virtual byte[] SigningChallenge
 	   {
 		   get
 		   {
-			  sbyte[] data = new sbyte[3];
+			  byte[] data = new byte[3];
 			  Array.Copy(signingChallenge, 0, data, 0, 3);
 			  return data;
 		   }
@@ -853,7 +853,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </summary>
 	   /// <param name="data"> the array for copying the 3-byte challenge. </param>
 	   /// <param name="offset"> the index at which to start copying. </param>
-	   public virtual void getSigningChallenge(sbyte[] data, int offset)
+	   public virtual void getSigningChallenge(byte[] data, int offset)
 	   {
 		  Array.Copy(signingChallenge, 0, data, offset, 3);
 	   }
@@ -970,7 +970,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </exception>
 	   /// <seealso cref= OneWireContainer18#SHAFunction(byte,int) </seealso>
 	   /// <seealso cref= #getLastError() </seealso>
-	   public virtual bool createDataSignature(sbyte[] accountData, sbyte[] signScratchpad, sbyte[] mac_buffer, int macStart)
+	   public virtual bool createDataSignature(byte[] accountData, byte[] signScratchpad, byte[] mac_buffer, int macStart)
 	   {
 		  //clear any errors
 		  this.lastError = SHAiButtonCopr.NO_ERROR;
@@ -1064,7 +1064,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <seealso cref= OneWireContainer18#SHAFunction(byte,int) </seealso>
 	   /// <seealso cref= #createDataSignature(byte[],byte[],byte[],int) </seealso>
 	   /// <seealso cref= #getLastError() </seealso>
-	   public virtual bool createDataSignatureAuth(sbyte[] accountData, sbyte[] signScratchpad, sbyte[] mac_buffer, int macStart, sbyte[] fullBindCode)
+	   public virtual bool createDataSignatureAuth(byte[] accountData, byte[] signScratchpad, byte[] mac_buffer, int macStart, byte[] fullBindCode)
 	   {
 		  //clear any errors
 		  this.lastError = SHAiButtonCopr.NO_ERROR;
@@ -1150,7 +1150,7 @@ namespace com.dalsemi.onewire.application.sha
 	   }
 
 	   //prevent malloc'ing in the critical path
-	   private sbyte[] generateChallenge_scratchpad = new sbyte[32];
+	   private byte[] generateChallenge_scratchpad = new byte[32];
 
 	   /// <summary>
 	   /// <para>Generates a 3 byte random challenge in the iButton, sufficient to be used
@@ -1185,7 +1185,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </exception>
 	   /// <seealso cref= SHAiButtonUser#readAccountData(byte[],int,byte[],int,byte[],int) </seealso>
 	   /// <seealso cref= #getLastError() </seealso>
-	   public virtual bool generateChallenge(int offset, sbyte[] ch, int start)
+	   public virtual bool generateChallenge(int offset, byte[] ch, int start)
 	   {
 		   lock (this)
 		   {
@@ -1194,7 +1194,7 @@ namespace com.dalsemi.onewire.application.sha
         
 			  //maintain local reference to container
 			  OneWireContainer18 ibcL = this.ibc;
-			  sbyte[] scratchpad = this.generateChallenge_scratchpad;
+			  byte[] scratchpad = this.generateChallenge_scratchpad;
 			  int addr = authPageNumber << 5;
         
 			  if (ibcL.eraseScratchPad(authPageNumber))
@@ -1219,9 +1219,9 @@ namespace com.dalsemi.onewire.application.sha
 					   IOHelper.writeBytesHex(address, 0, 8);
 					   IOHelper.writeLine("Challenge:");
 					   IOHelper.writeBytesHex(ch, start, 3);
-					   ch[start] = (sbyte)0x01;
-					   ch[start + 1] = (sbyte)0x02;
-					   ch[start + 2] = (sbyte)0x03;
+					   ch[start] = 0x01;
+					   ch[start + 1] = 0x02;
+					   ch[start + 2] = 0x03;
 					   IOHelper.writeBytesHex(ch, start, 3);
 					   IOHelper.writeLine("-----------------------------------------------------------");
 					}
@@ -1296,7 +1296,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <seealso cref= OneWireContainer18#SHAFunction(byte,int) </seealso>
 	   /// <seealso cref= OneWireContainer18#matchScratchPad(byte[]) </seealso>
 	   /// <seealso cref= #getLastError() </seealso>
-	   public virtual bool verifyAuthentication(sbyte[] fullBindCode, sbyte[] pageData, sbyte[] scratchpad, sbyte[] verify_mac, sbyte authCmd)
+	   public virtual bool verifyAuthentication(byte[] fullBindCode, byte[] pageData, byte[] scratchpad, byte[] verify_mac, byte authCmd)
 	   {
 		  //clear any errors
 		  this.lastError = SHAiButtonCopr.NO_ERROR;
@@ -1404,7 +1404,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </exception>
 	   /// <seealso cref= #verifyAuthentication(byte[],byte[],byte[],byte[],byte) </seealso>
 	   /// <seealso cref= #getLastError() </seealso>
-	   public virtual bool verifySignature(sbyte[] pageData, sbyte[] scratchpad, sbyte[] verify_mac)
+	   public virtual bool verifySignature(byte[] pageData, byte[] scratchpad, byte[] verify_mac)
 	   {
 		  //clear any errors
 		  this.lastError = SHAiButtonCopr.NO_ERROR;
@@ -1502,26 +1502,26 @@ namespace com.dalsemi.onewire.application.sha
 		  int siglen = @is.Read();
 		  int auxlen = @is.Read();
 
-		  sbyte[] l_providerName = new sbyte[namelen];
+		  byte[] l_providerName = new byte[namelen];
 		  @is.Read(l_providerName, 0, l_providerName.Length);
-		  this.providerName = StringHelperClass.NewString(l_providerName);
+		  this.providerName = System.Text.Encoding.Unicode.GetString(l_providerName);
 
 		  int cnt = Math.Min(this.initialSignature.Length, siglen);
 		  @is.Read(this.initialSignature,0,cnt);
 
-		  sbyte[] l_auxData = new sbyte[auxlen];
+		  byte[] l_auxData = new byte[auxlen];
 		  @is.Read(l_auxData, 0, l_auxData.Length);
-		  this.auxData = StringHelperClass.NewString(l_auxData);
+		  this.auxData = System.Text.Encoding.Unicode.GetString(l_auxData);
 
 		  this.encCode = @is.Read();
 		  this.DS1961Scompatible_Renamed = (@is.Read() != 0);
 #endif
-	   }
+        }
 
-	   /// <summary>
-	   /// Configuration saving method. Used also by Coprocessor VM
-	   /// </summary>
-	   protected internal virtual void toStream(System.IO.Stream os)
+        /// <summary>
+        /// Configuration saving method. Used also by Coprocessor VM
+        /// </summary>
+        protected internal virtual void toStream(System.IO.Stream os)
 	   {
 #if false
           //first part written is completely standard format
@@ -1541,14 +1541,14 @@ namespace com.dalsemi.onewire.application.sha
 		  os.Write(this.bindCode, 0, this.bindCode.Length);
 		  os.Write(this.signingChallenge, 0, this.signingChallenge.Length);
 
-		  sbyte[] l_providerName = this.providerName.GetBytes();
-		  sbyte[] l_auxData = this.auxData.GetBytes();
-		  os.WriteByte((sbyte)l_providerName.Length);
-		  os.WriteByte((sbyte)this.initialSignature.Length);
-		  os.WriteByte((sbyte)l_auxData.Length);
-		  os.Write(l_providerName,0,(sbyte)l_providerName.Length);
-		  os.Write(this.initialSignature,0,(sbyte)this.initialSignature.Length);
-		  os.Write(l_auxData,0,(sbyte)l_auxData.Length);
+		  byte[] l_providerName = this.providerName.GetBytes();
+		  byte[] l_auxData = this.auxData.GetBytes();
+		  os.WriteByte((byte)l_providerName.Length);
+		  os.WriteByte((byte)this.initialSignature.Length);
+		  os.WriteByte((byte)l_auxData.Length);
+		  os.Write(l_providerName,0,(byte)l_providerName.Length);
+		  os.Write(this.initialSignature,0,(byte)this.initialSignature.Length);
+		  os.Write(l_auxData,0,(byte)l_auxData.Length);
 		  os.WriteByte(this.encCode);
 		  os.WriteByte(this.DS1961Scompatible_Renamed?0x55:0x00);
 
@@ -1576,22 +1576,22 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </param>
 	   /// <returns> a reformatted authentication secret, with the appropriate
 	   ///         padding for DS1961S interaction. </returns>
-	   public static sbyte[] reformatFor1961S(sbyte[] auth_secret)
+	   public static byte[] reformatFor1961S(byte[] auth_secret)
 	   {
 		  int numPartials = (auth_secret.Length / 47) + 1;
-		  sbyte[] new_secret = new sbyte[47 * numPartials];
+		  byte[] new_secret = new byte[47 * numPartials];
 
 		  for (int i = 0; i < numPartials; i++)
 		  {
 			 int cnt = Math.Min(auth_secret.Length - (i * 47), 47);
 			 Array.Copy(auth_secret, i * 47, new_secret, i * 47, cnt);
-			 new_secret[i * 47 + 32] = unchecked((sbyte)0xFF);
-			 new_secret[i * 47 + 33] = unchecked((sbyte)0xFF);
-			 new_secret[i * 47 + 34] = unchecked((sbyte)0xFF);
-			 new_secret[i * 47 + 35] = unchecked((sbyte)0xFF);
-			 new_secret[i * 47 + 44] = unchecked((sbyte)0xFF);
-			 new_secret[i * 47 + 45] = unchecked((sbyte)0xFF);
-			 new_secret[i * 47 + 46] = unchecked((sbyte)0xFF);
+			 new_secret[i * 47 + 32] = 0xFF;
+			 new_secret[i * 47 + 33] = 0xFF;
+			 new_secret[i * 47 + 34] = 0xFF;
+			 new_secret[i * 47 + 35] = 0xFF;
+			 new_secret[i * 47 + 44] = 0xFF;
+			 new_secret[i * 47 + 45] = 0xFF;
+			 new_secret[i * 47 + 46] = 0xFF;
 		  }
 		  return new_secret;
 	   }

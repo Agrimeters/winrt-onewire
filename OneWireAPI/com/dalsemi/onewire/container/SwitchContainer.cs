@@ -172,7 +172,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> current state of the device returned from <code>readDevice()</code>
 	   /// </param>
 	   /// <returns> the number of channels for this device </returns>
-	   int getNumberChannels(sbyte[] state);
+	   int getNumberChannels(byte[] state);
 
 	   /// <summary>
 	   /// Checks the sensed level on the indicated channel.
@@ -188,7 +188,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #hasLevelSensing() </seealso>
-	   bool getLevel(int channel, sbyte[] state);
+	   bool getLevel(int channel, byte[] state);
 
 	   /// <summary>
 	   /// Checks the latch state of the indicated channel.
@@ -204,7 +204,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #isHighSideSwitch() </seealso>
 	   /// <seealso cref= #setLatchState(int,bool,bool,byte[]) </seealso>
-	   bool getLatchState(int channel, sbyte[] state);
+	   bool getLatchState(int channel, byte[] state);
 
 	   /// <summary>
 	   /// Checks if the indicated channel has experienced activity.
@@ -222,7 +222,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= #hasActivitySensing() </seealso>
 	   /// <seealso cref= #clearActivity() </seealso>
-	   bool getSensedActivity(int channel, sbyte[] state);
+	   bool getSensedActivity(int channel, byte[] state);
 
 	   //--------
 	   //-------- Switch 'set' Methods
@@ -248,7 +248,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #hasSmartOn() </seealso>
 	   /// <seealso cref= #getLatchState(int,byte[]) </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
-	   void setLatchState(int channel, bool latchState, bool doSmart, sbyte[] state);
+	   void setLatchState(int channel, bool latchState, bool doSmart, byte[] state);
 
 	   /// <summary>
 	   /// <para>Clears the activity latches the next time possible.  For

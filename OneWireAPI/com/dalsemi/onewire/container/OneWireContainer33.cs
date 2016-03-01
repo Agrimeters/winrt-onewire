@@ -164,11 +164,11 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// Private Secret </summary>
-	   private sbyte[] secret = new sbyte [8];
+	   private byte[] secret = new byte [8];
 
 	   /// <summary>
 	   /// Challenge to use for the Read Authenticate Methods </summary>
-	   private sbyte[] challenge = new sbyte [3];
+	   private byte[] challenge = new byte [3];
 
 	   /// <summary>
 	   /// The different memory banks for the container. </summary>
@@ -178,7 +178,7 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// Buffer used to hold MAC for certain calls </summary>
-	   private sbyte[] MAC_buffer = new sbyte[20];
+	   private byte[] MAC_buffer = new byte[20];
 
 	   /// <summary>
 	   /// Flag to indicate if the secret has been set. </summary>
@@ -198,15 +198,15 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// block of 0xFF's used for faster read pre-fill of 1-Wire blocks </summary>
-	   protected internal static readonly sbyte[] ffBlock = new sbyte[] {unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF), unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF), unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF), unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF), unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF), unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF), unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF), unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF), unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF),unchecked((sbyte)0xFF)};
+	   protected internal static readonly byte[] ffBlock = new byte[] {0x0FF,0x0FF,0x0FF,0x0FF, 0x0FF,0x0FF,0x0FF,0x0FF, 0x0FF,0x0FF,0x0FF,0x0FF, 0x0FF,0x0FF,0x0FF,0x0FF, 0x0FF,0x0FF,0x0FF,0x0FF, 0x0FF,0x0FF,0x0FF,0x0FF, 0x0FF,0x0FF,0x0FF,0x0FF, 0x0FF,0x0FF,0x0FF,0x0FF, 0x0FF,0x0FF,0x0FF,0x0FF};
 
 	   /// <summary>
 	   /// block of 0xFF's used for faster erase of blocks </summary>
-	   protected internal static readonly sbyte[] zeroBlock = new sbyte[] {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+	   protected internal static readonly byte[] zeroBlock = new byte[] {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
 	   /// <summary>
 	   /// This byte is used to set flags in the status register </summary>
-	   private static readonly sbyte[] ACTIVATION_BYTE = new sbyte[] {unchecked((sbyte)0xAA)};
+	   private static readonly byte[] ACTIVATION_BYTE = new byte[] {0xAA};
 
 	   /// <summary>
 	   /// Default Constructor OneWireContainer33.
@@ -229,7 +229,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="sourceAdapter">     adapter object required to communicate with
 	   ///                           this iButton. </param>
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
-	   public OneWireContainer33(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer33(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 
 		  Array.Copy(ffBlock,0,secret,0,8);
@@ -296,7 +296,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="sourceAdapter">     adapter object required to communicate with
 	   ///                           this iButton. </param>
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
-	   public override void setupContainer(DSPortAdapter sourceAdapter, sbyte[] newAddress)
+	   public override void setupContainer(DSPortAdapter sourceAdapter, byte[] newAddress)
 	   {
 		  base.setupContainer(sourceAdapter,newAddress);
 
@@ -467,7 +467,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="newSecret"> Secret for this DS2432. </param>
 	   /// <param name="offset"> index into array to copy the secret from </param>
-	   public virtual void setContainerSecret(sbyte[] newSecret, int offset)
+	   public virtual void setContainerSecret(byte[] newSecret, int offset)
 	   {
 		  Array.Copy(newSecret,offset,secret,0,8);
 		  secretSet = true;
@@ -477,7 +477,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="secretBuf"> array of bytes for holding the container secret </param>
 	   /// <param name="offset"> index into array to copy the secret to </param>
-	   public virtual void getContainerSecret(sbyte[] secretBuf, int offset)
+	   public virtual void getContainerSecret(byte[] secretBuf, int offset)
 	   {
 		  Array.Copy(secret,0,secretBuf,offset,8);
 	   }
@@ -522,7 +522,7 @@ namespace com.dalsemi.onewire.container
 	   /// Sets the challenge for the Read Authenticate Page
 	   /// </summary>
 	   /// <param name="challengeset">  Challenge for all the memory banks. </param>
-	   public virtual void setChallenge(sbyte[] challengeset, int offset)
+	   public virtual void setChallenge(byte[] challengeset, int offset)
 	   {
 		  Array.Copy(challengeset,offset,challenge,0,3);
 	   }
@@ -530,7 +530,7 @@ namespace com.dalsemi.onewire.container
 	   /// Get the challenge of this device as an array of bytes.
 	   /// </summary>
 	   /// <param name="get">  array of bytes containing the iButton challenge </param>
-	   public virtual void getChallenge(sbyte[] get, int offset)
+	   public virtual void getChallenge(byte[] get, int offset)
 	   {
 		  Array.Copy(challenge,0,get,offset,3);
 	   }
@@ -673,7 +673,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="addr"> address of page to use for the next secret computation. </param>
 	   /// <param name="parialsecret"> the data to put into the scrathpad in computing next secret. </param>
-	   public virtual void computeNextSecret(int pageNum, sbyte[] partialsecret, int offset)
+	   public virtual void computeNextSecret(int pageNum, byte[] partialsecret, int offset)
 	   {
 		  if (!container_check)
 		  {
@@ -704,7 +704,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual bool loadFirstSecret(sbyte[] data, int offset)
+	   public virtual bool loadFirstSecret(byte[] data, int offset)
 	   {
 		  if (!container_check)
 		  {
@@ -773,11 +773,11 @@ namespace com.dalsemi.onewire.container
 	   {
 		  if (!container_check)
 		  {
-			 sbyte[] mem = new sbyte [8];
+			 byte[] mem = new byte [8];
 
 			 memstatus.read(8,false,mem,0,8);
 
-			 if ((mem [0] == unchecked((sbyte) 0xAA)) || (mem [0] == (sbyte) 0x55))
+			 if ((mem [0] == 0xAA) || (mem [0] == 0x55))
 			 {
 				secretProtected = true;
 			 }
@@ -786,7 +786,7 @@ namespace com.dalsemi.onewire.container
 				secretProtected = false;
 			 }
 
-			 if (((mem [1] == unchecked((sbyte) 0xAA)) || (mem [1] == (sbyte) 0x55)) || ((mem [5] == unchecked((sbyte) 0xAA)) || (mem [5] == (sbyte) 0x55)))
+			 if ( ((mem [1] == 0xAA) || (mem [1] == 0x55)) || ((mem [5] == 0xAA) || (mem [5] == 0x55)) )
 			 {
 				memoryPages[0].readWrite = false;
 				memoryPages[0].readOnly = true;
@@ -798,7 +798,7 @@ namespace com.dalsemi.onewire.container
 			 }
 
 
-			 if ((mem [4] == unchecked((sbyte) 0xAA)) || (mem [4] == (sbyte) 0x55))
+			 if ((mem [4] == 0xAA) || (mem [4] == 0x55))
 			 {
 				memoryPages[1].writeOnce = true;
 			 }
@@ -807,7 +807,7 @@ namespace com.dalsemi.onewire.container
 				memoryPages[1].writeOnce = false;
 			 }
 
-			 if ((mem [1] == unchecked((sbyte) 0xAA)) || (mem [1] == (sbyte)0x55))
+			 if ((mem [1] == 0xAA) || (mem [1] == 0x55))
 			 {
 				memoryPages[1].readWrite = false;
 				memoryPages[1].readOnly = true;
@@ -818,7 +818,7 @@ namespace com.dalsemi.onewire.container
 				memoryPages[1].readOnly = false;
 			 }
 
-			 if ((mem [1] == unchecked((sbyte) 0xAA)) || (mem[1] == (sbyte) 0x55))
+			 if ((mem [1] == 0xAA) || (mem[1] == 0x55))
 			 {
 				memoryPages[2].readWrite = false;
 				memoryPages[2].readOnly = true;
@@ -920,28 +920,28 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="mac">           the MAC calculated for this function given back as the extra info </param>
 	   /// <param name="challenge">     the 3 bytes written to the scratch pad used in calculating the mac
 	   ///  </param>
-	   public static bool isMACValid(int addr, sbyte[] SerNum, sbyte[] memory, sbyte[] mac, sbyte[] challenge, sbyte[] secret)
+	   public static bool isMACValid(int addr, byte[] SerNum, byte[] memory, byte[] mac, byte[] challenge, byte[] secret)
 	   {
-		  sbyte[] MT = new sbyte [64];
+		  byte[] MT = new byte [64];
 
 		  Array.Copy(secret,0,MT,0,4);
 		  Array.Copy(memory,0,MT,4,32);
 		  Array.Copy(ffBlock,0,MT,36,4);
 
-		  MT[40] = (sbyte)(0x40 | (((addr) << 3) & 0x08) | (((int)((uint)(addr) >> 5)) & 0x07));
+		  MT[40] = (byte)(0x40 | (((addr) << 3) & 0x08) | (((int)((uint)(addr) >> 5)) & 0x07));
 
 		  Array.Copy(SerNum,0,MT,41,7);
 		  Array.Copy(secret,4,MT,48,4);
 		  Array.Copy(challenge,0,MT,52,3);
 
 		  // finish up with proper padding
-		  MT[55] = unchecked((sbyte) 0x80);
+		  MT[55] = 0x80;
 		  for (int i = 56;i < 62;i++)
 		  {
-			 MT[i] = (sbyte) 0x00;
+			 MT[i] = 0x00;
 		  }
-		  MT[62] = (sbyte) 0x01;
-		  MT[63] = unchecked((sbyte) 0xB8);
+		  MT[62] = 0x01;
+		  MT[63] = 0xB8;
 
 		  int[] AtoE = new int [5];
 		  com.dalsemi.onewire.utils.SHA.ComputeSHA(MT,AtoE);
@@ -952,7 +952,7 @@ namespace com.dalsemi.onewire.container
 			 int temp = AtoE[4 - i];
 			 for (int j = 0;j < 4;j++)
 			 {
-				if (mac[cnt++] != unchecked((sbyte)(temp & 0x0FF)))
+				if (mac[cnt++] != (byte)(temp & 0x0FF))
 				{
 				   return false;
 				}
@@ -986,7 +986,7 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref= #bindSecretToiButton(int,byte[]) </seealso>
-	   public virtual bool installMasterSecret(int page, sbyte[] newSecret)
+	   public virtual bool installMasterSecret(int page, byte[] newSecret)
 	   {
 		  for (int i = 0; i < secret.Length; i++)
 		  {
@@ -999,8 +999,8 @@ namespace com.dalsemi.onewire.container
 				return false;
 			 }
 
-			 sbyte[] input_secret = null;
-			 sbyte[] sp_buffer = new sbyte[8];
+			 byte[] input_secret = null;
+			 byte[] sp_buffer = new byte[8];
 			 int secret_mod_length = newSecret.Length % 47;
 
 			 if (secret_mod_length == 0) //if the length of the secret is divisible by 40
@@ -1009,7 +1009,7 @@ namespace com.dalsemi.onewire.container
 			 }
 			 else
 			 {
-				input_secret = new sbyte [newSecret.Length + (47 - secret_mod_length)];
+				input_secret = new byte [newSecret.Length + (47 - secret_mod_length)];
 
 				Array.Copy(newSecret, 0, input_secret, 0, newSecret.Length);
 			 }
@@ -1047,15 +1047,15 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref= #installMasterSecret(int,byte[]) </seealso>
-	   public virtual bool bindSecretToiButton(int pageNum, sbyte[] bindData)
+	   public virtual bool bindSecretToiButton(int pageNum, byte[] bindData)
 	   {
 		  if (!writeDataPage(pageNum,bindData))
 		  {
 			 return false;
 		  }
 
-		  sbyte[] bind_code = new sbyte[8];
-		  bind_code[0] = (sbyte)pageNum;
+		  byte[] bind_code = new byte[8];
+		  bind_code[0] = (byte)pageNum;
 		  Array.Copy(address,0,bind_code,1,7);
 		  mbScratchpad.computeNextSecret(pageNum * 32, bind_code, 0);
 
@@ -1077,7 +1077,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual bool writeDataPage(int targetPage, sbyte[] pageData)
+	   public virtual bool writeDataPage(int targetPage, byte[] pageData)
 	   {
 
 		  return writeDataPage(targetPage, pageData, 0);
@@ -1099,7 +1099,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual bool writeDataPage(int targetPage, sbyte[] pageData, int offset)
+	   public virtual bool writeDataPage(int targetPage, byte[] pageData, int offset)
 	   {
 		  int addr = 0;
 		  if (targetPage == 3)
@@ -1133,7 +1133,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual bool writeScratchpad(int targetPage, int targetPageOffset, sbyte[] inputbuffer, int start, int length)
+	   public virtual bool writeScratchpad(int targetPage, int targetPageOffset, byte[] inputbuffer, int start, int length)
 	   {
 		  int addr = (targetPage << 5) + targetPageOffset;
 		  mbScratchpad.writeScratchpad(addr,inputbuffer,start,length);
@@ -1152,7 +1152,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readScratchpad(sbyte[] scratchpad, int offset, sbyte[] extraInfo)
+	   public virtual void readScratchpad(byte[] scratchpad, int offset, byte[] extraInfo)
 	   {
 		  mbScratchpad.readScratchpad(scratchpad, offset, 8, extraInfo);
 	   }
@@ -1167,7 +1167,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual bool copyScratchpad(int targetPage, int targetPageOffset, sbyte[] copy_auth, int authStart)
+	   public virtual bool copyScratchpad(int targetPage, int targetPageOffset, byte[] copy_auth, int authStart)
 	   {
 		  int addr = (targetPage << 5) + targetPageOffset;
 		  mbScratchpad.copyScratchpadWithMAC(addr, copy_auth, authStart);
@@ -1202,7 +1202,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual bool readMemoryPage(int page, sbyte[] pageData, int offset)
+	   public virtual bool readMemoryPage(int page, byte[] pageData, int offset)
 	   {
 		  int addr = 0;
 		  if (page == 3)
@@ -1233,7 +1233,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual bool readAuthenticatedPage(int page, sbyte[] pagedata, int offset, sbyte[] computed_mac, int macStart)
+	   public virtual bool readAuthenticatedPage(int page, byte[] pagedata, int offset, byte[] computed_mac, int macStart)
 	   {
 		  int mbPage = 0;
 		  if (page == 3)

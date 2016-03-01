@@ -75,12 +75,12 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <summary>
 	   /// Cache of 1-Wire Address
 	   /// </summary>
-	   protected internal sbyte[] address = null;
+	   protected internal byte[] address = null;
 
 	   /// <summary>
 	   /// local cache of accountData
 	   /// </summary>
-	   protected internal readonly sbyte[] accountData = new sbyte[32];
+	   protected internal readonly byte[] accountData = new byte[32];
 
 	   /// <summary>
 	   /// page number account data is stored on
@@ -90,7 +90,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <summary>
 	   /// used to construct appropriate string for OWFile constructor
 	   /// </summary>
-	   protected internal readonly sbyte[] serviceFile = new sbyte[]{(sbyte)'D',(sbyte)'L', (sbyte)'S',(sbyte)'M'};
+	   protected internal readonly byte[] serviceFile = new byte[]{(byte)'D',(byte)'L', (byte)'S',(byte)'M'};
 	   /// <summary>
 	   /// stores string name of user's service file
 	   /// </summary>
@@ -100,7 +100,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// maintains a cache of the fullBindCode, for later binding of
 	   /// coprocessor.
 	   /// </summary>
-	   protected internal readonly sbyte[] fullBindCode = new sbyte[15];
+	   protected internal readonly byte[] fullBindCode = new byte[15];
 
 	   /// <summary>
 	   /// local cache of writeCycleCounter for data page
@@ -149,11 +149,11 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </summary>
 	   /// <returns> 8 byte array containing family code, address, and
 	   ///         crc8 of the OneWire device. </returns>
-	   public virtual sbyte[] Address
+	   public virtual byte[] Address
 	   {
 		   get
 		   {
-			  sbyte[] data = new sbyte[8];
+			  byte[] data = new byte[8];
 			  Array.Copy(address,0,data,0,8);
 			  return data;
 		   }
@@ -165,7 +165,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </summary>
 	   /// <param name="data"> array with at least 8 bytes after offset </param>
 	   /// <param name="offset"> the index at which copying starts </param>
-	   public virtual void getAddress(sbyte[] data, int offset)
+	   public virtual void getAddress(byte[] data, int offset)
 	   {
 		  Array.Copy(address, 0, data, offset, 8);
 	   }
@@ -178,7 +178,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <param name="data"> array with at least cnt bytes after offset </param>
 	   /// <param name="offset"> the index at which copying starts </param>
 	   /// <param name="cnt"> the number of bytes to copy </param>
-	   public virtual void getAddress(sbyte[] data, int offset, int cnt)
+	   public virtual void getAddress(byte[] data, int offset, int cnt)
 	   {
 		  Array.Copy(address, 0, data, offset, cnt);
 	   }
@@ -336,7 +336,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public abstract bool setiButtonUser(DSPortAdapter adapter, sbyte[] address);
+	   public abstract bool setiButtonUser(DSPortAdapter adapter, byte[] address);
 
 	   /// <summary>
 	   /// <P>Modifies this SHA iButton so that it refers to another device.
@@ -355,7 +355,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public abstract bool setiButtonUser(sbyte[] address);
+	   public abstract bool setiButtonUser(byte[] address);
 
 	   /// <summary>
 	   /// <P>Returns the value of the write cycle counter for the
@@ -398,7 +398,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///                     bytes available starting from the offset. </param>
 	   /// <param name="offset"> the offset into fullBindCode where copying should begin.
 	   ///  </param>
-	   public abstract void getFullBindCode(sbyte[] l_fullBindCode, int offset);
+	   public abstract void getFullBindCode(byte[] l_fullBindCode, int offset);
 
 
 	   /// <summary>
@@ -409,7 +409,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </summary>
 	   /// <returns> byte indicating appropriate command for authenticating user
 	   ///  </returns>
-	   public abstract sbyte AuthorizationCommand {get;}
+	   public abstract byte AuthorizationCommand {get;}
 
 	   /// <summary>
 	   /// <P>Writes the account data to the SHAiButton.  First, this function
@@ -428,7 +428,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public abstract bool writeAccountData(sbyte[] dataBuffer, int offset);
+	   public abstract bool writeAccountData(byte[] dataBuffer, int offset);
 
 	   /// <summary>
 	   /// <P>Reads the account data off the SHAiButton using a standard READ
@@ -446,7 +446,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public abstract bool readAccountData(sbyte[] dataBuffer, int offset);
+	   public abstract bool readAccountData(byte[] dataBuffer, int offset);
 
 	   /// <summary>
 	   /// <P>Reads the account data off the SHAiButton using a READ_AUTHENTICATE
@@ -479,7 +479,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public abstract int readAccountData(sbyte[] chlg, int chlgStart, sbyte[] dataBuffer, int dataStart, sbyte[] mac, int macStart);
+	   public abstract int readAccountData(byte[] chlg, int chlgStart, byte[] dataBuffer, int dataStart, byte[] mac, int macStart);
 
 	   // *************************************************************** //
 	   // End Abstract Methods for SHAiButtonUser                         //

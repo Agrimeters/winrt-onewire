@@ -2,6 +2,10 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices.WindowsRuntime;
 
+using Windows.Devices.Enumeration;
+using Windows.Devices.SerialCommunication;
+using System.Threading.Tasks;
+
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
  *
@@ -32,6 +36,10 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using com.dalsemi.onewire;
 using com.dalsemi.onewire.adapter;
 using com.dalsemi.onewire.container;
+using System.Collections.Generic;
+using System.Collections;
+using Windows.Foundation;
+using System.Text;
 
 namespace Test
 {
@@ -108,6 +116,8 @@ namespace Test
 
             if (!usedefault)
             {
+                //parse device instance
+
                 string[] st = args[0].Split(new char[] { '_' });
 
                 if (st.Length != 2)
@@ -209,7 +219,7 @@ namespace Test
 
                     double high = 0.0;
                     double low = 0.0;
-                    sbyte[] state = tc.readDevice();
+                    byte[] state = tc.readDevice();
 
                     if (hasAlarms)
                     {

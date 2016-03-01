@@ -83,7 +83,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Page Lock Flag
 	   /// </summary>
-	   public static readonly sbyte WRITEONCE_FLAG = unchecked((sbyte) 0xAA);
+	   public static readonly byte WRITEONCE_FLAG = unchecked((byte) 0xAA);
 
 	   //--------
 	   //-------- Static Final Variables
@@ -104,7 +104,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="sourceAdapter">     adapter object required to communicate with
 	   ///                           this iButton. </param>
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
-	   public OneWireContainer2D(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer2D(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 
 		  // initialize the memory banks
@@ -150,7 +150,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="sourceAdapter">     adapter object required to communicate with
 	   ///                           this iButton. </param>
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
-	   public override void setupContainer(DSPortAdapter sourceAdapter, sbyte[] newAddress)
+	   public override void setupContainer(DSPortAdapter sourceAdapter, byte[] newAddress)
 	   {
 		  base.setupContainer(sourceAdapter,newAddress);
 
@@ -274,7 +274,7 @@ namespace com.dalsemi.onewire.container
 		  sp.maxPacketDataLength = 5;
 		  sp.pageAutoCRC = true;
 		  sp.COPY_DELAY_LEN = 30;
-		  sp.ES_MASK = (sbyte) 0;
+		  sp.ES_MASK = 0;
 
 		  // main memory
 		  main_mem = new MemoryBankEEPROM(this,sp);
@@ -319,7 +319,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns>  'true' if current memory bank can only be written once </returns>
 	   public virtual bool isPageWriteOnce(int page)
 	   {
-		  sbyte[] rd_byte = new sbyte[1];
+		  byte[] rd_byte = new byte[1];
 
 		  register.read(page,false,rd_byte,0,1);
 
@@ -338,7 +338,7 @@ namespace com.dalsemi.onewire.container
 	   {
 		   set
 		   {
-			  sbyte[] wr_byte = new sbyte[1];
+			  byte[] wr_byte = new byte[1];
     
 			  wr_byte[0] = WRITEONCE_FLAG;
     

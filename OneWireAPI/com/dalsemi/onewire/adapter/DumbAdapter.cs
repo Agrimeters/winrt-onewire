@@ -105,12 +105,12 @@ namespace com.dalsemi.onewire.adapter
 	   /// <summary>
 	   /// Byte array of families to include in search
 	   /// </summary>
-	   private sbyte[] include;
+	   private byte[] include;
 
 	   /// <summary>
 	   /// Byte array of families to exclude from search
 	   /// </summary>
-	   private sbyte[] exclude;
+	   private byte[] exclude;
 
 	   //--------
 	   //-------- Methods
@@ -467,7 +467,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   /// <param name="address"> An array to be filled with the current iButton address. </param>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override void getAddress(sbyte[] address)
+	   public override void getAddress(byte[] address)
 	   {
 			OneWireContainer temp = (OneWireContainer) containers[containers_index - 1];
 			if (temp != null)
@@ -487,7 +487,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		   get
 		   {
-			  sbyte[] address = new sbyte [8];
+			  byte[] address = new byte [8];
     
 			  getAddress(address);
     
@@ -506,7 +506,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		   get
 		   {
-			  sbyte[] address = new sbyte [8];
+			  byte[] address = new byte [8];
     
 			  getAddress(address);
     
@@ -525,7 +525,7 @@ namespace com.dalsemi.onewire.adapter
 	   ///         <code>false</code>.
 	   /// </returns>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override bool isPresent(sbyte[] address)
+	   public override bool isPresent(byte[] address)
 	   {
 			return isPresent(Address.toLong(address));
 	   }
@@ -584,7 +584,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <returns>  <code>false</code>
 	   /// </returns>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override bool isAlarming(sbyte[] address)
+	   public override bool isAlarming(byte[] address)
 	   {
 			return false;
 	   }
@@ -634,7 +634,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </returns>
 	   /// <seealso cref= #isPresent(byte[]) </seealso>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override bool select(sbyte[] address)
+	   public override bool select(byte[] address)
 	   {
 			return isPresent(address);
 	   }
@@ -730,10 +730,10 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		  if ((include == null) || (include.Length != 1))
 		  {
-			 include = new sbyte [1];
+			 include = new byte [1];
 		  }
 
-		  include [0] = (sbyte) family;
+		  include [0] = (byte) family;
 	   }
 
 	   /// <summary>
@@ -742,11 +742,11 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="family">  array of the family types to target for searches </param>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
 	   /// <seealso cref=    #targetAllFamilies </seealso>
-	   public override void targetFamily(sbyte[] family)
+	   public override void targetFamily(byte[] family)
 	   {
 		  if ((include == null) || (include.Length != family.Length))
 		  {
-			 include = new sbyte [family.Length];
+			 include = new byte [family.Length];
 		  }
 
 		  Array.Copy(family, 0, include, 0, family.Length);
@@ -762,10 +762,10 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		  if ((exclude == null) || (exclude.Length != 1))
 		  {
-			 exclude = new sbyte [1];
+			 exclude = new byte [1];
 		  }
 
-		  exclude [0] = (sbyte) family;
+		  exclude [0] = (byte) family;
 	   }
 
 	   /// <summary>
@@ -774,11 +774,11 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="family">  array of family cods NOT to target for searches </param>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
 	   /// <seealso cref=    #targetAllFamilies </seealso>
-	   public override void excludeFamily(sbyte[] family)
+	   public override void excludeFamily(byte[] family)
 	   {
 		  if ((exclude == null) || (exclude.Length != family.Length))
 		  {
-			 exclude = new sbyte [family.Length];
+			 exclude = new byte [family.Length];
 		  }
 
 		  Array.Copy(family, 0, exclude, 0, family.Length);
@@ -865,10 +865,10 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="len">  length of data bytes to receive
 	   /// </param>
 	   /// <returns> a new byte array of length <code>len</code> </returns>
-	   public override sbyte[] getBlock(int len)
+	   public override byte[] getBlock(int len)
 	   {
 		  //this will not be implemented
-		  return new sbyte[len];
+		  return new byte[len];
 	   }
 
 	   /// <summary>
@@ -876,7 +876,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   /// <param name="arr">     array in which to write the received bytes </param>
 	   /// <param name="len">     length of data bytes to receive </param>
-	   public override void getBlock(sbyte[] arr, int len)
+	   public override void getBlock(byte[] arr, int len)
 	   {
 		  //this will not be implemented
 	   }
@@ -887,7 +887,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="arr">     array in which to write the received bytes </param>
 	   /// <param name="off">     offset into the array to start </param>
 	   /// <param name="len">     length of data bytes to receive </param>
-	   public override void getBlock(sbyte[] arr, int off, int len)
+	   public override void getBlock(byte[] arr, int off, int len)
 	   {
 		  //this will not be implemented
 	   }
@@ -898,7 +898,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="dataBlock">  array of data to transfer to and from the 1-Wire Network. </param>
 	   /// <param name="off">        offset into the array of data to start </param>
 	   /// <param name="len">        length of data to send / receive starting at 'off' </param>
-	   public override void dataBlock(sbyte[] dataBlock, int off, int len)
+	   public override void dataBlock(byte[] dataBlock, int off, int len)
 	   {
 		  //this will not be implemented
 	   }
@@ -1070,7 +1070,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <returns>  The <code>OneWireContainer</code> object, or <code>null</code> if no match could be found. </returns>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override OneWireContainer getDeviceContainer(sbyte[] address)
+	   public override OneWireContainer getDeviceContainer(byte[] address)
 	   {
 			long addr = Address.toLong(address);
 			lock (containers)
@@ -1126,7 +1126,7 @@ namespace com.dalsemi.onewire.adapter
 		   {
     
 			  // Mask off the upper bit.
-			  sbyte[] address = new sbyte [8];
+			  byte[] address = new byte [8];
     
 			  getAddress(address);
     
@@ -1139,9 +1139,9 @@ namespace com.dalsemi.onewire.adapter
 	   /// include group.
 	   /// </summary>
 	   /// <returns>  <code>true</code> if in include group </returns>
-	   protected internal override bool isValidFamily(sbyte[] address)
+	   protected internal override bool isValidFamily(byte[] address)
 	   {
-		  sbyte familyCode = address [0];
+		  byte familyCode = address [0];
 
 		  if (exclude != null)
 		  {

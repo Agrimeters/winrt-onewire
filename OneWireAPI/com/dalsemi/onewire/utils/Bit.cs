@@ -44,18 +44,18 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="index"> bit index into byte array </param>
 	   /// <param name="offset"> byte offset into byte array to start </param>
 	   /// <param name="buf"> byte array to manipulate </param>
-	   public static void arrayWriteBit(int state, int index, int offset, sbyte[] buf)
+	   public static void arrayWriteBit(int state, int index, int offset, byte[] buf)
 	   {
 		  int nbyt = ((int)((uint)index >> 3));
 		  int nbit = index - (nbyt << 3);
 
 		  if (state == 1)
 		  {
-			 buf [nbyt + offset] |= (sbyte)(0x01 << nbit);
+			 buf [nbyt + offset] |= (byte)(0x01 << nbit);
 		  }
 		  else
 		  {
-			 buf [nbyt + offset] &= (sbyte)(~(0x01 << nbit));
+			 buf [nbyt + offset] &= (byte)(~(0x01 << nbit));
 		  }
 	   }
 
@@ -67,7 +67,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="buf"> byte array to read from
 	   /// </param>
 	   /// <returns> bit state 1 or 0 </returns>
-	   public static int arrayReadBit(int index, int offset, sbyte[] buf)
+	   public static int arrayReadBit(int index, int offset, byte[] buf)
 	   {
 		  int nbyt = ((int)((uint)index >> 3));
 		  int nbit = index - (nbyt << 3);

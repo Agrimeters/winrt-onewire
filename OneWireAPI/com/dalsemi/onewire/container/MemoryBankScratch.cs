@@ -52,12 +52,12 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Write Scratchpad Command
 	   /// </summary>
-	   public static readonly sbyte WRITE_SCRATCHPAD_COMMAND = (sbyte) 0x0F;
+	   public static readonly byte WRITE_SCRATCHPAD_COMMAND = 0x0F;
 
 	   /// <summary>
 	   /// Read Scratchpad Command
 	   /// </summary>
-	   public static readonly sbyte READ_SCRATCHPAD_COMMAND = unchecked((sbyte) 0xAA);
+	   public static readonly byte READ_SCRATCHPAD_COMMAND = 0xAA;
 
 	   //--------
 	   //-------- Variables
@@ -71,12 +71,12 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// block of 0xFF's used for faster read pre-fill of 1-Wire blocks
 	   /// </summary>
-	   protected internal sbyte[] ffBlock;
+	   protected internal byte[] ffBlock;
 
 	   /// <summary>
 	   /// Copy Scratchpad Command
 	   /// </summary>
-	   protected internal sbyte COPY_SCRATCHPAD_COMMAND;
+	   protected internal byte COPY_SCRATCHPAD_COMMAND;
 
 	   /// <summary>
 	   /// Flag to indicate that speed needs to be set
@@ -221,15 +221,15 @@ namespace com.dalsemi.onewire.container
 		  extraInfoDescription = "Target address, offset";
 
 		  // create the ffblock (used for faster 0xFF fills)
-		  ffBlock = new sbyte [96];
+		  ffBlock = new byte [96];
 
 		  for (int i = 0; i < 96; i++)
 		  {
-			 ffBlock [i] = unchecked((sbyte) 0xFF);
+			 ffBlock [i] = 0xFF;
 		  }
 
 		  // default copy scratchpad command
-		  COPY_SCRATCHPAD_COMMAND = (sbyte) 0x55;
+		  COPY_SCRATCHPAD_COMMAND = 0x55;
 
 		  // indicate speed has not been set
 		  doSetSpeed = true;
@@ -524,7 +524,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void read(int startAddr, bool readContinue, sbyte[] readBuf, int offset, int len)
+	   public virtual void read(int startAddr, bool readContinue, byte[] readBuf, int offset, int len)
 	   {
 
 		  // check if read exceeds memory
@@ -560,7 +560,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void write(int startAddr, sbyte[] writeBuf, int offset, int len)
+	   public virtual void write(int startAddr, byte[] writeBuf, int offset, int len)
 	   {
 
 		  // return if nothing to do
@@ -582,8 +582,8 @@ namespace com.dalsemi.onewire.container
 		  writeScratchpad(startPhysicalAddress + startAddr, writeBuf, offset, len);
 
 		  // read to verify ok
-		  sbyte[] raw_buf = new sbyte [pageLength];
-		  sbyte[] extra_buf = new sbyte [extraInfoLength];
+		  byte[] raw_buf = new byte [pageLength];
+		  byte[] extra_buf = new byte [extraInfoLength];
 
 		  readScratchpad(raw_buf, 0, pageLength, extra_buf);
 
@@ -633,7 +633,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readPage(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public virtual void readPage(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
 
 		  // check if read exceeds memory
@@ -674,7 +674,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readPage(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public virtual void readPage(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
 
 		  // check if read exceeds memory
@@ -719,9 +719,9 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual int readPagePacket(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public virtual int readPagePacket(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
-		  sbyte[] raw_buf = new sbyte [pageLength];
+		  byte[] raw_buf = new byte [pageLength];
 
 		  // attempt to put device at speed
 		  checkSpeed();
@@ -777,9 +777,9 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual int readPagePacket(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public virtual int readPagePacket(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
-		  sbyte[] raw_buf = new sbyte [pageLength];
+		  byte[] raw_buf = new byte [pageLength];
 
 		  // attempt to put device at speed
 		  checkSpeed();
@@ -824,7 +824,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void writePagePacket(int page, sbyte[] writeBuf, int offset, int len)
+	   public virtual void writePagePacket(int page, byte[] writeBuf, int offset, int len)
 	   {
 
 		  // make sure length does not exceed max
@@ -840,16 +840,16 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // construct the packet to write
-		  sbyte[] raw_buf = new sbyte [len + 3];
+		  byte[] raw_buf = new byte [len + 3];
 
-		  raw_buf [0] = (sbyte) len;
+		  raw_buf [0] = (byte) len;
 
 		  Array.Copy(writeBuf, offset, raw_buf, 1, len);
 
 		  int crc = CRC16.compute(raw_buf, 0, len + 1, page);
 
-		  raw_buf [len + 1] = unchecked((sbyte)(~crc & 0xFF));
-		  raw_buf [len + 2] = unchecked((sbyte)(((int)((uint)(~crc & 0xFFFF) >> 8)) & 0xFF));
+		  raw_buf [len + 1] = (byte)(~crc & 0xFF);
+		  raw_buf [len + 2] = (byte)(((int)((uint)(~crc & 0xFFFF) >> 8)) & 0xFF);
 
 		  // write the packet, return result
 		  write(page * pageLength, raw_buf, 0, len + 3);
@@ -872,7 +872,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public virtual void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
 
 		  // only needs to be implemented if supported by hardware
@@ -899,7 +899,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public virtual void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
 
 		  // only needs to be implemented if supported by hardware
@@ -926,7 +926,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readScratchpad(sbyte[] readBuf, int offset, int len, sbyte[] extraInfo)
+	   public virtual void readScratchpad(byte[] readBuf, int offset, int len, byte[] extraInfo)
 	   {
 		  // select the device
 		  if (!ib.adapter.select(ib.address))
@@ -937,7 +937,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // build first block
-		  sbyte[] raw_buf = new sbyte [1 + extraInfoLength];
+		  byte[] raw_buf = new byte [1 + extraInfoLength];
 
 		  raw_buf [0] = READ_SCRATCHPAD_COMMAND;
 
@@ -969,7 +969,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void writeScratchpad(int startAddr, sbyte[] writeBuf, int offset, int len)
+	   public virtual void writeScratchpad(int startAddr, byte[] writeBuf, int offset, int len)
 	   {
 
 		  // select the device
@@ -981,11 +981,11 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // build block to send
-		  sbyte[] raw_buf = new sbyte [3 + len];
+		  byte[] raw_buf = new byte [3 + len];
 
 		  raw_buf [0] = WRITE_SCRATCHPAD_COMMAND;
-		  raw_buf [1] = unchecked((sbyte)(startAddr & 0xFF));
-		  raw_buf [2] = unchecked((sbyte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF));
+		  raw_buf [1] = (byte)(startAddr & 0xFF);
+		  raw_buf [2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
 
 		  Array.Copy(writeBuf, offset, raw_buf, 3, len);
 
@@ -1013,13 +1013,13 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // build block to send
-		  sbyte[] raw_buf = new sbyte [5];
+		  byte[] raw_buf = new byte [5];
 
 		  raw_buf [0] = COPY_SCRATCHPAD_COMMAND;
-		  raw_buf [1] = unchecked((sbyte)(startAddr & 0xFF));
-		  raw_buf [2] = unchecked((sbyte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF));
-		  raw_buf [3] = (sbyte)((startAddr + len - 1) & 0x1F);
-		  raw_buf [4] = unchecked((sbyte) 0xFF);
+		  raw_buf [1] = (byte)(startAddr & 0xFF);
+		  raw_buf [2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
+		  raw_buf [3] = (byte)((startAddr + len - 1) & 0x1F);
+		  raw_buf [4] = (byte) 0xFF;
 
 		  // send block (check copy indication complete)
 		  ib.adapter.dataBlock(raw_buf, 0, 5);

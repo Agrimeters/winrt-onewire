@@ -46,10 +46,10 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Memory functions.
 	   /// </summary>
-	   private static readonly sbyte WRITE_DATA_COMMAND = (sbyte) 0x6C;
-	   private static readonly sbyte READ_DATA_COMMAND = (sbyte) 0x69;
-	   private static readonly sbyte COPY_DATA_COMMAND = (sbyte) 0x48;
-	   private static readonly sbyte RECALL_DATA_COMMAND = unchecked((sbyte) 0xB8);
+	   private static readonly byte WRITE_DATA_COMMAND = (byte) 0x6C;
+	   private static readonly byte READ_DATA_COMMAND = (byte) 0x69;
+	   private static readonly byte COPY_DATA_COMMAND = (byte) 0x48;
+	   private static readonly byte RECALL_DATA_COMMAND = unchecked((byte) 0xB8);
 
 	   //--------
 	   //-------- Variables
@@ -63,7 +63,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// block of 0xFF's used for faster read pre-fill of 1-Wire blocks
 	   /// </summary>
-	   protected internal sbyte[] ffBlock = new sbyte [32];
+	   protected internal byte[] ffBlock = new byte [32];
 
 	   /// <summary>
 	   /// Flag to indicate that speed needs to be set
@@ -165,7 +165,7 @@ namespace com.dalsemi.onewire.container
 		  // create the ffblock (used for faster 0xFF fills)
 		  for (int i = 0; i < 32; i++)
 		  {
-			 ffBlock [i] = unchecked((sbyte) 0xFF);
+			 ffBlock [i] = unchecked((byte) 0xFF);
 		  }
 	   }
 
@@ -515,10 +515,10 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void read(int startAddr, bool readContinue, sbyte[] readBuf, int offset, int len)
+	   public virtual void read(int startAddr, bool readContinue, byte[] readBuf, int offset, int len)
 	   {
 		  int i;
-		  sbyte[] buffer = new sbyte[18];
+		  byte[] buffer = new byte[18];
 
 		  if ((startAddr + len) > 32)
 		  {
@@ -526,14 +526,14 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // calculate the address (32 and 48 are valid addresses)
-		  sbyte memAddr;
+		  byte memAddr;
 		  if (startAddr < 16)
 		  {
-			 memAddr = (sbyte) startPhysicalAddress;
+			 memAddr = (byte) startPhysicalAddress;
 		  }
 		  else
 		  {
-			 memAddr = (sbyte)(startPhysicalAddress + 16);
+			 memAddr = (byte)(startPhysicalAddress + 16);
 		  }
 
 		  /* perform the recall/read and verification */
@@ -586,7 +586,7 @@ namespace com.dalsemi.onewire.container
 				ib.adapter.select(ib.address);
 
 				buffer[0] = RECALL_DATA_COMMAND;
-				buffer[1] = (sbyte)(memAddr + 16);
+				buffer[1] = (byte)(memAddr + 16);
 
 				ib.adapter.dataBlock(buffer,0,2);
 
@@ -634,10 +634,10 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void write(int startAddr, sbyte[] writeBuf, int offset, int len)
+	   public virtual void write(int startAddr, byte[] writeBuf, int offset, int len)
 	   {
-		  sbyte[] buffer = new sbyte [18];
-		  sbyte[] memory = new sbyte [32];
+		  byte[] buffer = new byte [18];
+		  byte[] memory = new byte [32];
 		  int modify;
 		  int i;
 
@@ -647,14 +647,14 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // the first block is at address 32 and the second is at address 48
-		  sbyte memAddr;
+		  byte memAddr;
 		  if (startAddr < 16)
 		  {
-			 memAddr = (sbyte) startPhysicalAddress;
+			 memAddr = (byte) startPhysicalAddress;
 		  }
 		  else
 		  {
-			 memAddr = (sbyte)(startPhysicalAddress + 16);
+			 memAddr = (byte)(startPhysicalAddress + 16);
 		  }
 
 		  // if the EEPROM block is locked throw a OneWireIOException
@@ -797,7 +797,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readPage(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public virtual void readPage(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
 		  read(page * pageLength, readContinue, readBuf, offset, pageLength);
 	   }
@@ -827,7 +827,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readPage(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public virtual void readPage(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
 		  throw new OneWireException("Read extra information not supported on this memory bank");
 	   }
@@ -853,7 +853,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual int readPagePacket(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public virtual int readPagePacket(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
 		  throw new OneWireException("Read extra information not supported on this memory bank");
 	   }
@@ -878,9 +878,9 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual int readPagePacket(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public virtual int readPagePacket(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
-		  sbyte[] raw_buf = new sbyte [pageLength];
+		  byte[] raw_buf = new byte [pageLength];
 
 		  // read entire page with read page CRC
 		  read((page * pageLength), readContinue, raw_buf, 0, pageLength);
@@ -922,7 +922,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void writePagePacket(int page, sbyte[] writeBuf, int offset, int len)
+	   public virtual void writePagePacket(int page, byte[] writeBuf, int offset, int len)
 	   {
 
 		  // make sure length does not exceed max
@@ -932,16 +932,16 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // construct the packet to write
-		  sbyte[] raw_buf = new sbyte [len + 3];
+		  byte[] raw_buf = new byte [len + 3];
 
-		  raw_buf [0] = (sbyte) len;
+		  raw_buf [0] = (byte) len;
 
 		  Array.Copy(writeBuf, offset, raw_buf, 1, len);
 
 		  int crc = CRC16.compute(raw_buf, 0, len + 1, page);
 
-		  raw_buf [len + 1] = unchecked((sbyte)(~crc & 0xFF));
-		  raw_buf [len + 2] = unchecked((sbyte)(((int)((uint)(~crc & 0xFFFF) >> 8)) & 0xFF));
+		  raw_buf [len + 1] = unchecked((byte)(~crc & 0xFF));
+		  raw_buf [len + 2] = unchecked((byte)(((int)((uint)(~crc & 0xFFFF) >> 8)) & 0xFF));
 
 		  // write the packet, return result
 		  write(page * pageLength, raw_buf, 0, len + 3);
@@ -964,7 +964,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public virtual void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
 		  throw new OneWireException("Read page with CRC not supported in this memory bank");
 	   }
@@ -989,7 +989,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public virtual void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
 		  throw new OneWireException("Read page with CRC not supported in this memory bank");
 	   }

@@ -106,7 +106,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> state buffer of the Potentiometer 1-Wire Device (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> <CODE>true</CODE> if this device has linear potentiometer element(s),
 	   /// <CODE>false</CODE> if this device has logarithmic potentiometer element(s) </returns>
-	   bool isLinear(sbyte[] state);
+	   bool isLinear(byte[] state);
 
 	   /// <summary>
 	   /// Querys to see if this Potentiometer 1-Wire Device's
@@ -115,7 +115,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> state buffer of the Potentiometer 1-Wire Device (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> <CODE>true</CODE> if the wiper settings are volatile,
 	   /// <CODE>false</CODE> if the wiper settings are non-volatile. </returns>
-	   bool wiperSettingsAreVolatile(sbyte[] state);
+	   bool wiperSettingsAreVolatile(byte[] state);
 
 	   /// <summary>
 	   /// Querys to see how many potentiometers this
@@ -123,7 +123,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="state"> state buffer of the Potentiometer 1-Wire Device (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> number of potentiometers on this device </returns>
-	   int numberOfPotentiometers(sbyte[] state);
+	   int numberOfPotentiometers(byte[] state);
 
 	   /// <summary>
 	   /// Querys to find the number of wiper settings
@@ -132,14 +132,14 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="state"> state buffer of the Potentiometer 1-Wire Device (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> number of wiper positions available </returns>
-	   int numberOfWiperSettings(sbyte[] state);
+	   int numberOfWiperSettings(byte[] state);
 
 	   /// <summary>
 	   /// Querys to find the resistance value of the potentiometer.
 	   /// </summary>
 	   /// <param name="state"> state buffer of the Potentiometer 1-Wire Device (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> resistance value in k-Ohms </returns>
-	   int potentiometerResistance(sbyte[] state);
+	   int potentiometerResistance(byte[] state);
 
 	   //--------
 	   //-------- Potentiometer State methods
@@ -152,7 +152,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="state"> state buffer of the Potentiometer 1-Wire Device (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> current wiper number </returns>
-	   int getCurrentWiperNumber(sbyte[] state);
+	   int getCurrentWiperNumber(byte[] state);
 
 	   /// <summary>
 	   /// Sets the currently selected wiper number.  All wiper actions will
@@ -161,7 +161,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="wiper_number"> wiper number to select for communication </param>
 	   /// <param name="state"> state buffer of the Potentiometer 1-Wire Device (returned by <CODE>readDevice()</CODE>) </param>
-	   void setCurrentWiperNumber(int wiper_number, sbyte[] state);
+	   void setCurrentWiperNumber(int wiper_number, byte[] state);
 
 	   /// <summary>
 	   /// Determines if the Potentiometer's charge pump is enabled.
@@ -169,7 +169,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> state buffer of the Potentiometer 1-Wire Device (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> <CODE>true</CODE> if enabled, <CODE>false</CODE> if not
 	   ///  </returns>
-	   bool isChargePumpOn(sbyte[] state);
+	   bool isChargePumpOn(byte[] state);
 
 	   /// <summary>
 	   /// Sets the state of the Potentiometer's charge pump.  This decreases the wiper's resistance,
@@ -179,7 +179,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="charge_pump_on"> <CODE>true</CODE> to enable the charge pump, <CODE>false</CODE> to disable charge pump </param>
 	   /// <param name="state"> state buffer of the Potentiometer 1-Wire Device (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> <CODE>true</CODE> if the operation was successful, <CODE>false</CODE> if there was an error </returns>
-	   void setChargePump(bool charge_pump_on, sbyte[] state);
+	   void setChargePump(bool charge_pump_on, byte[] state);
 
 	   //--------
 	   //-------- Potentiometer Wiper access methods

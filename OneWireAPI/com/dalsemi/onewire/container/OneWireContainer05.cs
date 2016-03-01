@@ -135,7 +135,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #OneWireContainer05() </seealso>
 	   /// <seealso cref= #OneWireContainer05(com.dalsemi.onewire.adapter.DSPortAdapter,long) OneWireContainer05(DSPortAdapter,long) </seealso>
 	   /// <seealso cref= #OneWireContainer05(com.dalsemi.onewire.adapter.DSPortAdapter,java.lang.String) OneWireContainer05(DSPortAdapter,String) </seealso>
-	   public OneWireContainer05(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer05(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 	   }
 
@@ -229,7 +229,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> the number of channels for this device
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
-	   public virtual int getNumberChannels(sbyte[] state)
+	   public virtual int getNumberChannels(byte[] state)
 	   {
 		  //we ignore the state, DS2405 can only have one channel
 		  return 1;
@@ -333,7 +333,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #hasLevelSensing() </seealso>
-	   public virtual bool getLevel(int channel, sbyte[] state)
+	   public virtual bool getLevel(int channel, byte[] state)
 	   {
 		  return ((state [0] & 0x02) == 0x02);
 	   }
@@ -352,7 +352,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #isHighSideSwitch() </seealso>
 	   /// <seealso cref= #setLatchState(int,bool,bool,byte[]) </seealso>
-	   public virtual bool getLatchState(int channel, sbyte[] state)
+	   public virtual bool getLatchState(int channel, byte[] state)
 	   {
 		  return ((state [0] & 0x01) == 0x01);
 	   }
@@ -373,7 +373,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= #hasActivitySensing() </seealso>
 	   /// <seealso cref= #clearActivity() </seealso>
-	   public virtual bool getSensedActivity(int channel, sbyte[] state)
+	   public virtual bool getSensedActivity(int channel, byte[] state)
 	   {
 
 		  //i don't do this
@@ -420,15 +420,15 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #hasSmartOn() </seealso>
 	   /// <seealso cref= #getLatchState(int,byte[]) </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
-	   public virtual void setLatchState(int channel, bool latchState, bool doSmart, sbyte[] state)
+	   public virtual void setLatchState(int channel, bool latchState, bool doSmart, byte[] state)
 	   {
 		  if (latchState)
 		  {
-			 state [0] = (sbyte)(state [0] | 0x01);
+			 state [0] = (byte)(state [0] | 0x01);
 		  }
 		  else
 		  {
-			 state [0] = unchecked((sbyte)(state [0] & 0xfe));
+			 state [0] = unchecked((byte)(state [0] & 0xfe));
 		  }
 	   }
 
@@ -446,7 +446,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
 
 		  //first let's make sure we can talk to the part
@@ -454,12 +454,12 @@ namespace com.dalsemi.onewire.container
 		  doSpeed();
 
 		  //this ain't a hard part--it's only gonna take 1 byte
-		  sbyte[] state = new sbyte [1];
+		  byte[] state = new byte [1];
 
 		  //here's the 'bitmap'
 		  //bit 0 :   switch state (0 for conducting, 1 for non-conducting)
 		  //bit 1 :   sensed level (0 for low, 1 for high)
-		  state [0] = (sbyte) 0;
+		  state [0] = (byte) 0;
 
 		  if (Present)
 		  {
@@ -479,7 +479,7 @@ namespace com.dalsemi.onewire.container
 			 // Byte after 'search' indicates level
 			 if (adapter.Byte != 0)
 			 {
-				state [0] = (sbyte)(state [0] | 0x02);
+				state [0] = (byte)(state [0] | 0x02);
 			 }
 		  }
 		  else
@@ -504,7 +504,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
 		  doSpeed();
 

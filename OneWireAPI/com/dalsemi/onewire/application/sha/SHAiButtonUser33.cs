@@ -51,7 +51,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <summary>
 	   /// For fast 0xFF fills of byte arrays
 	   /// </summary>
-	   private static readonly sbyte[] ffBlock = new sbyte[] {unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF), unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF), unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF), unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF), unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF), unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF), unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF), unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF),unchecked((sbyte)0x0FF)};
+	   private static readonly byte[] ffBlock = new byte[] {0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF,0x0FF, 0x0FF,0x0FF,0x0FF,0x0FF, 0x0FF,0x0FF,0x0FF,0x0FF, 0x0FF,0x0FF,0x0FF,0x0FF};
 
 	   /// <summary>
 	   /// Reference to the OneWireContainer
@@ -113,7 +113,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </exception>
 	   /// <seealso cref= #SHAiButtonUser33(SHAiButtonCopr,SHAiButtonCopr,OneWireContainer33) </seealso>
 	   /// <seealso cref= #SHAiButtonUser33(SHAiButtonCopr,SHAiButtonCopr) </seealso>
-	   public SHAiButtonUser33(SHAiButtonCopr copr, OneWireContainer33 owc, bool formatDevice, sbyte[] authSecret) : this(copr,copr)
+	   public SHAiButtonUser33(SHAiButtonCopr copr, OneWireContainer33 owc, bool formatDevice, byte[] authSecret) : this(copr,copr)
 	   {
 		  //setup service filename
 
@@ -124,7 +124,7 @@ namespace com.dalsemi.onewire.application.sha
 		  this.address = owc.Address;
 
 		  //clear out old secret first
-		  sbyte[] NullSecret = new sbyte[8];
+		  byte[] NullSecret = new byte[8];
 		  for (int i = 0; i < 8; i++)
 		  {
 			 NullSecret[i] = 0x00;
@@ -146,7 +146,7 @@ namespace com.dalsemi.onewire.application.sha
 		  }
 
 		  //setup the fullBindCode with rest of info
-		  this.fullBindCode[4] = (sbyte)this.accountPageNumber;
+		  this.fullBindCode[4] = (byte)this.accountPageNumber;
 		  Array.Copy(this.address,0, this.fullBindCode,5,7);
 
 		  if (!owc.bindSecretToiButton(this.accountPageNumber, copr.BindData))
@@ -204,10 +204,10 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </exception>
 	   /// <seealso cref= #SHAiButtonUser33(SHAiButtonCopr,SHAiButtonCopr,OneWireContainer33) </seealso>
 	   /// <seealso cref= #SHAiButtonUser33(SHAiButtonCopr,SHAiButtonCopr) </seealso>
-	   public SHAiButtonUser33(sbyte[] coprBindCode, sbyte[] fileName, int fileNameExt, OneWireContainer33 owc, bool formatDevice, sbyte[] authSecret)
+	   public SHAiButtonUser33(byte[] coprBindCode, byte[] fileName, int fileNameExt, OneWireContainer33 owc, bool formatDevice, byte[] authSecret)
 	   {
 		  //create string representation of service filename
-		  this.strServiceFilename = StringHelperClass.NewString(fileName) + "." + (int)fileNameExt;
+		  this.strServiceFilename = System.Text.Encoding.Unicode.GetString(fileName) + "." + (int)fileNameExt;
 
 		  //hold container reference
 		  this.ibc33 = owc;
@@ -216,7 +216,7 @@ namespace com.dalsemi.onewire.application.sha
 		  this.address = owc.Address;
 
 		  //clear out old secret first
-		  sbyte[] NullSecret = new sbyte[8];
+		  byte[] NullSecret = new byte[8];
 		  for (int i = 0; i < 8; i++)
 		  {
 			 NullSecret[i] = 0x00;
@@ -238,7 +238,7 @@ namespace com.dalsemi.onewire.application.sha
 		  }
 
 		  //setup the fullBindCode with rest of info
-		  this.fullBindCode[4] = (sbyte)this.accountPageNumber;
+		  this.fullBindCode[4] = (byte)this.accountPageNumber;
 		  Array.Copy(this.address,0, this.fullBindCode,5,7);
 
 		  if (!owc.bindSecretToiButton(this.accountPageNumber, copr.BindData))
@@ -328,14 +328,14 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </exception>
 	   /// <seealso cref= #SHAiButtonUser33(SHAiButtonCopr,OneWireContainer33,bool,byte[]) </seealso>
 	   /// <seealso cref= #SHAiButtonUser33(SHAiButtonCopr,SHAiButtonCopr) </seealso>
-	   public SHAiButtonUser33(sbyte[] coprBindCode, sbyte[] fileName, int fileNameExt, OneWireContainer33 owc)
+	   public SHAiButtonUser33(byte[] coprBindCode, byte[] fileName, int fileNameExt, OneWireContainer33 owc)
 	   {
 		  //make sure fullBindCode has appropriate ff padding
 		  Array.Copy(ffBlock, 0, this.fullBindCode, 0, 15);
 
 		  //create string representation of service filename
 		  copr.getFilename(this.serviceFile,0);
-		  this.strServiceFilename = StringHelperClass.NewString(fileName) + "." + (int)fileNameExt;
+		  this.strServiceFilename = System.Text.Encoding.Unicode.GetString(fileName) + "." + (int)fileNameExt;
 
 		  //hold container reference and address
 		  if (!setiButton33(owc))
@@ -380,7 +380,7 @@ namespace com.dalsemi.onewire.application.sha
 
 		  //create string representation of service filename
 		  copr.getFilename(this.serviceFile,0);
-		  this.strServiceFilename = StringHelperClass.NewString(this.serviceFile) + "." + (int)copr.FilenameExt;
+		  this.strServiceFilename = System.Text.Encoding.Unicode.GetString(this.serviceFile) + "." + (int)copr.FilenameExt;
 	   }
 
 	   /// <summary>
@@ -421,7 +421,7 @@ namespace com.dalsemi.onewire.application.sha
 			  }
         
 			  //setup the fullBindCode with rest of info
-			  this.fullBindCode[4] = (sbyte)this.accountPageNumber;
+			  this.fullBindCode[4] = (byte)this.accountPageNumber;
 			  Array.Copy(this.address,0, this.fullBindCode,5,7);
         
 			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
@@ -458,7 +458,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public override bool setiButtonUser(DSPortAdapter adapter, sbyte[] address)
+	   public override bool setiButtonUser(DSPortAdapter adapter, byte[] address)
 	   {
 		   lock (this)
 		   {
@@ -488,7 +488,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public override bool setiButtonUser(sbyte[] address)
+	   public override bool setiButtonUser(byte[] address)
 	   {
 		   lock (this)
 		   {
@@ -572,7 +572,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///                     the coprocessor's scratchpad.  There should be 15
 	   ///                     bytes available starting from the offset. </param>
 	   /// <param name="offset"> the offset into fullBindCode where copying should begin. </param>
-	   public override void getFullBindCode(sbyte[] l_fullBindCode, int offset)
+	   public override void getFullBindCode(byte[] l_fullBindCode, int offset)
 	   {
 		  Array.Copy(this.fullBindCode,0, l_fullBindCode,offset, 15);
 		  /*System.arraycopy(ffBlock, 0, fullBindCode, offset, 15);
@@ -587,7 +587,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </summary>
 	   /// <returns> byte indicating appropriate command for authenticating user
 	   ///  </returns>
-	   public override sbyte AuthorizationCommand
+	   public override byte AuthorizationCommand
 	   {
 		   get
 		   {
@@ -595,9 +595,9 @@ namespace com.dalsemi.onewire.application.sha
 		   }
 	   }
 
-	   private sbyte[] writeAccountData_copyAuth = new sbyte[32];
-	   private sbyte[] writeAccountData_scratchpad = new sbyte[32];
-	   private sbyte[] writeAccountData_pageData = new sbyte[32];
+	   private byte[] writeAccountData_copyAuth = new byte[32];
+	   private byte[] writeAccountData_scratchpad = new byte[32];
+	   private byte[] writeAccountData_pageData = new byte[32];
 	   /// <summary>
 	   /// <P>Writes the account data to the SHAiButton.  First, this function
 	   /// asserts that the account page number is known.  The account data is
@@ -621,16 +621,16 @@ namespace com.dalsemi.onewire.application.sha
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public override bool writeAccountData(sbyte[] dataBuffer, int offset)
+	   public override bool writeAccountData(byte[] dataBuffer, int offset)
 	   {
 		   lock (this)
 		   {
 			  //local vars.
 			  OneWireContainer33 ibcL = this.ibc33;
-			  sbyte[] copyAuth = this.writeAccountData_copyAuth;
-			  sbyte[] scratchpad = this.writeAccountData_scratchpad;
-			  sbyte[] pageData = this.writeAccountData_pageData;
-			  sbyte[] fullBindCode = this.fullBindCode;
+			  byte[] copyAuth = this.writeAccountData_copyAuth;
+			  byte[] scratchpad = this.writeAccountData_scratchpad;
+			  byte[] pageData = this.writeAccountData_pageData;
+			  byte[] fullBindCode = this.fullBindCode;
 			  SHAiButtonCopr coprL = this.copr;
         
 			  //make sure account info is properly setup
@@ -739,7 +739,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <param name="dataBuffer"> the buffer to copy the account data into </param>
 	   /// <param name="offset"> the index into the buffer where copying should begin </param>
 	   /// <returns> whether or not the read was successful </returns>
-	   public override bool readAccountData(sbyte[] dataBuffer, int offset)
+	   public override bool readAccountData(byte[] dataBuffer, int offset)
 	   {
 		   lock (this)
 		   {
@@ -791,7 +791,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <param name="macStart"> the index into the mac buffer to start copying
 	   /// </param>
 	   /// <returns> the value of the write cycle counter for the page </returns>
-	   public override int readAccountData(sbyte[] chlg, int chlgStart, sbyte[] dataBuffer, int dataStart, sbyte[] mac, int macStart)
+	   public override int readAccountData(byte[] chlg, int chlgStart, byte[] dataBuffer, int dataStart, byte[] mac, int macStart)
 	   {
 		   lock (this)
 		   {

@@ -67,7 +67,7 @@ namespace com.dalsemi.onewire.application.tag
 		  HumidityContainer hc = (HumidityContainer) DeviceContainer_Renamed;
 
 		  // read the device first to get the state
-		  sbyte[] state = hc.readDevice();
+		  byte[] state = hc.readDevice();
 
 		  // convert humidity
 		  hc.doHumidityConvert(state);

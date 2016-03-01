@@ -72,13 +72,13 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Field EXT_DIRECTORY entension value </summary>
-	   private const sbyte EXT_DIRECTORY = 0x007F;
+	   private const byte EXT_DIRECTORY = 0x007F;
 
 	   /// <summary>
 	   /// Field EXT_UNKNOWN marker in path vector to indicate don't
 	   /// know if file or directory
 	   /// </summary>
-	   private const sbyte EXT_UNKNOWN = 0x007E;
+	   private const byte EXT_UNKNOWN = 0x007E;
 
 	   /// <summary>
 	   /// Field BM_CACHE bitmap type MemoryCache </summary>
@@ -150,7 +150,7 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Field feData - buffer containing the last File Entry Page </summary>
-	   private sbyte[] feData;
+	   private byte[] feData;
 
 	   /// <summary>
 	   /// Field feLen - length of packet in the last File Entry Page </summary>
@@ -190,7 +190,7 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Field lastPageData - buffer for the last page read </summary>
-	   private sbyte[] lastPageData;
+	   private byte[] lastPageData;
 
 	   /// <summary>
 	   /// Field filePosition - overall file position when reading </summary>
@@ -250,7 +250,7 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Field pbm - buffer containering the current image for the page bitmap </summary>
-	   private sbyte[] pbm;
+	   private byte[] pbm;
 
 	   /// <summary>
 	   /// Field pbmByteOffset - byte offset into page bitmap </summary>
@@ -274,23 +274,23 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Field tempPage - temporary page buffer </summary>
-	   private sbyte[] tempPage;
+	   private byte[] tempPage;
 
 	   /// <summary>
 	   /// Field initName - image of blank directory entry, used in parsing </summary>
-	   private sbyte[] initName = new sbyte[] {0x20, 0x20, 0x20, 0x20, EXT_UNKNOWN};
+	   private byte[] initName = new byte[] {0x20, 0x20, 0x20, 0x20, EXT_UNKNOWN};
 
 	   /// <summary>
 	   /// Field smallBuf - small buffer </summary>
-	   private sbyte[] smallBuf;
+	   private byte[] smallBuf;
 
 	   /// <summary>
 	   /// Field dmBuf - device map page buffer </summary>
-	   private sbyte[] dmBuf;
+	   private byte[] dmBuf;
 
 	   /// <summary>
 	   /// Field addrBuf - address buffer </summary>
-	   private sbyte[] addrBuf;
+	   private byte[] addrBuf;
 
 	   //--------
 	   //-------- Constructors
@@ -399,12 +399,12 @@ namespace com.dalsemi.onewire.application.file
 			 }
 
 			 // construct the page bufs
-			 lastPageData = new sbyte [maxDataLen];
-			 tempPage = new sbyte [lastPageData.Length];
-			 feData = new sbyte [lastPageData.Length];
-			 dmBuf = new sbyte [lastPageData.Length];
-			 smallBuf = new sbyte [10];
-			 addrBuf = new sbyte [8];
+			 lastPageData = new byte [maxDataLen];
+			 tempPage = new byte [lastPageData.Length];
+			 feData = new byte [lastPageData.Length];
+			 dmBuf = new byte [lastPageData.Length];
+			 smallBuf = new byte [10];
+			 addrBuf = new byte [8];
 
 			 // guese at the number of bytes to represent a page number
 			 // since have not read the root directory yet this may change
@@ -428,7 +428,7 @@ namespace com.dalsemi.onewire.application.file
 				bitmapType = BM_LOCAL;
 
 				// make PageBitMap max size of first page of directory
-				pbm = new sbyte [maxDataLen];
+				pbm = new byte [maxDataLen];
 				pbmByteOffset = 3;
 				pbmBitOffset = 0;
 			 }
@@ -437,7 +437,7 @@ namespace com.dalsemi.onewire.application.file
 				bitmapType = BM_FILE;
 
 				// make PageBitMap correct size number of pages in fs
-				pbm = new sbyte [totalPages / 8 + LEN_PAGE_PTR];
+				pbm = new byte [totalPages / 8 + LEN_PAGE_PTR];
 				pbmByteOffset = 0;
 				pbmBitOffset = 0;
 			 }
@@ -461,11 +461,11 @@ namespace com.dalsemi.onewire.application.file
 			 // create a compressed path (take out "." and "..")
 			 path = new ArrayList(verbosePath.Count);
 
-			 sbyte[] element;
+			 byte[] element;
 
 			 for (int element_num = 0; element_num < verbosePath.Count; element_num++)
 			 {
-				element = (sbyte[]) verbosePath[element_num];
+				element = (byte[]) verbosePath[element_num];
 
 				// ".."
 				if ((element [0] == '.') && (element [1] == '.'))
@@ -728,7 +728,7 @@ namespace com.dalsemi.onewire.application.file
 	   ///          filesystem </exception>
 	   protected internal virtual void create(bool append, bool isDirectory, bool makeParents, int startPage, int numberPages)
 	   {
-		  sbyte[] element;
+		  byte[] element;
 		  bool element_found;
 
 		  lock (cache)
@@ -760,7 +760,7 @@ namespace com.dalsemi.onewire.application.file
 			 // make sure last element in path is a directory (or unknown) if making directory
 			 if (isDirectory || makeParents)
 			 {
-				element = (sbyte[]) path[path.Count - 1];
+				element = (byte[]) path[path.Count - 1];
 
 				if (((element [4] & 0x7F) != EXT_UNKNOWN) && ((element [4] & 0x7F) != EXT_DIRECTORY))
 				{
@@ -782,12 +782,12 @@ namespace com.dalsemi.onewire.application.file
 			 // loop through the path elements, creating directories/file as needed
 			 feStartPage = 0;
 			 bool file_exists = false;
-			 sbyte[] prev_element = new sbyte[] {(sbyte)0x52, (sbyte)0x4F, (sbyte)0x4F, (sbyte)0x54};
+			 byte[] prev_element = new byte[] {0x52, 0x4F, 0x4F, 0x54};
 			 int prev_element_start = 0;
 
 			 for (int element_num = 0; element_num < path.Count; element_num++)
 			 {
-				element = (sbyte[]) path[element_num];
+				element = (byte[]) path[element_num];
 
 				try
 				{
@@ -804,9 +804,9 @@ namespace com.dalsemi.onewire.application.file
 				   {
 
 					  // convert unknown entry to directory
-					  if ((sbyte) element [4] == (sbyte) EXT_UNKNOWN)
+					  if (element [4] == EXT_UNKNOWN)
 					  {
-						 element [4] = (sbyte) EXT_DIRECTORY;
+						 element [4] = EXT_DIRECTORY;
 					  }
 
 					  if ((element_num != (path.Count - 1)) && !makeParents)
@@ -820,7 +820,7 @@ namespace com.dalsemi.onewire.application.file
 				   {
 
 					  // convert unknown entry to file with 0 extension
-					  if ((sbyte) element [4] == (sbyte) EXT_UNKNOWN)
+					  if (element [4] == EXT_UNKNOWN)
 					  {
 						 element [4] = 0;
 					  }
@@ -852,7 +852,7 @@ namespace com.dalsemi.onewire.application.file
 				   else
 				   {
 					  // check if last element is a directory and should be a file
-					  if ((element[4] == (sbyte)EXT_DIRECTORY) && (!isDirectory))
+					  if ((element[4] == EXT_DIRECTORY) && (!isDirectory))
 					  {
 						 // remove the entry in the cache before throwing exception
 						 cache.removeWriteOpen(owd[0].AddressAsString + Path);
@@ -968,8 +968,8 @@ namespace com.dalsemi.onewire.application.file
 
 			 // create the directory page
 			 // Directory Marker 'DM'
-			 feData[cdcnt] = (sbyte)((LEN_PAGE_PTR == 1) ? 0x0A : 0x0B);
-			 feData[cdcnt++] |= (sbyte)((owd.Length == 1) ? unchecked(0xA0) : 0xB0);
+			 feData[cdcnt] = (LEN_PAGE_PTR == 1) ? (byte) 0x0A : (byte) 0x0B;
+			 feData[cdcnt++] |= (owd.Length == 1) ? (byte) 0xA0 : (byte) 0xB0;
 
 			 // Map Address 'MA', skip for now
 			 cdcnt += LEN_PAGE_PTR;
@@ -1009,11 +1009,11 @@ namespace com.dalsemi.onewire.application.file
 				   bitmapType = BM_LOCAL;
 
 				   // make PageBitMap max size of first page of directory
-				   pbm = new sbyte [maxDataLen];
+				   pbm = new byte [maxDataLen];
 				   pbmByteOffset = 3;
 				   pbmBitOffset = 0;
 				   // 'BC'
-				   feData [cdcnt++] = (owd.Length > 1) ? unchecked((sbyte) 0x82) : unchecked((sbyte) 0x80);
+				   feData [cdcnt++] = (owd.Length > 1) ? (byte) 0x82 : (byte) 0x80;
 
 				   // check if this will fit on the ROOT device
 				   if (device_map_pages >= rootTotalPages)
@@ -1033,15 +1033,15 @@ namespace com.dalsemi.onewire.application.file
 					  // create the dummy directory
 					  tempPage[0] = feData[0];
 					  tempPage[LEN_PAGE_PTR] = 0;
-					  tempPage[1] = (sbyte)0x01;
-					  tempPage[LEN_PAGE_PTR + 1] = unchecked((sbyte)0x80);
+					  tempPage[1] = 0x01;
+					  tempPage[LEN_PAGE_PTR + 1] = 0x80;
 					  for (j = 2; j <= 5; j++)
 					  {
-						 tempPage[LEN_PAGE_PTR + j] = unchecked((sbyte)0xFF);
+						 tempPage[LEN_PAGE_PTR + j] = 0xFF;
 					  }
 					  for (j = 6; j <= 7; j++)
 					  {
-						 tempPage[LEN_PAGE_PTR + j] = (sbyte)0x00;
+						 tempPage[LEN_PAGE_PTR + j] = 0x00;
 					  }
 
 					  // create link back to the MASTER
@@ -1085,7 +1085,7 @@ namespace com.dalsemi.onewire.application.file
 				   }
 
 				   // 'BC' set the page number of the bitmap file
-				   feData [cdcnt++] = (owd.Length > 1) ? (sbyte) 0x02 : (sbyte) 0x00;
+				   feData [cdcnt++] = (owd.Length > 1) ? (byte) 0x02 : (byte) 0x00;
 
 				   // page address and number of pages for bitmap file
 				   if (LEN_PAGE_PTR == 1)
@@ -1115,15 +1115,15 @@ namespace com.dalsemi.onewire.application.file
 					  // create the dummy directory
 					  tempPage[0] = feData[0];
 					  tempPage[LEN_PAGE_PTR] = 0;
-					  tempPage[1] = (sbyte)0x01;
-					  tempPage[LEN_PAGE_PTR + 1] = unchecked((sbyte)0x80);
+					  tempPage[1] = 0x01;
+					  tempPage[LEN_PAGE_PTR + 1] = 0x80;
 					  for (j = 2; j <= 5; j++)
 					  {
-						 tempPage[LEN_PAGE_PTR + j] = unchecked((sbyte)0xFF);
+						 tempPage[LEN_PAGE_PTR + j] = 0xFF;
 					  }
 					  for (j = 6; j <= 7; j++)
 					  {
-						 tempPage[LEN_PAGE_PTR + j] = (sbyte)0x00;
+						 tempPage[LEN_PAGE_PTR + j] = 0x00;
 					  }
 
 					  // create link back to the MASTER
@@ -1181,7 +1181,7 @@ namespace com.dalsemi.onewire.application.file
 
 				   // bitmap already taken care of, just put right after directory
 				   // create the device map data to write
-				   sbyte[] dmf = new sbyte[dm_bytes];
+				   byte[] dmf = new byte[dm_bytes];
 				   for (i = 1; i < owd.Length; i++)
 				   {
 					  Array.Copy(owd[i].Address, 0, dmf, (i - 1) * 8, 8);
@@ -1247,7 +1247,7 @@ namespace com.dalsemi.onewire.application.file
 	   ///             <code>-1</code> if there is no more data because the end of
 	   ///             the file has been reached. </returns>
 	   /// <exception cref="IOException">  if an I/O error occurs. </exception>
-	   protected internal virtual int read(sbyte[] b, int off, int len)
+	   protected internal virtual int read(byte[] b, int off, int len)
 	   {
 		  int read_count = 0, page_data_read , next_page = 0;
 
@@ -1434,7 +1434,7 @@ namespace com.dalsemi.onewire.application.file
 				Debug.WriteLine("===write(int) " + b);
 			 }
 
-			 smallBuf [0] = (sbyte) b;
+			 smallBuf [0] = (byte) b;
 
 			 write(smallBuf, 0, 1);
 		  }
@@ -1448,7 +1448,7 @@ namespace com.dalsemi.onewire.application.file
 	   /// <param name="off">   the start offset in the data. </param>
 	   /// <param name="len">   the number of bytes to write. </param>
 	   /// <exception cref="IOException">  if an I/O error occurs. </exception>
-	   protected internal virtual void write(sbyte[] b, int off, int len)
+	   protected internal virtual void write(byte[] b, int off, int len)
 	   {
 		  lock (cache)
 		  {
@@ -1889,7 +1889,7 @@ namespace com.dalsemi.onewire.application.file
 					{
 					   if (Directory)
 					   {
-						  sbyte[] fl = (sbyte[]) path[path.Count - 1];
+						  byte[] fl = (byte[]) path[path.Count - 1];
     
 						  return ((fl [LEN_FILENAME - 1] & 0x80) != 0);
 					   }
@@ -2115,7 +2115,7 @@ namespace com.dalsemi.onewire.application.file
 
 						 for (i = 0; i < 4; i++)
 						 {
-							if ((sbyte) tempPage [offset + i] != (sbyte) 0x20)
+							if ((byte) tempPage [offset + i] != (byte) 0x20)
 							{
 							   build_buffer.Append((char) tempPage [offset + i]);
 							}
@@ -2125,7 +2125,7 @@ namespace com.dalsemi.onewire.application.file
 							}
 						 }
 
-						 if ((sbyte)(tempPage [offset + 4] & 0x7F) != (sbyte) EXT_DIRECTORY)
+						 if ((byte)(tempPage [offset + 4] & 0x7F) != (byte) EXT_DIRECTORY)
 						 {
 							build_buffer.Append("." + System.Convert.ToString((int)(tempPage [offset + 4] & 0x7F)));
 						 }
@@ -2137,7 +2137,7 @@ namespace com.dalsemi.onewire.application.file
 						 }
 
 						 // only add if not hidden directory
-						 if ((sbyte) tempPage [offset + 4] != unchecked((sbyte) 0xFF))
+						 if ((byte) tempPage [offset + 4] != 0xFF)
 						 {
 							// add to the vector of strings
 							entries.Add(build_buffer.ToString());
@@ -2286,7 +2286,7 @@ namespace com.dalsemi.onewire.application.file
 				}
 
 				// mark the readonly bit in the file entry page
-				feData [feOffset + LEN_FILENAME - 1] |= unchecked((sbyte)0x80);
+				feData [feOffset + LEN_FILENAME - 1] |= 0x80;
 
 				try
 				{
@@ -2825,12 +2825,12 @@ namespace com.dalsemi.onewire.application.file
 			 return null;
 		  }
 
-		  sbyte[] name;
+		  byte[] name;
 		  StringBuilder build_buffer = new StringBuilder((single ? "" : OWFile.separator));
 
 		  for (int element = beginIndex; element < endIndex; element++)
 		  {
-			 name = (sbyte[]) tempPath[element];
+			 name = (byte[]) tempPath[element];
 
 			 if (!single && (element != beginIndex))
 			 {
@@ -2839,7 +2839,7 @@ namespace com.dalsemi.onewire.application.file
 
 			 for (int i = 0; i < 4; i++)
 			 {
-				if ((sbyte) name [i] != (sbyte) 0x20)
+				if ((byte) name [i] != (byte) 0x20)
 				{
 				   build_buffer.Append((char) name [i]);
 				}
@@ -2849,7 +2849,7 @@ namespace com.dalsemi.onewire.application.file
 				}
 			 }
 
-			 if (((sbyte)(name[4] & 0x7F) != (sbyte) EXT_DIRECTORY) && ((sbyte) name [4] != (sbyte) EXT_UNKNOWN))
+			 if (((byte)(name[4] & 0x7F) != (byte) EXT_DIRECTORY) && ((byte) name [4] != (byte) EXT_UNKNOWN))
 			 {
 				build_buffer.Append("." + Convert.ToString((int) name [4] & 0x7F));
 			 }
@@ -2876,7 +2876,7 @@ namespace com.dalsemi.onewire.application.file
 	   /// <exception cref="OneWireException"> when an IO error occurs </exception>
 	   private bool verifyPath(int depth)
 	   {
-		  sbyte[] element;
+		  byte[] element;
 
 		  feStartPage = 0;
 
@@ -2888,7 +2888,7 @@ namespace com.dalsemi.onewire.application.file
 
 		  for (int element_num = 0; element_num < depth; element_num++)
 		  {
-			 element = (sbyte[]) path[element_num];
+			 element = (byte[]) path[element_num];
 
 			 // remember where the parent entry is
 			 feParentPage = feStartPage;
@@ -2920,7 +2920,7 @@ namespace com.dalsemi.onewire.application.file
 	   ///         fePage,feOffset, and feData have been set
 	   /// </returns>
 	   /// <exception cref="OneWireException"> when an IO error occurs </exception>
-	   private bool findElement(int startPage, sbyte[] element, int offset)
+	   private bool findElement(int startPage, byte[] element, int offset)
 	   {
 		  int next_page = startPage;
 
@@ -2960,7 +2960,7 @@ namespace com.dalsemi.onewire.application.file
 				   // copy over any read-only or hidden flag in element name
 				   if ((feData [feOffset + LEN_FILENAME - 1] & 0x80) != 0)
 				   {
-					  element [offset + LEN_FILENAME - 1] |= unchecked((sbyte)0x80);
+					  element [offset + LEN_FILENAME - 1] |= 0x80;
 				   }
 
 				   //\\//\\//\\//\\//\\//\\//\\//
@@ -3002,7 +3002,7 @@ namespace com.dalsemi.onewire.application.file
 	   /// <param name="offset2"> second file offset
 	   /// 
 	   /// @return </param>
-	   private bool elementEquals(sbyte[] file1, int offset1, sbyte[] file2, int offset2)
+	   private bool elementEquals(byte[] file1, int offset1, byte[] file2, int offset2)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//
 		  if (doDebugMessages)
@@ -3015,7 +3015,7 @@ namespace com.dalsemi.onewire.application.file
 
 		  for (int i = 0; i < 4; i++)
 		  {
-			 if ((sbyte) file1 [offset1 + i] != (sbyte) file2 [offset2 + i])
+			 if ((byte) file1 [offset1 + i] != (byte) file2 [offset2 + i])
 			 {
 				return false;
 			 }
@@ -3034,7 +3034,7 @@ namespace com.dalsemi.onewire.application.file
 			 }
 		  }
 
-		  return ((sbyte)(file1 [offset1 + 4] & 0x7F) == (sbyte)(file2 [offset2 + 4] & 0x7F));
+		  return ((byte)(file1 [offset1 + 4] & 0x7F) == (byte)(file2 [offset2 + 4] & 0x7F));
 	   }
 
 	   /// <summary>
@@ -3076,7 +3076,7 @@ namespace com.dalsemi.onewire.application.file
 	   /// </param>
 	   /// <exception cref="FileNotFoundException"> if the filesystem runs out of space or
 	   ///         if an IO error occurs </exception>
-	   private void createEntry(sbyte[] newEntry, int startPage, int numberPages, sbyte[] prevEntry, int prevEntryStart)
+	   private void createEntry(byte[] newEntry, int startPage, int numberPages, byte[] prevEntry, int prevEntryStart)
 	   {
 
 		  //\\//\\//\\//\\//\\//\\//\\//
@@ -3121,7 +3121,7 @@ namespace com.dalsemi.onewire.application.file
 				   // get a new file to represent the new file/directory location
 
 				   // get the next available page
-				   new_page = getFirstFreePage((newEntry[4] == (sbyte)102) || (newEntry[4] == (sbyte)101));
+				   new_page = getFirstFreePage((newEntry[4] == (byte)102) || (newEntry[4] == (byte)101));
 
 				   // verify got a free page
 				   if (new_page < 0)
@@ -3136,7 +3136,7 @@ namespace com.dalsemi.onewire.application.file
 					  }
 
 					  // if extension is 101 or 102, it could be there is not COUNTER pages
-					  if ((newEntry[4] == (sbyte)102) || (newEntry[4] == (sbyte)101))
+					  if ((newEntry[4] == (byte)102) || (newEntry[4] == (byte)101))
 					  {
 						 throw new OWFileNotFoundException("Out of space on 1-Wire device, or no secure pages available");
 					  }
@@ -3173,8 +3173,8 @@ namespace com.dalsemi.onewire.application.file
 				   if ((newEntry [4] & 0x7F) == EXT_DIRECTORY)
 				   {
 					  // Directory Marker 'DM'
-					  tempPage[0] = (sbyte)((LEN_PAGE_PTR == 1) ? 0x0A : 0x0B);
-					  tempPage[0] |= (sbyte)((owd.Length == 1) ? unchecked(0xA0) : 0xB0);
+					  tempPage[0] = (byte)((LEN_PAGE_PTR == 1) ? 0x0A : 0x0B);
+					  tempPage[0] |= (byte)((owd.Length == 1) ? unchecked(0xA0) : 0xB0);
 
 					  // dummy byte
 					  tempPage[1] = 0;
@@ -3254,7 +3254,7 @@ namespace com.dalsemi.onewire.application.file
 				   // get a new file to represent the new file/directory location
 
 				   // get new page for the file
-				   new_page = getNextFreePage((newEntry[4] == (sbyte)102) || (newEntry[4] == (sbyte)101));
+				   new_page = getNextFreePage((newEntry[4] == (byte)102) || (newEntry[4] == (byte)101));
 
 				   // verify got a free page
 				   if (new_page < 0)
@@ -3269,7 +3269,7 @@ namespace com.dalsemi.onewire.application.file
 					  }
 
 					  // if extension is 101 or 102, it could be there is not COUNTER pages
-					  if ((newEntry[4] == (sbyte)102) || (newEntry[4] == (sbyte)101))
+					  if ((newEntry[4] == (byte)102) || (newEntry[4] == (byte)101))
 					  {
 						 throw new OWFileNotFoundException("Out of space on 1-Wire device, or no secure pages available");
 					  }
@@ -3304,8 +3304,8 @@ namespace com.dalsemi.onewire.application.file
 				   if ((newEntry [4] & 0x7F) == EXT_DIRECTORY)
 				   {
 					  // Directory Marker 'DM'
-					  tempPage[0] = (sbyte)((LEN_PAGE_PTR == 1) ? 0x0A : 0x0B);
-					  tempPage[0] |= (sbyte)((owd.Length == 1) ? 0xA0 : 0xB0);
+					  tempPage[0] = (byte)((LEN_PAGE_PTR == 1) ? 0x0A : 0x0B);
+					  tempPage[0] |= (byte)((owd.Length == 1) ? 0xA0 : 0xB0);
 
 					  // dummy byte
 					  tempPage[1] = 0;
@@ -3649,7 +3649,7 @@ namespace com.dalsemi.onewire.application.file
 		  // parse name into a vector of byte arrays using the file structure
 		  int index , last_index = 0, period_index , i , name_len ;
 		  string field;
-		  sbyte[] name;
+		  byte[] name;
 
 		  do
 		  {
@@ -3676,7 +3676,7 @@ namespace com.dalsemi.onewire.application.file
 				}
 
 				// create byte array for field
-				name = new sbyte [LEN_FILENAME];
+				name = new byte [LEN_FILENAME];
 
 				Array.Copy(initName, 0, name, 0, LEN_FILENAME);
 
@@ -3694,7 +3694,7 @@ namespace com.dalsemi.onewire.application.file
 				   }
 
 				   // is name only
-				   Array.Copy(field.GetBytes(), 0, name, 0, field.Length);
+				   Array.Copy(System.Text.Encoding.ASCII.GetBytes(field), 0, name, 0, field.Length);
 				   name_len = field.Length;
 
 				   // check if last field
@@ -3730,7 +3730,7 @@ namespace com.dalsemi.onewire.application.file
 						 return false;
 					  }
 
-					  Array.Copy(field.GetBytes(), 0, name, 0, field.Length);
+					  Array.Copy(System.Text.Encoding.ASCII.GetBytes(field), 0, name, 0, field.Length);
 					  name [4] = EXT_DIRECTORY;
 					  name_len = field.Length;
 
@@ -3748,12 +3748,12 @@ namespace com.dalsemi.onewire.application.file
 					  name_len = period_index;
 
 					  // get name part
-					  Array.Copy(field.GetBytes(), 0, name, 0, period_index);
+					  Array.Copy(System.Text.Encoding.ASCII.GetBytes(field), 0, name, 0, period_index);
 
 					  // get the name part
 					  try
 					  {
-						 name [4] = (sbyte) int.Parse(field.Substring(period_index + 1, field.Length - (period_index + 1)));
+						 name [4] = (byte) int.Parse(field.Substring(period_index + 1, field.Length - (period_index + 1)));
 					  }
 					  catch (System.FormatException)
 					  {
@@ -3857,7 +3857,7 @@ namespace com.dalsemi.onewire.application.file
 			  {
 				 int i , j , hash = 0;
 				 string this_path = owd[0].AddressAsString + Path;
-				 sbyte[] path_bytes = this_path.GetBytes();
+				 byte[] path_bytes = System.Text.Encoding.ASCII.GetBytes(this_path);
     
 				 for (i = 0; i < (path_bytes.Length / 4); i++)
 				 {
@@ -3929,7 +3929,7 @@ namespace com.dalsemi.onewire.application.file
 	   /// <param name="buf"> buffer to dump </param>
 	   /// <param name="offset"> offset to start in the buffer </param>
 	   /// <param name="len"> length to dump </param>
-	   private void debugDump(sbyte[] buf, int offset, int len)
+	   private void debugDump(byte[] buf, int offset, int len)
 	   {
 		  for (int i = offset; i < (offset + len); i++)
 		  {

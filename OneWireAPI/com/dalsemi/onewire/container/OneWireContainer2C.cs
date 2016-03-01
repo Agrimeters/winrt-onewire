@@ -63,7 +63,7 @@ namespace com.dalsemi.onewire.container
 	   //--------
 	   //-------- Variables
 	   //--------
-	   private sbyte[] buffer = new sbyte [4];
+	   private byte[] buffer = new byte [4];
 
 	   //--------
 	   //-------- Finals
@@ -75,7 +75,7 @@ namespace com.dalsemi.onewire.container
 	   /// The Write Control Register command is used to manipulate DS2890 state bits
 	   /// located in the Control Register.
 	   /// </summary>
-	   private static readonly sbyte WRITE_CONTROL = (sbyte) 0x55;
+	   private static readonly byte WRITE_CONTROL = (byte) 0x55;
 
 	   /// <summary>
 	   /// DS2890 1-Wire Read Control Register command constant.
@@ -83,7 +83,7 @@ namespace com.dalsemi.onewire.container
 	   /// The Read Control Register command is used to obtain both the Control Register
 	   /// and potentiometer Feature Register.
 	   /// </summary>
-	   private static readonly sbyte READ_CONTROL = unchecked((sbyte) 0xaa);
+	   private static readonly byte READ_CONTROL = unchecked((byte) 0xaa);
 
 	   /// <summary>
 	   /// DS2890 1-Wire Write Position command constant.
@@ -91,7 +91,7 @@ namespace com.dalsemi.onewire.container
 	   /// The Write Position command is used to set the position of the currently
 	   /// addressed potentiometer wiper.
 	   /// </summary>
-	   private static readonly sbyte WRITE_POSITION = (sbyte) 0x0f;
+	   private static readonly byte WRITE_POSITION = (byte) 0x0f;
 
 	   /// <summary>
 	   /// DS2890 1-Wire Read Position command constant.
@@ -99,7 +99,7 @@ namespace com.dalsemi.onewire.container
 	   /// The Read Position command is used to obtain the wipre setting of the
 	   /// potentiometer currently addressed by the control register.
 	   /// </summary>
-	   private static readonly sbyte READ_POSITION = unchecked((sbyte) 0xf0);
+	   private static readonly byte READ_POSITION = unchecked((byte) 0xf0);
 
 	   /// <summary>
 	   /// DS2890 1-Wire Increment command constant.
@@ -107,7 +107,7 @@ namespace com.dalsemi.onewire.container
 	   /// The Increment command is used for a one step position increase of the
 	   /// currently addressed potentiometer wiper.
 	   /// </summary>
-	   private static readonly sbyte INCREMENT = unchecked((sbyte) 0xc3);
+	   private static readonly byte INCREMENT = unchecked((byte) 0xc3);
 
 	   /// <summary>
 	   /// DS2890 1-Wire Decrement command constant.
@@ -115,7 +115,7 @@ namespace com.dalsemi.onewire.container
 	   /// The Decrement command is used for a one setp position decrease of the
 	   /// currently addressed potentiometer wiper.
 	   /// </summary>
-	   private static readonly sbyte DECREMENT = unchecked((sbyte) 0x99);
+	   private static readonly byte DECREMENT = unchecked((byte) 0x99);
 
 	   //--------
 	   //-------- Constructors
@@ -135,7 +135,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="sourceAdapter"> adapter object required to communicate with
 	   /// this 1-Wire device </param>
 	   /// <param name="newAddress"> address of this 1-Wire device </param>
-	   public OneWireContainer2C(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer2C(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 	   }
 
@@ -231,7 +231,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> <CODE>true</CODE> if this device has linear potentiometer
 	   ///         element(s); <CODE>false</CODE> if this device has logarithmic
 	   ///         potentiometer element(s) </returns>
-	   public virtual bool isLinear(sbyte[] state)
+	   public virtual bool isLinear(byte[] state)
 	   {
 		  return ((state [0] & 0x01) == 0x01);
 	   }
@@ -244,7 +244,7 @@ namespace com.dalsemi.onewire.container
 	   ///              (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> <CODE>true</CODE> if the wiper settings are volatile;
 	   ///         <CODE>false</CODE> if the wiper settings are non-volatile </returns>
-	   public virtual bool wiperSettingsAreVolatile(sbyte[] state)
+	   public virtual bool wiperSettingsAreVolatile(byte[] state)
 	   {
 		  return ((state [0] & 0x02) == 0x02);
 	   }
@@ -256,7 +256,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> state buffer of this 1-Wire Potentiometer device
 	   ///             (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> the number of potentiometers on this device </returns>
-	   public virtual int numberOfPotentiometers(sbyte[] state)
+	   public virtual int numberOfPotentiometers(byte[] state)
 	   {
 		  return (((state [0] >> 2) & 0x03) + 1);
 	   }
@@ -269,7 +269,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> state buffer of this 1-Wire Potentiometer device
 	   ///             (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> number of wiper positions available </returns>
-	   public virtual int numberOfWiperSettings(sbyte[] state)
+	   public virtual int numberOfWiperSettings(byte[] state)
 	   {
 		  switch (state [0] & 0x30)
 		  {
@@ -291,7 +291,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> state buffer of this 1-Wire Potentiometer device
 	   ///             (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> the resistance value in k-Ohms </returns>
-	   public virtual int potentiometerResistance(sbyte[] state)
+	   public virtual int potentiometerResistance(byte[] state)
 	   {
 		  switch (state [0] & 0xc0)
 		  {
@@ -315,7 +315,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> state buffer of this 1-Wire Potentiometer device
 	   ///              (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> the current wiper number </returns>
-	   public virtual int getCurrentWiperNumber(sbyte[] state)
+	   public virtual int getCurrentWiperNumber(byte[] state)
 	   {
 		  int wiper = state [1] & 0x03;
 		  int wiper_inverse = (state [1] >> 2) & 0x03;
@@ -337,7 +337,7 @@ namespace com.dalsemi.onewire.container
 	   /// Valid choices are 0 to 3 </param>
 	   /// <param name="state"> state buffer of this 1-Wire Potentiometer device
 	   ///             (returned by <CODE>readDevice()</CODE>) </param>
-	   public virtual void setCurrentWiperNumber(int wiper_number, sbyte[] state)
+	   public virtual void setCurrentWiperNumber(int wiper_number, byte[] state)
 	   {
 		  if (wiper_number != (wiper_number & 0x03))
 		  {
@@ -347,7 +347,7 @@ namespace com.dalsemi.onewire.container
 		  int wiper_inverse = ~wiper_number;
 
 		  wiper_number = wiper_number | ((wiper_inverse & 0x03) << 2);
-		  state [1] = unchecked((sbyte)((state [1] & 0xf0) | (wiper_number & 0x0f)));
+		  state [1] = unchecked((byte)((state [1] & 0xf0) | (wiper_number & 0x0f)));
 	   }
 
 	   /// <summary>
@@ -356,7 +356,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> state buffer of this Potentiometer One Wire Device
 	   ///             (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> <CODE>true</CODE> if it is enabled; <CODE>false</CODE> if not </returns>
-	   public virtual bool isChargePumpOn(sbyte[] state)
+	   public virtual bool isChargePumpOn(byte[] state)
 	   {
 		  return ((state [1] & 0x40) == 0x40);
 	   }
@@ -372,13 +372,13 @@ namespace com.dalsemi.onewire.container
 	   ///             (returned by <CODE>readDevice()</CODE>) </param>
 	   /// <returns> <CODE>true</CODE> if the operation was successful;
 	   ///         <CODE>false</CODE> if there was an error </returns>
-	   public virtual void setChargePump(bool charge_pump_on, sbyte[] state)
+	   public virtual void setChargePump(bool charge_pump_on, byte[] state)
 	   {
-		  state [1] = unchecked((sbyte)(state [1] & 0xbf)); //mask out the charge pump bit
+		  state [1] = unchecked((byte)(state [1] & 0xbf)); //mask out the charge pump bit
 
 		  if (charge_pump_on)
 		  {
-			 state [1] = (sbyte)(state [1] | 0x40);
+			 state [1] = (byte)(state [1] | 0x40);
 		  }
 	   }
 
@@ -409,7 +409,7 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireException"> Could not find device </exception>
 	   public virtual bool setWiperPosition(int position)
 	   {
-		  return writeTransaction(WRITE_POSITION, (sbyte) position);
+		  return writeTransaction(WRITE_POSITION, (byte) position);
 	   }
 
 	   /// <summary>
@@ -476,7 +476,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> Data was not read correctly </exception>
 	   /// <exception cref="OneWireException"> Could not find device </exception>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
 
 		  //format for the byte array is this:
@@ -498,7 +498,7 @@ namespace com.dalsemi.onewire.container
 		  //        bit 2 : Inverted Wiper Number lsb
 		  //        bit 1 : Wiper Number msb
 		  //  (lsb) bit 0 : Wiper Number lsb
-		  sbyte[] state = new sbyte [2];
+		  byte[] state = new byte [2];
 
 		  doSpeed();
 
@@ -507,10 +507,10 @@ namespace com.dalsemi.onewire.container
 			 throw new OneWireIOException("Could not select the part!");
 		  }
 
-		  sbyte[] buf = new sbyte [3];
+		  byte[] buf = new byte [3];
 
 		  buf [0] = READ_CONTROL;
-		  buf [1] = buf [2] = unchecked((sbyte) 0x0ff);
+		  buf [1] = buf [2] = unchecked((byte) 0x0ff);
 
 		  adapter.dataBlock(buf, 0, 3);
 
@@ -530,7 +530,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> Data was not written correctly </exception>
 	   /// <exception cref="OneWireException"> Could not find device </exception>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
 
 		  //here we want to write the control register, just state[1]
@@ -551,7 +551,7 @@ namespace com.dalsemi.onewire.container
 	       Both of these operations send one command byte and receive two information bytes.
 	       The relevant information for both is stored in that second received byte.
 	   */
-	   private int readRegisters(sbyte COMMAND)
+	   private int readRegisters(byte COMMAND)
 	   {
 		   lock (this)
 		   {
@@ -563,7 +563,7 @@ namespace com.dalsemi.onewire.container
 			  }
         
 			  buffer [0] = COMMAND;
-			  buffer [1] = buffer [2] = unchecked((sbyte) 0x0ff);
+			  buffer [1] = buffer [2] = unchecked((byte) 0x0ff);
         
 			  adapter.dataBlock(buffer, 0, 3);
         
@@ -582,7 +582,7 @@ namespace com.dalsemi.onewire.container
 	       If the transaction succeeds, the part returns 0's, otherwise it returns 1's.
 	
 	    */
-	   private bool writeTransaction(sbyte COMMAND, sbyte value)
+	   private bool writeTransaction(byte COMMAND, byte value)
 	   {
 		   lock (this)
 		   {
@@ -592,14 +592,14 @@ namespace com.dalsemi.onewire.container
 			  {
 				 buffer [0] = COMMAND;
 				 buffer [1] = value;
-				 buffer [2] = unchecked((sbyte) 0x0ff);
+				 buffer [2] = unchecked((byte) 0x0ff);
         
 				 adapter.dataBlock(buffer, 0, 3);
         
 				 if (buffer [2] == value)
 				 {
-					buffer [0] = unchecked((sbyte) 0x096);
-					buffer [1] = unchecked((sbyte) 0x0ff);
+					buffer [0] = unchecked((byte) 0x096);
+					buffer [1] = unchecked((byte) 0x0ff);
         
 					adapter.dataBlock(buffer, 0, 2);
         
@@ -619,7 +619,7 @@ namespace com.dalsemi.onewire.container
 	      between consecutive unit change commands.  Both operations issue
 	      the command byte and then recieve the new wiper position.
 	   */
-	   private int unitChange(sbyte COMMAND, bool reselect)
+	   private int unitChange(byte COMMAND, bool reselect)
 	   {
 		   lock (this)
 		   {
@@ -630,7 +630,7 @@ namespace com.dalsemi.onewire.container
 			  }
         
 			  buffer [0] = COMMAND;
-			  buffer [1] = unchecked((sbyte) 0x0ff);
+			  buffer [1] = unchecked((byte) 0x0ff);
         
 			  adapter.dataBlock(buffer, 0, 2);
         

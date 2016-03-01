@@ -61,7 +61,7 @@ namespace com.dalsemi.onewire.container
 		  pageAutoCRC = true;
 
 		  // default copy scratchpad command
-		  COPY_SCRATCHPAD_COMMAND = (sbyte) 0x55;
+		  COPY_SCRATCHPAD_COMMAND = 0x55;
 	   }
 
 	   //--------
@@ -85,9 +85,9 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset)
+	   public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset)
 	   {
-		  sbyte[] extraInfo = new sbyte [extraInfoLength];
+		  byte[] extraInfo = new byte [extraInfoLength];
 
 		  readPageCRC(page, readContinue, readBuf, offset, extraInfo);
 	   }
@@ -112,7 +112,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPageCRC(int page, bool readContinue, sbyte[] readBuf, int offset, sbyte[] extraInfo)
+	   public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
 	   {
 
 		  // only needs to be implemented if supported by hardware
@@ -157,7 +157,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public override void readScratchpad(sbyte[] readBuf, int offset, int len, sbyte[] extraInfo)
+	   public override void readScratchpad(byte[] readBuf, int offset, int len, byte[] extraInfo)
 	   {
 		  // select the device
 		  if (!ib.adapter.select(ib.address))
@@ -168,7 +168,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // build block
-		  sbyte[] raw_buf = new sbyte [extraInfoLength + pageLength + 3];
+		  byte[] raw_buf = new byte [extraInfoLength + pageLength + 3];
 
 		  raw_buf [0] = READ_SCRATCHPAD_COMMAND;
 

@@ -124,27 +124,27 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// Read Write Status register commmand. </summary>
-	   protected internal static readonly sbyte READ_WRITE_STATUS_COMMAND = (sbyte) 0x5A;
+	   protected internal static readonly byte READ_WRITE_STATUS_COMMAND = (byte) 0x5A;
 
 	   /// <summary>
 	   /// All lines off command. </summary>
-	   protected internal static readonly sbyte ALL_LINES_OFF_COMMAND = (sbyte) 0x66;
+	   protected internal static readonly byte ALL_LINES_OFF_COMMAND = (byte) 0x66;
 
 	   /// <summary>
 	   /// Discharge command. </summary>
-	   protected internal static readonly sbyte DISCHARGE_COMMAND = unchecked((sbyte) 0x99);
+	   protected internal static readonly byte DISCHARGE_COMMAND = unchecked((byte) 0x99);
 
 	   /// <summary>
 	   /// Direct on main command. </summary>
-	   protected internal static readonly sbyte DIRECT_ON_MAIN_COMMAND = unchecked((sbyte) 0xA5);
+	   protected internal static readonly byte DIRECT_ON_MAIN_COMMAND = unchecked((byte) 0xA5);
 
 	   /// <summary>
 	   /// Smart on main command. </summary>
-	   protected internal static readonly sbyte SMART_ON_MAIN_COMMAND = unchecked((sbyte) 0xCC);
+	   protected internal static readonly byte SMART_ON_MAIN_COMMAND = unchecked((byte) 0xCC);
 
 	   /// <summary>
 	   /// Smart on aux command. </summary>
-	   protected internal static readonly sbyte SMART_ON_AUX_COMMAND = (sbyte) 0x33;
+	   protected internal static readonly byte SMART_ON_AUX_COMMAND = (byte) 0x33;
 
 	   /// <summary>
 	   /// Main Channel number. </summary>
@@ -204,7 +204,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= #OneWireContainer1F() OneWireContainer1F </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
-	   public OneWireContainer1F(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer1F(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 
 		  clearActivityOnWrite = false;
@@ -342,9 +342,9 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
-		  sbyte[] ret_buf = new sbyte [4];
+		  byte[] ret_buf = new byte [4];
 
 		  if (doSpeedEnable)
 		  {
@@ -352,7 +352,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // read the status byte
-		  sbyte[] tmp_buf = deviceOperation(READ_WRITE_STATUS_COMMAND, unchecked((sbyte) 0x00FF), 2);
+		  byte[] tmp_buf = deviceOperation(READ_WRITE_STATUS_COMMAND, unchecked((byte) 0x00FF), 2);
 
 		  // extract the status byte
 		  ret_buf [0] = tmp_buf [2];
@@ -374,11 +374,11 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
 		  int extra = 0;
-		  sbyte command, first_byte;
-		  sbyte[] tmp_buf = null;
+		  byte command, first_byte;
+		  byte[] tmp_buf = null;
 
 		  if (doSpeedEnable)
 		  {
@@ -404,17 +404,17 @@ namespace com.dalsemi.onewire.container
 			 // mode bit
 			 if (Bit.arrayReadBit(7, STATUS_OFFSET, state) == 1)
 			 {
-				first_byte |= (sbyte) 0x20;
+				first_byte |= (byte) 0x20;
 			 }
 
 			 // Control output
 			 if (Bit.arrayReadBit(6, STATUS_OFFSET, state) == 1)
 			 {
-				first_byte |= unchecked((sbyte) 0xC0);
+				first_byte |= unchecked((byte) 0xC0);
 			 }
 
 			 tmp_buf = deviceOperation(READ_WRITE_STATUS_COMMAND, first_byte, 2);
-			 state [0] = (sbyte) tmp_buf [2];
+			 state [0] = (byte) tmp_buf [2];
 		  }
 
 		  // check for AUX state change
@@ -461,7 +461,7 @@ namespace com.dalsemi.onewire.container
 			 {
 
 				// clear the events
-				deviceOperation(ALL_LINES_OFF_COMMAND, unchecked((sbyte) 0xFF), 0);
+				deviceOperation(ALL_LINES_OFF_COMMAND, unchecked((byte) 0xFF), 0);
 
 				// set the channels back to the correct state
 				if (command == 0)
@@ -483,7 +483,7 @@ namespace com.dalsemi.onewire.container
 		  // check if there is a command to send
 		  if (command != 0)
 		  {
-			 tmp_buf = deviceOperation(command, unchecked((sbyte) 0xFF), extra);
+			 tmp_buf = deviceOperation(command, unchecked((byte) 0xFF), extra);
 		  }
 
 		  // if doing a SMART_ON, then look at result data for presence
@@ -534,7 +534,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // discharge the lines
-		  deviceOperation(DISCHARGE_COMMAND, unchecked((sbyte) 0xFF), 0);
+		  deviceOperation(DISCHARGE_COMMAND, unchecked((byte) 0xFF), 0);
 
 		  // wait for desired time and return.
 		  try
@@ -548,7 +548,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // clear the discharge
-		  deviceOperation(READ_WRITE_STATUS_COMMAND, unchecked((sbyte) 0x00FF), 2);
+		  deviceOperation(READ_WRITE_STATUS_COMMAND, unchecked((byte) 0x00FF), 2);
 	   }
 
 	   //--------
@@ -650,7 +650,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> current state of the device returned from <code>readDevice()</code>
 	   /// </param>
 	   /// <returns> the number of channels for this device </returns>
-	   public virtual int getNumberChannels(sbyte[] state)
+	   public virtual int getNumberChannels(byte[] state)
 	   {
 		  return 2;
 	   }
@@ -669,7 +669,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #hasLevelSensing() </seealso>
-	   public virtual bool getLevel(int channel, sbyte[] state)
+	   public virtual bool getLevel(int channel, byte[] state)
 	   {
 		  return (Bit.arrayReadBit(1 + channel * 2, STATUS_OFFSET, state) == 1);
 	   }
@@ -688,7 +688,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #isHighSideSwitch() </seealso>
 	   /// <seealso cref= #setLatchState(int,bool,bool,byte[]) </seealso>
-	   public virtual bool getLatchState(int channel, sbyte[] state)
+	   public virtual bool getLatchState(int channel, byte[] state)
 	   {
 		  return (Bit.arrayReadBit(channel * 2, STATUS_OFFSET, state) == 0);
 	   }
@@ -709,7 +709,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= #hasActivitySensing() </seealso>
 	   /// <seealso cref= #clearActivity() </seealso>
-	   public virtual bool getSensedActivity(int channel, sbyte[] state)
+	   public virtual bool getSensedActivity(int channel, byte[] state)
 	   {
 		  return (Bit.arrayReadBit(4 + channel, STATUS_OFFSET, state) == 1);
 	   }
@@ -724,7 +724,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> current state of the device returned from <code>readDevice()</code>
 	   /// </param>
 	   /// <returns> <code>true</code> if control mode is automatic </returns>
-	   public virtual bool isModeAuto(sbyte[] state)
+	   public virtual bool isModeAuto(byte[] state)
 	   {
 		  return (Bit.arrayReadBit(7, STATUS_OFFSET, state) == 0);
 	   }
@@ -738,7 +738,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <returns> <code>int</code> the channel number that is associated
 	   /// with the control pin </returns>
-	   public virtual int getControlChannelAssociation(sbyte[] state)
+	   public virtual int getControlChannelAssociation(byte[] state)
 	   {
 		  return Bit.arrayReadBit(6, STATUS_OFFSET, state);
 	   }
@@ -752,7 +752,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> current state of the device returned from <code>readDevice()</code>
 	   /// </param>
 	   /// <returns> <code>int</code> the control output transistor state </returns>
-	   public virtual int getControlData(sbyte[] state)
+	   public virtual int getControlData(byte[] state)
 	   {
 		  return Bit.arrayReadBit(6, STATUS_OFFSET, state);
 	   }
@@ -796,17 +796,17 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #hasSmartOn() </seealso>
 	   /// <seealso cref= #getLatchState(int,byte[]) </seealso>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
-	   public virtual void setLatchState(int channel, bool latchState, bool doSmart, sbyte[] state)
+	   public virtual void setLatchState(int channel, bool latchState, bool doSmart, byte[] state)
 	   {
 
 		  // set the state flag
 		  if (latchState)
 		  {
-			 state [channel + 1] = (sbyte)((doSmart) ? SWITCH_SMART : SWITCH_ON);
+			 state [channel + 1] = (byte)((doSmart) ? SWITCH_SMART : SWITCH_ON);
 		  }
 		  else
 		  {
-			 state [channel + 1] = (sbyte) SWITCH_OFF;
+			 state [channel + 1] = (byte) SWITCH_OFF;
 		  }
 
 		  // indicate in bitmap the the state has changed
@@ -839,7 +839,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="makeAuto"> <CODE>true</CODE> to set to auto mode, false for manual mode </param>
 	   /// <param name="state"> current state of the device returned from <code>readDevice()</code> </param>
-	   public virtual void setModeAuto(bool makeAuto, sbyte[] state)
+	   public virtual void setModeAuto(bool makeAuto, byte[] state)
 	   {
 		  // set the bit
 		  Bit.arrayWriteBit((makeAuto ? 0 : 1), 7, STATUS_OFFSET, state);
@@ -859,7 +859,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> current state of the device returned from <code>readDevice()</code>
 	   /// </param>
 	   /// <exception cref="OneWireException"> when trying to set channel association in manual mode </exception>
-	   public virtual void setControlChannelAssociation(int channel, sbyte[] state)
+	   public virtual void setControlChannelAssociation(int channel, byte[] state)
 	   {
 
 		  // check for invalid mode
@@ -886,7 +886,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> current state of the device returned from <code>readDevice()</code>
 	   /// </param>
 	   /// <exception cref="OneWireException"> when trying to set control data in automatic mode </exception>
-	   public virtual void setControlData(bool data, sbyte[] state)
+	   public virtual void setControlData(bool data, byte[] state)
 	   {
 		  // check for invalid mode
 		  if (isModeAuto(state))
@@ -920,21 +920,21 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   private sbyte[] deviceOperation(sbyte command, sbyte sendByte, int extra)
+	   private byte[] deviceOperation(byte command, byte sendByte, int extra)
 	   {
 		  OneWireIOException exc = null;
 		  for (int attemptCounter = 2; attemptCounter > 0; attemptCounter--)
 		  {
 			 // Variables.
-			 sbyte[] raw_buf = new sbyte [extra + 2];
+			 byte[] raw_buf = new byte [extra + 2];
 
 			 // build block.
-			 raw_buf [0] = (sbyte) command;
-			 raw_buf [1] = (sbyte) sendByte;
+			 raw_buf [0] = (byte) command;
+			 raw_buf [1] = (byte) sendByte;
 
 			 for (int i = 2; i < raw_buf.Length; i++)
 			 {
-				raw_buf [i] = unchecked((sbyte) 0xFF);
+				raw_buf [i] = unchecked((byte) 0xFF);
 			 }
 
 			 // Select the device.
@@ -947,7 +947,7 @@ namespace com.dalsemi.onewire.container
 				// verify
 				if (command == READ_WRITE_STATUS_COMMAND)
 				{
-				   if ((sbyte) raw_buf [raw_buf.Length - 1] != (sbyte) raw_buf [raw_buf.Length - 2])
+				   if ((byte) raw_buf [raw_buf.Length - 1] != (byte) raw_buf [raw_buf.Length - 2])
 				   {
 					  if (exc == null)
 					  {
@@ -958,7 +958,7 @@ namespace com.dalsemi.onewire.container
 				}
 				else
 				{
-				   if ((sbyte) raw_buf [raw_buf.Length - 1] != (sbyte) command)
+				   if ((byte) raw_buf [raw_buf.Length - 1] != (byte) command)
 				   {
 					  if (exc == null)
 					  {

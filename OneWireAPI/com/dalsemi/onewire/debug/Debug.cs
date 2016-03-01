@@ -156,7 +156,7 @@ namespace com.dalsemi.onewire.debug
 	   /// </summary>
 	   /// <param name="lbl"> the message to print out above the array </param>
 	   /// <param name="bytes"> the byte array to print out </param>
-		public static void debug(string lbl, sbyte[] bytes)
+		public static void debug(string lbl, byte[] bytes)
 		{
 		  if (DEBUG)
 		  {
@@ -183,7 +183,7 @@ namespace com.dalsemi.onewire.debug
 	   /// <param name="bytes"> the byte array to print out </param>
 	   /// <param name="offset"> the offset to start printing from the array </param>
 	   /// <param name="length"> the number of bytes to print from the array </param>
-		public static void debug(string lbl, sbyte[] bytes, int offset, int length)
+		public static void debug(string lbl, byte[] bytes, int offset, int length)
 		{
 		  if (DEBUG)
 		  {

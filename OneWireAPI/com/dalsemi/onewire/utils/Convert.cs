@@ -104,14 +104,14 @@ namespace com.dalsemi.onewire.utils
 	   // ----------------------------------------------------------------------
 
 	   /// <summary>
-	   /// This method constructs a long from a LSByte byte array of specified length.
+	   /// This method constructs a long from a Lbyte byte array of specified length.
 	   /// </summary>
-	   /// <param name="byteArray"> byte array to convert to a long (LSByte first) </param>
+	   /// <param name="byteArray"> byte array to convert to a long (Lbyte first) </param>
 	   /// <param name="offset"> byte offset into the array where to start to convert </param>
 	   /// <param name="len"> number of bytes to use to convert to a long
 	   /// 
 	   /// @returns value constructed from bytes </param>
-	   public static long toLong(sbyte[] byteArray, int offset, int len)
+	   public static long toLong(byte[] byteArray, int offset, int len)
 	   {
 		  long val = 0;
 
@@ -128,58 +128,58 @@ namespace com.dalsemi.onewire.utils
 	   }
 
 	   /// <summary>
-	   /// This method constructs a long from a LSByte byte array of specified length.
+	   /// This method constructs a long from a Lbyte byte array of specified length.
 	   /// Uses 8 bytes starting at the first index.
 	   /// </summary>
-	   /// <param name="byteArray"> byte array to convert to a long (LSByte first)
+	   /// <param name="byteArray"> byte array to convert to a long (Lbyte first)
 	   /// 
 	   /// @returns value constructed from bytes </param>
-	   public static long toLong(sbyte[] byteArray)
+	   public static long toLong(byte[] byteArray)
 	   {
 		  return toLong(byteArray, 0, Math.Min(8, byteArray.Length));
 	   }
 
 	   /// <summary>
-	   /// This method constructs a LSByte byte array with specified length from a long.
+	   /// This method constructs a Lbyte byte array with specified length from a long.
 	   /// </summary>
 	   /// <param name="longVal"> the long value to convert to a byte array. </param>
-	   /// <param name="byteArray"> LSByte first byte array, holds bytes from long </param>
+	   /// <param name="byteArray"> Lbyte first byte array, holds bytes from long </param>
 	   /// <param name="offset"> byte offset into the array </param>
 	   /// <param name="len"> number of bytes to get
 	   /// 
 	   /// @returns value constructed from bytes </param>
-	   public static void toByteArray(long longVal, sbyte[] byteArray, int offset, int len)
+	   public static void toByteArray(long longVal, byte[] byteArray, int offset, int len)
 	   {
 		  int max = offset + len;
 
 		  // Concatanate the byte array into one variable.
 		  for (int i = offset; i < max; i++)
 		  {
-			 byteArray[i] = (sbyte)longVal;
+			 byteArray[i] = (byte)longVal;
 			 longVal = (long)((ulong)longVal >> 8);
 		  }
 	   }
 
 	   /// <summary>
-	   /// This method constructs a LSByte byte array with 8 bytes from a long.
+	   /// This method constructs a Lbyte byte array with 8 bytes from a long.
 	   /// </summary>
 	   /// <param name="longVal"> the long value to convert to a byte array. </param>
-	   /// <param name="byteArray"> LSByte first byte array, holds bytes from long
+	   /// <param name="byteArray"> Lbyte first byte array, holds bytes from long
 	   ///  </param>
-	   public static void toByteArray(long longVal, sbyte[] byteArray)
+	   public static void toByteArray(long longVal, byte[] byteArray)
 	   {
 		  toByteArray(longVal, byteArray, 0, 8);
 	   }
 
 	   /// <summary>
-	   /// This method constructs a LSByte byte array with 8 bytes from a long.
+	   /// This method constructs a Lbyte byte array with 8 bytes from a long.
 	   /// </summary>
 	   /// <param name="longVal"> the long value to convert to a byte array.
 	   /// 
 	   /// @returns value constructed from bytes </param>
-	   public static sbyte[] toByteArray(long longVal)
+	   public static byte[] toByteArray(long longVal)
 	   {
-		  sbyte[] byteArray = new sbyte[8];
+		  byte[] byteArray = new byte[8];
 		  toByteArray(longVal, byteArray, 0, 8);
 		  return byteArray;
 	   }
@@ -189,14 +189,14 @@ namespace com.dalsemi.onewire.utils
 	   // ----------------------------------------------------------------------
 
 	   /// <summary>
-	   /// This method constructs an int from a LSByte byte array of specified length.
+	   /// This method constructs an int from a Lbyte byte array of specified length.
 	   /// </summary>
-	   /// <param name="byteArray"> byte array to convert to an int (LSByte first) </param>
+	   /// <param name="byteArray"> byte array to convert to an int (Lbyte first) </param>
 	   /// <param name="offset"> byte offset into the array where to start to convert </param>
 	   /// <param name="len"> number of bytes to use to convert to an int
 	   /// 
 	   /// @returns value constructed from bytes </param>
-	   public static int toInt(sbyte[] byteArray, int offset, int len)
+	   public static int toInt(byte[] byteArray, int offset, int len)
 	   {
 		  int val = 0;
 
@@ -213,56 +213,56 @@ namespace com.dalsemi.onewire.utils
 	   }
 
 	   /// <summary>
-	   /// This method constructs an int from a LSByte byte array of specified length.
+	   /// This method constructs an int from a Lbyte byte array of specified length.
 	   /// Uses 4 bytes starting at the first index.
 	   /// </summary>
-	   /// <param name="byteArray"> byte array to convert to an int (LSByte first)
+	   /// <param name="byteArray"> byte array to convert to an int (Lbyte first)
 	   /// 
 	   /// @returns value constructed from bytes </param>
-	   public static int toInt(sbyte[] byteArray)
+	   public static int toInt(byte[] byteArray)
 	   {
 		  return toInt(byteArray, 0, Math.Min(4, byteArray.Length));
 	   }
 
 	   /// <summary>
-	   /// This method constructs a LSByte byte array with specified length from an int.
+	   /// This method constructs a Lbyte byte array with specified length from an int.
 	   /// </summary>
 	   /// <param name="intVal"> the int value to convert to a byte array. </param>
-	   /// <param name="byteArray"> LSByte first byte array, holds bytes from int </param>
+	   /// <param name="byteArray"> Lbyte first byte array, holds bytes from int </param>
 	   /// <param name="offset"> byte offset into the array </param>
 	   /// <param name="len"> number of bytes to get </param>
-	   public static void toByteArray(int intVal, sbyte[] byteArray, int offset, int len)
+	   public static void toByteArray(int intVal, byte[] byteArray, int offset, int len)
 	   {
 		  int max = offset + len;
 
 		  // Concatanate the byte array into one variable.
 		  for (int i = offset; i < max; i++)
 		  {
-			 byteArray[i] = (sbyte)intVal;
+			 byteArray[i] = (byte)intVal;
 			 intVal = (int)((uint)intVal >> 8);
 		  }
 	   }
 
 	   /// <summary>
-	   /// This method constructs a LSByte byte array with 4 bytes from an int.
+	   /// This method constructs a Lbyte byte array with 4 bytes from an int.
 	   /// </summary>
 	   /// <param name="intVal"> the int value to convert to a byte array. </param>
-	   /// <param name="byteArray"> LSByte first byte array, holds bytes from long
+	   /// <param name="byteArray"> Lbyte first byte array, holds bytes from long
 	   ///  </param>
-	   public static void toByteArray(int intVal, sbyte[] byteArray)
+	   public static void toByteArray(int intVal, byte[] byteArray)
 	   {
 		  toByteArray(intVal, byteArray, 0, 4);
 	   }
 
 	   /// <summary>
-	   /// This method constructs a LSByte byte array with 4 bytes from an int.
+	   /// This method constructs a Lbyte byte array with 4 bytes from an int.
 	   /// </summary>
 	   /// <param name="longVal"> the long value to convert to a byte array.
 	   /// 
 	   /// @returns value constructed from bytes </param>
-	   public static sbyte[] toByteArray(int intVal)
+	   public static byte[] toByteArray(int intVal)
 	   {
-		  sbyte[] byteArray = new sbyte[4];
+		  byte[] byteArray = new byte[4];
 		  toByteArray(intVal, byteArray, 0, 4);
 		  return byteArray;
 	   }
@@ -281,11 +281,11 @@ namespace com.dalsemi.onewire.utils
 	   /// </summary>
 	   /// <param name="strData"> hex-encoded numerical string </param>
 	   /// <returns> byte[] the decoded bytes </returns>
-	   public static sbyte[] toByteArray(string strData)
+	   public static byte[] toByteArray(string strData)
 	   {
-		  sbyte[] bDataTmp = new sbyte[strData.Length * 2];
+		  byte[] bDataTmp = new byte[strData.Length * 2];
 		  int len = toByteArray(strData, bDataTmp, 0, bDataTmp.Length);
-		  sbyte[] bData = new sbyte[len];
+		  byte[] bData = new byte[len];
 		  Array.Copy(bDataTmp, 0, bData, 0, len);
 		  return bData;
 	   }
@@ -301,7 +301,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="strData"> hex-encoded numerical string </param>
 	   /// <param name="bData"> byte[] which will hold the decoded bytes </param>
 	   /// <returns> The number of bytes converted </returns>
-	   public static int toByteArray(string strData, sbyte[] bData)
+	   public static int toByteArray(string strData, byte[] bData)
 	   {
 		  return toByteArray(strData, bData, 0, bData.Length);
 	   }
@@ -319,7 +319,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="offset"> the offset into bData to start placing bytes </param>
 	   /// <param name="length"> the maximum number of bytes to convert </param>
 	   /// <returns> The number of bytes converted </returns>
-	   public static int toByteArray(string strData, sbyte[] bData, int offset, int length)
+	   public static int toByteArray(string strData, byte[] bData, int offset, int length)
 	   {
 		  int strIndex = 0, strLength = strData.Length;
 		  int index = offset;
@@ -361,7 +361,7 @@ namespace com.dalsemi.onewire.utils
 			 lVal = Character.digit(lower, 16);
 			 if (uVal != -1 && lVal != -1)
 			 {
-				bData[index++] = (sbyte)(((uVal & 0x0F) << 4) | (lVal & 0x0F));
+				bData[index++] = (byte)(((uVal & 0x0F) << 4) | (lVal & 0x0F));
 			 }
 			 else
 			 {
@@ -377,7 +377,7 @@ namespace com.dalsemi.onewire.utils
 	   /// </summary>
 	   /// <param name="data"> The byte[] to convert to a hex-encoded string </param>
 	   /// <returns> Hex-encoded String </returns>
-	   public static string toHexString(sbyte[] data)
+	   public static string toHexString(byte[] data)
 	   {
 		  return toHexString(data, 0, data.Length, "");
 	   }
@@ -390,7 +390,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="offset"> the offset to start converting bytes </param>
 	   /// <param name="length"> the number of bytes to convert </param>
 	   /// <returns> Hex-encoded String </returns>
-	   public static string toHexString(sbyte[] data, int offset, int length)
+	   public static string toHexString(byte[] data, int offset, int length)
 	   {
 		  return toHexString(data, offset, length, "");
 	   }
@@ -403,7 +403,7 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="data"> The byte[] to convert to a hex-encoded string </param>
 	   /// <param name="delimeter"> the delimeter to place between each byte of data </param>
 	   /// <returns> Hex-encoded String </returns>
-	   public static string toHexString(sbyte[] data, string delimeter)
+	   public static string toHexString(byte[] data, string delimeter)
 	   {
 		  return toHexString(data, 0, data.Length, delimeter);
 	   }
@@ -417,14 +417,14 @@ namespace com.dalsemi.onewire.utils
 	   /// <param name="length"> the number of bytes to convert </param>
 	   /// <param name="delimeter"> the delimeter to place between each byte of data </param>
 	   /// <returns> Hex-encoded String </returns>
-	   public static string toHexString(sbyte[] data, int offset, int length, string delimeter)
+	   public static string toHexString(byte[] data, int offset, int length, string delimeter)
 	   {
 		  StringBuilder value = new StringBuilder(length * (2 + delimeter.Length));
 		  int max = length + offset;
 		  int lastDelim = max - 1;
 		  for (int i = offset; i < max; i++)
 		  {
-			 sbyte bits = data[i];
+			 byte bits = data[i];
 			 value.Append(lookup_hex[(bits >> 4) & 0x0F]);
 			 value.Append(lookup_hex[bits & 0x0F]);
 			 if (i < lastDelim)
@@ -440,7 +440,7 @@ namespace com.dalsemi.onewire.utils
 	   /// </summary>
 	   /// <param name="bValue"> the byte to encode </param>
 	   /// <returns> String Hex-encoded String </returns>
-	   public static string toHexString(sbyte bValue)
+	   public static string toHexString(byte bValue)
 	   {
 		  char[] hexValue = new char[2];
 		  hexValue[1] = lookup_hex[bValue & 0x0F];
@@ -531,7 +531,7 @@ namespace com.dalsemi.onewire.utils
 	   // ----------------------------------------------------------------------
 
 	   /// <summary>
-	   /// <P>Converts a hex-encoded string (LSByte) into a long.</P>
+	   /// <P>Converts a hex-encoded string (Lbyte) into a long.</P>
 	   /// <P>To illustrate the rules for parsing, the following String:<br>
 	   /// "FF 0 1234 567 12 03"<br>
 	   /// becomes:<br>
@@ -546,7 +546,7 @@ namespace com.dalsemi.onewire.utils
 	   }
 
 	   /// <summary>
-	   /// <P>Converts a long into a hex-encoded string (LSByte).</P>
+	   /// <P>Converts a long into a hex-encoded string (Lbyte).</P>
 	   /// </summary>
 	   /// <param name="lValue"> the long integer to encode </param>
 	   /// <returns> String Hex-encoded String </returns>
@@ -560,7 +560,7 @@ namespace com.dalsemi.onewire.utils
 	   // ----------------------------------------------------------------------
 
 	   /// <summary>
-	   /// <P>Converts a hex-encoded string (LSByte) into an int.</P>
+	   /// <P>Converts a hex-encoded string (Lbyte) into an int.</P>
 	   /// <P>To illustrate the rules for parsing, the following String:<br>
 	   /// "FF 0 1234 567 12 03"<br>
 	   /// becomes:<br>
@@ -575,7 +575,7 @@ namespace com.dalsemi.onewire.utils
 	   }
 
 	   /// <summary>
-	   /// <P>Converts an integer into a hex-encoded string (LSByte).</P>
+	   /// <P>Converts an integer into a hex-encoded string (Lbyte).</P>
 	   /// </summary>
 	   /// <param name="iValue"> the integer to encode </param>
 	   /// <returns> String Hex-encoded String </returns>

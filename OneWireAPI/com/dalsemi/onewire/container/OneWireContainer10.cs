@@ -97,23 +97,23 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// DS1920 convert temperature command </summary>
-	   private const sbyte CONVERT_TEMPERATURE_COMMAND = 0x44;
+	   private const byte CONVERT_TEMPERATURE_COMMAND = 0x44;
 
 	   /// <summary>
 	   /// DS1920 read data from scratchpad command </summary>
-	   private static readonly sbyte READ_SCRATCHPAD_COMMAND = unchecked((sbyte) 0xBE);
+	   private static readonly byte READ_SCRATCHPAD_COMMAND = unchecked((byte) 0xBE);
 
 	   /// <summary>
 	   /// DS1920 write data to scratchpad command </summary>
-	   private static readonly sbyte WRITE_SCRATCHPAD_COMMAND = (sbyte) 0x4E;
+	   private static readonly byte WRITE_SCRATCHPAD_COMMAND = (byte) 0x4E;
 
 	   /// <summary>
 	   /// DS1920 copy data from scratchpad to EEPROM command </summary>
-	   private static readonly sbyte COPY_SCRATCHPAD_COMMAND = (sbyte) 0x48;
+	   private static readonly byte COPY_SCRATCHPAD_COMMAND = (byte) 0x48;
 
 	   /// <summary>
 	   /// DS1920 recall EEPROM command </summary>
-	   //TODO private static readonly sbyte RECALL_EEPROM_COMMAND = unchecked((sbyte) 0xB8);
+	   //TODO private static readonly byte RECALL_EEPROM_COMMAND = unchecked((byte) 0xB8);
 
 
 	   /// <summary>
@@ -149,7 +149,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #OneWireContainer10() </seealso>
 	   /// <seealso cref= #OneWireContainer10(DSPortAdapter,long) </seealso>
 	   /// <seealso cref= #OneWireContainer10(DSPortAdapter,String) </seealso>
-	   public OneWireContainer10(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer10(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 	   }
 
@@ -364,7 +364,7 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref=    #getTemperature </seealso>
-	   public virtual void doTemperatureConvert(sbyte[] state)
+	   public virtual void doTemperatureConvert(byte[] state)
 	   {
 		  doSpeed();
 
@@ -398,7 +398,7 @@ namespace com.dalsemi.onewire.container
 			 }
 
 			 // read the result
-			 sbyte mode = state [4]; //preserve the resolution in the state
+			 byte mode = state [4]; //preserve the resolution in the state
 
 			 adapter.select(address);
 			 readScratch(state);
@@ -434,7 +434,7 @@ namespace com.dalsemi.onewire.container
 	   ///         'presence pulse'.
 	   /// </exception>
 	   /// <seealso cref=    #doTemperatureConvert </seealso>
-	   public virtual double getTemperature(sbyte[] state)
+	   public virtual double getTemperature(byte[] state)
 	   {
 
 		  //on some parts, namely the 18S20, you can get invalid readings.
@@ -484,7 +484,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref=    #hasTemperatureAlarms </seealso>
 	   /// <seealso cref=    #setTemperatureAlarm </seealso>
-	   public virtual double getTemperatureAlarm(int alarmType, sbyte[] state)
+	   public virtual double getTemperatureAlarm(int alarmType, byte[] state)
 	   {
 		  return (double) state [alarmType == TemperatureContainer_Fields.ALARM_LOW ? 3 : 2];
 	   }
@@ -502,7 +502,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolutions </seealso>
 	   /// <seealso cref=    #setTemperatureResolution </seealso>
-	   public virtual double getTemperatureResolution(sbyte[] state)
+	   public virtual double getTemperatureResolution(byte[] state)
 	   {
 		  if (state [4] == 0)
 		  {
@@ -529,7 +529,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref=    #hasTemperatureAlarms </seealso>
 	   /// <seealso cref=    #getTemperatureAlarm </seealso>
-	   public virtual void setTemperatureAlarm(int alarmType, double alarmValue, sbyte[] state)
+	   public virtual void setTemperatureAlarm(int alarmType, double alarmValue, byte[] state)
 	   {
 		  if ((alarmType != TemperatureContainer_Fields.ALARM_LOW) && (alarmType != TemperatureContainer_Fields.ALARM_HIGH))
 		  {
@@ -541,7 +541,7 @@ namespace com.dalsemi.onewire.container
 			 throw new System.ArgumentException("Value for alarm not in accepted range.  Must be -55 C <-> +100 C.");
 		  }
 
-		  state [(alarmType == TemperatureContainer_Fields.ALARM_LOW) ? 3 : 2] = (sbyte) alarmValue;
+		  state [(alarmType == TemperatureContainer_Fields.ALARM_LOW) ? 3 : 2] = (byte) alarmValue;
 	   }
 
 	   /// <summary>
@@ -559,7 +559,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolutions </seealso>
-	   public virtual void setTemperatureResolution(double resolution, sbyte[] state)
+	   public virtual void setTemperatureResolution(double resolution, byte[] state)
 	   {
 		  lock (this)
 		  {
@@ -572,7 +572,7 @@ namespace com.dalsemi.onewire.container
 				normalResolution = false;
 			 }
 
-			 state [4] = (sbyte)(normalResolution ? 0 : 1);
+			 state [4] = (byte)(normalResolution ? 0 : 1);
 		  }
 	   }
 
@@ -606,10 +606,10 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref=    #writeDevice </seealso>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
 
-		  sbyte[] data = new sbyte [8];
+		  byte[] data = new byte [8];
 
 		  doSpeed();
 
@@ -618,15 +618,15 @@ namespace com.dalsemi.onewire.container
 		  {
 
 			 // construct a block to read the scratchpad
-			 sbyte[] buffer = new sbyte [10];
+			 byte[] buffer = new byte [10];
 
 			 // read scratchpad command
-			 buffer [0] = (sbyte) READ_SCRATCHPAD_COMMAND;
+			 buffer [0] = (byte) READ_SCRATCHPAD_COMMAND;
 
 			 // now add the read bytes for data bytes and crc8
 			 for (int i = 1; i < 10; i++)
 			 {
-				buffer [i] = unchecked((sbyte) 0x0FF);
+				buffer [i] = unchecked((byte) 0x0FF);
 			 }
 
 			 // send the block
@@ -648,7 +648,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  //we are just reading normalResolution here, no need to synchronize
-		  data [4] = (sbyte)(normalResolution ? 0 : 1);
+		  data [4] = (byte)(normalResolution ? 0 : 1);
 
 		  return data;
 	   }
@@ -670,11 +670,11 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref=    #readDevice </seealso>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
 		  doSpeed();
 
-		  sbyte[] temp = new sbyte [2];
+		  byte[] temp = new byte [2];
 
 		  temp [0] = state [2];
 		  temp [1] = state [3];
@@ -732,7 +732,7 @@ namespace com.dalsemi.onewire.container
 	   ///         'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   private void readScratch(sbyte[] data)
+	   private void readScratch(byte[] data)
 	   {
 
 		  // select the device
@@ -740,15 +740,15 @@ namespace com.dalsemi.onewire.container
 		  {
 
 			 // construct a block to read the scratchpad
-			 sbyte[] buffer = new sbyte [10];
+			 byte[] buffer = new byte [10];
 
 			 // read scratchpad command
-			 buffer [0] = (sbyte) READ_SCRATCHPAD_COMMAND;
+			 buffer [0] = (byte) READ_SCRATCHPAD_COMMAND;
 
 			 // now add the read bytes for data bytes and crc8
 			 for (int i = 1; i < 10; i++)
 			 {
-				buffer [i] = unchecked((sbyte) 0x0FF);
+				buffer [i] = unchecked((byte) 0x0FF);
 			 }
 
 			 // send the block
@@ -786,12 +786,12 @@ namespace com.dalsemi.onewire.container
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
 	   /// <exception cref="IllegalArgumentException"> when data length is not equal to <code>2</code> </exception>
-	   private void writeScratchpad(sbyte[] data)
+	   private void writeScratchpad(byte[] data)
 	   {
 
 		  // Variables.
-		  sbyte[] write_block = new sbyte [3];
-		  sbyte[] buffer = new sbyte [8];
+		  byte[] write_block = new byte [3];
+		  byte[] buffer = new byte [8];
 
 		  // First do some error checking.
 		  if (data.Length != 2)
@@ -815,7 +815,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // Check data to ensure correctly recived.
-		  buffer = new sbyte [8];
+		  buffer = new byte [8];
 
 		  readScratch(buffer);
 

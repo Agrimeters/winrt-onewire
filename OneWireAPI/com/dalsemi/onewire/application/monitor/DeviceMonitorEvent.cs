@@ -162,7 +162,7 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// Returns the device address at the specified index as a byte array.
 	   /// </summary>
 	   /// <returns> the device address at the specified index </returns>
-	   public virtual sbyte[] getAddressAt(int index)
+	   public virtual byte[] getAddressAt(int index)
 	   {
 		  return Address.toByteArray(getAddressAsLongAt(index));
 	   }

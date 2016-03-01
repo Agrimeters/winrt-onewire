@@ -227,7 +227,7 @@ namespace com.dalsemi.onewire.utils
 	   {
 		  OWPathElement path_element;
 		  SwitchContainer sw;
-		  sbyte[] sw_state;
+		  byte[] sw_state;
 
 		  // enumerature through elements in path
 		  for (int i = 0; i < elements.Count; i++)
@@ -266,7 +266,7 @@ namespace com.dalsemi.onewire.utils
 	   {
 		  OWPathElement path_element;
 		  SwitchContainer sw;
-		  sbyte[] sw_state;
+		  byte[] sw_state;
 
 		  // loop through elements in path in reverse order
 		  for (int i = elements.Count - 1; i >= 0; i--)
