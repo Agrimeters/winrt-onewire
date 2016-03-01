@@ -40,40 +40,33 @@ namespace com.dalsemi.onewire.adapter
     using com.dalsemi.onewire.utils;
     using System.Collections.Generic;
     using Windows.Storage.Streams;
-    using System.Text;    /// <summary>
-                          /// <para>This <code>DSPortAdapter</code> class was designed to be used for
-                          /// the iB-IDE's emulator.  The <code>DumbAdapter</code> allows
-                          /// programmers to add and remove <code>OneWireContainer</code>
-                          /// objects that will be found in its search.  The Java iButton
-                          /// emulator works by creating a class that subclasses all of
-                          /// <code>OneWireContainer16</code>'s relevant methods and redirecting them
-                          /// to the emulation code.  That object is then added to this class's
-                          /// list of <code>OneWireContainer</code>s.</para>
-                          /// 
-                          /// <para>Note that methods such as <code>selectPort</code> and
-                          /// <code>beginExclusive</code> by default do nothing.  This class is
-                          /// mainly meant for debugging using an emulated iButton.  It will do
-                          /// a poor job of debugging any multi-threading, port-sharing issues.
-                          /// 
-                          /// </para>
-                          /// </summary>
-                          /// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter </seealso>
-                          /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer
-                          /// 
-                          /// @version    0.00, 16 Mar 2001
-                          /// @author     K </seealso>
+    using System.Text;
+    using System.IO;
+    using Windows.Foundation;
+    using System.Threading;/// <summary>
+                           /// <para>This <code>DSPortAdapter</code> class was designed to be used for
+                           /// the iB-IDE's emulator.  The <code>DumbAdapter</code> allows
+                           /// programmers to add and remove <code>OneWireContainer</code>
+                           /// objects that will be found in its search.  The Java iButton
+                           /// emulator works by creating a class that subclasses all of
+                           /// <code>OneWireContainer16</code>'s relevant methods and redirecting them
+                           /// to the emulation code.  That object is then added to this class's
+                           /// list of <code>OneWireContainer</code>s.</para>
+                           /// 
+                           /// <para>Note that methods such as <code>selectPort</code> and
+                           /// <code>beginExclusive</code> by default do nothing.  This class is
+                           /// mainly meant for debugging using an emulated iButton.  It will do
+                           /// a poor job of debugging any multi-threading, port-sharing issues.
+                           /// 
+                           /// </para>
+                           /// </summary>
+                           /// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter </seealso>
+                           /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer
+                           /// 
+                           /// @version    0.00, 16 Mar 2001
+                           /// @author     K </seealso>
     public class UsbAdapter : DSPortAdapter
-	{
-        public class Pipe
-        {
-            public const UInt32 InterruptInPipeIndex = 0;
-            public const UInt32 BulkInPipeIndex = 0;
-            public const UInt32 BulkOutPipeIndex = 0;
-        }
-
-        public const UInt16 DeviceVid = 0x04FA;
-        public const UInt16 DevicePid = 0x2490;
-
+    {
         //--------
         //-------- Variables
         //--------
@@ -91,8 +84,15 @@ namespace com.dalsemi.onewire.adapter
         /// The DeviceInformation device id used to open the USB port</summary>
         private string deviceId;
         /// <summary>
-        /// The input stream, for reading data from the USB port </summary>
-        private DataReader serialInputStream = null;
+        /// State of the OneWire </summary>
+        private OneWireState owState;
+        /// <summary>
+        /// Usb Adapter state </summary>
+        private UsbAdapterState uState;
+
+        private Ds2490.UsbStatusPacket statusPacket = new Ds2490.UsbStatusPacket();
+
+        AutoResetEvent waitStatus = new AutoResetEvent(false);
 
         /// <summary>
         /// Vector of thread hash codes that have done an open but no close </summary>
@@ -100,116 +100,116 @@ namespace com.dalsemi.onewire.adapter
 
         internal int containers_index = 0;
 
-	    private ArrayList containers = new ArrayList();
+        private ArrayList containers = new ArrayList();
 
 
-	   /// <summary>
-	   /// Adds a <code>OneWireContainer</code> to the list of containers that
-	   /// this adapter object will find.
-	   /// </summary>
-	   /// <param name="c"> represents a 1-Wire device that this adapter will report from a search </param>
-	   public virtual void addContainer(OneWireContainer c)
-	   {
-			lock (containers)
-			{
-				containers.Add(c);
-			}
-	   }
+        /// <summary>
+        /// Adds a <code>OneWireContainer</code> to the list of containers that
+        /// this adapter object will find.
+        /// </summary>
+        /// <param name="c"> represents a 1-Wire device that this adapter will report from a search </param>
+        public virtual void addContainer(OneWireContainer c)
+        {
+            lock (containers)
+            {
+                containers.Add(c);
+            }
+        }
 
-	   /// <summary>
-	   /// Removes a <code>OneWireContainer</code> from the list of containers that
-	   /// this adapter object will find.
-	   /// </summary>
-	   /// <param name="c"> represents a 1-Wire device that this adapter should no longer
-	   ///        report as found by a search </param>
-	   public virtual void removeContainer(OneWireContainer c)
-	   {
-			lock (containers)
-			{
-				containers.Remove(c);
-			}
-	   }
+        /// <summary>
+        /// Removes a <code>OneWireContainer</code> from the list of containers that
+        /// this adapter object will find.
+        /// </summary>
+        /// <param name="c"> represents a 1-Wire device that this adapter should no longer
+        ///        report as found by a search </param>
+        public virtual void removeContainer(OneWireContainer c)
+        {
+            lock (containers)
+            {
+                containers.Remove(c);
+            }
+        }
 
 
-	   /// <summary>
-	   /// Hashtable to contain the user replaced OneWireContainers
-	   /// </summary>
-	   private Hashtable registeredOneWireContainerClasses = new Hashtable(5);
+        /// <summary>
+        /// Hashtable to contain the user replaced OneWireContainers
+        /// </summary>
+        private Hashtable registeredOneWireContainerClasses = new Hashtable(5);
 
-	   /// <summary>
-	   /// Byte array of families to include in search
-	   /// </summary>
-	   private byte[] include;
+        /// <summary>
+        /// Byte array of families to include in search
+        /// </summary>
+        private byte[] include;
 
-	   /// <summary>
-	   /// Byte array of families to exclude from search
-	   /// </summary>
-	   private byte[] exclude;
+        /// <summary>
+        /// Byte array of families to exclude from search
+        /// </summary>
+        private byte[] exclude;
 
-	   //--------
-	   //-------- Methods
-	   //--------
+        //--------
+        //-------- Methods
+        //--------
 
-	   /// <summary>
-	   /// Retrieves the name of the port adapter as a string.  The 'Adapter'
-	   /// is a device that connects to a 'port' that allows one to
-	   /// communicate with an iButton or other 1-Wire device.  As example
-	   /// of this is 'DS9097U'.
-	   /// </summary>
-	   /// <returns>  <code>String</code> representation of the port adapter. </returns>
-	   public override string AdapterName
-	   {
-		   get
-		   {
-				return "DS2490";
-		   }
-	   }
+        /// <summary>
+        /// Retrieves the name of the port adapter as a string.  The 'Adapter'
+        /// is a device that connects to a 'port' that allows one to
+        /// communicate with an iButton or other 1-Wire device.  As example
+        /// of this is 'DS9097U'.
+        /// </summary>
+        /// <returns>  <code>String</code> representation of the port adapter. </returns>
+        public override string AdapterName
+        {
+            get
+            {
+                return "DS2490";
+            }
+        }
 
-	   /// <summary>
-	   /// Retrieves a description of the port required by this port adapter.
-	   /// An example of a 'Port' would 'serial communication port'.
-	   /// </summary>
-	   /// <returns>  <code>String</code> description of the port type required. </returns>
-	   public override string PortTypeDescription
-	   {
-		   get
-		   {
-				return "DS2490 USB Port";
-		   }
-	   }
+        /// <summary>
+        /// Retrieves a description of the port required by this port adapter.
+        /// An example of a 'Port' would 'serial communication port'.
+        /// </summary>
+        /// <returns>  <code>String</code> description of the port type required. </returns>
+        public override string PortTypeDescription
+        {
+            get
+            {
+                return "DS2490 USB Port";
+            }
+        }
 
-	   /// <summary>
-	   /// Retrieves a version string for this class.
-	   /// </summary>
-	   /// <returns>  version string </returns>
-	   public override string ClassVersion
-	   {
-		   get
-		   {
-				return "1.00";
-		   }
-	   }
+        /// <summary>
+        /// Retrieves a version string for this class.
+        /// </summary>
+        /// <returns>  version string </returns>
+        public override string ClassVersion
+        {
+            get
+            {
+                return "1.00";
+            }
+        }
 
-	   //--------
-	   //-------- Port Selection
-	   //--------
+        //--------
+        //-------- Port Selection
+        //--------
 
-	   /// <summary>
-	   /// Retrieves a list of the platform appropriate port names for this
-	   /// adapter.  A port must be selected with the method 'selectPort'
-	   /// before any other communication methods can be used.  Using
-	   /// a communcation method before 'selectPort' will result in
-	   /// a <code>OneWireException</code> exception.
-	   /// </summary>
-	   /// <returns>  <code>Enumeration</code> of type <code>String</code> that contains the port
-	   /// names </returns>
-	   public override System.Collections.IEnumerator PortNames
-	   {
+        /// <summary>
+        /// Retrieves a list of the platform appropriate port names for this
+        /// adapter.  A port must be selected with the method 'selectPort'
+        /// before any other communication methods can be used.  Using
+        /// a communcation method before 'selectPort' will result in
+        /// a <code>OneWireException</code> exception.
+        /// </summary>
+        /// <returns>  <code>Enumeration</code> of type <code>String</code> that contains the port
+        /// names </returns>
+        public override System.Collections.IEnumerator PortNames
+        {
             get
             {
                 var t = Task<IEnumerator>.Run(async () =>
                 {
-                    string aqs = UsbDevice.GetDeviceSelector(DeviceVid, DevicePid);
+                    string aqs = UsbDevice.GetDeviceSelector(Ds2490.DeviceVid, Ds2490.DevicePid);
                     var myDevices = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(aqs, null);
                     DeviceInformationCollection DeviceList = myDevices;
                     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
@@ -233,25 +233,25 @@ namespace com.dalsemi.onewire.adapter
                     throw new System.Exception("Unable to retrieve list of USB devices");
                 }
             }
-	   }
+        }
 
-	   /// <summary>
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// 
-	   /// </summary>
-	   public override void registerOneWireContainerClass(int family, Type OneWireContainerClass)
-	   {
-	   }
+        /// <summary>
+        /// This method does nothing in <code>DumbAdapter</code>.
+        /// 
+        /// </summary>
+        public override void registerOneWireContainerClass(int family, Type OneWireContainerClass)
+        {
+        }
 
-	   /// <summary>
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <param name="portName">  name of the target port, retrieved from
-	   /// getPortNames()
-	   /// </param>
-	   /// <returns> always returns <code>true</code> </returns>
-	   public override bool selectPort(string portName)
-	   {
+        /// <summary>
+        /// This method does nothing in <code>DumbAdapter</code>.
+        /// </summary>
+        /// <param name="portName">  name of the target port, retrieved from
+        /// getPortNames()
+        /// </param>
+        /// <returns> always returns <code>true</code> </returns>
+        public override bool selectPort(string portName)
+        {
             //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
             if (doDebugMessages)
             {
@@ -269,7 +269,7 @@ namespace com.dalsemi.onewire.adapter
                 users.Add(Environment.CurrentManagedThreadId);
             }
 
-            if (usbPort != null)
+            if (PortOpen)
                 return true;
 
             try
@@ -277,7 +277,7 @@ namespace com.dalsemi.onewire.adapter
                 var t = Task<UsbDevice>.Run(async () =>
                 {
                     // @"USB\VID_04FA&PID_2490\6&F0F8E95&0&2"
-                    string[] st = portName.Split(new char[]{'\\'});
+                    string[] st = portName.Split(new char[] { '\\' });
                     StringBuilder deviceInstance = new StringBuilder();
                     deviceInstance.Append(@"\\?\");
                     deviceInstance.Append(st[0]);
@@ -286,7 +286,6 @@ namespace com.dalsemi.onewire.adapter
                     deviceInstance.Append('#');
                     deviceInstance.Append(st[2].ToLower());
                     deviceInstance.Append('#');
-                    //deviceInstance.Append("{dee824ef-729b-4a0e-9c14-b7117d33a817}");
                     deviceInstance.Append("{dee824ef-729b-4a0e-9c14-b7117d33a817}");
 
                     deviceId = deviceInstance.ToString();
@@ -311,12 +310,7 @@ namespace com.dalsemi.onewire.adapter
             catch (Exception e)
             {
                 // close the port if we have an object
-                if (usbPort != null)
-                {
-                    usbPort.Dispose();
-                }
-
-                usbPort = null;
+                freePort();
 
                 throw new System.IO.IOException("Failed to open (" + portName + ") :" + e);
             }
@@ -328,54 +322,319 @@ namespace com.dalsemi.onewire.adapter
         /// This method does nothing in <code>DumbAdapter</code>.
         /// </summary>
         public override void freePort()
-	   {
-            if(usbPort != null)
+        {
+            if (usbPort != null)
+            {
                 usbPort.Dispose();
-       }
+                usbPort = null;
+            }
+        }
 
         /// <summary>
         /// Retrieves the name of the selected port as a <code>String</code>.
         /// </summary>
-        /// <returns>  always returns the <code>String</code> "NULL0" </returns>
+        /// <returns>  the deviceID of port </returns>
         public override string PortName
-	   {
-		   get
-		   {
-				return deviceId;
-		   }
-	   }
+        {
+            get
+            {
+                return deviceId;
+            }
+        }
 
-	   //--------
-	   //-------- Adapter detection
-	   //--------
+        /// <summary>
+        /// Retrieves the open state of the selected port as a <code>bool</code>.
+        /// </summary>
+        /// <returns>  bool indicating port open state </returns>
+        public virtual bool PortOpen
+        {
+            get
+            {
+                lock (this)
+                {
+                    return (usbPort != null) ? true : false;
+                }
+            }
+        }
 
-	   /// <summary>
-	   /// Detects adapter presence on the selected port.  In <code>DumbAdapter</code>,
-	   /// the adapter is always detected.
-	   /// </summary>
-	   /// <returns>  <code>true</code> </returns>
-	   public override bool adapterDetected()
-	   {
-			return true;
-	   }
+        //--------
+        //-------- Adapter detection
+        //--------
 
-	   //--------
-	   //-------- Adapter features
-	   //--------
+        private bool SendCommand(byte req, uint value, uint index, string description)
+        {
+            bool result = true;
 
-	   /* The following interogative methods are provided so that client code
-	    * can react selectively to underlying states without generating an
-	    * exception.
-	    */
+            // try to aquire the port
+            try
+            {
+                if (!PortOpen)
+                {
+                    throw new System.IO.IOException("Port Not Open");
+                }
 
-	   /// <summary>
-	   /// Applications might check this method and not attempt operation unless this method
-	   /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-	   /// this method always returns <code>true</code>.
-	   /// </summary>
-	   /// <returns>  <code>true</code>
-	   ///  </returns>
-	   public override bool canOverdrive()
+                //
+                // RESET_DEVICE
+                //
+                var t = Task<uint>.Run(async () =>
+                {
+                    UsbSetupPacket setupPacket = new UsbSetupPacket
+                    {
+                        RequestType = new UsbControlRequestType
+                        {
+                            Direction = UsbTransferDirection.Out,
+                            Recipient = UsbControlRecipient.Device,
+                            ControlTransferType = UsbControlTransferType.Vendor
+                        },
+                        Request = req,
+                        Value = value,
+                        Index = index,
+                        Length = 0
+                    };
+
+                    return await usbPort.SendControlOutTransferAsync(setupPacket);
+                });
+
+                t.Wait();
+
+                if (t.Status != TaskStatus.RanToCompletion)
+                {
+                    Debug.WriteLine("USBAdapter-" + description + " failed to send packet");
+                }
+                System.Diagnostics.Debug.WriteLine("SendControlOut HResult = {0:X08}", t.Result.ToString());
+            }
+            catch (System.IO.IOException e)
+            {
+                if (doDebugMessages)
+                {
+                    Debug.WriteLine("USBAdapter-" + description + ": " + e);
+                }
+            }
+
+            return result;
+        }
+
+        private UInt32 registeredInterruptPipeIndex; // Pipe index of the pipe we that we registered for. Only valid if registeredInterrupt is true
+        private bool registeredInterrupt;
+
+        private void OnStatusChangeEvent(UsbInterruptInPipe sender, UsbInterruptInEventArgs eventArgs)
+        {
+            IBuffer buffer = eventArgs.InterruptData;
+
+            if (buffer.Length > 0)
+            {
+                DataReader reader = DataReader.FromBuffer(buffer);
+
+                statusPacket.UpdateUsbStatusPacket(reader, buffer.Length);
+            }
+
+            waitStatus.Set();
+        }
+
+        private TypedEventHandler<UsbInterruptInPipe, UsbInterruptInEventArgs> interruptEventHandler = null;
+
+        private void GetStatus(out byte nResultRegisters)
+        {
+            interruptEventHandler = new TypedEventHandler<UsbInterruptInPipe, UsbInterruptInEventArgs>(this.OnStatusChangeEvent);
+            statusPacket.Updated = false;
+            statusPacket.CommResultCodes = null;
+
+            RegisterForInterruptEvent(Ds2490.Pipe.InterruptInPipeIndex, interruptEventHandler);
+
+            while (!statusPacket.Updated)
+                waitStatus.WaitOne();
+
+            UnregisterFromInterruptEvent();
+
+            if (statusPacket.CommResultCodes != null)
+                nResultRegisters = (byte)statusPacket.CommResultCodes.Length;
+            else
+                nResultRegisters = 0;
+        }
+
+        /// <summary>
+        /// Register for the interrupt that is triggered when the device sends an interrupt to us
+        /// 
+        /// The DefaultInterface on the the device is the first interface on the device. We navigate to
+        /// the InterruptInPipes because that collection contains all the interrupt in pipes for the
+        /// selected interface setting.
+        ///
+        /// Each pipe has a property that links to an EndpointDescriptor. This descriptor can be used to find information about
+        /// the pipe (e.g. type, id, etc...). The EndpointDescriptor trys to mirror the EndpointDescriptor that is defined in the Usb Spec.
+        ///
+        /// The function also saves the event token so that we can unregister from the even later on.
+        /// </summary>
+        /// <param name="pipeIndex">The index of the pipe found in UsbInterface.InterruptInPipes. It is not the endpoint number</param>
+        /// <param name="eventHandler">Event handler that will be called when the event is raised</param>
+        private void RegisterForInterruptEvent(UInt32 pipeIndex, TypedEventHandler<UsbInterruptInPipe, UsbInterruptInEventArgs> eventHandler)
+        {
+            var interruptInPipes = usbPort.DefaultInterface.InterruptInPipes;
+
+            if (!registeredInterrupt && (pipeIndex < interruptInPipes.Count))
+            {
+                var interruptInPipe = interruptInPipes[(int)pipeIndex];
+
+                registeredInterrupt = true;
+                registeredInterruptPipeIndex = pipeIndex;
+
+                // Save the interrupt handler so we can use it to unregister
+                interruptEventHandler = eventHandler;
+
+                interruptInPipe.DataReceived += interruptEventHandler;
+            }
+        }
+
+        /// <summary>
+        /// Unregisters from the interrupt event that was registered for in the RegisterForInterruptEvent();
+        /// </summary>
+        private void UnregisterFromInterruptEvent()
+        {
+            if (registeredInterrupt)
+            {
+                // Search for the correct pipe that we know we used to register events
+                var interruptInPipe = usbPort.DefaultInterface.InterruptInPipes[(int)registeredInterruptPipeIndex];
+                interruptInPipe.DataReceived -= interruptEventHandler;
+
+                registeredInterrupt = false;
+            }
+        }
+
+        /// <summary>
+        /// Check to see if there is a short on the 1-Wire bus. Used to stop 
+        /// communication with the DS2490 while the short is in effect to not
+        /// overrun the buffers.
+        /// </summary>
+        /// <param name="present">flag set (1) if device presence detected</param>
+        /// <param name="vpp">flag set (1) if Vpp programming voltage detected</param>
+        /// <returns>
+        /// true  - DS2490 1-Wire is NOT shorted
+        /// true - Could not detect DS2490 or 1-Wire shorted
+        /// </returns>
+        private bool ShortCheck(out bool present, out bool vpp)
+        {
+            byte nResultRegisters;
+
+            present = false;
+
+            GetStatus(out nResultRegisters);
+
+            // get vpp present flag
+            vpp = ((statusPacket.StatusFlags & Ds2490.STATUSFLAGS_12VP) != 0);
+
+            //	Check for short
+            if (statusPacket.CommBufferStatus != 0)
+            {
+                return false;
+            }
+            else
+            {
+                // check for short
+                for (var i = 0; i < nResultRegisters; i++)
+                {
+                    // check for SH bit (0x02), ignore 0xA5
+                    if ((statusPacket.CommResultCodes[i] & Ds2490.COMMCMDERRORRESULT_SH) != 0)
+                    {
+                        // short detected
+                        return false;
+                    }
+                }
+            }
+
+            // check for No 1-Wire device condition
+            present = true;
+            // loop through result registers
+            for (var i = 0; i < nResultRegisters; i++)
+            {
+                // only check for error conditions when the condition is not a ONEWIREDEVICEDETECT
+                if (statusPacket.CommResultCodes[i] != Ds2490.ONEWIREDEVICEDETECT)
+                {
+                    // check for NRS bit (0x01)
+                    if ((statusPacket.CommResultCodes[i] & Ds2490.COMMCMDERRORRESULT_NRS) != 0)
+                    {
+                        // empty bus detected
+                        present = false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Do a master reset on the DS2490.  This initiates
+        /// a master rest cycle.
+        /// </summary>
+        private void uMasterReset()
+        {
+            if (doDebugMessages)
+            {
+                Debug.WriteLine("DEBUG: uMasterReset");
+            }
+
+            SendCommand(
+                Ds2490.CMD_TYPE.CONTROL,
+                Ds2490.CTL.RESET_DEVICE,
+                0x0000,
+                "uMasterReset"
+                );
+
+            // reset state variables to default
+            //TODO owState.oneWireSpeed = SPEED_REGULAR;
+            //TODO uState.uSpeedMode = UsbAdapterState.USPEED_FLEX;
+        }
+
+        /// <summary>
+        /// Detects adapter presence on the selected port.  In <code>DumbAdapter</code>,
+        /// the adapter is always detected.
+        /// </summary>
+        /// <returns>  <code>true</code> </returns>
+        public override bool adapterDetected()
+        {
+            uMasterReset();
+
+            // set the strong pullup duration to infinite
+            SendCommand(
+                Ds2490.CMD_TYPE.COMM,
+                Ds2490.COMM.SET_DURATION | Ds2490.COMM.IM,
+                0x0000,
+                "Set duration to infinite");
+
+            // set the 12V pullup duration to 512us
+            SendCommand(
+                Ds2490.CMD_TYPE.COMM,
+                Ds2490.COMM.SET_DURATION | Ds2490.COMM.IM | Ds2490.COMM.TYPE,
+                0x0040,
+                "Set 12V pullup duration to 512us");
+
+            // disable strong pullup, but leave program pulse enabled (faster)
+            SendCommand(
+                Ds2490.CMD_TYPE.MODE,
+                Ds2490.Mode.PULSE_EN,
+                Ds2490.ENABLEPULSE_PRGE,
+                "disable strong pullup, but leave program pulse enabled");
+
+            bool present = false;
+            bool vpp = false;
+            return ShortCheck(out present, out vpp);
+       }
+
+    //--------
+    //-------- Adapter features
+    //--------
+
+    /* The following interogative methods are provided so that client code
+     * can react selectively to underlying states without generating an
+     * exception.
+     */
+
+    /// <summary>
+    /// Applications might check this method and not attempt operation unless this method
+    /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
+    /// this method always returns <code>true</code>.
+    /// </summary>
+    /// <returns>  <code>true</code>
+    ///  </returns>
+    public override bool canOverdrive()
 	   {
 		  //don't want someone to bail because of this
 		  return true;

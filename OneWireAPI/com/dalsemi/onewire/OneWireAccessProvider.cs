@@ -215,6 +215,7 @@ namespace com.dalsemi.onewire
               // DRAIN
           }
 
+#if false //TODO
           // DS2480B - Serial
           try
           {
@@ -236,7 +237,7 @@ namespace com.dalsemi.onewire
 		  {
 			 // DRAIN
 		  }
-
+#endif
 		  if ((!usb_loaded) && (!serial_loaded))
 		  {
 		      Debug.WriteLine("");
