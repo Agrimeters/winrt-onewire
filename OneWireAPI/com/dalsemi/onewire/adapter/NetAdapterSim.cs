@@ -1,6 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Collections;
 using System.Threading;
+using System.Text;
+using System.Net.Sockets;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -32,48 +35,47 @@ using System.Threading;
 namespace com.dalsemi.onewire.adapter
 {
 
-
-	using com.dalsemi.onewire;
-	using com.dalsemi.onewire.utils;
-
-	/// <summary>
-	/// <P>NetAdapterSim is the host (or server) component for a network-based
-	/// DSPortAdapter.  It actually wraps the hardware DSPortAdapter and handles
-	/// connections from outside sources (NetAdapter) who want to access it.</P>
-	/// 
-	/// <P>NetAdapterSim is designed to be run in a thread, waiting for incoming
-	/// connections.  You can run this in the same thread as your main program or
-	/// you can establish the connections yourself (presumably using some higher
-	/// level of security) and then call the <code>handleConnection(Socket)</code> </summary>
-	/// {<seealso cref= #handleConnection(Socket)}.</P>
-	/// 
-	/// <P>Once a NetAdapter is connected with the host, a version check is performed
-	/// followed by a simple authentication step.  The authentication is dependent
-	/// upon a secret shared between the NetAdapter and the host.  Both will use
-	/// a default value, that each will agree with if you don't provide a secret
-	/// of your own.  To set the secret, add the following line to your
-	/// onewire.properties file:
-	/// <ul>
-	///    <li>NetAdapter.secret="This is my custom secret"</li>
-	/// </ul>
-	/// Optionally, the secret can be set by calling the <code>setSecret(String)</code> </seealso>
-	/// {<seealso cref= #setSecret(String)}</P>
-	/// 
-	/// <P>The NetAdapter and NetAdapterSim support multicast broadcasts for
-	/// automatic discovery of compatible servers on your LAN.  To start the
-	/// multicast listener for this NetAdapterSim, call the
-	/// <code>createMulticastListener()</code> method </seealso>
-	/// {<seealso cref= #createMulticastListener()}.</P>
-	/// 
-	/// <P>For information on creating the client component, see the JavaDocs
-	/// for the  <seealso cref="com.dalsemi.onewire.adapter.NetAdapter NetAdapter"/>.
-	/// </seealso>
-	/// <seealso cref= NetAdapter
-	/// 
-	/// @author SH
-	/// @version    1.00, 9 Jan 2002 </seealso>
-	public class NetAdapterSim : Runnable, NetAdapterConstants
-	{
+    using com.dalsemi.onewire;
+    using com.dalsemi.onewire.utils;
+    using System.Threading.Tasks;
+    using Windows.Networking.Sockets;    /// <summary>
+                                         /// <P>NetAdapterSim is the host (or server) component for a network-based
+                                         /// DSPortAdapter.  It actually wraps the hardware DSPortAdapter and handles
+                                         /// connections from outside sources (NetAdapter) who want to access it.</P>
+                                         /// 
+                                         /// <P>NetAdapterSim is designed to be run in a thread, waiting for incoming
+                                         /// connections.  You can run this in the same thread as your main program or
+                                         /// you can establish the connections yourself (presumably using some higher
+                                         /// level of security) and then call the <code>handleConnection(Socket)</code> </summary>
+                                         /// {<seealso cref= #handleConnection(Socket)}.</P>
+                                         /// 
+                                         /// <P>Once a NetAdapter is connected with the host, a version check is performed
+                                         /// followed by a simple authentication step.  The authentication is dependent
+                                         /// upon a secret shared between the NetAdapter and the host.  Both will use
+                                         /// a default value, that each will agree with if you don't provide a secret
+                                         /// of your own.  To set the secret, add the following line to your
+                                         /// onewire.properties file:
+                                         /// <ul>
+                                         ///    <li>NetAdapter.secret="This is my custom secret"</li>
+                                         /// </ul>
+                                         /// Optionally, the secret can be set by calling the <code>setSecret(String)</code> </seealso>
+                                         /// {<seealso cref= #setSecret(String)}</P>
+                                         /// 
+                                         /// <P>The NetAdapter and NetAdapterSim support multicast broadcasts for
+                                         /// automatic discovery of compatible servers on your LAN.  To start the
+                                         /// multicast listener for this NetAdapterSim, call the
+                                         /// <code>createMulticastListener()</code> method </seealso>
+                                         /// {<seealso cref= #createMulticastListener()}.</P>
+                                         /// 
+                                         /// <P>For information on creating the client component, see the JavaDocs
+                                         /// for the  <seealso cref="com.dalsemi.onewire.adapter.NetAdapter NetAdapter"/>.
+                                         /// </seealso>
+                                         /// <seealso cref= NetAdapter
+                                         /// 
+                                         /// @author SH
+                                         /// @version    1.00, 9 Jan 2002 </seealso>
+    public class NetAdapterSim : NetAdapterConstants
+    {
 	   protected internal static bool SIM_DEBUG = false;
 
 	   /// <summary>
@@ -82,28 +84,28 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// Log file </summary>
-	   protected internal PrintWriter logFile;
+	   protected internal TextWriter logFile;
 
 	   /// <summary>
 	   /// exec command, command string to start the simulator </summary>
 	   protected internal string execCommand;
 
-	   protected internal Process process;
+	   protected internal Object process; //Process
 	   protected internal System.IO.StreamReader processOutput;
 	   protected internal System.IO.StreamReader processError;
 	   protected internal System.IO.StreamWriter processInput;
 
 	   /// <summary>
 	   /// fake address, returned from all search or getAddress commands </summary>
-	   protected internal sbyte[] fakeAddress = null;
+	   protected internal byte[] fakeAddress = null;
 
-	   /// <summary>
-	   /// The server socket for listening for connections </summary>
-	   protected internal ServerSocket serverSocket = null;
+       /// <summary>
+       /// The server socket for listening for connections </summary>
+	   protected internal StreamSocketListener serverSocket = null;
 
 	   /// <summary>
 	   /// secret for authentication with the server </summary>
-	   protected internal sbyte[] netAdapterSecret = null;
+	   protected internal byte[] netAdapterSecret = null;
 
 	   /// <summary>
 	   /// boolean flags for stopping the host </summary>
@@ -159,7 +161,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <exception cref="IOException"> if a network error occurs or the listen socket
 	   /// cannot be created on the specified port. </exception>
-	   public NetAdapterSim(string execCmd, sbyte[] fakeAddress, string logFile, int listenPort) : this(execCmd, logFile, listenPort, false)
+	   public NetAdapterSim(string execCmd, byte[] fakeAddress, string logFile, int listenPort) : this(execCmd, logFile, listenPort, false)
 	   {
 	   }
 
@@ -203,60 +205,60 @@ namespace com.dalsemi.onewire.adapter
 	   /// cannot be created on the specified port. </exception>
 	   public NetAdapterSim(string execCmd, string logFilename, int listenPort, bool multiThread)
 	   {
-		  // save references to file and command
-		  this.execCommand = execCmd;
-		  this.process = Runtime.Runtime.exec(execCmd);
-		  this.processOutput = new System.IO.StreamReader(this.process.InputStream);
-		  this.processError = new System.IO.StreamReader(this.process.ErrorStream);
-		  this.processInput = new System.IO.StreamWriter(this.process.OutputStream);
+            // save references to file and command
+            this.execCommand = execCmd;
+            this.process = null; //TODO Runtime.Runtime.exec(execCmd);
+            //this.processOutput = new System.IO.StreamReader(this.process.InputStream);
+            //this.processError = new System.IO.StreamReader(this.process.ErrorStream);
+            //this.processInput = new System.IO.StreamWriter(this.process.OutputStream);
 
-		  // wait until process is ready
-		  int complete = 0;
-		  while (complete < 2)
-		  {
-			 string line = processOutput.ReadLine();
-			 if (complete == 0 && line.IndexOf("read ok (data=17)", StringComparison.Ordinal) >= 0)
-			 {
-				complete++;
-				continue;
-			 }
-			 if (complete == 1 && line.IndexOf(PROMPT, StringComparison.Ordinal) >= 0)
-			 {
-				complete++;
-				continue;
-			 }
-		  }
+            // wait until process is ready
+            int complete = 0;
+            while (complete < 2)
+            {
+                string line = processOutput.ReadLine();
+                if (complete == 0 && line.IndexOf("read ok (data=17)", StringComparison.Ordinal) >= 0)
+                {
+                    complete++;
+                    continue;
+                }
+                if (complete == 1 && line.IndexOf(PROMPT, StringComparison.Ordinal) >= 0)
+                {
+                    complete++;
+                    continue;
+                }
+            }
 
-		  if (!string.ReferenceEquals(logFilename, null))
-		  {
-			 this.logFile = new PrintWriter(new System.IO.StreamWriter(logFilename), true);
-		  }
+            if (!string.ReferenceEquals(logFilename, null))
+            {
+                this.logFile = File.CreateText(logFilename);
+            }
 
-		   // Make sure we loaded the address of the device
-		  simulationGetAddress();
+            // Make sure we loaded the address of the device
+            simulationGetAddress();
 
-		  // create the server socket
-		  this.serverSocket = new ServerSocket(listenPort);
+            // create the server socket
+            this.serverSocket.Control.NoDelay = true;
 
-		  // set multithreaded flag
-		  this.singleThreaded = !multiThread;
-		  if (multiThread)
-		  {
-			 this.hashHandlers = new Hashtable();
-			 this.timeoutInSeconds = 0;
-		  }
+            // set multithreaded flag
+            this.singleThreaded = !multiThread;
+            if (multiThread)
+            {
+                this.hashHandlers = new Hashtable();
+                this.timeoutInSeconds = 0;
+            }
 
-		  // get the shared secret
-		  string secret = OneWireAccessProvider.getProperty("NetAdapter.secret");
-		  if (!string.ReferenceEquals(secret, null))
-		  {
-			 netAdapterSecret = secret.GetBytes();
-		  }
-		  else
-		  {
-			 netAdapterSecret = NetAdapterConstants_Fields.DEFAULT_SECRET.GetBytes();
-		  }
-	   }
+            // get the shared secret
+            string secret = OneWireAccessProvider.getProperty("NetAdapter.secret");
+            if (!string.ReferenceEquals(secret, null))
+            {
+                netAdapterSecret = Encoding.UTF8.GetBytes(secret);
+            }
+            else
+            {
+                netAdapterSecret = Encoding.UTF8.GetBytes(NetAdapterConstants_Fields.DEFAULT_SECRET);
+            }
+        }
 
 	   /// <summary>
 	   /// <P>Creates an instance of a NetAdapterSim which wraps the provided
@@ -274,7 +276,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <exception cref="IOException"> if a network error occurs or the listen socket
 	   /// cannot be created on the specified port. </exception>
-	   public NetAdapterSim(string execCmd, string logFilename, ServerSocket serverSock) : this(execCmd, logFilename, serverSock, false)
+	   public NetAdapterSim(string execCmd, string logFilename, StreamSocketListener serverSock) : this(execCmd, logFilename, serverSock, false)
 	   {
 	   }
 
@@ -295,62 +297,62 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <exception cref="IOException"> if a network error occurs or the listen socket
 	   /// cannot be created on the specified port. </exception>
-	   public NetAdapterSim(string execCmd, string logFilename, ServerSocket serverSock, bool multiThread)
+	   public NetAdapterSim(string execCmd, string logFilename, StreamSocketListener serverSock, bool multiThread)
 	   {
-		  // save references to file and command
-		  this.execCommand = execCmd;
-		  this.process = Runtime.Runtime.exec(execCmd);
-		  this.processOutput = new System.IO.StreamReader(this.process.InputStream);
-		  this.processError = new System.IO.StreamReader(this.process.ErrorStream);
-		  this.processInput = new System.IO.StreamWriter(this.process.OutputStream);
+            // save references to file and command
+            this.execCommand = execCmd;
+            this.process = null; //TODO Runtime.Runtime.exec(execCmd);
+            //TODO this.processOutput = new System.IO.StreamReader(this.process.InputStream);
+            //TODO this.processError = new System.IO.StreamReader(this.process.ErrorStream);
+            //TODO this.processInput = new System.IO.StreamWriter(this.process.OutputStream);
 
-		  // wait  until process is ready
-		  int complete = 0;
-		  while (complete < 2)
-		  {
-			 string line = processOutput.ReadLine();
-			 if (complete == 0 && line.IndexOf("read ok (data=17)", StringComparison.Ordinal) >= 0)
-			 {
-				complete++;
-				continue;
-			 }
-			 if (complete == 1 && line.IndexOf(PROMPT, StringComparison.Ordinal) >= 0)
-			 {
-				complete++;
-				continue;
-			 }
-		  }
+            // wait  until process is ready
+            int complete = 0;
+            while (complete < 2)
+            {
+                string line = processOutput.ReadLine();
+                if (complete == 0 && line.IndexOf("read ok (data=17)", StringComparison.Ordinal) >= 0)
+                {
+                    complete++;
+                    continue;
+                }
+                if (complete == 1 && line.IndexOf(PROMPT, StringComparison.Ordinal) >= 0)
+                {
+                    complete++;
+                    continue;
+                }
+            }
 
-		  if (!string.ReferenceEquals(logFilename, null))
-		  {
-			 this.logFile = new PrintWriter(new System.IO.StreamWriter(logFilename), true);
-		  }
+            if (!string.ReferenceEquals(logFilename, null))
+            {
+                this.logFile = File.CreateText(logFilename);
+            }
 
-		   // Make sure we loaded the address of the device
-		  simulationGetAddress();
+            // Make sure we loaded the address of the device
+            simulationGetAddress();
 
-		  // save reference to the server socket
-		  this.serverSocket = serverSock;
+            // save reference to the server socket
+            this.serverSocket = serverSock;
 
-		  // set multithreaded flag
-		  this.singleThreaded = !multiThread;
-		  if (multiThread)
-		  {
-			 this.hashHandlers = new Hashtable();
-			 this.timeoutInSeconds = 0;
-		  }
+            // set multithreaded flag
+            this.singleThreaded = !multiThread;
+            if (multiThread)
+            {
+                this.hashHandlers = new Hashtable();
+                this.timeoutInSeconds = 0;
+            }
 
-		  // get the shared secret
-		  string secret = OneWireAccessProvider.getProperty("NetAdapter.secret");
-		  if (!string.ReferenceEquals(secret, null))
-		  {
-			 netAdapterSecret = secret.GetBytes();
-		  }
-		  else
-		  {
-			 netAdapterSecret = NetAdapterConstants_Fields.DEFAULT_SECRET.GetBytes();
-		  }
-	   }
+            // get the shared secret
+            string secret = OneWireAccessProvider.getProperty("NetAdapter.secret");
+            if (!string.ReferenceEquals(secret, null))
+            {
+                netAdapterSecret = Encoding.UTF8.GetBytes(secret);
+            }
+            else
+            {
+                netAdapterSecret = Encoding.UTF8.GetBytes(NetAdapterConstants_Fields.DEFAULT_SECRET);
+            }
+        }
 
 	   /// <summary>
 	   /// Sets the secret used for authenticating incoming client connections.
@@ -361,8 +363,8 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		   set
 		   {
-			  netAdapterSecret = value.GetBytes();
-		   }
+			  netAdapterSecret = Encoding.UTF8.GetBytes(value);
+           }
 	   }
 
 	   /// <summary>
@@ -398,30 +400,34 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="group"> The group the Multicast socket will join </param>
 	   public virtual void createMulticastListener(int port, string group)
 	   {
-		  if (multicastListener == null)
-		  {
-			 // 4 bytes for integer versionUID
-			 sbyte[] versionBytes = Convert.toByteArray(NetAdapterConstants_Fields.versionUID);
+            if (multicastListener == null)
+            {
+                // 4 bytes for integer versionUID
+                byte[] versionBytes = Convert.toByteArray(NetAdapterConstants_Fields.versionUID);
 
-			 // this byte array is 5 because length is used to determine different
-			 // packet types by client
-			 sbyte[] listenPortBytes = new sbyte[5];
-			 Convert.toByteArray(serverSocket.LocalPort, listenPortBytes, 0, 4);
-			 listenPortBytes[4] = unchecked((sbyte)0x0FF);
+                // this byte array is 5 because length is used to determine different
+                // packet types by client
+                byte[] listenPortBytes = new byte[5];
+                Convert.toByteArray(serverSocket.Information.LocalPort, listenPortBytes, 0, 4);
+                listenPortBytes[4] = unchecked((byte)0x0FF);
 
-			 multicastListener = new MulticastListener(port, group, versionBytes, listenPortBytes);
-			 (new Thread(multicastListener)).Start();
-		  }
-	   }
+                multicastListener = new MulticastListener(port, group, versionBytes, listenPortBytes);
+            }
+        }
 
+        private static readonly System.DateTime Jan1st1970 = new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
+        internal static long CurrentUnixTimeMillis()
+        {
+            return (long)(System.DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
+        }
 
-	   /// <summary>
-	   /// Run method for threaded NetAdapterSim.  Maintains server socket which
-	   /// waits for incoming connections.  Whenever a connection is received
-	   /// launches it services the socket or (optionally) launches a new thread
-	   /// for servicing the socket.
-	   /// </summary>
-	   public virtual void run()
+        /// <summary>
+        /// Run method for threaded NetAdapterSim.  Maintains server socket which
+        /// waits for incoming connections.  Whenever a connection is received
+        /// launches it services the socket or (optionally) launches a new thread
+        /// for servicing the socket.
+        /// </summary>
+        public virtual void run()
 	   {
 		  hostRunning = true;
 		  while (!hostStopped)
@@ -429,22 +435,22 @@ namespace com.dalsemi.onewire.adapter
 			 Socket sock = null;
 			 try
 			 {
-				sock = serverSocket.accept();
+				//TODO sock = serverSocket.accept();
 				// reset time of last command, so we don't simulate a bunch of
 				// unneccessary time
-				timeOfLastCommand = DateTimeHelperClass.CurrentUnixTimeMillis();
+				timeOfLastCommand = CurrentUnixTimeMillis();
 				handleConnection(sock);
 			 }
-			 catch (IOException)
+			 catch (System.IO.IOException)
 			 {
 				try
 				{
 				   if (sock != null)
 				   {
-					  sock.close();
+					  //TODO sock.close();
 				   }
 				}
-				catch (IOException)
+				catch (System.IO.IOException)
 				{
 					;
 				}
@@ -466,28 +472,29 @@ namespace com.dalsemi.onewire.adapter
 			 // single-threaded
 			 sh.run();
 		  }
-		  else
-		  {
-			 // multi-threaded
-			 Thread t = new Thread(sh);
-			 t.Start();
-			 lock (hashHandlers)
-			 {
-				hashHandlers[t] = sh;
-			 }
-		  }
+          //TODO
+		  //else
+		  //{
+			 //// multi-threaded
+			 //Thread t = new Thread(sh);
+			 //t.Start();
+			 //lock (hashHandlers)
+			 //{
+				//hashHandlers[t] = sh;
+			 //}
+		  //}
 	   }
 	   /// <summary>
 	   /// Stops all threads and kills the server socket.
 	   /// </summary>
-	   public virtual void stopHost()
+	   public virtual async void stopHost()
 	   {
 		  this.hostStopped = true;
 		  try
 		  {
-			 this.serverSocket.close();
+			 await this.serverSocket.CancelIOAsync();
 		  }
-		  catch (IOException)
+		  catch (System.IO.IOException)
 		  {
 			  ;
 		  }
@@ -537,10 +544,14 @@ namespace com.dalsemi.onewire.adapter
 	   private bool sendVersionUID(NetAdapterConstants_Connection conn)
 	   {
 		  // write server version
-		  conn.output.writeInt(NetAdapterConstants_Fields.versionUID);
-		  conn.output.flush();
+		  conn.output.WriteInt32(NetAdapterConstants_Fields.versionUID);
+          var t = Task.Run(async() =>
+          {
+              await conn.output.StoreAsync();
+          });
+          t.Wait();
 
-		  sbyte retVal = conn.input.readByte();
+		  byte retVal = conn.input.ReadByte();
 
 		  return (retVal == NetAdapterConstants_Fields.RET_SUCCESS);
 	   }
@@ -553,24 +564,24 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   /// <param name="conn"> The connection to send/receive data.
 	   ///  </param>
-	   private void processRequests(NetAdapterConstants_Connection conn)
+	   private async void processRequests(NetAdapterConstants_Connection conn)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  if (logFile != null)
 		  {
-			 logFile.println("\n------------------------------------------");
+			 logFile.WriteLine("\n------------------------------------------");
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
 		  // get the next command
-		  sbyte cmd = 0x00;
+		  byte cmd = 0x00;
 
-		  cmd = conn.input.readByte();
+		  cmd = conn.input.ReadByte();
 
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  if (logFile != null)
 		  {
-			 logFile.println("CMD received: " + cmd.ToString("x"));
+			 logFile.WriteLine("CMD received: " + cmd.ToString("x"));
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
@@ -578,15 +589,15 @@ namespace com.dalsemi.onewire.adapter
 		  {
 			 // no-op, might update timer of some sort later
 			 simulationPing(1000);
-			 conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-			 conn.output.flush();
+			 conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+			 await conn.output.StoreAsync();
 		  }
 		  else
 		  {
-			 long timeDelta = DateTimeHelperClass.CurrentUnixTimeMillis() - timeOfLastCommand;
+			 long timeDelta = CurrentUnixTimeMillis() - timeOfLastCommand;
 			 if (SIM_DEBUG && logFile != null)
 			 {
-				logFile.println("general: timeDelta=" + timeDelta);
+				logFile.WriteLine("general: timeDelta=" + timeDelta);
 			 }
 			 if (timeDelta >= IGNORE_TIME_MIN && timeDelta <= IGNORE_TIME_MAX)
 			 {
@@ -711,7 +722,7 @@ namespace com.dalsemi.onewire.adapter
 				   default:
 					  if (SIM_DEBUG && logFile != null)
 					  {
-						 logFile.println("Unkown command received: " + cmd);
+						 logFile.WriteLine("Unkown command received: " + cmd);
 					  }
 					  break;
 				}
@@ -720,13 +731,13 @@ namespace com.dalsemi.onewire.adapter
 			 {
 				if (SIM_DEBUG && logFile != null)
 				{
-				   logFile.println("Exception: " + owe.ToString());
+				   logFile.WriteLine("Exception: " + owe.ToString());
 				}
-				conn.output.writeByte(NetAdapterConstants_Fields.RET_FAILURE);
-				conn.output.writeUTF(owe.ToString());
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.RET_FAILURE);
+				conn.output.WriteString(owe.ToString());
+				await conn.output.StoreAsync();
 			 }
-			 timeOfLastCommand = DateTimeHelperClass.CurrentUnixTimeMillis();
+			 timeOfLastCommand = CurrentUnixTimeMillis();
 		  }
 	   }
 
@@ -740,10 +751,10 @@ namespace com.dalsemi.onewire.adapter
 		  {
 			 if (conn.sock != null)
 			 {
-				conn.sock.close();
+				//TODO conn.sock.Close();
 			 }
 		  }
-		  catch (IOException)
+		  catch (System.IO.IOException)
 		  { //drain
 	;
 		  }
@@ -760,126 +771,126 @@ namespace com.dalsemi.onewire.adapter
 	   //-------- Finding iButton/1-Wire device options
 	   //--------
 
-	   private void adapterFindFirstDevice(NetAdapterConstants_Connection conn)
+	   private async void adapterFindFirstDevice(NetAdapterConstants_Connection conn)
 	   {
 		  bool b = true; //adapter.findFirstDevice();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   findFirstDevice returned " + b);
+			 logFile.WriteLine("   findFirstDevice returned " + b);
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(b);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(b);
+		  await conn.output.StoreAsync();
 	   }
 
-	   private void adapterFindNextDevice(NetAdapterConstants_Connection conn)
+	   private async void adapterFindNextDevice(NetAdapterConstants_Connection conn)
 	   {
 		  bool b = false; //adapter.findNextDevice();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   findNextDevice returned " + b);
+			 logFile.WriteLine("   findNextDevice returned " + b);
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(b);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(b);
+		  await conn.output.StoreAsync();
 	   }
 
-	   private void adapterGetAddress(NetAdapterConstants_Connection conn)
+	   private async void adapterGetAddress(NetAdapterConstants_Connection conn)
 	   {
 		  if (logFile != null)
 		  {
-			 logFile.println("   adapter.getAddress(byte[]) called");
+			 logFile.WriteLine("   adapter.getAddress(byte[]) called");
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.write(fakeAddress, 0, 8);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBytes(fakeAddress);
+		  await conn.output.StoreAsync();
 	   }
 
-	   private void adapterSetSearchOnlyAlarmingDevices(NetAdapterConstants_Connection conn)
+	   private async void adapterSetSearchOnlyAlarmingDevices(NetAdapterConstants_Connection conn)
 	   {
 		  if (logFile != null)
 		  {
-			 logFile.println("   setSearchOnlyAlarmingDevices called");
+			 logFile.WriteLine("   setSearchOnlyAlarmingDevices called");
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
-	   private void adapterSetNoResetSearch(NetAdapterConstants_Connection conn)
+	   private async void adapterSetNoResetSearch(NetAdapterConstants_Connection conn)
 	   {
 		  if (logFile != null)
 		  {
-			 logFile.println("   setNoResetSearch called");
+			 logFile.WriteLine("   setNoResetSearch called");
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
-	   private void adapterSetSearchAllDevices(NetAdapterConstants_Connection conn)
+	   private async void adapterSetSearchAllDevices(NetAdapterConstants_Connection conn)
 	   {
 		  if (logFile != null)
 		  {
-			 logFile.println("   setSearchAllDevices called");
+			 logFile.WriteLine("   setSearchAllDevices called");
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
-	   private void adapterTargetAllFamilies(NetAdapterConstants_Connection conn)
+	   private async void adapterTargetAllFamilies(NetAdapterConstants_Connection conn)
 	   {
 		  if (logFile != null)
 		  {
-			 logFile.println("   targetAllFamilies called");
+			 logFile.WriteLine("   targetAllFamilies called");
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
-	   }
-
-	   // TODO
-	   private void adapterTargetFamily(NetAdapterConstants_Connection conn)
-	   {
-		  // get the number of family codes to expect
-		  int len = conn.input.readInt();
-		  // get the family codes
-		  sbyte[] family = new sbyte[len];
-		  conn.input.readFully(family, 0, len);
-
-		  if (logFile != null)
-		  {
-			 logFile.println("   targetFamily called");
-			 logFile.println("      families: " + Convert.toHexString(family));
-		  }
-
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterExcludeFamily(NetAdapterConstants_Connection conn)
+	   private async void adapterTargetFamily(NetAdapterConstants_Connection conn)
 	   {
 		  // get the number of family codes to expect
-		  int len = conn.input.readInt();
+		  int len = conn.input.ReadInt32();
 		  // get the family codes
-		  sbyte[] family = new sbyte[len];
-		  conn.input.readFully(family, 0, len);
+		  byte[] family = new byte[len];
+		  conn.input.ReadBytes(family);
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   excludeFamily called");
-			 logFile.println("      families: " + Convert.toHexString(family));
+			 logFile.WriteLine("   targetFamily called");
+			 logFile.WriteLine("      families: " + Convert.toHexString(family));
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
+	   }
+
+	   // TODO
+	   private async void adapterExcludeFamily(NetAdapterConstants_Connection conn)
+	   {
+		  // get the number of family codes to expect
+		  int len = conn.input.ReadInt32();
+		  // get the family codes
+		  byte[] family = new byte[len];
+		  conn.input.ReadBytes(family);
+
+		  if (logFile != null)
+		  {
+			 logFile.WriteLine("   excludeFamily called");
+			 logFile.WriteLine("      families: " + Convert.toHexString(family));
+		  }
+
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
 	   //--------
@@ -887,137 +898,137 @@ namespace com.dalsemi.onewire.adapter
 	   //--------
 
 	   // TODO
-	   private void adapterBeginExclusive(NetAdapterConstants_Connection conn)
+	   private async void adapterBeginExclusive(NetAdapterConstants_Connection conn)
 	   {
 		  if (logFile != null)
 		  {
-			 logFile.println("   adapter.beginExclusive called");
+			 logFile.WriteLine("   adapter.beginExclusive called");
 		  }
 
 		  // get blocking boolean
 		  //boolean blocking = 
-			 conn.input.readBoolean();
+			 conn.input.ReadBoolean();
 		  // call beginExclusive
 		  bool b = true;
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(b);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(b);
+          await conn.output.StoreAsync();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("      adapter.beginExclusive returned " + b);
+			 logFile.WriteLine("      adapter.beginExclusive returned " + b);
 		  }
 	   }
 
 	   // TODO
-	   private void adapterEndExclusive(NetAdapterConstants_Connection conn)
+	   private async void adapterEndExclusive(NetAdapterConstants_Connection conn)
 	   {
 		  if (logFile != null)
 		  {
-			 logFile.println("   adapter.endExclusive called");
+			 logFile.WriteLine("   adapter.endExclusive called");
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
 	   //--------
 	   //-------- Primitive 1-Wire Network data methods
 	   //--------
 
-	   private void adapterReset(NetAdapterConstants_Connection conn)
+	   private async void adapterReset(NetAdapterConstants_Connection conn)
 	   {
 		  int i = 1; // return 1 for presence pulse
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   reset returned " + i);
+			 logFile.WriteLine("   reset returned " + i);
 		  }
 
 		  simulationReset();
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeInt(i);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteInt32(i);
+		  await conn.output.StoreAsync();
 	   }
 
 	   //TODO
-	   private void adapterPutBit(NetAdapterConstants_Connection conn)
+	   private async void adapterPutBit(NetAdapterConstants_Connection conn)
 	   {
 		  // get the value of the bit
-		  bool bit = conn.input.readBoolean();
+		  bool bit = conn.input.ReadBoolean();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   putBit called");
-			 logFile.println("      bit=" + bit);
+			 logFile.WriteLine("   putBit called");
+			 logFile.WriteLine("      bit=" + bit);
 		  }
 
 		  simulationPutBit(bit);
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
-	   private void adapterPutByte(NetAdapterConstants_Connection conn)
+	   private async void adapterPutByte(NetAdapterConstants_Connection conn)
 	   {
 		  // get the value of the byte
-		  sbyte b = conn.input.readByte();
+		  byte b = conn.input.ReadByte();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   putByte called");
-			 logFile.println("      byte=" + Convert.toHexString(b));
+			 logFile.WriteLine("   putByte called");
+			 logFile.WriteLine("      byte=" + Convert.toHexString(b));
 		  }
 
 		  simulationPutByte(b);
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
-	   private void adapterGetBit(NetAdapterConstants_Connection conn)
+	   private async void adapterGetBit(NetAdapterConstants_Connection conn)
 	   {
 		  bool bit = simulationGetBit();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   getBit called");
-			 logFile.println("      bit=" + bit);
+			 logFile.WriteLine("   getBit called");
+			 logFile.WriteLine("      bit=" + bit);
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(bit);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(bit);
+		  await conn.output.StoreAsync();
 	   }
 
-	   private void adapterGetByte(NetAdapterConstants_Connection conn)
+	   private async void adapterGetByte(NetAdapterConstants_Connection conn)
 	   {
-		  int b = simulationGetByte();
+		  byte b = simulationGetByte();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   getByte called");
-			 logFile.println("      byte=" + Convert.toHexString((sbyte)b));
+			 logFile.WriteLine("   getByte called");
+			 logFile.WriteLine("      byte=" + Convert.toHexString((byte)b));
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeByte(b);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteByte(b);
+          await conn.output.StoreAsync();
 	   }
 
-	   private void adapterGetBlock(NetAdapterConstants_Connection conn)
+	   private async void adapterGetBlock(NetAdapterConstants_Connection conn)
 	   {
 		  // get the number requested
-		  int len = conn.input.readInt();
+		  int len = conn.input.ReadInt32();
 		  if (logFile != null)
 		  {
-			 logFile.println("   getBlock called");
-			 logFile.println("      len=" + len);
+			 logFile.WriteLine("   getBlock called");
+			 logFile.WriteLine("      len=" + len);
 		  }
 
 		  // get the bytes
-		  sbyte[] b = new sbyte[len];
+		  byte[] b = new byte[len];
 		  for (int i = 0; i < len; i++)
 		  {
 			 b[i] = simulationGetByte();
@@ -1025,36 +1036,36 @@ namespace com.dalsemi.onewire.adapter
 
 		  if (logFile != null)
 		  {
-			 logFile.println("      returned: " + Convert.toHexString(b));
+			 logFile.WriteLine("      returned: " + Convert.toHexString(b));
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.write(b, 0, len);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBytes(b);
+		  await conn.output.StoreAsync();
 	   }
 
-	   private void adapterDataBlock(NetAdapterConstants_Connection conn)
+	   private async void adapterDataBlock(NetAdapterConstants_Connection conn)
 	   {
 		  if (logFile != null)
 		  {
-			 logFile.println("   DataBlock called");
+			 logFile.WriteLine("   DataBlock called");
 		  }
 		  // get the number to block
-		  int len = conn.input.readInt();
+		  int len = conn.input.ReadInt32();
 		  // get the bytes to block
-		  sbyte[] b = new sbyte[len];
-		  conn.input.readFully(b, 0, len);
+		  byte[] b = new byte[len];
+		  conn.input.ReadBytes(b);
 
 		  if (logFile != null)
 		  {
-			 logFile.println("      " + len + " bytes");
-			 logFile.println("      Send: " + Convert.toHexString(b));
+			 logFile.WriteLine("      " + len + " bytes");
+			 logFile.WriteLine("      Send: " + Convert.toHexString(b));
 		  }
 
 		  // do the block
 		  for (int i = 0; i < len; i++)
 		  {
-			 if (b[i] == unchecked((sbyte)0x0FF))
+			 if (b[i] == 0x0FF)
 			 {
 				b[i] = simulationGetByte();
 			 }
@@ -1066,12 +1077,12 @@ namespace com.dalsemi.onewire.adapter
 
 		  if (logFile != null)
 		  {
-			 logFile.println("      Recv: " + Convert.toHexString(b));
+			 logFile.WriteLine("      Recv: " + Convert.toHexString(b));
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.write(b, 0, len);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBytes(b);
+		  await conn.output.StoreAsync();
 	   }
 
 	   //--------
@@ -1079,111 +1090,111 @@ namespace com.dalsemi.onewire.adapter
 	   //--------
 
 	   // TODO
-	   private void adapterSetPowerDuration(NetAdapterConstants_Connection conn)
+	   private async void adapterSetPowerDuration(NetAdapterConstants_Connection conn)
 	   {
 		  // get the time factor value
-		  int timeFactor = conn.input.readInt();
+		  int timeFactor = conn.input.ReadInt32();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   setPowerDuration called");
-			 logFile.println("      timeFactor=" + timeFactor);
+			 logFile.WriteLine("   setPowerDuration called");
+			 logFile.WriteLine("      timeFactor=" + timeFactor);
 		  }
 
 		  // call setPowerDuration
 		  //adapter.setPowerDuration(timeFactor);
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterStartPowerDelivery(NetAdapterConstants_Connection conn)
+	   private async void adapterStartPowerDelivery(NetAdapterConstants_Connection conn)
 	   {
 		  // get the change condition value
-		  int changeCondition = conn.input.readInt();
+		  int changeCondition = conn.input.ReadInt32();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   startPowerDelivery called");
-			 logFile.println("      changeCondition=" + changeCondition);
+			 logFile.WriteLine("   startPowerDelivery called");
+			 logFile.WriteLine("      changeCondition=" + changeCondition);
 		  }
 
 		  // call startPowerDelivery
 		  bool success = true; //adapter.startPowerDelivery(changeCondition);
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(success);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(success);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterSetProgramPulseDuration(NetAdapterConstants_Connection conn)
+	   private async void adapterSetProgramPulseDuration(NetAdapterConstants_Connection conn)
 	   {
 		  // get the time factor value
-		  int timeFactor = conn.input.readInt();
+		  int timeFactor = conn.input.ReadInt32();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   setProgramPulseDuration called");
-			 logFile.println("      timeFactor=" + timeFactor);
+			 logFile.WriteLine("   setProgramPulseDuration called");
+			 logFile.WriteLine("      timeFactor=" + timeFactor);
 		  }
 
 		  // call setProgramPulseDuration
 		  //adapter.setProgramPulseDuration(timeFactor);
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterStartProgramPulse(NetAdapterConstants_Connection conn)
+	   private async void adapterStartProgramPulse(NetAdapterConstants_Connection conn)
 	   {
 		  // get the change condition value
-		  int changeCondition = conn.input.readInt();
+		  int changeCondition = conn.input.ReadInt32();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   startProgramPulse called");
-			 logFile.println("      changeCondition=" + changeCondition);
+			 logFile.WriteLine("   startProgramPulse called");
+			 logFile.WriteLine("      changeCondition=" + changeCondition);
 		  }
 
 		  // call startProgramPulse();
 		  bool success = true; //adapter.startProgramPulse(changeCondition);
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(success);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(success);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterStartBreak(NetAdapterConstants_Connection conn)
+	   private async void adapterStartBreak(NetAdapterConstants_Connection conn)
 	   {
 		  if (logFile != null)
 		  {
-			 logFile.println("   startBreak called");
+			 logFile.WriteLine("   startBreak called");
 		  }
 
 		  // call startBreak();
 		  //adapter.startBreak();
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterSetPowerNormal(NetAdapterConstants_Connection conn)
+	   private async void adapterSetPowerNormal(NetAdapterConstants_Connection conn)
 	   {
 		  if (logFile != null)
 		  {
-			 logFile.println("   setPowerNormal called");
+			 logFile.WriteLine("   setPowerNormal called");
 		  }
 
 		  // call setPowerNormal
 		  //adapter.setPowerNormal();
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
 	   //--------
@@ -1191,39 +1202,39 @@ namespace com.dalsemi.onewire.adapter
 	   //--------
 
 	   // TODO
-	   private void adapterSetSpeed(NetAdapterConstants_Connection conn)
+	   private async void adapterSetSpeed(NetAdapterConstants_Connection conn)
 	   {
 		  // get the value of the new speed
-		  int speed = conn.input.readInt();
+		  int speed = conn.input.ReadInt32();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   setSpeed called");
-			 logFile.println("      speed=" + speed);
+			 logFile.WriteLine("   setSpeed called");
+			 logFile.WriteLine("      speed=" + speed);
 		  }
 
 		  // do the setSpeed
 		  //adapter.setSpeed(speed);
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterGetSpeed(NetAdapterConstants_Connection conn)
+	   private async void adapterGetSpeed(NetAdapterConstants_Connection conn)
 	   {
 		  // get the adapter speed
 		  int speed = 0; //adapter.getSpeed();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   getSpeed called");
-			 logFile.println("      speed=" + speed);
+			 logFile.WriteLine("   getSpeed called");
+			 logFile.WriteLine("      speed=" + speed);
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeInt(speed);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteInt32(speed);
+		  await conn.output.StoreAsync();
 	   }
 
 
@@ -1232,108 +1243,108 @@ namespace com.dalsemi.onewire.adapter
 	   //--------
 
 	   // TODO
-	   private void adapterCanOverdrive(NetAdapterConstants_Connection conn)
+	   private async void adapterCanOverdrive(NetAdapterConstants_Connection conn)
 	   {
 		  bool b = false; //adapter.canOverdrive();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   canOverdrive returned " + b);
+			 logFile.WriteLine("   canOverdrive returned " + b);
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(b);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(b);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterCanHyperdrive(NetAdapterConstants_Connection conn)
+	   private async void adapterCanHyperdrive(NetAdapterConstants_Connection conn)
 	   {
 		  bool b = false; //adapter.canHyperdrive();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   canHyperDrive returned " + b);
+			 logFile.WriteLine("   canHyperDrive returned " + b);
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(b);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(b);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterCanFlex(NetAdapterConstants_Connection conn)
+	   private async void adapterCanFlex(NetAdapterConstants_Connection conn)
 	   {
 		  bool b = false; //adapter.canFlex();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   canFlex returned " + b);
+			 logFile.WriteLine("   canFlex returned " + b);
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(b);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(b);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterCanProgram(NetAdapterConstants_Connection conn)
+	   private async void adapterCanProgram(NetAdapterConstants_Connection conn)
 	   {
 		  bool b = true; //adapter.canProgram();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   canProgram returned " + b);
+			 logFile.WriteLine("   canProgram returned " + b);
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(b);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(b);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterCanDeliverPower(NetAdapterConstants_Connection conn)
+	   private async void adapterCanDeliverPower(NetAdapterConstants_Connection conn)
 	   {
 		  bool b = true; //adapter.canDeliverPower();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   canDeliverPower returned " + b);
+			 logFile.WriteLine("   canDeliverPower returned " + b);
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(b);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(b);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterCanDeliverSmartPower(NetAdapterConstants_Connection conn)
+	   private async void adapterCanDeliverSmartPower(NetAdapterConstants_Connection conn)
 	   {
 		  bool b = true; //adapter.canDeliverSmartPower();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   canDeliverSmartPower returned " + b);
+			 logFile.WriteLine("   canDeliverSmartPower returned " + b);
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(b);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(b);
+		  await conn.output.StoreAsync();
 	   }
 
 	   // TODO
-	   private void adapterCanBreak(NetAdapterConstants_Connection conn)
+	   private async void adapterCanBreak(NetAdapterConstants_Connection conn)
 	   {
 		  bool b = true; //adapter.canBreak();
 
 		  if (logFile != null)
 		  {
-			 logFile.println("   canBreak returned " + b);
+			 logFile.WriteLine("   canBreak returned " + b);
 		  }
 
-		  conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-		  conn.output.writeBoolean(b);
-		  conn.output.flush();
+		  conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+		  conn.output.WriteBoolean(b);
+		  await conn.output.StoreAsync();
 	   }
 
 	   //--------
@@ -1344,7 +1355,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// Private inner class for servicing new connections.
 	   /// Can be run in it's own thread or in the same thread.
 	   /// </summary>
-	   private class SocketHandler : Runnable
+	   private class SocketHandler //TODO : Runnable
 	   {
 		   private readonly NetAdapterSim outerInstance;
 
@@ -1363,52 +1374,53 @@ namespace com.dalsemi.onewire.adapter
 		  /// streams and send's the version of this host to the client
 		  /// connection.
 		  /// </summary>
-		  public SocketHandler(NetAdapterSim outerInstance, Socket sock)
+		  public SocketHandler(NetAdapterSim outerInstance, System.Net.Sockets.Socket sock)
 		  {
 			  this.outerInstance = outerInstance;
-			 // set socket timeout to 10 seconds
-			 sock.SoTimeout = outerInstance.timeoutInSeconds * 1000;
+             //TODO
+			 //// set socket timeout to 10 seconds
+			 //sock.SoTimeout = outerInstance.timeoutInSeconds * 1000;
 
-			 // create the connection object
-			 conn = new NetAdapterConstants_Connection();
-			 conn.sock = sock;
-			 conn.input = new DataInputStream(conn.sock.InputStream);
-			 if (NetAdapterConstants_Fields.BUFFERED_OUTPUT)
-			 {
-				conn.output = new DataOutputStream(new BufferedOutputStream(conn.sock.OutputStream));
-			 }
-			 else
-			 {
-				conn.output = new DataOutputStream(conn.sock.OutputStream);
-			 }
+			 //// create the connection object
+			 //conn = new NetAdapterConstants_Connection();
+			 //conn.sock = sock;
+			 //conn.input = new DataInputStream(conn.sock.InputStream);
+			 //if (NetAdapterConstants_Fields.BUFFERED_OUTPUT)
+			 //{
+				//conn.output = new DataOutputStream(new BufferedOutputStream(conn.sock.OutputStream));
+			 //}
+			 //else
+			 //{
+				//conn.output = new DataOutputStream(conn.sock.OutputStream);
+			 //}
 
 			 // first thing transmitted should be version info
 			 if (!outerInstance.sendVersionUID(conn))
 			 {
-				throw new IOException("send version failed");
+				throw new System.IO.IOException("send version failed");
 			 }
 
 			 // authenticate the client
-			 sbyte[] chlg = new sbyte[8];
+			 byte[] chlg = new byte[8];
 			 rand.NextBytes(chlg);
-			 conn.output.write(chlg);
-			 conn.output.flush();
+			 conn.output.WriteBytes(chlg);
+			 conn.output.StoreAsync();
 
 			 // compute the crc of the secret and the challenge
 			 int crc = CRC16.compute(outerInstance.netAdapterSecret, 0);
 			 crc = CRC16.compute(chlg, crc);
-			 int answer = conn.input.readInt();
+			 int answer = conn.input.ReadInt32();
 			 if (answer != crc)
 			 {
-				conn.output.writeByte(NetAdapterConstants_Fields.RET_FAILURE);
-				conn.output.writeUTF("Client Authentication Failed");
-				conn.output.flush();
-				throw new IOException("authentication failed");
+				conn.output.WriteByte(NetAdapterConstants_Fields.RET_FAILURE);
+				conn.output.WriteString("Client Authentication Failed");
+				conn.output.StoreAsync();
+				throw new System.IO.IOException("authentication failed");
 			 }
 			 else
 			 {
-				conn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+				conn.output.StoreAsync();
 			 }
 		  }
 
@@ -1429,8 +1441,8 @@ namespace com.dalsemi.onewire.adapter
 			 {
 				if (outerInstance.logFile != null)
 				{
-				   Debug.WriteLine(t.ToString());
-				   Debug.Write(t.StackTrace);
+				   System.Diagnostics.Debug.WriteLine(t.ToString());
+				   System.Diagnostics.Debug.Write(t.StackTrace);
 				}
 				outerInstance.close(conn);
 			 }
@@ -1442,7 +1454,7 @@ namespace com.dalsemi.onewire.adapter
 				{
 				   // thread finished running without being stopped.
 				   // politely remove it from the hashtable.
-				   outerInstance.hashHandlers.Remove(Thread.CurrentThread);
+				   outerInstance.hashHandlers.Remove(System.Environment.CurrentManagedThreadId);
 				}
 			 }
 		  }
@@ -1507,11 +1519,14 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		  if (SIM_DEBUG && logFile != null)
 		  {
-			 logFile.println("reset: Writing=" + OW_RESET_CMD);
-			 logFile.println("reset: Writing=" + RUN + OW_RESET_RUN_LENGTH);
+			 logFile.WriteLine("reset: Writing=" + OW_RESET_CMD);
+			 logFile.WriteLine("reset: Writing=" + RUN + OW_RESET_RUN_LENGTH);
 		  }
-		  processInput.BaseStream.WriteByte(OW_RESET_CMD + LINE_DELIM);
-		  processInput.BaseStream.WriteByte(RUN + OW_RESET_RUN_LENGTH + LINE_DELIM);
+
+          byte[] reset_cmd = Encoding.UTF8.GetBytes(OW_RESET_CMD + LINE_DELIM);
+          processInput.BaseStream.Write(reset_cmd, 0, reset_cmd.Length);
+          byte[] run_cmd = Encoding.UTF8.GetBytes(OW_RESET_CMD + LINE_DELIM);
+		  processInput.BaseStream.Write(run_cmd, 0, run_cmd.Length);
 		  processInput.Flush();
 
 		  // wait for it to complete
@@ -1521,7 +1536,7 @@ namespace com.dalsemi.onewire.adapter
 			 string line = processOutput.ReadLine();
 			 if (SIM_DEBUG && logFile != null)
 			 {
-				logFile.println("reset: complete=" + complete + ", read=" + line);
+				logFile.WriteLine("reset: complete=" + complete + ", read=" + line);
 			 }
 			 if (complete == 0 && line.IndexOf(OW_RESET_RESULT, StringComparison.Ordinal) >= 0)
 			 {
@@ -1536,7 +1551,7 @@ namespace com.dalsemi.onewire.adapter
 		  }
 		  if (SIM_DEBUG && logFile != null)
 		  {
-			 logFile.println("reset: Complete");
+			 logFile.WriteLine("reset: Complete");
 		  }
 	   }
 
@@ -1546,11 +1561,13 @@ namespace com.dalsemi.onewire.adapter
 
 		  if (SIM_DEBUG && logFile != null)
 		  {
-			 logFile.println("getBit: Writing=" + OW_READ_SLOT_CMD);
-			 logFile.println("getBit: Writing=" + RUN + OW_READ_SLOT_RUN_LENGTH);
+			 logFile.WriteLine("getBit: Writing=" + OW_READ_SLOT_CMD);
+			 logFile.WriteLine("getBit: Writing=" + RUN + OW_READ_SLOT_RUN_LENGTH);
 		  }
-		  processInput.BaseStream.WriteByte(OW_READ_SLOT_CMD + LINE_DELIM);
-		  processInput.BaseStream.WriteByte(RUN + OW_READ_SLOT_RUN_LENGTH + LINE_DELIM);
+          byte[] read_cmd = Encoding.UTF8.GetBytes(OW_READ_SLOT_CMD + LINE_DELIM);
+		  processInput.BaseStream.Write(read_cmd, 0, read_cmd.Length);
+          byte[] run_cmd = Encoding.UTF8.GetBytes(RUN + OW_READ_SLOT_RUN_LENGTH + LINE_DELIM);
+		  processInput.BaseStream.Write(run_cmd, 0, run_cmd.Length);
 		  processInput.Flush();
 
 		  // wait for it to complete
@@ -1560,7 +1577,7 @@ namespace com.dalsemi.onewire.adapter
 			 string line = processOutput.ReadLine();
 			 if (SIM_DEBUG && logFile != null)
 			 {
-				logFile.println("getBit: complete=" + complete + ", read=" + line);
+				logFile.WriteLine("getBit: complete=" + complete + ", read=" + line);
 			 }
 			 if (complete == 0 && line.IndexOf("OW = 1'b0", StringComparison.Ordinal) >= 0)
 			 {
@@ -1587,22 +1604,24 @@ namespace com.dalsemi.onewire.adapter
 		  }
 		  if (SIM_DEBUG && logFile != null)
 		  {
-			 logFile.println("getBit: Complete");
+			 logFile.WriteLine("getBit: Complete");
 		  }
 		  return bit;
 	   }
 
-	   private sbyte simulationGetByte()
+	   private byte simulationGetByte()
 	   {
-		  sbyte bits = 0;
+		  byte bits = 0;
 
 		  if (SIM_DEBUG && logFile != null)
 		  {
-			 logFile.println("getByte: Writing=" + OW_READ_BYTE_CMD);
-			 logFile.println("getByte: Writing=" + RUN + OW_READ_BYTE_RUN_LENGTH);
+			 logFile.WriteLine("getByte: Writing=" + OW_READ_BYTE_CMD);
+			 logFile.WriteLine("getByte: Writing=" + RUN + OW_READ_BYTE_RUN_LENGTH);
 		  }
-		  processInput.BaseStream.WriteByte(OW_READ_BYTE_CMD + LINE_DELIM);
-		  processInput.BaseStream.WriteByte(RUN + OW_READ_BYTE_RUN_LENGTH + LINE_DELIM);
+          byte[] read_cmd = Encoding.UTF8.GetBytes(OW_READ_BYTE_CMD + LINE_DELIM);
+		  processInput.BaseStream.Write(read_cmd, 0, read_cmd.Length);
+          byte[] run_cmd = Encoding.UTF8.GetBytes(RUN + OW_READ_BYTE_RUN_LENGTH + LINE_DELIM);
+          processInput.BaseStream.Write(run_cmd, 0, run_cmd.Length);
 		  processInput.Flush();
 
 		  // wait for it to complete
@@ -1614,7 +1633,7 @@ namespace com.dalsemi.onewire.adapter
 				string line = processOutput.ReadLine();
 				if (SIM_DEBUG && logFile != null)
 				{
-				   logFile.println("getByte: complete=" + complete + ", read=" + line);
+				   logFile.WriteLine("getByte: complete=" + complete + ", read=" + line);
 				}
 				if (complete == 0 && line.IndexOf(OW_READ_RESULT, StringComparison.Ordinal) >= 0)
 				{
@@ -1622,9 +1641,9 @@ namespace com.dalsemi.onewire.adapter
 				   string bitstr = line.Substring(i, 2);
 				   if (SIM_DEBUG && logFile != null)
 				   {
-					  logFile.println("getByte: bitstr=" + bitstr);
+					  logFile.WriteLine("getByte: bitstr=" + bitstr);
 				   }
-				   bits = unchecked((sbyte)(Convert.toInt(bitstr) & 0x0FF));
+				   bits = unchecked((byte)(Convert.toInt(bitstr) & 0x0FF));
 				   complete++;
 				   continue;
 				}
@@ -1636,14 +1655,14 @@ namespace com.dalsemi.onewire.adapter
 			 }
 			 if (SIM_DEBUG && logFile != null)
 			 {
-				logFile.println("getByte: complete");
+				logFile.WriteLine("getByte: complete");
 			 }
 		  }
 		  catch (Convert.ConvertException ce)
 		  {
 			 if (SIM_DEBUG && logFile != null)
 			 {
-				logFile.println("Error during hex string conversion: " + ce);
+				logFile.WriteLine("Error during hex string conversion: " + ce);
 			 }
 		  }
 		  return bits;
@@ -1655,21 +1674,26 @@ namespace com.dalsemi.onewire.adapter
 		  {
 			 if (SIM_DEBUG && logFile != null)
 			 {
-				logFile.println("putBit: Writing=" + OW_WRITE_ONE_CMD);
-				logFile.println("putBit: Writing=" + RUN + OW_WRITE_ONE_RUN_LENGTH);
+				logFile.WriteLine("putBit: Writing=" + OW_WRITE_ONE_CMD);
+				logFile.WriteLine("putBit: Writing=" + RUN + OW_WRITE_ONE_RUN_LENGTH);
 			 }
-			 processInput.BaseStream.WriteByte(OW_WRITE_ONE_CMD + LINE_DELIM);
-			 processInput.BaseStream.WriteByte(RUN + OW_WRITE_ONE_RUN_LENGTH + LINE_DELIM);
+             byte[] write_cmd = Encoding.UTF8.GetBytes(OW_WRITE_ONE_CMD + LINE_DELIM);
+		     processInput.BaseStream.Write(write_cmd, 0, write_cmd.Length);
+             byte[] run_cmd = Encoding.UTF8.GetBytes(RUN + OW_WRITE_ONE_RUN_LENGTH + LINE_DELIM);
+             processInput.BaseStream.Write(run_cmd, 0, run_cmd.Length);
+		     processInput.Flush();
 		  }
 		  else
 		  {
 			 if (SIM_DEBUG && logFile != null)
 			 {
-				logFile.println("putBit: Writing=" + OW_WRITE_ZERO_CMD);
-				logFile.println("putBit: Writing=" + RUN + OW_WRITE_ZERO_RUN_LENGTH);
+				logFile.WriteLine("putBit: Writing=" + OW_WRITE_ZERO_CMD);
+				logFile.WriteLine("putBit: Writing=" + RUN + OW_WRITE_ZERO_RUN_LENGTH);
 			 }
-			 processInput.BaseStream.WriteByte(OW_WRITE_ZERO_CMD + LINE_DELIM);
-			 processInput.BaseStream.WriteByte(RUN + OW_WRITE_ZERO_RUN_LENGTH + LINE_DELIM);
+             byte[] write_cmd = Encoding.UTF8.GetBytes(OW_WRITE_ZERO_CMD + LINE_DELIM);
+		     processInput.BaseStream.Write(write_cmd, 0, write_cmd.Length);
+             byte[] run_cmd = Encoding.UTF8.GetBytes(RUN + OW_WRITE_ZERO_RUN_LENGTH + LINE_DELIM);
+             processInput.BaseStream.Write(run_cmd, 0, run_cmd.Length);
 		  }
 		  processInput.Flush();
 
@@ -1680,7 +1704,7 @@ namespace com.dalsemi.onewire.adapter
 			 string line = processOutput.ReadLine();
 			 if (SIM_DEBUG && logFile != null)
 			 {
-				logFile.println("putBit: complete=" + complete + ", read=" + line);
+				logFile.WriteLine("putBit: complete=" + complete + ", read=" + line);
 			 }
 			 if (complete == 0 && line.IndexOf(GENERIC_CMD_END, StringComparison.Ordinal) >= 0)
 			 {
@@ -1690,21 +1714,24 @@ namespace com.dalsemi.onewire.adapter
 		  }
 		  if (SIM_DEBUG && logFile != null)
 		  {
-			 logFile.println("putBit: complete");
+			 logFile.WriteLine("putBit: complete");
 		  }
 	   }
 
-	   private void simulationPutByte(sbyte b)
+	   private void simulationPutByte(byte b)
 	   {
 		  if (SIM_DEBUG && logFile != null)
 		  {
-			 logFile.println("putByte: Writing=" + OW_WRITE_BYTE_ARG + Convert.toHexString(b));
-			 logFile.println("putByte: Writing=" + OW_WRITE_BYTE_CMD);
-			 logFile.println("putByte: Writing=" + RUN + OW_WRITE_BYTE_RUN_LENGTH);
+			 logFile.WriteLine("putByte: Writing=" + OW_WRITE_BYTE_ARG + Convert.toHexString(b));
+			 logFile.WriteLine("putByte: Writing=" + OW_WRITE_BYTE_CMD);
+			 logFile.WriteLine("putByte: Writing=" + RUN + OW_WRITE_BYTE_RUN_LENGTH);
 		  }
-		  processInput.BaseStream.WriteByte(OW_WRITE_BYTE_ARG + Convert.toHexString(b) + LINE_DELIM);
-		  processInput.BaseStream.WriteByte(OW_WRITE_BYTE_CMD + LINE_DELIM);
-		  processInput.BaseStream.WriteByte(RUN + OW_WRITE_BYTE_RUN_LENGTH + LINE_DELIM);
+          byte[] write_arg = Encoding.UTF8.GetBytes(OW_WRITE_BYTE_ARG + Convert.toHexString(b) + LINE_DELIM);
+          processInput.BaseStream.Write(write_arg, 0, write_arg.Length);
+          byte[] write_cmd = Encoding.UTF8.GetBytes(OW_WRITE_BYTE_CMD + LINE_DELIM);
+          processInput.BaseStream.Write(write_cmd, 0, write_cmd.Length);
+          byte[] run_cmd = Encoding.UTF8.GetBytes(RUN + OW_WRITE_BYTE_RUN_LENGTH + LINE_DELIM);
+          processInput.BaseStream.Write(run_cmd, 0, run_cmd.Length);
 		  processInput.Flush();
 
 		  // wait for it to complete
@@ -1714,7 +1741,7 @@ namespace com.dalsemi.onewire.adapter
 			 string line = processOutput.ReadLine();
 			 if (SIM_DEBUG && logFile != null)
 			 {
-				logFile.println("putByte: complete=" + complete + ", read=" + line);
+				logFile.WriteLine("putByte: complete=" + complete + ", read=" + line);
 			 }
 			 if (complete == 0 && line.IndexOf(GENERIC_CMD_END, StringComparison.Ordinal) >= 0)
 			 {
@@ -1724,7 +1751,7 @@ namespace com.dalsemi.onewire.adapter
 		  }
 		  if (SIM_DEBUG && logFile != null)
 		  {
-			 logFile.println("putByte: complete");
+			 logFile.WriteLine("putByte: complete");
 		  }
 	   }
 
@@ -1732,10 +1759,11 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		  if (SIM_DEBUG && logFile != null)
 		  {
-			 logFile.println("ping: timeDelta=" + timeDelta);
-			 logFile.println("ping: Writing=" + RUN + (PING_MS_RUN_LENGTH * timeDelta));
+			 logFile.WriteLine("ping: timeDelta=" + timeDelta);
+			 logFile.WriteLine("ping: Writing=" + RUN + (PING_MS_RUN_LENGTH * timeDelta));
 		  }
-		  processInput.BaseStream.WriteByte(RUN + (PING_MS_RUN_LENGTH * timeDelta) + LINE_DELIM);
+          byte[] run_cmd = Encoding.UTF8.GetBytes(RUN + (PING_MS_RUN_LENGTH * timeDelta) + LINE_DELIM);
+          processInput.BaseStream.Write(run_cmd, 0, run_cmd.Length);
 		  processInput.Flush();
 
 		  // wait for it to complete
@@ -1745,7 +1773,7 @@ namespace com.dalsemi.onewire.adapter
 			 string line = processOutput.ReadLine();
 			 if (SIM_DEBUG && logFile != null)
 			 {
-				logFile.println("ping: complete=" + complete + ", read=" + line);
+				logFile.WriteLine("ping: complete=" + complete + ", read=" + line);
 			 }
 			 if (complete == 0 && line.IndexOf(GENERIC_CMD_END, StringComparison.Ordinal) >= 0)
 			 {
@@ -1755,17 +1783,17 @@ namespace com.dalsemi.onewire.adapter
 		  }
 		  if (SIM_DEBUG && logFile != null)
 		  {
-			 logFile.println("ping: complete");
+			 logFile.WriteLine("ping: complete");
 		  }
 	   }
 
 	   private void simulationGetAddress()
 	   {
-		  this.fakeAddress = new sbyte[8];
+		  this.fakeAddress = new byte[8];
 		  // reset the simulated part
 		  simulationReset();
 		  // put the Read Rom command
-		  simulationPutByte((sbyte)0x33);
+		  simulationPutByte((byte)0x33);
 		  // get the Rom ID
 		  for (int i = 0; i < 8; i++)
 		  {
@@ -1783,47 +1811,49 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   public static void Main(string[] args)
 	   {
-		  Debug.WriteLine("NetAdapterSim");
+		  System.Diagnostics.Debug.WriteLine("NetAdapterSim");
 		  if (args.Length < 1)
 		  {
-			 Debug.WriteLine("");
-			 Debug.WriteLine("   java com.dalsemi.onewire.adapter.NetAdapterSim <execCmd> <logFilename> <simDebug>");
-			 Debug.WriteLine("");
-			 Debug.WriteLine("   execCmd     - the command to start the simulator");
-			 Debug.WriteLine("   logFilename - the name of the file to log output to");
-			 Debug.WriteLine("   simDebug    - 'true' or 'false', turns on debug output from simulation");
-			 Debug.WriteLine("");
-			 Environment.Exit(1);
+			 System.Diagnostics.Debug.WriteLine("");
+			 System.Diagnostics.Debug.WriteLine("   java com.dalsemi.onewire.adapter.NetAdapterSim <execCmd> <logFilename> <simDebug>");
+			 System.Diagnostics.Debug.WriteLine("");
+			 System.Diagnostics.Debug.WriteLine("   execCmd     - the command to start the simulator");
+			 System.Diagnostics.Debug.WriteLine("   logFilename - the name of the file to log output to");
+			 System.Diagnostics.Debug.WriteLine("   simDebug    - 'true' or 'false', turns on debug output from simulation");
+			 System.Diagnostics.Debug.WriteLine("");
+             return;
 		  }
 
 		  string execCmd = args[0];
-		  Debug.WriteLine("   Executing: " + execCmd);
+		  System.Diagnostics.Debug.WriteLine("   Executing: " + execCmd);
 		  string logFilename = null;
 		  if (args.Length > 1)
 		  {
 			 if (!args[1].ToLower().Equals("false"))
 			 {
 				logFilename = args[1];
-				Debug.WriteLine("   Logging data to file: " + logFilename);
+				System.Diagnostics.Debug.WriteLine("   Logging data to file: " + logFilename);
 			 }
 		  }
 		  if (args.Length > 2)
 		  {
 			 NetAdapterSim.SIM_DEBUG = args[2].ToLower().Equals("true");
-			 Debug.WriteLine("   Simulation Debugging is: " + (NetAdapterSim.SIM_DEBUG?"enabled":"disabled"));
+			 System.Diagnostics.Debug.WriteLine("   Simulation Debugging is: " + (NetAdapterSim.SIM_DEBUG?"enabled":"disabled"));
 		  }
 
+          var t = Task.Run(() =>
+          {
+              NetAdapterSim host = new NetAdapterSim(execCmd, logFilename);
+              System.Diagnostics.Debug.WriteLine("Device Address=" + Address.ToString(host.fakeAddress));
 
-		  NetAdapterSim host = new NetAdapterSim(execCmd, logFilename);
-		  Debug.WriteLine("Device Address=" + Address.ToString(host.fakeAddress));
+              System.Diagnostics.Debug.WriteLine("Starting Multicast Listener...");
+              host.createMulticastListener();
 
-		  Debug.WriteLine("Starting Multicast Listener...");
-		  host.createMulticastListener();
+              System.Diagnostics.Debug.WriteLine("Starting NetAdapter Host...");
+          });
 
-		  Debug.WriteLine("Starting NetAdapter Host...");
-		  (new Thread(host)).Start();
-		  Debug.WriteLine("NetAdapter Host Started");
-	   }
-	}
+          System.Diagnostics.Debug.WriteLine("NetAdapter Host Started");
+        }
+    }
 
 }
