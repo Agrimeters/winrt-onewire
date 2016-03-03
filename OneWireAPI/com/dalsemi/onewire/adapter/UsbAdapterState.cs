@@ -33,14 +33,14 @@ namespace com.dalsemi.onewire.adapter
 
 
 	/// <summary>
-	/// UAdapterState contains the communication state of the DS2480
-	///  based COM port adapter.
+	/// UsbAdapterState contains the communication state of the DS2490
+	///  based USB adapter.
 	///  //\\//\\ This class is very preliminary and not all
 	///           functionality is complete or debugged.  This
 	///           class is subject to change.                  //\\//\\
 	/// 
-	///  @version    0.00, 28 Aug 2000
-	///  @author     DS
+	///  @version    0.00, 1 Mar 2016
+	///  @author     JW
 	/// </summary>
 	internal class UsbAdapterState
 	{
@@ -58,11 +58,11 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// DS2490 speed mode, flexible speed for long lines </summary>
-	   public const byte USPEED_FLEX = 0x04;
+	   public const byte USPEED_FLEX = 0x01;
 
 	   /// <summary>
 	   /// DS2490 speed mode, overdrive speed </summary>
-	   public const byte USPEED_OVERDRIVE = 0x08;
+	   public const byte USPEED_OVERDRIVE = 0x02;
 
 	   /// <summary>
 	   /// DS2490 speed mode, pulse, for program and power delivery </summary>

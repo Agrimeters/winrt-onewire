@@ -139,16 +139,18 @@ namespace com.dalsemi.onewire.adapter
 	   public static readonly NetAdapterConstants_Connection EMPTY_CONNECTION = new NetAdapterConstants_Connection();
 	}
 
-	   public sealed class NetAdapterConstants_Connection
-	   {
+	public sealed class NetAdapterConstants_Connection
+	{
 	  /// <summary>
 	  /// socket to host </summary>
-	  public java.net.Socket sock = null;
+	  public System.Net.Sockets.Socket sock = null;
+        
 	  /// <summary>
 	  /// input stream from socket </summary>
-	  public java.io.DataInputStream input = null;
+	  public Windows.Storage.Streams.DataReader input = null;
+        
 	  /// <summary>
 	  /// output stream from socket </summary>
-	  public java.io.DataOutputStream output = null;
-	   }
+	  public Windows.Storage.Streams.DataWriter output = null;
+	}
 }

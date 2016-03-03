@@ -76,23 +76,46 @@ namespace com.dalsemi.onewire.adapter
         private static bool doDebugMessages = true;
         /// <summary>
         /// The USB port name of this object</summary>
-        private readonly string usbPortName;
+        private readonly string usbDeviceName;
         /// <summary>
         /// The USB port object for setting USB port parameters </summary>
-        private UsbDevice usbPort = null;
+        private UsbDevice usbDevice = null;
         /// <summary>
         /// The DeviceInformation device id used to open the USB port</summary>
         private string deviceId;
+
+        /// <summary>
+        /// USB Adapter packet builder </summary>
+        internal UsbPacketBuilder uBuild;
+
         /// <summary>
         /// State of the OneWire </summary>
         private OneWireState owState;
+
         /// <summary>
-        /// Usb Adapter state </summary>
+        /// USB Adapter state </summary>
         private UsbAdapterState uState;
 
-        private Ds2490.UsbStatusPacket statusPacket = new Ds2490.UsbStatusPacket();
+        /// <summary>
+        /// Flag to indicate have a local begin/end Exclusive use of serial </summary>
+        private bool haveLocalUse;
+        private object syncObject;
 
-        AutoResetEvent waitStatus = new AutoResetEvent(false);
+        /// <summary>
+        /// String name of the current opened port </summary>
+        private bool adapterPresent;
+
+        /// <summary>
+        /// Flag to indicate more than expected byte received in a transaction </summary>
+        private bool extraBytesReceived;
+
+        /// <summary>
+        /// Adapter Status registers </summary>
+        private Ds2490.UsbStatusPacket statusPacket;
+
+        /// <summary>
+        /// Event used to read interrupt only once </summary>
+        private AutoResetEvent waitStatus;
 
         /// <summary>
         /// Vector of thread hash codes that have done an open but no close </summary>
@@ -102,6 +125,19 @@ namespace com.dalsemi.onewire.adapter
 
         private ArrayList containers = new ArrayList();
 
+
+        public UsbAdapter()
+        {
+            usbDevice = null;
+            owState = new OneWireState();
+            uState = new UsbAdapterState(owState);
+            uBuild = new UsbPacketBuilder(uState);
+            statusPacket = new Ds2490.UsbStatusPacket();
+            waitStatus = new AutoResetEvent(false);
+            adapterPresent = false;
+            haveLocalUse = false;
+            syncObject = new object();
+        }
 
         /// <summary>
         /// Adds a <code>OneWireContainer</code> to the list of containers that
@@ -298,7 +334,7 @@ namespace com.dalsemi.onewire.adapter
                     throw new System.IO.IOException("Failed to open (" + portName + ")");
                 }
 
-                usbPort = t.Result;
+                usbDevice = t.Result;
 
                 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
                 if (doDebugMessages)
@@ -323,10 +359,10 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         public override void freePort()
         {
-            if (usbPort != null)
+            if (usbDevice != null)
             {
-                usbPort.Dispose();
-                usbPort = null;
+                usbDevice.Dispose();
+                usbDevice = null;
             }
         }
 
@@ -352,7 +388,7 @@ namespace com.dalsemi.onewire.adapter
             {
                 lock (this)
                 {
-                    return (usbPort != null) ? true : false;
+                    return (usbDevice != null) ? true : false;
                 }
             }
         }
@@ -364,6 +400,11 @@ namespace com.dalsemi.onewire.adapter
         private bool SendCommand(byte req, uint value, uint index, string description)
         {
             bool result = true;
+
+            if (doDebugMessages)
+            {
+                Debug.WriteLine("DEBUG: SetupCommand - " + description);
+            }
 
             // try to aquire the port
             try
@@ -392,7 +433,7 @@ namespace com.dalsemi.onewire.adapter
                         Length = 0
                     };
 
-                    return await usbPort.SendControlOutTransferAsync(setupPacket);
+                    return await usbDevice.SendControlOutTransferAsync(setupPacket);
                 });
 
                 t.Wait();
@@ -426,9 +467,9 @@ namespace com.dalsemi.onewire.adapter
                 DataReader reader = DataReader.FromBuffer(buffer);
 
                 statusPacket.UpdateUsbStatusPacket(reader, buffer.Length);
-            }
 
-            waitStatus.Set();
+                waitStatus.Set();
+            }
         }
 
         private TypedEventHandler<UsbInterruptInPipe, UsbInterruptInEventArgs> interruptEventHandler = null;
@@ -436,6 +477,7 @@ namespace com.dalsemi.onewire.adapter
         private void GetStatus(out byte nResultRegisters)
         {
             interruptEventHandler = new TypedEventHandler<UsbInterruptInPipe, UsbInterruptInEventArgs>(this.OnStatusChangeEvent);
+
             statusPacket.Updated = false;
             statusPacket.CommResultCodes = null;
 
@@ -468,7 +510,7 @@ namespace com.dalsemi.onewire.adapter
         /// <param name="eventHandler">Event handler that will be called when the event is raised</param>
         private void RegisterForInterruptEvent(UInt32 pipeIndex, TypedEventHandler<UsbInterruptInPipe, UsbInterruptInEventArgs> eventHandler)
         {
-            var interruptInPipes = usbPort.DefaultInterface.InterruptInPipes;
+            var interruptInPipes = usbDevice.DefaultInterface.InterruptInPipes;
 
             if (!registeredInterrupt && (pipeIndex < interruptInPipes.Count))
             {
@@ -492,7 +534,7 @@ namespace com.dalsemi.onewire.adapter
             if (registeredInterrupt)
             {
                 // Search for the correct pipe that we know we used to register events
-                var interruptInPipe = usbPort.DefaultInterface.InterruptInPipes[(int)registeredInterruptPipeIndex];
+                var interruptInPipe = usbDevice.DefaultInterface.InterruptInPipes[(int)registeredInterruptPipeIndex];
                 interruptInPipe.DataReceived -= interruptEventHandler;
 
                 registeredInterrupt = false;
@@ -561,11 +603,158 @@ namespace com.dalsemi.onewire.adapter
         }
 
         /// <summary>
+        ///  Read and verify the baud rate with the DS2480 chip and perform a
+        ///  single bit MicroLAN operation.  This is used as a DS2480 detect.
+        /// </summary>
+        ///  <returns>  'true' if the correct baud rate and bit operation
+        ///           was read from the DS2480
+        /// </returns>
+        ///  <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
+        private bool uVerify()
+        {
+            try
+            {
+                bool present = false;
+                bool vpp = false;
+
+                return ShortCheck(out present, out vpp);
+            }
+            catch (IOException ioe)
+            {
+                if (doDebugMessages)
+                {
+                    Debug.WriteLine("USBAdapter-uVerify: " + ioe);
+                }
+            }
+            catch (OneWireIOException e)
+            {
+                if (doDebugMessages)
+                {
+                    Debug.WriteLine("USBAdapter-uVerify: " + e);
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Write the raw U packet and then read the result.
+        /// </summary>
+        /// <param name="tempBuild">  the U Packet Build where the packet to send
+        ///                     resides
+        /// </param>
+        /// <returns>  the result array
+        /// </returns>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
+        private byte[] uTransaction(UPacketBuilder tempBuild)
+        {
+            int offset;
+            byte[] ret_buffer = null;
+
+            Debugger.Break();
+
+            try
+            {
+                using (MemoryStream inBuffer = new MemoryStream())
+                {
+                    // loop to send all of the packets
+                    for (System.Collections.IEnumerator packet_enum = tempBuild.Packets; packet_enum.MoveNext();)
+                    {
+
+                        // get the next packet
+                        RawSendPacket pkt = (RawSendPacket)packet_enum.Current;
+
+                        // bogus packet to indicate need to wait for long DS2480 alarm reset
+                        if ((pkt.buffer.Length == 0) && (pkt.returnLength == 0))
+                        {
+                            Thread.Sleep(6);
+
+                            continue;
+                        }
+
+                        // remember number of bytes in input
+                        offset = (int)inBuffer.Length;
+
+                        // send the packet
+                        pkt.writer.Flush();
+                        //TODO serial.write(pkt.buffer.ToArray());
+
+                        // wait on returnLength bytes in inBound
+                        //TODO byte[] read = serial.readWithTimeout(pkt.returnLength);
+                        //TODO inBuffer.Write(read, 0, read.Length);
+                    }
+
+                    // read the return packet
+                    ret_buffer = new byte[inBuffer.Length];
+
+                    ret_buffer = inBuffer.ToArray();
+
+                    // check for extra bytes in inBuffer
+                    extraBytesReceived = (inBuffer.Length > tempBuild.totalReturnLength);
+                }
+
+                return ret_buffer;
+            }
+            catch (IOException e)
+            {
+
+                // need to check on adapter
+                adapterPresent = false;
+
+                // pass it on
+                throw new OneWireIOException(e.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Verify that the DS2480 based adapter is present on the open port.
+        /// </summary>
+        /// <returns> 'true' if adapter present
+        /// </returns>
+        /// <exception cref="OneWireException"> - if port not selected </exception>
+        private bool uAdapterPresent()
+        {
+            bool rt = true;
+
+            // check if adapter has already be verified to be present
+            if (!adapterPresent)
+            {
+
+                // do a master reset
+                uMasterReset();
+
+                // attempt to verify
+                if (!uVerify())
+                {
+
+                    // do a master reset and try again
+                    uMasterReset();
+
+                    if (!uVerify())
+                    {
+
+                        rt = false;
+                    }
+                }
+            }
+
+            adapterPresent = rt;
+
+            if (doDebugMessages)
+            {
+                Debug.WriteLine("DEBUG: AdapterPresent result: " + rt);
+            }
+
+            return rt;
+        }
+
+        /// <summary>
         /// Do a master reset on the DS2490.  This initiates
         /// a master rest cycle.
         /// </summary>
         private void uMasterReset()
         {
+
             if (doDebugMessages)
             {
                 Debug.WriteLine("DEBUG: uMasterReset");
@@ -578,19 +767,9 @@ namespace com.dalsemi.onewire.adapter
                 "uMasterReset"
                 );
 
-            // reset state variables to default
-            //TODO owState.oneWireSpeed = SPEED_REGULAR;
-            //TODO uState.uSpeedMode = UsbAdapterState.USPEED_FLEX;
-        }
-
-        /// <summary>
-        /// Detects adapter presence on the selected port.  In <code>DumbAdapter</code>,
-        /// the adapter is always detected.
-        /// </summary>
-        /// <returns>  <code>true</code> </returns>
-        public override bool adapterDetected()
-        {
-            uMasterReset();
+            // reset state variables to match device
+            owState.oneWireSpeed = SPEED_REGULAR;
+            uState.uSpeedMode = UsbAdapterState.USPEED_REGULAR;
 
             // set the strong pullup duration to infinite
             SendCommand(
@@ -613,307 +792,424 @@ namespace com.dalsemi.onewire.adapter
                 Ds2490.ENABLEPULSE_PRGE,
                 "disable strong pullup, but leave program pulse enabled");
 
-            bool present = false;
-            bool vpp = false;
-            return ShortCheck(out present, out vpp);
-       }
+        }
 
-    //--------
-    //-------- Adapter features
-    //--------
+        /// <summary>
+        /// Detect adapter presence on the selected port.
+        /// </summary>
+        /// <returns>  <code>true</code> if the adapter is confirmed to be connected to
+        /// the selected port, <code>false</code> if the adapter is not connected.
+        /// </returns>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        public override bool adapterDetected()
+        {
+            bool rt;
 
-    /* The following interogative methods are provided so that client code
-     * can react selectively to underlying states without generating an
-     * exception.
-     */
+            try
+            {
 
-    /// <summary>
-    /// Applications might check this method and not attempt operation unless this method
-    /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-    /// this method always returns <code>true</code>.
-    /// </summary>
-    /// <returns>  <code>true</code>
-    ///  </returns>
-    public override bool canOverdrive()
-	   {
-		  //don't want someone to bail because of this
-		  return true;
-	   }
+                // acquire exclusive use of the port
+                beginLocalExclusive();
+                uAdapterPresent();
 
-	   /// <summary>
-	   /// Applications might check this method and not attempt operation unless this method
-	   /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-	   /// this method always returns <code>true</code>.
-	   /// </summary>
-	   /// <returns>  <code>true</code> </returns>
-	   public override bool canHyperdrive()
-	   {
-		  //don't want someone to bail because of this, although it doesn't exist yet
-		  return true;
-	   }
+                rt = uVerify();
+            }
+            catch (OneWireException)
+            {
+                rt = false;
+            }
+            finally
+            {
 
-	   /// <summary>
-	   /// Applications might check this method and not attempt operation unless this method
-	   /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-	   /// this method always returns <code>true</code>.
-	   /// </summary>
-	   /// <returns>  <code>true</code> </returns>
-	   public override bool canFlex()
-	   {
-		  //don't want someone to bail because of this
-		  return true;
-	   }
+                // release local exclusive use of port
+                endLocalExclusive();
+            }
 
-	   /// <summary>
-	   /// Applications might check this method and not attempt operation unless this method
-	   /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-	   /// this method always returns <code>true</code>.
-	   /// </summary>
-	   /// <returns>  <code>true</code> </returns>
-	   public override bool canProgram()
-	   {
-		  //don't want someone to bail because of this
-		  return true;
-	   }
+            return rt;
+        }
 
-	   /// <summary>
-	   /// Applications might check this method and not attempt operation unless this method
-	   /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-	   /// this method always returns <code>true</code>.
-	   /// </summary>
-	   /// <returns>  <code>true</code> </returns>
-	   public override bool canDeliverPower()
-	   {
-		  //don't want someone to bail because of this
-		  return true;
-	   }
+        //--------
+        //-------- Adapter features
+        //--------
 
-	   /// <summary>
-	   /// Applications might check this method and not attempt operation unless this method
-	   /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-	   /// this method always returns <code>true</code>.
-	   /// </summary>
-	   /// <returns>  <code>true</code> </returns>
-	   public override bool canDeliverSmartPower()
-	   {
-		  //don't want someone to bail because of this
-		  return true;
-	   }
+        /// <summary>
+        /// Applications might check this method and not attempt operation unless this method
+        /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
+        /// this method always returns <code>true</code>.
+        /// </summary>
+        /// <returns>  <code>true</code>
+        ///  </returns>
+        public override bool canOverdrive()
+        {
+            return true;
+        }
 
-	   /// <summary>
-	   /// Applications might check this method and not attempt operation unless this method
-	   /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-	   /// this method always returns <code>true</code>.
-	   /// </summary>
-	   /// <returns>  <code>true</code> </returns>
-	   public override bool canBreak()
-	   {
-		  //don't want someone to bail because of this
-		  return true;
-	   }
+        /// <summary>
+        /// Applications might check this method and not attempt operation unless this method
+        /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
+        /// this method always returns <code>true</code>.
+        /// </summary>
+        /// <returns>  <code>true</code> </returns>
+        public override bool canHyperdrive()
+        {
+            return true;
+        }
 
-	   //--------
-	   //-------- Finding iButtons and 1-Wire devices
-	   //--------
+        /// <summary>
+        /// Applications might check this method and not attempt operation unless this method
+        /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
+        /// this method always returns <code>true</code>.
+        /// </summary>
+        /// <returns>  <code>true</code> </returns>
+        public override bool canFlex()
+        {
+            return true;
+        }
 
-	   /// <summary>
-	   /// Returns an enumeration of <code>OneWireContainer</code> objects corresponding
-	   /// to all of the iButtons or 1-Wire devices found on the 1-Wire Network.  In the case of
-	   /// the <code>DumbAdapter</code>, this method returns a simple copy of the internal
-	   /// <code>java.util.Vector</code> that stores all the 1-Wire devices this class finds
-	   /// in a search.
-	   /// </summary>
-	   /// <returns>  <code>Enumeration</code> of <code>OneWireContainer</code> objects
-	   /// found on the 1-Wire Network. </returns>
-	   public override System.Collections.IEnumerator AllDeviceContainers
-	   {
-		   get
-		   {
-				ArrayList copy_vector = new ArrayList();
-				lock (containers)
-				{
-					for (int i = 0;i < containers.Count;i++)
-					{
-						copy_vector.Add(containers[i]);
-					}
-				}
-				return copy_vector.GetEnumerator();
-		   }
-	   }
+        /// <summary>
+        /// Applications might check this method and not attempt operation unless this method
+        /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
+        /// this method always returns <code>true</code>.
+        /// </summary>
+        /// <returns>  <code>true</code> </returns>
+        public override bool canProgram()
+        {
+            return false;
+        }
 
-	   /// <summary>
-	   /// Returns a <code>OneWireContainer</code> object corresponding to the first iButton
-	   /// or 1-Wire device found on the 1-Wire Network. If no devices are found,
-	   /// then a <code>null</code> reference will be returned. In most cases, all further
-	   /// communication with the device is done through the <code>OneWireContainer</code>.
-	   /// </summary>
-	   /// <returns>  The first <code>OneWireContainer</code> object found on the
-	   /// 1-Wire Network, or <code>null</code> if no devices found. </returns>
-	   public override OneWireContainer FirstDeviceContainer
-	   {
-		   get
-		   {
-			  lock (containers)
-			  {
-				if (containers.Count > 0)
-				{
-					containers_index = 1;
-					return (OneWireContainer) containers[0];
-				}
-				else
-				{
-					return null;
-				}
-			  }
-		   }
-	   }
+        /// <summary>
+        /// Applications might check this method and not attempt operation unless this method
+        /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
+        /// this method always returns <code>true</code>.
+        /// </summary>
+        /// <returns>  <code>true</code> </returns>
+        public override bool canDeliverPower()
+        {
+            return true;
+        }
 
-	   /// <summary>
-	   /// Returns a <code>OneWireContainer</code> object corresponding to the next iButton
-	   /// or 1-Wire device found. The previous 1-Wire device found is used
-	   /// as a starting point in the search.  If no devices are found,
-	   /// then a <code>null</code> reference will be returned. In most cases, all further
-	   /// communication with the device is done through the <code>OneWireContainer</code>.
-	   /// </summary>
-	   /// <returns>  The next <code>OneWireContainer</code> object found on the
-	   /// 1-Wire Network, or <code>null</code> if no iButtons found. </returns>
-	   public override OneWireContainer NextDeviceContainer
-	   {
-		   get
-		   {
-			  lock (containers)
-			  {
-				if (containers.Count > containers_index)
-				{
-					containers_index++;
-					return (OneWireContainer) containers[containers_index - 1];
-				}
-				else
-				{
-					return null;
-				}
-			  }
-		   }
-	   }
+        /// <summary>
+        /// Applications might check this method and not attempt operation unless this method
+        /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
+        /// this method always returns <code>true</code>.
+        /// </summary>
+        /// <returns>  <code>true</code> </returns>
+        public override bool canDeliverSmartPower()
+        {
+            return true;
+        }
 
-	   /// <summary>
-	   /// Returns <code>true</code> if the first iButton or 1-Wire device
-	   /// is found on the 1-Wire Network.
-	   /// If no devices are found, then <code>false</code> will be returned.
-	   /// </summary>
-	   /// <returns>  <code>true</code> if an iButton or 1-Wire device is found. </returns>
-	   public override bool findFirstDevice()
-	   {
-		  lock (containers)
-		  {
-			if (containers.Count > 0)
-			{
-				containers_index = 1;
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		  }
-	   }
+        /// <summary>
+        /// Applications might check this method and not attempt operation unless this method
+        /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
+        /// this method always returns <code>true</code>.
+        /// </summary>
+        /// <returns>  <code>true</code> </returns>
+        public override bool canBreak()
+        {
+            return true;
+        }
 
-	   /// <summary>
-	   /// Returns <code>true</code> if the next iButton or 1-Wire device
-	   /// is found. The previous 1-Wire device found is used
-	   /// as a starting point in the search.  If no more devices are found
-	   /// then <code>false</code> will be returned.
-	   /// </summary>
-	   /// <returns>  <code>true</code> if an iButton or 1-Wire device is found. </returns>
-	   public override bool findNextDevice()
-	   {
-		  lock (containers)
-		  {
-			if (containers.Count > containers_index)
-			{
-				containers_index++;
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		  }
-	   }
+        //--------
+        //-------- Finding iButtons and 1-Wire devices
+        //--------
 
-	   /// <summary>
-	   /// Copies the 'current' 1-Wire device address being used by the adapter into
-	   /// the array.  This address is the last iButton or 1-Wire device found
-	   /// in a search (findNextDevice()...).
-	   /// This method copies into a user generated array to allow the
-	   /// reuse of the buffer.  When searching many iButtons on the one
-	   /// wire network, this will reduce the memory burn rate.
-	   /// </summary>
-	   /// <param name="address"> An array to be filled with the current iButton address. </param>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override void getAddress(byte[] address)
-	   {
-			OneWireContainer temp = (OneWireContainer) containers[containers_index - 1];
-			if (temp != null)
-			{
-				Array.Copy(temp.Address, 0, address, 0, 8);
-			}
-	   }
+        /// <summary>
+        /// Returns <code>true</code> if the first iButton or 1-Wire device
+        /// is found on the 1-Wire Network.
+        /// If no devices are found, then <code>false</code> will be returned.
+        /// </summary>
+        /// <returns>  <code>true</code> if an iButton or 1-Wire device is found. </returns>
+        public override bool findFirstDevice()
+        {
 
-	   /// <summary>
-	   /// Gets the 'current' 1-Wire device address being used by the adapter as a long.
-	   /// This address is the last iButton or 1-Wire device found
-	   /// in a search (findNextDevice()...).
-	   /// </summary>
-	   /// <returns> <code>long</code> representation of the iButton address </returns>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override long AddressAsLong
-	   {
-		   get
-		   {
-			  byte[] address = new byte [8];
+            // reset the current search
+            owState.searchLastDiscrepancy = 0;
+            owState.searchFamilyLastDiscrepancy = 0;
+            owState.searchLastDevice = false;
+
+            // search for the first device using next
+            return findNextDevice();
+        }
+
+        /// <summary>
+        /// Returns <code>true</code> if the next iButton or 1-Wire device
+        /// is found. The previous 1-Wire device found is used
+        /// as a starting point in the search.  If no more devices are found
+        /// then <code>false</code> will be returned.
+        /// </summary>
+        /// <returns>  <code>true</code> if an iButton or 1-Wire device is found. </returns>
+        public override bool findNextDevice()
+        {
+            bool search_result;
+
+            try
+            {
+
+                // acquire exclusive use of the port
+                beginLocalExclusive();
+
+                // check for previous last device
+                if (owState.searchLastDevice)
+                {
+                    owState.searchLastDiscrepancy = 0;
+                    owState.searchFamilyLastDiscrepancy = 0;
+                    owState.searchLastDevice = false;
+
+                    return false;
+                }
+
+                // check for 'first' and only 1 target
+                if ((owState.searchLastDiscrepancy == 0) && (owState.searchLastDevice == false) && (owState.searchIncludeFamilies.Length == 1))
+                {
+
+                    // set the search to find the 1 target first
+                    owState.searchLastDiscrepancy = 64;
+
+                    // create an id to set
+                    byte[] new_id = new byte[8];
+
+                    // set the family code
+                    new_id[0] = owState.searchIncludeFamilies[0];
+
+                    // clear the rest
+                    for (int i = 1; i < 8; i++)
+                    {
+                        new_id[i] = 0;
+                    }
+
+                    // set this new ID
+                    Array.Copy(new_id, 0, owState.ID, 0, 8);
+                }
+
+                // loop until the correct type is found or no more devices
+                do
+                {
+
+                    // perform a search and keep the result
+                    search_result = search(owState);
+
+                    if (search_result)
+                    {
+
+                        // check if not in exclude list
+                        bool is_excluded = false;
+
+                        for (int i = 0; i < owState.searchExcludeFamilies.Length; i++)
+                        {
+                            if (owState.ID[0] == owState.searchExcludeFamilies[i])
+                            {
+                                is_excluded = true;
+
+                                break;
+                            }
+                        }
+
+                        // if not in exclude list then check for include list
+                        if (!is_excluded)
+                        {
+
+                            // loop through the include list
+                            bool is_included = false;
+
+                            for (int i = 0; i < owState.searchIncludeFamilies.Length; i++)
+                            {
+                                if (owState.ID[0] == owState.searchIncludeFamilies[i])
+                                {
+                                    is_included = true;
+
+                                    break;
+                                }
+                            }
+
+                            // check if include list or there is no include list
+                            if (is_included || (owState.searchIncludeFamilies.Length == 0))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+
+                    // skip the current type if not last device
+                    if (!owState.searchLastDevice && (owState.searchFamilyLastDiscrepancy != 0))
+                    {
+                        owState.searchLastDiscrepancy = owState.searchFamilyLastDiscrepancy;
+                        owState.searchFamilyLastDiscrepancy = 0;
+                        owState.searchLastDevice = false;
+                    }
+
+                    // end of search so reset and return
+                    else
+                    {
+                        owState.searchLastDiscrepancy = 0;
+                        owState.searchFamilyLastDiscrepancy = 0;
+                        owState.searchLastDevice = false;
+                        search_result = false;
+                    }
+                } while (search_result);
+
+                // device not found
+                return false;
+            }
+            finally
+            {
+
+                // release local exclusive use of port
+                endLocalExclusive();
+            }
+        }
+
+
+        /// <summary>
+        /// Copies the 'current' 1-Wire device address being used by the adapter into
+        /// the array.  This address is the last iButton or 1-Wire device found
+        /// in a search (findNextDevice()...).
+        /// This method copies into a user generated array to allow the
+        /// reuse of the buffer.  When searching many iButtons on the one
+        /// wire network, this will reduce the memory burn rate.
+        /// </summary>
+        /// <param name="address"> An array to be filled with the current iButton address. </param>
+        /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
+        public override void getAddress(byte[] address)
+        {
+            Array.Copy(owState.ID, 0, address, 0, 8);
+        }
+
+        /// <summary>
+        /// Copies the provided 1-Wire device address into the 'current'
+        /// array.  This address will then be used in the getDeviceContainer()
+        /// method.  Permits the adapter instance to create containers
+        /// of devices it did not find in a search.
+        /// </summary>
+        /// <param name="address"> An array to be copied into the current iButton
+        ///         address. </param>
+        public virtual byte[] Address
+        {
+            set
+            {
+                Array.Copy(value, 0, owState.ID, 0, 8);
+            }
+        }
+
+        ///// <summary>
+        ///// Gets the 'current' 1-Wire device address being used by the adapter as a long.
+        ///// This address is the last iButton or 1-Wire device found
+        ///// in a search (findNextDevice()...).
+        ///// </summary>
+        ///// <returns> <code>long</code> representation of the iButton address </returns>
+        ///// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
+        //public override long AddressAsLong
+        //{
+        // get
+        // {
+        // byte[] address = new byte [8];
+
+        // getAddress(address);
+
+        // return Address.toLong(address);
+        // }
+        //}
+
+        ///// <summary>
+        ///// Gets the 'current' 1-Wire device address being used by the adapter as a String.
+        ///// This address is the last iButton or 1-Wire device found
+        ///// in a search (findNextDevice()...).
+        ///// </summary>
+        ///// <returns> <code>String</code> representation of the iButton address </returns>
+        ///// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
+        //public override string AddressAsString
+        //{
+        // get
+        // {
+        // byte[] address = new byte [8];
+
+        // getAddress(address);
+
+        // return Address.ToString(address);
+        // }
+        //}
+
+        /// <summary>
+        /// Verifies that the iButton or 1-Wire device specified is present on
+        /// the 1-Wire Network. This does not affect the 'current' device
+        /// state information used in searches (findNextDevice...).
+        /// </summary>
+        /// <param name="address">  device address to verify is present
+        /// </param>
+        /// <returns>  <code>true</code> if device is present, else
+        ///         <code>false</code>.
+        /// </returns>
+        /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
+        public override bool isPresent(byte[] address)
+        {
+            try
+            {
+
+                // acquire exclusive use of the port
+                beginLocalExclusive();
+
+                // make sure adapter is present
+                if (adapterDetected())
+                {
+
+                    // check for pending power conditions
+                    if (owState.oneWireLevel != LEVEL_NORMAL)
+                    {
+                        setPowerNormal();
+                    }
+
+                    // if in overdrive, then use the block method in super
+                    if (owState.oneWireSpeed == SPEED_OVERDRIVE)
+                    {
+                        return blockIsPresent(address, false);
+                    }
+
+                    // create a private OneWireState
+                    OneWireState onewire_state = new OneWireState();
+
+                    // set the ID to the ID of the iButton passes to this method
+                    Array.Copy(address, 0, onewire_state.ID, 0, 8);
+
+                    // set the state to find the specified device
+                    onewire_state.searchLastDiscrepancy = 64;
+                    onewire_state.searchFamilyLastDiscrepancy = 0;
+                    onewire_state.searchLastDevice = false;
+                    onewire_state.searchOnlyAlarmingButtons = false;
+
+                    // perform a search
+                    if (search(onewire_state))
+                    {
+
+                        // compare the found device with the desired device
+                        for (int i = 0; i < 8; i++)
+                        {
+                            if (address[i] != onewire_state.ID[i])
+                            {
+                                return false;
+                            }
+                        }
+
+                        // must be the correct device
+                        return true;
+                    }
+
+                    // failed to find device
+                    return false;
+                }
+                else
+                {
+                    throw new OneWireIOException("Error communicating with adapter");
+                }
+            }
+            finally
+            {
+
+                // release local exclusive use of port
+                endLocalExclusive();
+            }
+        }
     
-			  getAddress(address);
-    
-			  return Address.toLong(address);
-		   }
-	   }
-
-	   /// <summary>
-	   /// Gets the 'current' 1-Wire device address being used by the adapter as a String.
-	   /// This address is the last iButton or 1-Wire device found
-	   /// in a search (findNextDevice()...).
-	   /// </summary>
-	   /// <returns> <code>String</code> representation of the iButton address </returns>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override string AddressAsString
-	   {
-		   get
-		   {
-			  byte[] address = new byte [8];
-    
-			  getAddress(address);
-    
-			  return Address.ToString(address);
-		   }
-	   }
-
-	   /// <summary>
-	   /// Verifies that the iButton or 1-Wire device specified is present on
-	   /// the 1-Wire Network. This does not affect the 'current' device
-	   /// state information used in searches (findNextDevice...).
-	   /// </summary>
-	   /// <param name="address">  device address to verify is present
-	   /// </param>
-	   /// <returns>  <code>true</code> if device is present, else
-	   ///         <code>false</code>.
-	   /// </returns>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override bool isPresent(byte[] address)
-	   {
-			return isPresent(Address.toLong(address));
-	   }
-
 	   /// <summary>
 	   /// Verifies that the iButton or 1-Wire device specified is present on
 	   /// the 1-Wire Network. This does not affect the 'current' device
@@ -942,66 +1238,89 @@ namespace com.dalsemi.onewire.adapter
 			return false;
 	   }
 
-	   /// <summary>
-	   /// Verifies that the iButton or 1-Wire device specified is present on
-	   /// the 1-Wire Network. This does not affect the 'current' device
-	   /// state information used in searches (findNextDevice...).
-	   /// </summary>
-	   /// <param name="address">  device address to verify is present
-	   /// </param>
-	   /// <returns>  <code>true</code> if device is present, else
-	   ///         <code>false</code>.
-	   /// </returns>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override bool isPresent(string address)
-	   {
-		  return isPresent(Address.toByteArray(address));
-	   }
+        /// <summary>
+        /// Verifies that the iButton or 1-Wire device specified is present
+        /// on the 1-Wire Network and in an alarm state. This does not
+        /// affect the 'current' device state information used in searches
+        /// (findNextDevice...).
+        /// </summary>
+        /// <param name="address">  device address to verify is present and alarming
+        /// </param>
+        /// <returns>  <code>true</code> if device is present and alarming else
+        /// <code>false</code>.
+        /// </returns>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
+        /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter
+        /// </exception>
+        /// <seealso cref=    com.dalsemi.onewire.utils.Address </seealso>
+        public override bool isAlarming(byte[] address)
+        {
+            try
+            {
 
-	   /// <summary>
-	   /// Verifies that the iButton or 1-Wire device specified is present
-	   /// on the 1-Wire Network and in an alarm state. This method is currently
-	   /// not implemented in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <param name="address">  device address to verify is present and alarming
-	   /// </param>
-	   /// <returns>  <code>false</code>
-	   /// </returns>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override bool isAlarming(byte[] address)
-	   {
-			return false;
-	   }
+                // acquire exclusive use of the port
+                beginLocalExclusive();
 
-	   /// <summary>
-	   /// Verifies that the iButton or 1-Wire device specified is present
-	   /// on the 1-Wire Network and in an alarm state. This method is currently
-	   /// not implemented in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <param name="address">  device address to verify is present and alarming
-	   /// </param>
-	   /// <returns>  <code>false</code>
-	   /// </returns>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override bool isAlarming(long address)
-	   {
-		  return isAlarming(Address.toByteArray(address));
-	   }
+                // make sure adapter is present
+                if (uAdapterPresent())
+                {
 
-	   /// <summary>
-	   /// Verifies that the iButton or 1-Wire device specified is present
-	   /// on the 1-Wire Network and in an alarm state. This method is currently
-	   /// not implemented in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <param name="address">  device address to verify is present and alarming
-	   /// </param>
-	   /// <returns>  <code>false</code>
-	   /// </returns>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override bool isAlarming(string address)
-	   {
-		  return isAlarming(Address.toByteArray(address));
-	   }
+                    // check for pending power conditions
+                    if (owState.oneWireLevel != LEVEL_NORMAL)
+                    {
+                        setPowerNormal();
+                    }
+
+                    // if in overdrive, then use the block method in super
+                    if (owState.oneWireSpeed == SPEED_OVERDRIVE)
+                    {
+                        return blockIsPresent(address, true);
+                    }
+
+                    // create a private OneWireState
+                    OneWireState onewire_state = new OneWireState();
+
+                    // set the ID to the ID of the iButton passes to this method
+                    Array.Copy(address, 0, onewire_state.ID, 0, 8);
+
+                    // set the state to find the specified device (alarming)
+                    onewire_state.searchLastDiscrepancy = 64;
+                    onewire_state.searchFamilyLastDiscrepancy = 0;
+                    onewire_state.searchLastDevice = false;
+                    onewire_state.searchOnlyAlarmingButtons = true;
+
+                    // perform a search
+                    if (search(onewire_state))
+                    {
+
+                        // compare the found device with the desired device
+                        for (int i = 0; i < 8; i++)
+                        {
+                            if (address[i] != onewire_state.ID[i])
+                            {
+                                return false;
+                            }
+                        }
+
+                        // must be the correct device
+                        return true;
+                    }
+
+                    // failed to find any alarming device
+                    return false;
+                }
+                else
+                {
+                    throw new OneWireIOException("Error communicating with adapter");
+                }
+            }
+            finally
+            {
+
+                // release local exclusive use of port
+                endLocalExclusive();
+            }
+        }
 
 	   /// <summary>
 	   /// Selects the specified iButton or 1-Wire device by broadcasting its
@@ -1023,45 +1342,182 @@ namespace com.dalsemi.onewire.adapter
 			return isPresent(address);
 	   }
 
-	   /// <summary>
-	   /// Selects the specified iButton or 1-Wire device by broadcasting its
-	   /// address.  With a <code>DumbAdapter</code>, this method simply
-	   /// returns true.
-	   /// 
-	   /// Warning, this does not verify that the device is currently present
-	   /// on the 1-Wire Network (See isPresent).
-	   /// </summary>
-	   /// <param name="address">    address of iButton or 1-Wire device to select
-	   /// </param>
-	   /// <returns>  <code>true</code> if device address was sent, <code>false</code>
-	   /// otherwise.
-	   /// </returns>
-	   /// <seealso cref= #isPresent(byte[]) </seealso>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override bool select(long address)
-	   {
-		  return select(Address.toByteArray(address));
-	   }
+        /// <summary>
+        /// Selects the specified iButton or 1-Wire device by broadcasting its
+        /// address.  With a <code>DumbAdapter</code>, this method simply
+        /// returns true.
+        /// 
+        /// Warning, this does not verify that the device is currently present
+        /// on the 1-Wire Network (See isPresent).
+        /// </summary>
+        /// <param name="address">    address of iButton or 1-Wire device to select
+        /// </param>
+        /// <returns>  <code>true</code> if device address was sent, <code>false</code>
+        /// otherwise.
+        /// </returns>
+        /// <seealso cref= #isPresent(byte[]) </seealso>
+        /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
+        //public override bool select(long address)
+        //{
+        //return select(Address.toByteArray(address));
+        //}
 
-	   /// <summary>
-	   /// Selects the specified iButton or 1-Wire device by broadcasting its
-	   /// address.  With a <code>DumbAdapter</code>, this method simply
-	   /// returns true.
-	   /// 
-	   /// Warning, this does not verify that the device is currently present
-	   /// on the 1-Wire Network (See isPresent).
-	   /// </summary>
-	   /// <param name="address">    address of iButton or 1-Wire device to select
-	   /// </param>
-	   /// <returns>  <code>true</code> if device address was sent, <code>false</code>
-	   /// otherwise.
-	   /// </returns>
-	   /// <seealso cref=    #isPresent(byte[]) </seealso>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override bool select(string address)
-	   {
-		  return select(Address.toByteArray(address));
-	   }
+        /// <summary>
+        /// Selects the specified iButton or 1-Wire device by broadcasting its
+        /// address.  With a <code>DumbAdapter</code>, this method simply
+        /// returns true.
+        /// 
+        /// Warning, this does not verify that the device is currently present
+        /// on the 1-Wire Network (See isPresent).
+        /// </summary>
+        /// <param name="address">    address of iButton or 1-Wire device to select
+        /// </param>
+        /// <returns>  <code>true</code> if device address was sent, <code>false</code>
+        /// otherwise.
+        /// </returns>
+        /// <seealso cref=    #isPresent(byte[]) </seealso>
+        /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
+        //public override bool select(string address)
+        //{
+        //return select(Address.toByteArray(address));
+        //}
+
+        //--------
+        //-------- Support methods
+        //--------
+
+        /// <summary>
+        /// Peform a search using the oneWire state provided
+        /// </summary>
+        ///  <param name="mState">  current OneWire state used to do the search
+        /// </param>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
+        /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
+        private bool search(OneWireState mState)
+        {
+            int reset_offset = 0;
+
+            Debugger.Break();
+
+            // make sure adapter is present
+            if (uAdapterPresent())
+            {
+
+                // check for pending power conditions
+                if (owState.oneWireLevel != LEVEL_NORMAL)
+                {
+                    setPowerNormal();
+                }
+
+                // set the correct baud rate to stream this operation
+//TODO                StreamingSpeed = UPacketBuilder.OPERATION_SEARCH;
+
+                //// reset the packet
+                //uBuild.restart();
+
+                //// add a reset/ search command
+                //if (!mState.skipResetOnSearch)
+                //{
+                //    reset_offset = oneWireReset();
+                //}
+
+                //if (mState.searchOnlyAlarmingButtons)
+                //{
+                //    uBuild.dataByte(ALARM_SEARCH_CMD);
+                //}
+                //else
+                //{
+                //    uBuild.dataByte(NORMAL_SEARCH_CMD);
+                //}
+
+                //// add search sequence based on mState
+                //int search_offset = uBuild.search(mState);
+
+                //// send/receive the search
+                //byte[] result_array = uTransaction(uBuild);
+
+                //// interpret search result and return
+                //if (!mState.skipResetOnSearch)
+                //{
+                //    uBuild.interpretOneWireReset(result_array[reset_offset]);
+                //}
+
+                //TODO return uBuild.interpretSearch(mState, result_array, search_offset);
+                return false;
+            }
+            else
+            {
+                throw new OneWireIOException("Error communicating with adapter");
+            }
+        }
+
+        /// <summary>
+        /// Perform a 'strongAccess' with the provided 1-Wire address.
+        /// 1-Wire Network has already been reset and the 'search'
+        /// command sent before this is called.
+        /// </summary>
+        /// <param name="address">  device address to do strongAccess on </param>
+        /// <param name="alarmOnly">  verify device is present and alarming if true
+        /// </param>
+        /// <returns>  true if device participated and was present
+        ///         in the strongAccess search </returns>
+        private bool blockIsPresent(byte[] address, bool alarmOnly)
+        {
+            byte[] send_packet = new byte[24];
+            int i;
+
+            // reset the 1-Wire
+            reset();
+
+            // send search command
+            if (alarmOnly)
+            {
+//TODO                putByte(ALARM_SEARCH_CMD);
+            }
+            else
+            {
+//TODO                putByte(NORMAL_SEARCH_CMD);
+            }
+
+            // set all bits at first
+            for (i = 0; i < 24; i++)
+            {
+                send_packet[i] = 0xFF;
+            }
+
+            // now set or clear apropriate bits for search
+            for (i = 0; i < 64; i++)
+            {
+                Bit.arrayWriteBit(Bit.arrayReadBit(i, 0, address), (i + 1) * 3 - 1, 0, send_packet);
+            }
+
+            // send to 1-Wire Net
+            dataBlock(send_packet, 0, 24);
+
+            // check the results of last 8 triplets (should be no conflicts)
+            int cnt = 56, goodbits = 0, tst, s;
+
+            for (i = 168; i < 192; i += 3)
+            {
+                tst = (Bit.arrayReadBit(i, 0, send_packet) << 1) | Bit.arrayReadBit(i + 1, 0, send_packet);
+                s = Bit.arrayReadBit(cnt++, 0, address);
+
+                if (tst == 0x03) // no device on line
+                {
+                    goodbits = 0; // number of good bits set to zero
+
+                    break; // quit
+                }
+
+                if (((s == 0x01) && (tst == 0x02)) || ((s == 0x00) && (tst == 0x01))) // correct bit
+                {
+                    goodbits++; // count as a good bit
+                }
+            }
+
+            // check too see if there were enough good bits to be successful
+            return (goodbits >= 8);
+        }
 
 	   //--------
 	   //-------- Finding iButton/1-Wire device options
@@ -1073,6 +1529,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <seealso cref= #setNoResetSearch </seealso>
 	   public override void setSearchOnlyAlarmingDevices()
 	   {
+            owState.searchOnlyAlarmingButtons = true;
 	   }
 
 	   /// <summary>
@@ -1081,6 +1538,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   public override void setNoResetSearch()
 	   {
+            owState.skipResetOnSearch = true;
 	   }
 
 	   /// <summary>
@@ -1089,19 +1547,23 @@ namespace com.dalsemi.onewire.adapter
 	   /// <seealso cref= #setNoResetSearch </seealso>
 	   public override void setSearchAllDevices()
 	   {
-	   }
+            owState.searchOnlyAlarmingButtons = false;
+            owState.skipResetOnSearch = false;
+       }
 
-	   /// <summary>
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <seealso cref=    #targetFamily </seealso>
-	   /// <seealso cref=    #targetFamily(byte[]) </seealso>
-	   /// <seealso cref=    #excludeFamily </seealso>
-	   /// <seealso cref=    #excludeFamily(byte[]) </seealso>
-	   public override void targetAllFamilies()
+       /// <summary>
+       /// This method does nothing in <code>DumbAdapter</code>.
+       /// </summary>
+       /// <seealso cref=    #targetFamily </seealso>
+       /// <seealso cref=    #targetFamily(byte[]) </seealso>
+       /// <seealso cref=    #excludeFamily </seealso>
+       /// <seealso cref=    #excludeFamily(byte[]) </seealso>
+       public override void targetAllFamilies()
 	   {
-		  include = null;
-		  exclude = null;
+
+          // clear the include and exclude family search lists
+          owState.searchIncludeFamilies = new byte[0];
+          owState.searchExcludeFamilies = new byte[0];
 	   }
 
 	   /// <summary>
@@ -1112,12 +1574,10 @@ namespace com.dalsemi.onewire.adapter
 	   /// <seealso cref=    #targetAllFamilies </seealso>
 	   public override void targetFamily(int family)
 	   {
-		  if ((include == null) || (include.Length != 1))
-		  {
-			 include = new byte [1];
-		  }
 
-		  include [0] = (byte) family;
+          // replace include family array with 1 element array
+          owState.searchIncludeFamilies = new byte[1];
+          owState.searchIncludeFamilies[0] = (byte)family;
 	   }
 
 	   /// <summary>
@@ -1128,12 +1588,11 @@ namespace com.dalsemi.onewire.adapter
 	   /// <seealso cref=    #targetAllFamilies </seealso>
 	   public override void targetFamily(byte[] family)
 	   {
-		  if ((include == null) || (include.Length != family.Length))
-		  {
-			 include = new byte [family.Length];
-		  }
 
-		  Array.Copy(family, 0, include, 0, family.Length);
+          // replace include family array with new array
+          owState.searchIncludeFamilies = new byte[family.Length];
+
+          Array.Copy(family, 0, owState.searchIncludeFamilies, 0, family.Length);
 	   }
 
 	   /// <summary>
@@ -1144,12 +1603,10 @@ namespace com.dalsemi.onewire.adapter
 	   /// <seealso cref=    #targetAllFamilies </seealso>
 	   public override void excludeFamily(int family)
 	   {
-		  if ((exclude == null) || (exclude.Length != 1))
-		  {
-			 exclude = new byte [1];
-		  }
 
-		  exclude [0] = (byte) family;
+            // replace exclude family array with 1 element array
+            owState.searchExcludeFamilies = new byte[1];
+            owState.searchExcludeFamilies[0] = (byte)family;
 	   }
 
 	   /// <summary>
@@ -1160,13 +1617,12 @@ namespace com.dalsemi.onewire.adapter
 	   /// <seealso cref=    #targetAllFamilies </seealso>
 	   public override void excludeFamily(byte[] family)
 	   {
-		  if ((exclude == null) || (exclude.Length != family.Length))
-		  {
-			 exclude = new byte [family.Length];
-		  }
 
-		  Array.Copy(family, 0, exclude, 0, family.Length);
-	   }
+            // replace exclude family array with new array
+            owState.searchExcludeFamilies = new byte[family.Length];
+
+            Array.Copy(family, 0, owState.searchExcludeFamilies, 0, family.Length);
+        }
 
 	   //--------
 	   //-------- 1-Wire Network Semaphore methods
@@ -1192,6 +1648,64 @@ namespace com.dalsemi.onewire.adapter
 	   {
 			//DEBUG!!! RIGHT NOW THIS IS NOT IMPLEMENTED!!!
 	   }
+
+        /// <summary>
+        /// Gets exclusive use of the 1-Wire to communicate with an iButton or
+        /// 1-Wire Device if it is not already done.  Used to make methods
+        /// thread safe.
+        /// </summary>
+        /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
+        private void beginLocalExclusive()
+        {
+            //// check if there is no such port
+            //if (!PortOpen)
+            //{
+            //    throw new OneWireException("USerialAdapter: port not selected ");
+            //}
+
+            //// check if already have exclusive use
+            //if (serial.haveExclusive())
+            //{
+            //    return;
+            //}
+            //else
+            //{
+            //    while (!haveLocalUse)
+            //    {
+            //        lock (syncObject)
+            //        {
+            //            haveLocalUse = serial.beginExclusive(false);
+            //        }
+            //        if (!haveLocalUse)
+            //        {
+            //            try
+            //            {
+            //                Thread.Sleep(50);
+            //            }
+            //            catch (Exception)
+            //            {
+            //            }
+            //        }
+            //    }
+            //}
+        }
+
+        /// <summary>
+        /// Relinquishes local exclusive control of the 1-Wire Network.  This
+        /// just checks if we did our own 'beginExclusive' block and frees it.
+        /// </summary>
+        private void endLocalExclusive()
+        {
+            //lock (syncObject)
+            //{
+            //    if (haveLocalUse)
+            //    {
+            //        haveLocalUse = false;
+
+            //        serial.endExclusive();
+            //    }
+            //}
+        }
 
 	   //--------
 	   //-------- Primitive 1-Wire Network data methods
@@ -1287,52 +1801,98 @@ namespace com.dalsemi.onewire.adapter
 		  //this will not be implemented
 	   }
 
-	   /// <summary>
-	   /// Sends a Reset to the 1-Wire Network.
-	   /// </summary>
-	   /// <returns>  the result of the reset. Potential results are:
-	   /// <ul>
-	   /// <li> 0 (RESET_NOPRESENCE) no devices present on the 1-Wire Network.
-	   /// <li> 1 (RESET_PRESENCE) normal presence pulse detected on the 1-Wire
-	   ///        Network indicating there is a device present.
-	   /// <li> 2 (RESET_ALARM) alarming presence pulse detected on the 1-Wire
-	   ///        Network indicating there is a device present and it is in the
-	   ///        alarm condition.  This is only provided by the DS1994/DS2404
-	   ///        devices.
-	   /// <li> 3 (RESET_SHORT) inticates 1-Wire appears shorted.  This can be
-	   ///        transient conditions in a 1-Wire Network.  Not all adapter types
-	   ///        can detect this condition.
-	   /// </ul>
-	   /// Note that in <code>DumbAdapter</code>, the only possible results are 0 and 1. </returns>
-	   public override int reset()
-	   {
-		  //this will not be implemented
-		  if (containers.Count > 0)
-		  {
-			return 1;
-		  }
-		  return 0;
-	   }
+        /// <summary>
+        /// Sends a Reset to the 1-Wire Network.
+        /// </summary>
+        /// <returns>  the result of the reset. Potential results are:
+        /// <ul>
+        /// <li> 0 (RESET_NOPRESENCE) no devices present on the 1-Wire Network.
+        /// <li> 1 (RESET_PRESENCE) normal presence pulse detected on the 1-Wire
+        ///        Network indicating there is a device present.
+        /// <li> 2 (RESET_ALARM) alarming presence pulse detected on the 1-Wire
+        ///        Network indicating there is a device present and it is in the
+        ///        alarm condition.  This is only provided by the DS1994/DS2404
+        ///        devices.
+        /// <li> 3 (RESET_SHORT) inticates 1-Wire appears shorted.  This can be
+        ///        transient conditions in a 1-Wire Network.  Not all adapter types
+        ///        can detect this condition.
+        /// </ul>
+        /// </returns>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
+        /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
+        public override int reset()
+        {
+            try
+            {
 
-	   //--------
-	   //-------- 1-Wire Network power methods
-	   //--------
+                // acquire exclusive use of the port
+                beginLocalExclusive();
 
-	   /// <summary>
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <param name="timeFactor">
-	   /// <ul>
-	   /// <li>   0 (DELIVERY_HALF_SECOND) provide power for 1/2 second.
-	   /// <li>   1 (DELIVERY_ONE_SECOND) provide power for 1 second.
-	   /// <li>   2 (DELIVERY_TWO_SECONDS) provide power for 2 seconds.
-	   /// <li>   3 (DELIVERY_FOUR_SECONDS) provide power for 4 seconds.
-	   /// <li>   4 (DELIVERY_SMART_DONE) provide power until the
-	   ///          the device is no longer drawing significant power.
-	   /// <li>   5 (DELIVERY_INFINITE) provide power until the
-	   ///          setPowerNormal() method is called.
-	   /// </ul> </param>
-	   public override int PowerDuration
+                // make sure adapter is present
+                if (uAdapterPresent())
+                {
+
+                    // check for pending power conditions
+                    if (owState.oneWireLevel != LEVEL_NORMAL)
+                    {
+                        setPowerNormal();
+                    }
+
+                    //// build a message to read the baud rate from the U brick
+                    //uBuild.restart();
+
+                    //int reset_offset = uBuild.oneWireReset();
+
+                    //// send and receive
+                    //byte[] result_array = uTransaction(uBuild);
+
+                    //// check the result
+                    //if (result_array.Length == (reset_offset + 1))
+                    //{
+                    //    return uBuild.interpretOneWireReset(result_array[reset_offset]);
+                    //}
+                    //else
+                    //{
+                    //    throw new OneWireIOException("USBAdapter-reset: no return byte form 1-Wire reset");
+                    //}
+                    return 0; //TODO
+                }
+                else
+                {
+                    throw new OneWireIOException("Error communicating with adapter");
+                }
+            }
+            catch (IOException ioe)
+            {
+                throw new OneWireIOException(ioe.ToString());
+            }
+            finally
+            {
+
+                // release local exclusive use of port
+                endLocalExclusive();
+            }
+        }
+
+        //--------
+        //-------- 1-Wire Network power methods
+        //--------
+
+        /// <summary>
+        /// This method does nothing in <code>DumbAdapter</code>.
+        /// </summary>
+        /// <param name="timeFactor">
+        /// <ul>
+        /// <li>   0 (DELIVERY_HALF_SECOND) provide power for 1/2 second.
+        /// <li>   1 (DELIVERY_ONE_SECOND) provide power for 1 second.
+        /// <li>   2 (DELIVERY_TWO_SECONDS) provide power for 2 seconds.
+        /// <li>   3 (DELIVERY_FOUR_SECONDS) provide power for 4 seconds.
+        /// <li>   4 (DELIVERY_SMART_DONE) provide power until the
+        ///          the device is no longer drawing significant power.
+        /// <li>   5 (DELIVERY_INFINITE) provide power until the
+        ///          setPowerNormal() method is called.
+        /// </ul> </param>
+        public override int PowerDuration
 	   {
 		   set
 		   {
@@ -1405,29 +1965,150 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   public override void setPowerNormal()
 	   {
-		  return;
-	   }
+            try
+            {
+                Debugger.Break();
 
-	   //--------
-	   //-------- 1-Wire Network speed methods
-	   //--------
+                // acquire exclusive use of the port
+                beginLocalExclusive();
 
-	   /// <summary>
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <param name="speed">
-	   /// <ul>
-	   /// <li>     0 (SPEED_REGULAR) set to normal communciation speed
-	   /// <li>     1 (SPEED_FLEX) set to flexible communciation speed used
-	   ///            for long lines
-	   /// <li>     2 (SPEED_OVERDRIVE) set to normal communciation speed to
-	   ///            overdrive
-	   /// <li>     3 (SPEED_HYPERDRIVE) set to normal communciation speed to
-	   ///            hyperdrive
-	   /// <li>    >3 future speeds
-	   /// </ul>
-	   ///  </param>
-	   public override int Speed
+                if (owState.oneWireLevel == LEVEL_POWER_DELIVERY)
+                {
+
+                    // make sure adapter is present
+                    if (uAdapterPresent())
+                    {
+
+                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                        // shughes - 8-28-2003
+                        // Fixed the Set Power Level Normal problem where adapter
+                        // is left in a bad state.  Removed bad fix: extra getBit()
+                        // SEE BELOW!
+                        // stop pulse command
+                        uBuild.sendCommand(UPacketBuilder.FUNCTION_STOP_PULSE, true);
+
+                        // start pulse with no prime
+                        uBuild.sendCommand(UPacketBuilder.FUNCTION_5VPULSE_NOW, false);
+                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+
+                        // add the command to stop the pulse
+                        int pulse_response_offset = uBuild.sendCommand(UPacketBuilder.FUNCTION_STOP_PULSE, true);
+
+                        // send and receive
+                        //byte[] result_array = uTransaction(uBuild);
+                        byte[] result_array = new byte[pulse_response_offset+1];
+
+                        // check the result
+                        if (result_array.Length == (pulse_response_offset + 1))
+                        {
+                            owState.oneWireLevel = LEVEL_NORMAL;
+
+                            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                            // shughes - 8-28-2003
+                            // This is a bad "fix", it was needed when we were causing
+                            // a bad condition.  Instead of fixing it here, we should
+                            // fix it where we were causing it..  Which we did!
+                            // SEE ABOVE!
+                            //getBit();
+                            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                        }
+                        else
+                        {
+                            throw new OneWireIOException("Did not get a response back from stop power delivery");
+                        }
+                    }
+                }
+                else if (owState.oneWireLevel == LEVEL_BREAK)
+                {
+
+                    //// restore power
+                    //serial.DTR = true;
+                    //serial.RTS = true;
+
+                    //// wait for power to come up
+                    //sleep(300);
+
+                    // set the level state
+                    owState.oneWireLevel = LEVEL_NORMAL;
+
+                    // set the DS2480 to the correct mode and verify
+                    adapterPresent = false;
+
+                    if (!uAdapterPresent())
+                    {
+                        throw new OneWireIOException("Did not get a response back from adapter after break");
+                    }
+                }
+            }
+            catch (IOException ioe)
+            {
+                throw new OneWireIOException(ioe.ToString());
+            }
+            finally
+            {
+
+                // release local exclusive use of port
+                endLocalExclusive();
+            }
+        }
+
+        //--------
+        //-------- 1-Wire Network operation append methods
+        //--------
+
+        /// <summary>
+        /// Add the command to reset the OneWire at the current speed.
+        /// </summary>
+        ///  <returns> the number offset in the return packet to get the
+        ///          result of this operation </returns>
+        public virtual int oneWireReset()
+        {
+            SendCommand(
+                Ds2490.CMD_TYPE.COMM,
+                Ds2490.COMM._1_WIRE_RESET | Ds2490.COMM.F | Ds2490.COMM.IM | Ds2490.COMM.SE,
+                uState.uSpeedMode,
+                "One-Wire Reset");
+
+            //// append the reset command at the current speed
+            //packet.writer.Write((byte)(FUNCTION_RESET | uState.uSpeedMode)); //TODO .Append
+
+
+            //// check if not streaming resets
+            //if (!uState.streamResets)
+            //{
+            //    newPacket();
+            //}
+
+            //// check for 2480 wait on extra bytes packet
+            //if (uState.longAlarmCheck && ((uState.uSpeedMode == UsbAdapterState.USPEED_REGULAR) || (uState.uSpeedMode == UsbAdapterState.USPEED_FLEX)))
+            //{
+            //    newPacket();
+            //}
+
+            //return totalReturnLength - 1;
+            return 5;
+        }
+
+        //--------
+        //-------- 1-Wire Network speed methods
+        //--------
+
+        /// <summary>
+        /// This method does nothing in <code>DumbAdapter</code>.
+        /// </summary>
+        /// <param name="speed">
+        /// <ul>
+        /// <li>     0 (SPEED_REGULAR) set to normal communciation speed
+        /// <li>     1 (SPEED_FLEX) set to flexible communciation speed used
+        ///            for long lines
+        /// <li>     2 (SPEED_OVERDRIVE) set to normal communciation speed to
+        ///            overdrive
+        /// <li>     3 (SPEED_HYPERDRIVE) set to normal communciation speed to
+        ///            hyperdrive
+        /// <li>    >3 future speeds
+        /// </ul>
+        ///  </param>
+        public override int Speed
 	   {
 		   set
 		   {
@@ -1454,35 +2135,22 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <returns>  The <code>OneWireContainer</code> object, or <code>null</code> if no match could be found. </returns>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override OneWireContainer getDeviceContainer(byte[] address)
-	   {
-			long addr = Address.toLong(address);
-			lock (containers)
-			{
-				for (int i = 0;i < containers.Count;i++)
-				{
-					if (((OneWireContainer)containers[i]).AddressAsLong == addr)
-					{
-						return (OneWireContainer)containers[i];
-					}
-				}
-			}
-			return null;
+	  // public override OneWireContainer getDeviceContainer(byte[] address)
+	  // {
+			//long addr = Address.toLong(address);
+			//lock (containers)
+			//{
+			//	for (int i = 0;i < containers.Count;i++)
+			//	{
+			//		if (((OneWireContainer)containers[i]).AddressAsLong == addr)
+			//		{
+			//			return (OneWireContainer)containers[i];
+			//		}
+			//	}
+			//}
+			//return null;
 
-	   }
-
-	   /// <summary>
-	   /// Gets the container from this adapter whose address matches the address of a container
-	   /// in the <code>DumbAdapter</code>'s internal <code>java.util.Vector</code>.
-	   /// </summary>
-	   /// <param name="address">  device address with which to find a container
-	   /// </param>
-	   /// <returns>  The <code>OneWireContainer</code> object, or <code>null</code> if no match could be found. </returns>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override OneWireContainer getDeviceContainer(long address)
-	   {
-		  return getDeviceContainer(Address.toByteArray(address));
-	   }
+	  // }
 
 	   /// <summary>
 	   /// Gets the container from this adapter whose address matches the address of a container
@@ -1492,10 +2160,23 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <returns>  The <code>OneWireContainer</code> object, or <code>null</code> if no match could be found. </returns>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override OneWireContainer getDeviceContainer(string address)
-	   {
-		  return getDeviceContainer(Address.toByteArray(address));
-	   }
+	   //public override OneWireContainer getDeviceContainer(long address)
+	   //{
+		  //return getDeviceContainer(Address.toByteArray(address));
+	   //}
+
+	   /// <summary>
+	   /// Gets the container from this adapter whose address matches the address of a container
+	   /// in the <code>DumbAdapter</code>'s internal <code>java.util.Vector</code>.
+	   /// </summary>
+	   /// <param name="address">  device address with which to find a container
+	   /// </param>
+	   /// <returns>  The <code>OneWireContainer</code> object, or <code>null</code> if no match could be found. </returns>
+	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
+	   //public override OneWireContainer getDeviceContainer(string address)
+	   //{
+		  //return getDeviceContainer(Address.toByteArray(address));
+	   //}
 
 	   /// <summary>
 	   /// Returns a <code>OneWireContainer</code> object using the current 1-Wire network address.
