@@ -26,7 +26,6 @@
  */
 namespace com.dalsemi.onewire.adapter
 {
-
 	/// <summary>
 	/// Interface for holding all constants related to Network Adapter communications.
 	/// This interface is used by both NetAdapterHost and the NetAdapter.  In
@@ -99,43 +98,43 @@ namespace com.dalsemi.onewire.adapter
 	   public const string DEFAULT_SECRET = "Adapter Secret Default";
 	   public const string DEFAULT_MULTICAST_GROUP = "228.5.6.7";
 	   public const int DEFAULT_MULTICAST_PORT = 6163;
-	   public static readonly sbyte RET_SUCCESS = unchecked((sbyte)0x0FF);
-	   public static readonly sbyte RET_FAILURE = unchecked((sbyte)0x0F0);
-	   public const sbyte CMD_CLOSECONNECTION = 0x08;
-	   public const sbyte CMD_PINGCONNECTION = 0x09;
-	   public const sbyte CMD_RESET = 0x10;
-	   public const sbyte CMD_PUTBIT = 0x11;
-	   public const sbyte CMD_PUTBYTE = 0x12;
-	   public const sbyte CMD_GETBIT = 0x13;
-	   public const sbyte CMD_GETBYTE = 0x14;
-	   public const sbyte CMD_GETBLOCK = 0x15;
-	   public const sbyte CMD_DATABLOCK = 0x16;
-	   public const sbyte CMD_SETPOWERDURATION = 0x17;
-	   public const sbyte CMD_STARTPOWERDELIVERY = 0x18;
-	   public const sbyte CMD_SETPROGRAMPULSEDURATION = 0x19;
-	   public const sbyte CMD_STARTPROGRAMPULSE = 0x1A;
-	   public const sbyte CMD_STARTBREAK = 0x1B;
-	   public const sbyte CMD_SETPOWERNORMAL = 0x1C;
-	   public const sbyte CMD_SETSPEED = 0x1D;
-	   public const sbyte CMD_GETSPEED = 0x1E;
-	   public const sbyte CMD_BEGINEXCLUSIVE = 0x1F;
-	   public const sbyte CMD_ENDEXCLUSIVE = 0x20;
-	   public const sbyte CMD_FINDFIRSTDEVICE = 0x21;
-	   public const sbyte CMD_FINDNEXTDEVICE = 0x22;
-	   public const sbyte CMD_GETADDRESS = 0x23;
-	   public const sbyte CMD_SETSEARCHONLYALARMINGDEVICES = 0x24;
-	   public const sbyte CMD_SETNORESETSEARCH = 0x25;
-	   public const sbyte CMD_SETSEARCHALLDEVICES = 0x26;
-	   public const sbyte CMD_TARGETALLFAMILIES = 0x27;
-	   public const sbyte CMD_TARGETFAMILY = 0x28;
-	   public const sbyte CMD_EXCLUDEFAMILY = 0x29;
-	   public const sbyte CMD_CANBREAK = 0x2A;
-	   public const sbyte CMD_CANDELIVERPOWER = 0x2B;
-	   public const sbyte CMD_CANDELIVERSMARTPOWER = 0x2C;
-	   public const sbyte CMD_CANFLEX = 0x2D;
-	   public const sbyte CMD_CANHYPERDRIVE = 0x2E;
-	   public const sbyte CMD_CANOVERDRIVE = 0x2F;
-	   public const sbyte CMD_CANPROGRAM = 0x30;
+	   public static readonly byte RET_SUCCESS = 0x0FF;
+	   public static readonly byte RET_FAILURE = 0x0F0;
+	   public const byte CMD_CLOSECONNECTION = 0x08;
+	   public const byte CMD_PINGCONNECTION = 0x09;
+	   public const byte CMD_RESET = 0x10;
+	   public const byte CMD_PUTBIT = 0x11;
+	   public const byte CMD_PUTBYTE = 0x12;
+	   public const byte CMD_GETBIT = 0x13;
+	   public const byte CMD_GETBYTE = 0x14;
+	   public const byte CMD_GETBLOCK = 0x15;
+	   public const byte CMD_DATABLOCK = 0x16;
+	   public const byte CMD_SETPOWERDURATION = 0x17;
+	   public const byte CMD_STARTPOWERDELIVERY = 0x18;
+	   public const byte CMD_SETPROGRAMPULSEDURATION = 0x19;
+	   public const byte CMD_STARTPROGRAMPULSE = 0x1A;
+	   public const byte CMD_STARTBREAK = 0x1B;
+	   public const byte CMD_SETPOWERNORMAL = 0x1C;
+	   public const byte CMD_SETSPEED = 0x1D;
+	   public const byte CMD_GETSPEED = 0x1E;
+	   public const byte CMD_BEGINEXCLUSIVE = 0x1F;
+	   public const byte CMD_ENDEXCLUSIVE = 0x20;
+	   public const byte CMD_FINDFIRSTDEVICE = 0x21;
+	   public const byte CMD_FINDNEXTDEVICE = 0x22;
+	   public const byte CMD_GETADDRESS = 0x23;
+	   public const byte CMD_SETSEARCHONLYALARMINGDEVICES = 0x24;
+	   public const byte CMD_SETNORESETSEARCH = 0x25;
+	   public const byte CMD_SETSEARCHALLDEVICES = 0x26;
+	   public const byte CMD_TARGETALLFAMILIES = 0x27;
+	   public const byte CMD_TARGETFAMILY = 0x28;
+	   public const byte CMD_EXCLUDEFAMILY = 0x29;
+	   public const byte CMD_CANBREAK = 0x2A;
+	   public const byte CMD_CANDELIVERPOWER = 0x2B;
+	   public const byte CMD_CANDELIVERSMARTPOWER = 0x2C;
+	   public const byte CMD_CANFLEX = 0x2D;
+	   public const byte CMD_CANHYPERDRIVE = 0x2E;
+	   public const byte CMD_CANOVERDRIVE = 0x2F;
+	   public const byte CMD_CANPROGRAM = 0x30;
 	   public static readonly NetAdapterConstants_Connection EMPTY_CONNECTION = new NetAdapterConstants_Connection();
 	}
 

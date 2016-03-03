@@ -109,7 +109,9 @@
   <ItemGroup>
     <Compile Include="com\dalsemi\onewire\adapter\Ds2490.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\DSPortAdapter.cs" />
+    <Compile Include="com\dalsemi\onewire\adapter\MulticastListener.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\NetAdapterConstants.cs" />
+    <Compile Include="com\dalsemi\onewire\adapter\NetAdapterSim.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\UsbPacketBuilder.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\UsbAdapterState.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\UsbAdapter.cs" />

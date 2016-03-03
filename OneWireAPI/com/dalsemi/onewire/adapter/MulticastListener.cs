@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Diagnostics;
+using Windows.Networking;
+using Windows.Networking.Sockets;
+using System.Threading.Tasks;
+using Windows.Storage.Streams;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -31,7 +35,6 @@ using System.Diagnostics;
 namespace com.dalsemi.onewire.adapter
 {
 
-
 	/// <summary>
 	/// Generic Mulitcast broadcast listener.  Listens for a specific message and,
 	/// in response, gives the specified reply.  Used by NetAdapterHost for
@@ -44,7 +47,7 @@ namespace com.dalsemi.onewire.adapter
 	{
 	   /// <summary>
 	   /// boolean flag to turn on debug messages </summary>
-	   private const bool DEBUG = false;
+	   private const bool DEBUG = true;
 
 	   /// <summary>
 	   /// timeout for socket receive </summary>
@@ -52,20 +55,22 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// multicast socket to receive datagram packets on </summary>
-	   private MulticastSocket socket = null;
-	   /// <summary>
-	   /// the message we're expecting to receive on the multicast socket </summary>
-	   private sbyte[] expectedMessage;
-	   /// <summary>
-	   /// the message we should reply with when we get the expected message </summary>
-	   private sbyte[] returnMessage;
+	   private DatagramSocket socket = null;
 
 	   /// <summary>
-	   /// boolean to stop the thread from listening for messages </summary>
-	   private volatile bool listenerStopped = false;
+	   /// the message we're expecting to receive on the multicast socket </summary>
+	   private byte[] expectedMessage;
 	   /// <summary>
-	   /// boolean to check if the thread is still running </summary>
-	   private volatile bool listenerRunning = false;
+	   /// the message we should reply with when we get the expected message </summary>
+	   private byte[] returnMessage;
+
+	   /// <summary>
+	   /// boolean to indicate if packet handling is active </summary>
+	   private volatile bool handlingPacket = false;
+       /// <summary>
+       /// AutoResetEvent used to stop Multicast reciever </summary>
+       private AutoResetEvent waitPacketDone = new AutoResetEvent(false);
+
 
 	   /// <summary>
 	   /// Creates a multicast listener on the specified multicast port,
@@ -78,7 +83,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="multicastGroup"> Group to bind this listener to. </param>
 	   /// <param name="expectedMessage"> the message to look for </param>
 	   /// <param name="returnMessage"> the message to reply with </param>
-	   public MulticastListener(int multicastPort, string multicastGroup, sbyte[] expectedMessage, sbyte[] returnMessage)
+	   public MulticastListener(int multicastPort, string multicastGroup, byte[] expectedMessage, byte[] returnMessage)
 	   {
 		  this.expectedMessage = expectedMessage;
 		  this.returnMessage = returnMessage;
@@ -90,101 +95,105 @@ namespace com.dalsemi.onewire.adapter
 			 Debug.WriteLine("DEBUG:    Multicast port: " + multicastPort);
 			 Debug.WriteLine("DEBUG:    Multicast group: " + multicastGroup);
 		  }
-		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+          //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
-		  // create multicast socket
-		  socket = new MulticastSocket(multicastPort);
-		  // set timeout at 3 seconds
-		  socket.SoTimeout = timeoutInSeconds * 1000;
+          // create multicast socket
+          socket = new DatagramSocket(); // MulticastSocket(multicastPort);
+
+          socket.Control.MulticastOnly = true;
+
+		  handlingPacket = false;
+          socket.MessageReceived += Multicast_MessageReceived;
+
+          var t = Task.Run(async () =>
+          {
+              // specify IP address of adapter...
+              await socket.BindEndpointAsync(new HostName("localhost"), Convert.ToString(multicastPort));
+          });
+          t.Wait();
+          
+
 		  //join the multicast group
-		  InetAddress group = InetAddress.getByName(multicastGroup);
-		  socket.joinGroup(group);
-	   }
+          socket.JoinMulticastGroup(new HostName(multicastGroup));
 
-	   /// <summary>
-	   /// Run method waits for Multicast packets with the specified contents
-	   /// and replies with the specified message.
-	   /// </summary>
-	   public virtual void run()
-	   {
-		  sbyte[] receiveBuffer = new sbyte[expectedMessage.Length];
+          //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+          if (DEBUG)
+          {
+              Debug.WriteLine("DEBUG: waiting for multicast packet");
+          }
+          //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+        }
 
-		  listenerRunning = true;
-		  while (!listenerStopped)
-		  {
-			 try
-			 {
-				// packet for receiving messages
-				DatagramPacket inPacket = new DatagramPacket(receiveBuffer, receiveBuffer.Length);
-				//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-				if (DEBUG)
-				{
-				   Debug.WriteLine("DEBUG: waiting for multicast packet");
-				}
-				//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-				// blocks for message until timeout occurs
-				socket.receive(inPacket);
+        private async void Multicast_MessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
+        {
+            handlingPacket = true;
+            var reader = args.GetDataReader();
 
-				// check to see if the received data matches the expected message
-				int length = inPacket.Length;
+            // check to see if the received data matches the expected message
+            uint length = reader.UnconsumedBufferLength;
 
-				//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-				if (DEBUG)
-				{
-				   Debug.WriteLine("DEBUG: packet.length=" + length);
-				   Debug.WriteLine("DEBUG: expecting=" + expectedMessage.Length);
-				}
-				//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+            if (DEBUG)
+            {
+                Debug.WriteLine("DEBUG: packet.length=" + length);
+                Debug.WriteLine("DEBUG: expecting=" + expectedMessage.Length);
+            }
+            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+            try
+            {
 
-				if (length == expectedMessage.Length)
-				{
-				   bool dataMatch = true;
-				   for (int i = 0; dataMatch && i < length; i++)
-				   {
-					  dataMatch = (expectedMessage[i] == receiveBuffer[i]);
-				   }
-				   // check to see if we received the expected message
-				   if (dataMatch)
-				   {
-					  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-					  if (DEBUG)
-					  {
-						 Debug.WriteLine("DEBUG: packet match, replying");
-					  }
-					  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-					  // packet for sending messages
-					  DatagramPacket outPacket = new DatagramPacket(returnMessage, returnMessage.Length, inPacket.Address, inPacket.Port);
-					  // send return message
-					  socket.send(outPacket);
-				   }
-				}
-			 }
-			 catch (IOException)
-			 { // drain
-			 }
-		  }
-		  listenerRunning = false;
-	   }
+                if (length == expectedMessage.Length)
+                {
+                    bool dataMatch = true;
+                    for (int i = 0; dataMatch && i < length; i++)
+                    {
+                        dataMatch = (expectedMessage[i] == reader.ReadByte());
+                    }
+                    // check to see if we received the expected message
+                    if (dataMatch)
+                    {
+                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+                        if (DEBUG)
+                        {
+                            Debug.WriteLine("DEBUG: packet match, replying");
+                        }
+                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+
+                        // send return message
+                        using (var writer = new DataWriter(socket.OutputStream))
+                        {
+                            writer.WriteBytes(returnMessage);
+                            await writer.StoreAsync();
+                            // we return before the packet goes out, that's fine
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine("Unknown packet length recieved: " + length);
+                }
+            }
+            catch (System.IO.IOException)
+            {
+                // drain
+                Debugger.Break();
+            }
+            finally
+            {
+                handlingPacket = false;
+                waitPacketDone.Set();
+            }
+        }
 
 	   /// <summary>
 	   /// Waits for datagram listener to finish, with a timeout.
 	   /// </summary>
 	   public virtual void stopListener()
 	   {
-		  listenerStopped = true;
-		  int i = 0;
-		  int timeout = timeoutInSeconds * 100;
-		  while (listenerRunning && i++<timeout)
-		  {
-			 try
-			 {
-			 Thread.Sleep(10);
-			 }
-		 catch (Exception)
-		 {
-			 ;
-		 }
-		  }
-	   }
-	}
+           while (handlingPacket)
+               waitPacketDone.WaitOne();
+
+           socket.MessageReceived -= Multicast_MessageReceived;
+       }
+    }
 }
