@@ -157,11 +157,11 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   /// <param name="adapter"> DSPortAdapter that this NetAdapterSim will proxy
 	   /// commands to. </param>
-	   /// <param name="listenPort"> the TCP/IP port to listen on for incoming connections
+	   /// <param name="serviceName"> the TCP/IP port to listen on for incoming connections
 	   /// </param>
 	   /// <exception cref="IOException"> if a network error occurs or the listen socket
 	   /// cannot be created on the specified port. </exception>
-	   public NetAdapterSim(string execCmd, byte[] fakeAddress, string logFile, int listenPort) : this(execCmd, logFile, listenPort, false)
+	   public NetAdapterSim(string execCmd, byte[] fakeAddress, string logFile, string serviceName) : this(execCmd, logFile, serviceName, false)
 	   {
 	   }
 
@@ -197,13 +197,13 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   /// <param name="adapter"> DSPortAdapter that this NetAdapterSim will proxy
 	   /// commands to. </param>
-	   /// <param name="listenPort"> the TCP/IP port to listen on for incoming connections </param>
+	   /// <param name="serviceName"> the TCP/IP port to listen on for incoming connections </param>
 	   /// <param name="multiThread"> if true, multiple TCP/IP connections are allowed
 	   /// to interact simulataneously with this adapter.
 	   /// </param>
 	   /// <exception cref="IOException"> if a network error occurs or the listen socket
 	   /// cannot be created on the specified port. </exception>
-	   public NetAdapterSim(string execCmd, string logFilename, int listenPort, bool multiThread)
+	   public NetAdapterSim(string execCmd, string logFilename, string serviceName, bool multiThread)
 	   {
             // save references to file and command
             this.execCommand = execCmd;
@@ -409,7 +409,7 @@ namespace com.dalsemi.onewire.adapter
                 // packet types by client
                 byte[] listenPortBytes = new byte[5];
                 Convert.toByteArray(serverSocket.Information.LocalPort, listenPortBytes, 0, 4);
-                listenPortBytes[4] = unchecked((byte)0x0FF);
+                listenPortBytes[4] = 0x0FF;
 
                 multicastListener = new MulticastListener(port, group, versionBytes, listenPortBytes);
             }
@@ -1643,7 +1643,7 @@ namespace com.dalsemi.onewire.adapter
 				   {
 					  logFile.WriteLine("getByte: bitstr=" + bitstr);
 				   }
-				   bits = unchecked((byte)(Convert.toInt(bitstr) & 0x0FF));
+				   bits = (byte)(Convert.toInt(bitstr) & 0x0FF);
 				   complete++;
 				   continue;
 				}

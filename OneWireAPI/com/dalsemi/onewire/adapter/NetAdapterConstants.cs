@@ -91,10 +91,10 @@ namespace com.dalsemi.onewire.adapter
 
 	public static class NetAdapterConstants_Fields
 	{
-	   public const bool DEBUG = false;
+	   public const bool DEBUG = true;
 	   public const int versionUID = 1;
 	   public const bool BUFFERED_OUTPUT = true;
-	   public const int DEFAULT_PORT = 6161;
+	   public const string DEFAULT_PORT = "6161";
 	   public const string DEFAULT_SECRET = "Adapter Secret Default";
 	   public const string DEFAULT_MULTICAST_GROUP = "228.5.6.7";
 	   public const int DEFAULT_MULTICAST_PORT = 6163;
@@ -142,7 +142,7 @@ namespace com.dalsemi.onewire.adapter
 	{
 	  /// <summary>
 	  /// socket to host </summary>
-	  public System.Net.Sockets.Socket sock = null;
+	  public Windows.Networking.Sockets.StreamSocket sock = null;
         
 	  /// <summary>
 	  /// input stream from socket </summary>

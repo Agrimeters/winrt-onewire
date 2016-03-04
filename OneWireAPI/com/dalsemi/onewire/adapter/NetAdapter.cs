@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Text;
 using System.Threading;
+using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -33,133 +35,134 @@ namespace com.dalsemi.onewire.adapter
 {
 
 
-	using com.dalsemi.onewire;
-	using com.dalsemi.onewire.utils;
-
-	/// <summary>
-	/// <P>NetAdapter is a network-based DSPortAdapter.  It allows for the use of
-	/// an actual DSPortAdapter which isn't on the local machine, but rather is
-	/// connected to another device which is reachable via a TCP/IP network
-	/// connection.</P>
-	/// 
-	/// <P>The syntax for the <code>selectPort(String)</code> command is the
-	/// hostname of the computer which hosts the actual DSPortAdapter and the
-	/// TCP/IP port that the host is listening on.  If the port number is not
-	/// specified, a default value of 6161 is used. Here are a few examples to
-	/// illustrate the syntax:
-	/// <ul>
-	///    <li>my.host.com:6060</li>
-	///    <li>180.0.2.46:6262</li>
-	///    <li>my.host.com</li>
-	///    <li>180.0.2.46</li>
-	/// </ul></P>
-	/// 
-	/// <P?The use of the NetAdapter is virtually identical to the use of any
-	/// other DSPortAdapter.  The only significant changes are the necessity
-	/// of the 'host' component (see NetAdapterHost)
-	/// and the discovery of hosts on your network.  There are currently two
-	/// techniques used for discovering all of the hosts: The look-up of each host
-	/// from the onewire.properties file and the use of multicast sockets for
-	/// automatic discovery.</P>
-	/// 
-	/// <P>In the onewire.properties file, you can add a host to your list of valid
-	/// hosts by making a NetAdapter.host with an integer to distinguish the hosts.
-	/// There is no limit on the number of hosts which can appear in this list, but
-	/// the first one must be numbered '0'.  These hosts will then be returned in
-	/// the list of valid 'ports' from the <code>selectPortNames()</code> method.
-	/// Note that there do not have to be any servers returned from
-	/// <code>selectPortNames()</code> for the NetAdapter to be able to connect
-	/// to them (so it isn't necessary to add these entries for it to function),
-	/// but applications which allow a user to automatically select an appropriate
-	/// adapter and a port from a given list will not function properly without it.
-	/// For example:
-	/// <ul>
-	///    <li>NetAdapter.host0=my.host.com:6060</li>
-	///    <li>NetAdapter.host1=180.0.2.46:6262</li>
-	///    <li>NetAdapter.host2=my.host.com</li>
-	///    <li>NetAdapter.host3=180.0.2.46</li>
-	/// </ul></P>
-	/// 
-	/// <P>The multicast socket technique allows you to automatically discover
-	/// hosts on your subnet which are listening for multicast packets.  By
-	/// default, the multicast discovery of NetAdapter hosts is disabled.
-	/// When enabled, the NetAdapter creates a multicast socket and looks for servers
-	/// every time you call <code>selectPortNames()</code>.  This will add a
-	/// 1 second delay (due to the socket timeout) on calling the method.  If you'd
-	/// like to enable this feature, add the following line to your
-	/// onewire.properties file:
-	/// <ul>
-	///    <li>NetAdapter.MulticastEnabled=true</li>
-	/// </ul>
-	/// The port used and the multicast group used for multicast sockets can
-	/// also be changed.  The group however, must fall withing a valid range.
-	/// For more information about multicast sockets in Java, see the Java
-	/// tutorial on networking at <A HREF="http://java.sun.com/docs/books/tutorial/">
-	/// http://java.sun.com/docs/books/tutorial/</A>.  Change the defaults in the
-	/// onewire.properties file with the following entries:
-	/// <ul>
-	///    <li>NetAdapter.MulticastGroup=228.5.6.7</li>
-	///    <li>NetAdapter.MulticastPort=6163</li>
-	/// </ul>
-	/// </P>
-	/// 
-	/// <P>Once the NetAdapter is connected with a host, a version check is performed
-	/// followed by a simple authentication step.  The authentication is dependent
-	/// upon a secret shared between the NetAdapter and the host.  Both will use
-	/// a default value, that each will agree with if you don't provide a secret
-	/// of your own.  To set the secret, add the following line to your
-	/// onewire.properties file:
-	/// <ul>
-	///    <li>NetAdapter.secret="This is my custom secret"</li>
-	/// </ul>
-	/// Optionally, the secret can be specified on a per-host basis by simply
-	/// adding the secret after the port number followed by a colon.  If no port
-	/// number is specified, a double-colon is required.  Here are examples:
-	/// <ul>
-	///    <li>my.host.com:6060:my custom secret</li>
-	///    <li>180.0.2.46:6262:another custom secret</li>
-	///    <li>my.host.com::the custom secret without port number</li>
-	///    <li>180.0.2.46::another example of a custom secret</li>
-	/// </ul></P>
-	/// 
-	/// <P>All of the above mentioned properties can be set on the command-line
-	/// as well as being set in the onewire.properties file.  To set the
-	/// properties on the command-line, use the -D option:
-	/// java -DNetAdapter.Secret="custom secret" myApplication</P>
-	/// 
-	/// <P>The following is a list of all parameters that can be set for the
-	/// NetAdapter, followed by default values where applicable.<br>
-	/// <ul>
-	///    <li>NetAdapter.secret=Adapter Secret Default</li>
-	///    <li>NetAdapter.secret[0-MaxInt]=[no default]</li>
-	///    <li>NetAdapter.host[0-MaxInt]=[no default]</li>
-	///    <li>NetAdapter.MulticastEnabled=false</li>
-	///    <li>NetAdapter.MulticastGroup=228.5.6.7</li>
-	///    <li>NetAdapter.MulticastPort=6163</li>
-	/// </ul></P>
-	/// 
-	/// <para>If you wanted added security on the communication channel, an SSL socket
-	/// (or similar custom socket implementation) can be used by circumventing the
-	/// standard DSPortAdapter's <code>selectPort(String)</code> and using the
-	/// NetAdapter-specific <code>selectPort(Socket)</code>.  For example:
-	/// <pre>
-	///    NetAdapter na = new NetAdapter();
-	/// 
-	///    Socket secureSocket = // insert fancy secure socket implementation here
-	/// 
-	///    na.selectPort(secureSocket);
-	/// <pre></P>
-	/// 
-	/// <P>For information on setting up the host component, see the JavaDocs
-	/// for the <code>NetAdapterHost</code>
-	/// 
-	/// </para>
-	/// </summary>
-	/// <seealso cref= NetAdapterHost
-	/// 
-	/// @author SH
-	/// @version    1.00, 9 Jan 2002 </seealso>
-	public class NetAdapter : DSPortAdapter, NetAdapterConstants
+    using com.dalsemi.onewire;
+    using com.dalsemi.onewire.utils;
+    using System.Threading.Tasks;
+    using Windows.Storage.Streams;
+    /// <summary>
+    /// <P>NetAdapter is a network-based DSPortAdapter.  It allows for the use of
+    /// an actual DSPortAdapter which isn't on the local machine, but rather is
+    /// connected to another device which is reachable via a TCP/IP network
+    /// connection.</P>
+    /// 
+    /// <P>The syntax for the <code>selectPort(String)</code> command is the
+    /// hostname of the computer which hosts the actual DSPortAdapter and the
+    /// TCP/IP port that the host is listening on.  If the port number is not
+    /// specified, a default value of 6161 is used. Here are a few examples to
+    /// illustrate the syntax:
+    /// <ul>
+    ///    <li>my.host.com:6060</li>
+    ///    <li>180.0.2.46:6262</li>
+    ///    <li>my.host.com</li>
+    ///    <li>180.0.2.46</li>
+    /// </ul></P>
+    /// 
+    /// <P?The use of the NetAdapter is virtually identical to the use of any
+    /// other DSPortAdapter.  The only significant changes are the necessity
+    /// of the 'host' component (see NetAdapterHost)
+    /// and the discovery of hosts on your network.  There are currently two
+    /// techniques used for discovering all of the hosts: The look-up of each host
+    /// from the onewire.properties file and the use of multicast sockets for
+    /// automatic discovery.</P>
+    /// 
+    /// <P>In the onewire.properties file, you can add a host to your list of valid
+    /// hosts by making a NetAdapter.host with an integer to distinguish the hosts.
+    /// There is no limit on the number of hosts which can appear in this list, but
+    /// the first one must be numbered '0'.  These hosts will then be returned in
+    /// the list of valid 'ports' from the <code>selectPortNames()</code> method.
+    /// Note that there do not have to be any servers returned from
+    /// <code>selectPortNames()</code> for the NetAdapter to be able to connect
+    /// to them (so it isn't necessary to add these entries for it to function),
+    /// but applications which allow a user to automatically select an appropriate
+    /// adapter and a port from a given list will not function properly without it.
+    /// For example:
+    /// <ul>
+    ///    <li>NetAdapter.host0=my.host.com:6060</li>
+    ///    <li>NetAdapter.host1=180.0.2.46:6262</li>
+    ///    <li>NetAdapter.host2=my.host.com</li>
+    ///    <li>NetAdapter.host3=180.0.2.46</li>
+    /// </ul></P>
+    /// 
+    /// <P>The multicast socket technique allows you to automatically discover
+    /// hosts on your subnet which are listening for multicast packets.  By
+    /// default, the multicast discovery of NetAdapter hosts is disabled.
+    /// When enabled, the NetAdapter creates a multicast socket and looks for servers
+    /// every time you call <code>selectPortNames()</code>.  This will add a
+    /// 1 second delay (due to the socket timeout) on calling the method.  If you'd
+    /// like to enable this feature, add the following line to your
+    /// onewire.properties file:
+    /// <ul>
+    ///    <li>NetAdapter.MulticastEnabled=true</li>
+    /// </ul>
+    /// The port used and the multicast group used for multicast sockets can
+    /// also be changed.  The group however, must fall withing a valid range.
+    /// For more information about multicast sockets in Java, see the Java
+    /// tutorial on networking at <A HREF="http://java.sun.com/docs/books/tutorial/">
+    /// http://java.sun.com/docs/books/tutorial/</A>.  Change the defaults in the
+    /// onewire.properties file with the following entries:
+    /// <ul>
+    ///    <li>NetAdapter.MulticastGroup=228.5.6.7</li>
+    ///    <li>NetAdapter.MulticastPort=6163</li>
+    /// </ul>
+    /// </P>
+    /// 
+    /// <P>Once the NetAdapter is connected with a host, a version check is performed
+    /// followed by a simple authentication step.  The authentication is dependent
+    /// upon a secret shared between the NetAdapter and the host.  Both will use
+    /// a default value, that each will agree with if you don't provide a secret
+    /// of your own.  To set the secret, add the following line to your
+    /// onewire.properties file:
+    /// <ul>
+    ///    <li>NetAdapter.secret="This is my custom secret"</li>
+    /// </ul>
+    /// Optionally, the secret can be specified on a per-host basis by simply
+    /// adding the secret after the port number followed by a colon.  If no port
+    /// number is specified, a double-colon is required.  Here are examples:
+    /// <ul>
+    ///    <li>my.host.com:6060:my custom secret</li>
+    ///    <li>180.0.2.46:6262:another custom secret</li>
+    ///    <li>my.host.com::the custom secret without port number</li>
+    ///    <li>180.0.2.46::another example of a custom secret</li>
+    /// </ul></P>
+    /// 
+    /// <P>All of the above mentioned properties can be set on the command-line
+    /// as well as being set in the onewire.properties file.  To set the
+    /// properties on the command-line, use the -D option:
+    /// java -DNetAdapter.Secret="custom secret" myApplication</P>
+    /// 
+    /// <P>The following is a list of all parameters that can be set for the
+    /// NetAdapter, followed by default values where applicable.<br>
+    /// <ul>
+    ///    <li>NetAdapter.secret=Adapter Secret Default</li>
+    ///    <li>NetAdapter.secret[0-MaxInt]=[no default]</li>
+    ///    <li>NetAdapter.host[0-MaxInt]=[no default]</li>
+    ///    <li>NetAdapter.MulticastEnabled=false</li>
+    ///    <li>NetAdapter.MulticastGroup=228.5.6.7</li>
+    ///    <li>NetAdapter.MulticastPort=6163</li>
+    /// </ul></P>
+    /// 
+    /// <para>If you wanted added security on the communication channel, an SSL socket
+    /// (or similar custom socket implementation) can be used by circumventing the
+    /// standard DSPortAdapter's <code>selectPort(String)</code> and using the
+    /// NetAdapter-specific <code>selectPort(Socket)</code>.  For example:
+    /// <pre>
+    ///    NetAdapter na = new NetAdapter();
+    /// 
+    ///    Socket secureSocket = // insert fancy secure socket implementation here
+    /// 
+    ///    na.selectPort(secureSocket);
+    /// <pre></P>
+    /// 
+    /// <P>For information on setting up the host component, see the JavaDocs
+    /// for the <code>NetAdapterHost</code>
+    /// 
+    /// </para>
+    /// </summary>
+    /// <seealso cref= NetAdapterHost
+    /// 
+    /// @author SH
+    /// @version    1.00, 9 Jan 2002 </seealso>
+    public class NetAdapter : DSPortAdapter, NetAdapterConstants
 	{
 	   /// <summary>
 	   /// Error message when neither RET_SUCCESS or RET_FAILURE are returned </summary>
@@ -185,7 +188,7 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// secret for authentication with the server </summary>
-	   protected internal sbyte[] netAdapterSecret = null;
+	   protected internal byte[] netAdapterSecret = null;
 
 	   /// <summary>
 	   /// if true, the user used a custom secret </summary>
@@ -234,7 +237,7 @@ namespace com.dalsemi.onewire.adapter
 		   {
 			  if (!string.ReferenceEquals(value, null))
 			  {
-				 this.netAdapterSecret = value.GetBytes();
+                 this.netAdapterSecret = Encoding.UTF8.GetBytes(value);
 			  }
 			  else
 			  {
@@ -252,11 +255,11 @@ namespace com.dalsemi.onewire.adapter
 		  string secret = OneWireAccessProvider.getProperty("NetAdapter.Secret");
 		  if (!string.ReferenceEquals(secret, null))
 		  {
-			 this.netAdapterSecret = secret.GetBytes();
-		  }
+			 this.netAdapterSecret = Encoding.UTF8.GetBytes(secret);
+            }
 		  else
 		  {
-			 this.netAdapterSecret = NetAdapterConstants_Fields.DEFAULT_SECRET.GetBytes();
+			 this.netAdapterSecret = Encoding.UTF8.GetBytes(NetAdapterConstants_Fields.DEFAULT_SECRET);
 		  }
 	   }
 
@@ -270,7 +273,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   private void checkReturnValue(NetAdapterConstants_Connection conn)
 	   {
-		  sbyte retVal = conn.input.readByte();
+		  byte retVal = conn.input.ReadByte();
 		  if (retVal != NetAdapterConstants_Fields.RET_SUCCESS)
 		  {
 			 // an error occurred
@@ -278,7 +281,7 @@ namespace com.dalsemi.onewire.adapter
 			 if (retVal == NetAdapterConstants_Fields.RET_FAILURE)
 			 {
 				// should be a standard error message after RET_FAILURE
-				errorMsg = conn.input.readUTF();
+				errorMsg = conn.input.ReadString(conn.input.UnconsumedBufferLength);
 			 }
 			 else
 			 {
@@ -308,13 +311,17 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send beginExclusive command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_PINGCONNECTION);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_PINGCONNECTION);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
 				checkReturnValue(conn);
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -413,7 +420,7 @@ namespace com.dalsemi.onewire.adapter
 				 }
 				 if (!string.ReferenceEquals(enabled, null))
 				 {
-					multicastEnabled = Convert.ToBoolean(enabled);
+					multicastEnabled = (enabled.ToLower() == "true") ? true : false;
 				 }
 				 else
 				 {
@@ -423,7 +430,7 @@ namespace com.dalsemi.onewire.adapter
     
 			  // if multicasting is enabled, we'll look for servers dynamically
 			  // and add them to the list
-			  if (multicastEnabled.Value)
+			  if (multicastEnabled.HasValue)
 			  {
 				 // figure out what the datagram listen port is
 				 if (datagramPort == -1)
@@ -450,27 +457,27 @@ namespace com.dalsemi.onewire.adapter
 				 // figure out what the multicast group is
 				 if (string.ReferenceEquals(multicastGroup, null))
 				 {
-					string group = null;
-					try
+                    string groupName = null;
+
+                    try
 					{
-					   group = OneWireAccessProvider.getProperty("NetAdapter.MulticastGroup");
+					   groupName = OneWireAccessProvider.getProperty("NetAdapter.MulticastGroup");
 					}
 					catch (Exception)
 					{
 						;
 					}
-					if (string.ReferenceEquals(group, null))
+					if (string.ReferenceEquals(groupName, null))
 					{
 					   multicastGroup = NetAdapterConstants_Fields.DEFAULT_MULTICAST_GROUP;
 					}
 					else
 					{
-					   multicastGroup = group;
+					   multicastGroup = groupName;
 					}
 				 }
     
-				 MulticastSocket socket = null;
-				 InetAddress group = null;
+				 Windows.Networking.Sockets.DatagramSocket socket = null;
 				 try
 				 {
 					//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
@@ -482,23 +489,24 @@ namespace com.dalsemi.onewire.adapter
 					//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
     
 					// create the multi-cast socket
-					socket = new MulticastSocket(datagramPort);
-					// create the group's InetAddress
-					group = InetAddress.getByName(multicastGroup);
-					// join the group
-					socket.joinGroup(group);
+					socket = new Windows.Networking.Sockets.DatagramSocket();
+//TODO
+					//// create the group's InetAddress
+					//group = InetAddress.getByName(multicastGroup);
+					//// join the group
+					//socket.joinGroup(group);
     
 					// convert the versionUID to a byte[]
-					sbyte[] versionBytes = Convert.toByteArray(NetAdapterConstants_Fields.versionUID);
+					byte[] versionBytes = Convert.toByteArray(NetAdapterConstants_Fields.versionUID);
     
 					// send a packet with the versionUID
-					DatagramPacket outPacket = new DatagramPacket(versionBytes, 4, group, datagramPort);
-					socket.send(outPacket);
+//TODO					DatagramPacket outPacket = new DatagramPacket(versionBytes, 4, group, datagramPort);
+//TODO					socket.send(outPacket);
     
 					// set a timeout of 1/2 second for the receive
-					socket.SoTimeout = 500;
+//TODO					socket.SoTimeout = 500;
     
-					sbyte[] receiveBuffer = new sbyte[32];
+					byte[] receiveBuffer = new byte[32];
 					for (;;)
 					{
 					   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
@@ -507,39 +515,41 @@ namespace com.dalsemi.onewire.adapter
 						  Debug.WriteLine("DEBUG: waiting for multicast packet");
 					   }
 					   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-					   DatagramPacket inPacket = new DatagramPacket(receiveBuffer, receiveBuffer.Length);
-					   socket.receive(inPacket);
+//TODO					   DatagramPacket inPacket = new DatagramPacket(receiveBuffer, receiveBuffer.Length);
+//TODO					   socket.receive(inPacket);
     
-					   int length = inPacket.Length;
-					   sbyte[] data = inPacket.Data;
+//TODO					   int length = inPacket.Length;
+//TODO					   byte[] data = inPacket.Data;
 					   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 					   if (NetAdapterConstants_Fields.DEBUG)
 					   {
-						  Debug.WriteLine("DEBUG: packet.length=" + length);
+//TODO						  Debug.WriteLine("DEBUG: packet.length=" + length);
 						  Debug.WriteLine("DEBUG: expecting=" + 5);
 					   }
 					   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-					   if (length == 5 && data[4] == unchecked((sbyte)0xFF))
-					   {
-						  int listenPort = Convert.toInt(data, 0, 4);
-						  v.Add(inPacket.Address.HostName + ":" + listenPort);
-					   }
+//TODO
+					   //if (length == 5 && data[4] == 0xFF)
+					   //{
+						  //int listenPort = Convert.toInt(data, 0, 4);
+						  //v.Add(inPacket.Address.HostName + ":" + listenPort);
+					   //}
 					}
 				 }
 				 catch (Exception)
 				 { //drain
-		;
+                     ;
 				 }
 				 finally
 				 {
 					try
 					{
-					   socket.leaveGroup(group);
-					   socket.close();
+                       Debugger.Break();
+					   //socket.leaveGroup(group);
+					   //socket.close();
 					}
 					catch (Exception)
 					{ //drain
-		;
+		                ;
 					}
 				 }
 			  }
@@ -562,7 +572,7 @@ namespace com.dalsemi.onewire.adapter
 				  ;
 			  }
     
-			  return v.elements();
+			  return v.GetEnumerator();
 		   }
 	   }
 
@@ -587,10 +597,10 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		  lock (conn)
 		  {
-			 Socket s = null;
+			 Windows.Networking.Sockets.StreamSocket s = null;
 			 try
 			 {
-				int port = NetAdapterConstants_Fields.DEFAULT_PORT;
+				string port = NetAdapterConstants_Fields.DEFAULT_PORT;
 				// should be of the format "hostname:port" or hostname
 				int index = portName.IndexOf(':');
 				if (index >= 0)
@@ -598,7 +608,7 @@ namespace com.dalsemi.onewire.adapter
 				   int index2 = portName.IndexOf(':', index + 1);
 				   if (index2 < 0) // no custom secret specified
 				   {
-					  port = int.Parse(portName.Substring(index + 1));
+					  port = portName.Substring(index + 1);
 					  // reset the secret to default
 					  resetSecret();
 					  useCustomSecret = false;
@@ -610,7 +620,7 @@ namespace com.dalsemi.onewire.adapter
 					  useCustomSecret = true;
 					  if (index < index2 - 1) // port number is specified
 					  {
-						 port = int.Parse(portName.Substring(index + 1, index2 - (index + 1)));
+						 port = portName.Substring(index + 1, index2 - (index + 1));
 					  }
 				   }
 				   portName = portName.Substring(0, index);
@@ -621,9 +631,10 @@ namespace com.dalsemi.onewire.adapter
 				   resetSecret();
 				   useCustomSecret = false;
 				}
-				s = new Socket(portName, port);
+                s = new Windows.Networking.Sockets.StreamSocket();
+                //TODO s = new Socket(portName, port);
 			 }
-			 catch (IOException ioe)
+			 catch (System.IO.IOException ioe)
 			 {
 				throw new OneWireIOException("Can't reach server: " + ioe.Message);
 			 }
@@ -642,7 +653,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> If port does not exist, or unable to communicate with port. </exception>
 	   /// <exception cref="OneWireException"> If port does not exist </exception>
-	   public virtual bool selectPort(Socket sock)
+	   public virtual bool selectPort(Windows.Networking.Sockets.StreamSocket sock)
 	   {
 		  bool bSuccess = false;
 		  lock (conn)
@@ -652,36 +663,37 @@ namespace com.dalsemi.onewire.adapter
 
 			 try
 			 {
-				tmpConn.input = new DataInputStream(sock.InputStream);
-				if (NetAdapterConstants_Fields.BUFFERED_OUTPUT)
-				{
-				   tmpConn.output = new DataOutputStream(new BufferedOutputStream(sock.OutputStream));
-				}
-				else
-				{
-				   tmpConn.output = new DataOutputStream(sock.OutputStream);
-				}
+				tmpConn.input = new DataReader(sock.InputStream);
+                tmpConn.output = new DataWriter(sock.OutputStream);
 
 				// check host version
-				int hostVersionUID = tmpConn.input.readInt();
+				int hostVersionUID = tmpConn.input.ReadInt32();
 
 				if (hostVersionUID == NetAdapterConstants_Fields.versionUID)
 				{
 				   // tell the server that the versionUID matched
-				   tmpConn.output.writeByte(NetAdapterConstants_Fields.RET_SUCCESS);
-				   tmpConn.output.flush();
+				   tmpConn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+                   var t = Task.Run(async () =>
+                   {
+                       await conn.output.StoreAsync();
+                   });
+                   t.Wait();
 
 				   // if the versionUID matches, we need to authenticate ourselves
 				   // using the challenge from the server.
-				   sbyte[] chlg = new sbyte[8];
-				   tmpConn.input.read(chlg, 0, 8);
+				   byte[] chlg = new byte[8];
+				   tmpConn.input.ReadBytes(chlg);
 
 				   // compute the crc of the secret and the challenge
 				   int crc = CRC16.compute(netAdapterSecret, 0);
 				   crc = CRC16.compute(chlg, crc);
 				   // and send it back to the server
-				   tmpConn.output.writeInt(crc);
-				   tmpConn.output.flush();
+				   tmpConn.output.WriteInt32(crc);
+                   var t1 = Task.Run(async () =>
+                   {
+                       await conn.output.StoreAsync();
+                   });
+                   t.Wait();
 
 				   // check to see if it matched
 				   checkReturnValue(tmpConn);
@@ -690,12 +702,16 @@ namespace com.dalsemi.onewire.adapter
 				}
 				else
 				{
-				   tmpConn.output.writeByte(NetAdapterConstants_Fields.RET_FAILURE);
-				   tmpConn.output.flush();
+				   tmpConn.output.WriteByte(NetAdapterConstants_Fields.RET_FAILURE);
+                   var t = Task.Run(async () =>
+                   {
+                       await tmpConn.output.StoreAsync();
+                   });
+                   t.Wait();
 				   tmpConn = null;
 				}
 			 }
-			 catch (IOException)
+			 catch (System.IO.IOException)
 			 {
 				bSuccess = false;
 				tmpConn = null;
@@ -703,7 +719,7 @@ namespace com.dalsemi.onewire.adapter
 
 			 if (bSuccess)
 			 {
-				portNameForReconnect = sock.InetAddress.HostName + ":" + sock.Port;
+				portNameForReconnect = sock.Information.LocalAddress + ":" + sock.Information.LocalPort;
 				conn = tmpConn;
 			 }
 		  }
@@ -725,9 +741,13 @@ namespace com.dalsemi.onewire.adapter
 		  {
 			 lock (conn)
 			 {
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_CLOSECONNECTION);
-				conn.output.flush();
-				conn.sock.close();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_CLOSECONNECTION);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
+//TODO				conn.sock.close();
 				conn = NetAdapterConstants_Fields.EMPTY_CONNECTION;
 			 }
 		  }
@@ -755,11 +775,11 @@ namespace com.dalsemi.onewire.adapter
 				 }
 				 else if (useCustomSecret)
 				 {
-					return conn.sock.InetAddress.HostName + ":" + conn.sock.Port + ":" + StringHelperClass.NewString(this.netAdapterSecret);
+					return conn.sock.Information.LocalAddress + ":" + conn.sock.Information.LocalPort + ":" + Encoding.UTF8.GetString(this.netAdapterSecret);
 				 }
 				 else
 				 {
-					return conn.sock.InetAddress.HostName + ":" + conn.sock.Port;
+                    return conn.sock.Information.LocalAddress + ":" + conn.sock.Information.LocalPort;
 				 }
 			  }
 		   }
@@ -781,17 +801,20 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send beginExclusive command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_CANOVERDRIVE);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_CANOVERDRIVE);
+                var t = Task.Run(async () => {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
 				// check return value for success
 				checkReturnValue(conn);
 
 				// next parameter should be the return from beginExclusive
-				return conn.input.readBoolean();
+				return conn.input.ReadBoolean();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -813,17 +836,21 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send beginExclusive command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_CANHYPERDRIVE);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_CANHYPERDRIVE);
+                var t = Task.Run(async () => {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
+
 
 				// check return value for success
 				checkReturnValue(conn);
 
 				// next parameter should be the return from beginExclusive
-				return conn.input.readBoolean();
+				return conn.input.ReadBoolean();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -845,17 +872,21 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send beginExclusive command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_CANFLEX);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_CANFLEX);
+                var t = Task.Run(async () => {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
+
 
 				// check return value for success
 				checkReturnValue(conn);
 
 				// next parameter should be the return from beginExclusive
-				return conn.input.readBoolean();
+				return conn.input.ReadBoolean();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -877,17 +908,21 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send beginExclusive command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_CANPROGRAM);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_CANPROGRAM);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
 				// check return value for success
 				checkReturnValue(conn);
 
 				// next parameter should be the return from beginExclusive
-				return conn.input.readBoolean();
+				return conn.input.ReadBoolean();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -910,17 +945,21 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send beginExclusive command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_CANDELIVERPOWER);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_CANDELIVERPOWER);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
 				// check return value for success
 				checkReturnValue(conn);
 
 				// next parameter should be the return from beginExclusive
-				return conn.input.readBoolean();
+				return conn.input.ReadBoolean();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -945,17 +984,21 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send beginExclusive command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_CANDELIVERSMARTPOWER);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_CANDELIVERSMARTPOWER);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
-				// check return value for success
-				checkReturnValue(conn);
+                // check return value for success
+                checkReturnValue(conn);
 
 				// next parameter should be the return from beginExclusive
-				return conn.input.readBoolean();
+				return conn.input.ReadBoolean();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -977,17 +1020,21 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send beginExclusive command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_CANBREAK);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_CANBREAK);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
 				// check return value for success
 				checkReturnValue(conn);
 
 				// next parameter should be the return from beginExclusive
-				return conn.input.readBoolean();
+				return conn.input.ReadBoolean();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -1013,17 +1060,18 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send findFirstDevice command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_FINDFIRSTDEVICE);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_FINDFIRSTDEVICE);
+                var t = Task.Run(async () => { await conn.output.StoreAsync(); });
+                t.Wait();
 
 				// check return value for success
 				checkReturnValue(conn);
 
 				// return boolean from findFirstDevice
-				return conn.input.readBoolean();
+				return conn.input.ReadBoolean();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -1046,17 +1094,21 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send findNextDevice command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_FINDNEXTDEVICE);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_FINDNEXTDEVICE);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
 				// check return value for success
 				checkReturnValue(conn);
 
 				// return boolean from findNextDevice
-				return conn.input.readBoolean();
+				return conn.input.ReadBoolean();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -1073,21 +1125,25 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   /// <param name="address"> An array to be filled with the current iButton address. </param>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   public override void getAddress(sbyte[] address)
+	   public override void getAddress(byte[] address)
 	   {
 		  try
 		  {
 			 lock (conn)
 			 {
 				// send getAddress command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_GETADDRESS);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_GETADDRESS);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
 				// check return value for success
 				checkReturnValue(conn);
 
 				// get the address
-				conn.input.read(address, 0, 8);
+				conn.input.ReadBytes(address);
 			 }
 		  }
 		  catch (Exception)
@@ -1111,8 +1167,12 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send setSearchOnlyAlarmingDevices command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_SETSEARCHONLYALARMINGDEVICES);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_SETSEARCHONLYALARMINGDEVICES);
+                var t = Task.Run(async () => {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
+
 
 				// check return value for success
 				checkReturnValue(conn);
@@ -1138,8 +1198,12 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send setNoResetSearch command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_SETNORESETSEARCH);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_SETNORESETSEARCH);
+                var t = Task.Run(async () => {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
+
 
 				// check return value for success
 				checkReturnValue(conn);
@@ -1165,8 +1229,12 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send setSearchAllDevices command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_SETSEARCHALLDEVICES);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_SETSEARCHALLDEVICES);
+                var t = Task.Run(async () => {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
+
 
 				// check return value for success
 				checkReturnValue(conn);
@@ -1194,8 +1262,12 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send targetAllFamilies command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_TARGETALLFAMILIES);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_TARGETALLFAMILIES);
+                var t = Task.Run(async () => {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
+
 
 				// check return value for success
 				checkReturnValue(conn);
@@ -1222,10 +1294,14 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send targetFamily command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_TARGETFAMILY);
-				conn.output.writeInt(1);
-				conn.output.writeByte((sbyte)family);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_TARGETFAMILY);
+				conn.output.WriteInt32(1);
+				conn.output.WriteByte((byte)family);
+                var t = Task.Run(async () => {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
+
 
 				// check return value for success
 				checkReturnValue(conn);
@@ -1244,17 +1320,20 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="family">  array of the family types to target for searches </param>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
 	   /// <seealso cref=    #targetAllFamilies </seealso>
-	   public override void targetFamily(sbyte[] family)
+	   public override void targetFamily(byte[] family)
 	   {
 		  try
 		  {
 			 lock (conn)
 			 {
 				// send targetFamily command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_TARGETFAMILY);
-				conn.output.writeInt(family.Length);
-				conn.output.write(family, 0, family.Length);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_TARGETFAMILY);
+				conn.output.WriteInt32(family.Length);
+				conn.output.WriteBytes(family);
+                var t = Task.Run(async () => {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
 				// check return value for success
 				checkReturnValue(conn);
@@ -1282,10 +1361,13 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send excludeFamily command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_EXCLUDEFAMILY);
-				conn.output.writeInt(1);
-				conn.output.writeByte((sbyte)family);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_EXCLUDEFAMILY);
+				conn.output.WriteInt32(1);
+				conn.output.WriteByte((byte)family);
+                var t = Task.Run(async () => {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
 				// check return value for success
 				checkReturnValue(conn);
@@ -1305,17 +1387,20 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="family">  array of family cods NOT to target for searches </param>
 	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
 	   /// <seealso cref=    #targetAllFamilies </seealso>
-	   public override void excludeFamily(sbyte[] family)
+	   public override void excludeFamily(byte[] family)
 	   {
 		  try
 		  {
 			 lock (conn)
 			 {
 				// send excludeFamily command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_EXCLUDEFAMILY);
-				conn.output.writeInt(family.Length);
-				conn.output.write(family, 0, family.Length);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_EXCLUDEFAMILY);
+				conn.output.WriteInt32(family.Length);
+				conn.output.WriteBytes(family);
+                var t = Task.Run(async () => {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
 				// check return value for success
 				checkReturnValue(conn);
@@ -1382,18 +1467,22 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send beginExclusive command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_BEGINEXCLUSIVE);
-				conn.output.writeBoolean(blocking);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_BEGINEXCLUSIVE);
+				conn.output.WriteBoolean(blocking);
+                var t = Task.Run(async () => {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
+
 
 				// check return value for success
 				checkReturnValue(conn);
 
 				// next parameter should be the return from beginExclusive
-				bGotServerBlock = conn.input.readBoolean();
+				bGotServerBlock = conn.input.ReadBoolean();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -1420,27 +1509,27 @@ namespace com.dalsemi.onewire.adapter
 	   /// <exception cref="OneWireException"> </exception>
 	   private bool beginExclusive()
 	   {
-		  lock (currentThreadHash)
+//TODO		  lock (currentThreadHash)
 		  {
 			 if (currentThreadHash == NOT_OWNED)
 			 {
 				// not owned so take
-				currentThreadHash = new int?(Thread.CurrentThread.GetHashCode());
+				currentThreadHash = new int?(Environment.CurrentManagedThreadId.GetHashCode());
 
 				// provided debug on standard out
 				if (NetAdapterConstants_Fields.DEBUG)
 				{
-				   Debug.WriteLine("beginExclusive, now owned by: " + Thread.CurrentThread.Name);
+				   Debug.WriteLine("beginExclusive, now owned by: " + System.Environment.CurrentManagedThreadId);
 				}
 
 				return true;
 			 }
-			 else if (currentThreadHash.Value == Thread.CurrentThread.GetHashCode())
+			 else if (currentThreadHash.Value == Environment.CurrentManagedThreadId.GetHashCode())
 			 {
 				// provided debug on standard out
 				if (NetAdapterConstants_Fields.DEBUG)
 				{
-				   Debug.WriteLine("beginExclusive, already owned by: " + Thread.CurrentThread.Name);
+				   Debug.WriteLine("beginExclusive, already owned by: " + Environment.CurrentManagedThreadId);
 				}
 
 				// already own
@@ -1461,14 +1550,14 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   public override void endExclusive()
 	   {
-		  lock (currentThreadHash)
+//TODO		  lock (currentThreadHash)
 		  {
 			 // if own then release
-			 if (currentThreadHash != NOT_OWNED && currentThreadHash.Value == Thread.CurrentThread.GetHashCode())
+			 if (currentThreadHash != NOT_OWNED && currentThreadHash.Value == Environment.CurrentManagedThreadId.GetHashCode())
 			 {
 				if (NetAdapterConstants_Fields.DEBUG)
 				{
-				   Debug.WriteLine("endExclusive, was owned by: " + Thread.CurrentThread.Name);
+				   Debug.WriteLine("endExclusive, was owned by: " + Environment.CurrentManagedThreadId);
 				}
 
 				currentThreadHash = NOT_OWNED;
@@ -1477,8 +1566,12 @@ namespace com.dalsemi.onewire.adapter
 				   lock (conn)
 				   {
 					  // send endExclusive command
-					  conn.output.writeByte(NetAdapterConstants_Fields.CMD_ENDEXCLUSIVE);
-					  conn.output.flush();
+					  conn.output.WriteByte(NetAdapterConstants_Fields.CMD_ENDEXCLUSIVE);
+                      var t = Task.Run(async () => 
+                      {
+                          await conn.output.StoreAsync();
+                      });
+                      t.Wait();
 
 					  // check return value for success
 					  checkReturnValue(conn);
@@ -1521,17 +1614,22 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send reset command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_RESET);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_RESET);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
-				// check return value for success
-				checkReturnValue(conn);
+
+                // check return value for success
+                checkReturnValue(conn);
 
 				// next parameter should be the return from reset
-				return conn.input.readInt();
+				return conn.input.ReadInt32();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -1551,16 +1649,20 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send putBit command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_PUTBIT);
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_PUTBIT);
 				// followed by the bit
-				conn.output.writeBoolean(bitValue);
-				conn.output.flush();
+				conn.output.WriteBoolean(bitValue);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
 				// check return value for success
 				checkReturnValue(conn);
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -1573,31 +1675,37 @@ namespace com.dalsemi.onewire.adapter
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public override bool Bit
-	   {
-		   get
-		   {
-			  try
-			  {
-				 lock (conn)
-				 {
-					// send getBit command
-					conn.output.writeByte(NetAdapterConstants_Fields.CMD_GETBIT);
-					conn.output.flush();
+//TODO
+	   //public override bool Bit
+	   //{
+		  // get
+		  // {
+			 // try
+			 // {
+				// lock (conn)
+				// {
+				//	// send getBit command
+				//	conn.output.WriteByte(NetAdapterConstants_Fields.CMD_GETBIT);
+    //                var t = Task.Run(async () =>
+    //                {
+    //                    await conn.output.StoreAsync();
+    //                });
+    //                t.Wait();
+
     
-					// check return value for success
-					checkReturnValue(conn);
+				//	// check return value for success
+				//	checkReturnValue(conn);
     
-					// next parameter should be the return from getBit
-					return conn.input.readBoolean();
-				 }
-			  }
-			  catch (IOException ioe)
-			  {
-				 throw new OneWireException(COMM_FAILED + ioe.Message);
-			  }
-		   }
-	   }
+				//	// next parameter should be the return from getBit
+				//	return conn.input.ReadBoolean();
+				// }
+			 // }
+			 // catch (System.IO.IOException ioe)
+			 // {
+				// throw new OneWireException(COMM_FAILED + ioe.Message);
+			 // }
+		  // }
+	   //}
 
 	   /// <summary>
 	   /// Sends a byte to the 1-Wire Network.
@@ -1613,16 +1721,21 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send putByte command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_PUTBYTE);
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_PUTBYTE);
 				// followed by the byte
-				conn.output.writeByte(byteValue);
-				conn.output.flush();
+				conn.output.WriteByte((byte)byteValue);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
+
 
 				// check return value for success
 				checkReturnValue(conn);
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -1644,17 +1757,22 @@ namespace com.dalsemi.onewire.adapter
 				 lock (conn)
 				 {
 					// send getByte command
-					conn.output.writeByte(NetAdapterConstants_Fields.CMD_GETBYTE);
-					conn.output.flush();
+					conn.output.WriteByte(NetAdapterConstants_Fields.CMD_GETBYTE);
+                    var t = Task.Run(async () =>
+                    {
+                        await conn.output.StoreAsync();
+                    });
+                    t.Wait();
+
     
 					// check return value for success
 					checkReturnValue(conn);
     
 					// next parameter should be the return from getByte
-					return conn.input.readByte() & 0x0FF;
+					return conn.input.ReadByte() & 0x0FF;
 				 }
 			  }
-			  catch (IOException ioe)
+			  catch (System.IO.IOException ioe)
 			  {
 				 throw new OneWireException(COMM_FAILED + ioe.Message);
 			  }
@@ -1670,9 +1788,9 @@ namespace com.dalsemi.onewire.adapter
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public override sbyte[] getBlock(int len)
+	   public override byte[] getBlock(int len)
 	   {
-		  sbyte[] buffer = new sbyte[len];
+		  byte[] buffer = new byte[len];
 		  getBlock(buffer,0,len);
 		  return buffer;
 	   }
@@ -1686,7 +1804,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public override void getBlock(sbyte[] arr, int len)
+	   public override void getBlock(byte[] arr, int len)
 	   {
 		  getBlock(arr, 0, len);
 	   }
@@ -1701,26 +1819,32 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public override void getBlock(sbyte[] arr, int off, int len)
+	   public override void getBlock(byte[] arr, int off, int len)
 	   {
 		  try
 		  {
 			 lock (conn)
 			 {
 				// send getBlock command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_GETBLOCK);
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_GETBLOCK);
 				// followed by the number of bytes to get
-				conn.output.writeInt(len);
-				conn.output.flush();
+				conn.output.WriteInt32(len);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 
-				// check return value for success
-				checkReturnValue(conn);
+                // check return value for success
+                checkReturnValue(conn);
 
-				// next should be the bytes
-				conn.input.readFully(arr, off, len);
-			 }
+                // next should be the bytes
+                if (off != 0)
+                    Debugger.Break();
+				conn.input.ReadBytes(arr); //TODO off, len
+             }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -1738,7 +1862,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </param>
 	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
 	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public override void dataBlock(sbyte[] dataBlock, int off, int len)
+	   public override void dataBlock(byte[] dataBlock, int off, int len)
 	   {
 		  if (NetAdapterConstants_Fields.DEBUG)
 		  {
@@ -1749,21 +1873,28 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send dataBlock command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_DATABLOCK);
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_DATABLOCK);
 				// followed by the number of bytes to block
-				conn.output.writeInt(len);
-				// followed by the bytes
-				conn.output.write(dataBlock, off, len);
-				conn.output.flush();
+				conn.output.WriteInt32(len);
+                // followed by the bytes
+                if (off != 0)
+                    Debugger.Break();
+				conn.output.WriteBytes(dataBlock); //, off, len
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
 
 				// check return value for success
 				checkReturnValue(conn);
 
-				// next should be the bytes returned
-				conn.input.readFully(dataBlock, off, len);
-			 }
+                // next should be the bytes returned
+                if (off != 0)
+                    Debugger.Break();
+				conn.input.ReadBytes(dataBlock); // , off, len
+                }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -1812,16 +1943,19 @@ namespace com.dalsemi.onewire.adapter
 				 lock (conn)
 				 {
 					// send setPowerDuration command
-					conn.output.writeByte(NetAdapterConstants_Fields.CMD_SETPOWERDURATION);
+					conn.output.WriteByte(NetAdapterConstants_Fields.CMD_SETPOWERDURATION);
 					// followed by the value
-					conn.output.writeInt(value);
-					conn.output.flush();
+					conn.output.WriteInt32(value);
+                    var t = Task.Run(async () =>
+                    {
+                        await conn.output.StoreAsync();
+                    });
     
 					// check return value for success
 					checkReturnValue(conn);
 				 }
 			  }
-			  catch (IOException ioe)
+			  catch (System.IO.IOException ioe)
 			  {
 				 throw new OneWireException(COMM_FAILED + ioe.Message);
 			  }
@@ -1862,19 +1996,22 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send startPowerDelivery command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_STARTPOWERDELIVERY);
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_STARTPOWERDELIVERY);
 				// followed by the changeCondition
-				conn.output.writeInt(changeCondition);
-				conn.output.flush();
+				conn.output.WriteInt32(changeCondition);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
 
-				// check return value for success
-				checkReturnValue(conn);
+                // check return value for success
+                checkReturnValue(conn);
 
 				// and get the return value from startPowerDelivery
-				return conn.input.readBoolean();
+				return conn.input.ReadBoolean();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -1911,16 +2048,20 @@ namespace com.dalsemi.onewire.adapter
 				 lock (conn)
 				 {
 					// send setProgramPulseDuration command
-					conn.output.writeByte(NetAdapterConstants_Fields.CMD_SETPROGRAMPULSEDURATION);
+					conn.output.WriteByte(NetAdapterConstants_Fields.CMD_SETPROGRAMPULSEDURATION);
 					// followed by the value
-					conn.output.writeInt(value);
-					conn.output.flush();
+					conn.output.WriteInt32(value);
+                    var t = Task.Run(async () =>
+                    {
+                        await conn.output.StoreAsync();
+                    });
+
     
 					// check return value for success
 					checkReturnValue(conn);
 				 }
 			  }
-			  catch (IOException ioe)
+			  catch (System.IO.IOException ioe)
 			  {
 				 throw new OneWireException(COMM_FAILED + ioe.Message);
 			  }
@@ -1962,19 +2103,22 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send startProgramPulse command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_STARTPROGRAMPULSE);
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_STARTPROGRAMPULSE);
 				// followed by the changeCondition
-				conn.output.writeInt(changeCondition);
-				conn.output.flush();
+				conn.output.WriteInt32(changeCondition);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
 
 				// check return value for success
 				checkReturnValue(conn);
 
 				// and get the return value from startPowerDelivery
-				return conn.input.readBoolean();
+				return conn.input.ReadBoolean();
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -1995,14 +2139,17 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send startBreak command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_STARTBREAK);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_STARTBREAK);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
 
-				// check return value for success
-				checkReturnValue(conn);
+                // check return value for success
+                checkReturnValue(conn);
 			 }
 		  }
-		  catch (IOException)
+		  catch (System.IO.IOException)
 		  {
 			 throw new OneWireException(COMM_FAILED);
 		  }
@@ -2025,14 +2172,17 @@ namespace com.dalsemi.onewire.adapter
 			 lock (conn)
 			 {
 				// send startBreak command
-				conn.output.writeByte(NetAdapterConstants_Fields.CMD_SETPOWERNORMAL);
-				conn.output.flush();
+				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_SETPOWERNORMAL);
+                var t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
 
-				// check return value for success
-				checkReturnValue(conn);
+                // check return value for success
+                checkReturnValue(conn);
 			 }
 		  }
-		  catch (IOException ioe)
+		  catch (System.IO.IOException ioe)
 		  {
 			 throw new OneWireException(COMM_FAILED + ioe.Message);
 		  }
@@ -2072,16 +2222,19 @@ namespace com.dalsemi.onewire.adapter
 				 lock (conn)
 				 {
 					// send startBreak command
-					conn.output.writeByte(NetAdapterConstants_Fields.CMD_SETSPEED);
+					conn.output.WriteByte(NetAdapterConstants_Fields.CMD_SETSPEED);
 					// followed by the value
-					conn.output.writeInt(value);
-					conn.output.flush();
-    
-					// check return value for success
-					checkReturnValue(conn);
+					conn.output.WriteInt32(value);
+                    var t = Task.Run(async () =>
+                    {
+                        await conn.output.StoreAsync();
+                    });
+
+                    // check return value for success
+                    checkReturnValue(conn);
 				 }
 			  }
-			  catch (IOException ioe)
+			  catch (System.IO.IOException ioe)
 			  {
 				 throw new OneWireException(COMM_FAILED + ioe.Message);
 			  }
@@ -2093,14 +2246,17 @@ namespace com.dalsemi.onewire.adapter
 				 lock (conn)
 				 {
 					// send startBreak command
-					conn.output.writeByte(NetAdapterConstants_Fields.CMD_GETSPEED);
-					conn.output.flush();
+					conn.output.WriteByte(NetAdapterConstants_Fields.CMD_GETSPEED);
+                    var t = Task.Run(async () =>
+                    {
+                        await conn.output.StoreAsync();
+                    });
     
 					// check return value for success
 					checkReturnValue(conn);
     
 					// and return the return value from getSpeed()
-					return conn.input.readInt();
+					return conn.input.ReadInt32();
 				 }
 			  }
 			  catch (Exception)
@@ -2112,5 +2268,13 @@ namespace com.dalsemi.onewire.adapter
 		   }
 	   }
 
-	}
+//TODO
+        public override bool getBit
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+    }
 }

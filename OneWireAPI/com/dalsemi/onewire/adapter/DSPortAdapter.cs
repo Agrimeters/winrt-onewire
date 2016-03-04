@@ -1645,12 +1645,12 @@ namespace com.dalsemi.onewire.adapter
 		   }
 	   }
 
-	   /// <summary>
-	   /// Checks to see if the family found is in the desired
-	   /// include group.
-	   /// </summary>
-	   /// <returns>  <code>true</code> if in include group </returns>
-	   protected internal virtual bool isValidFamily(byte[] address)
+        /// <summary>
+        /// Checks to see if the family found is in the desired
+        /// include group.
+        /// </summary>
+        /// <returns>  <code>true</code> if in include group </returns>
+        protected internal virtual bool isValidFamily(byte[] address)
 	   {
 		  byte familyCode = address [0];
 

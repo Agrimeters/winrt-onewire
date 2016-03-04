@@ -247,25 +247,16 @@ namespace com.dalsemi.onewire
 			  Debug.WriteLine("");
 		  }
 
-#if false //TODO
-            // get the network adapter
-            try
+          // get the network adapter
+          try
 		  {
-			 //adapter_class = Type.GetType("com.dalsemi.onewire.adapter.NetAdapter");
-             //adapter_instance = (DSPortAdapter)Activator.CreateInstance(adapter_class);
              adapter_instance = (DSPortAdapter)new NetAdapter();
              adapter_vector.Add(adapter_instance);
 		  }
-		  catch (System.MemberAccessException e)
-		  {
-			 Debug.WriteLine("Warning: Could not load NetAdapter: " + e);
-		  }
 		  catch (System.Exception)
 		  {
-             Debugger.Break();
 			 // DRAIN
 		  }
-#endif //TODO
 
           // check for no adapters
           if (adapter_vector.Count == 0)
