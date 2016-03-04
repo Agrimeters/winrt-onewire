@@ -38,42 +38,43 @@ namespace com.dalsemi.onewire.adapter
     using com.dalsemi.onewire;
     using com.dalsemi.onewire.utils;
     using System.Threading.Tasks;
-    using Windows.Networking.Sockets;    /// <summary>
-                                         /// <P>NetAdapterSim is the host (or server) component for a network-based
-                                         /// DSPortAdapter.  It actually wraps the hardware DSPortAdapter and handles
-                                         /// connections from outside sources (NetAdapter) who want to access it.</P>
-                                         /// 
-                                         /// <P>NetAdapterSim is designed to be run in a thread, waiting for incoming
-                                         /// connections.  You can run this in the same thread as your main program or
-                                         /// you can establish the connections yourself (presumably using some higher
-                                         /// level of security) and then call the <code>handleConnection(Socket)</code> </summary>
-                                         /// {<seealso cref= #handleConnection(Socket)}.</P>
-                                         /// 
-                                         /// <P>Once a NetAdapter is connected with the host, a version check is performed
-                                         /// followed by a simple authentication step.  The authentication is dependent
-                                         /// upon a secret shared between the NetAdapter and the host.  Both will use
-                                         /// a default value, that each will agree with if you don't provide a secret
-                                         /// of your own.  To set the secret, add the following line to your
-                                         /// onewire.properties file:
-                                         /// <ul>
-                                         ///    <li>NetAdapter.secret="This is my custom secret"</li>
-                                         /// </ul>
-                                         /// Optionally, the secret can be set by calling the <code>setSecret(String)</code> </seealso>
-                                         /// {<seealso cref= #setSecret(String)}</P>
-                                         /// 
-                                         /// <P>The NetAdapter and NetAdapterSim support multicast broadcasts for
-                                         /// automatic discovery of compatible servers on your LAN.  To start the
-                                         /// multicast listener for this NetAdapterSim, call the
-                                         /// <code>createMulticastListener()</code> method </seealso>
-                                         /// {<seealso cref= #createMulticastListener()}.</P>
-                                         /// 
-                                         /// <P>For information on creating the client component, see the JavaDocs
-                                         /// for the  <seealso cref="com.dalsemi.onewire.adapter.NetAdapter NetAdapter"/>.
-                                         /// </seealso>
-                                         /// <seealso cref= NetAdapter
-                                         /// 
-                                         /// @author SH
-                                         /// @version    1.00, 9 Jan 2002 </seealso>
+    using Windows.Networking.Sockets;
+    /// <summary>
+    /// <P>NetAdapterSim is the host (or server) component for a network-based
+    /// DSPortAdapter.  It actually wraps the hardware DSPortAdapter and handles
+    /// connections from outside sources (NetAdapter) who want to access it.</P>
+    /// 
+    /// <P>NetAdapterSim is designed to be run in a thread, waiting for incoming
+    /// connections.  You can run this in the same thread as your main program or
+    /// you can establish the connections yourself (presumably using some higher
+    /// level of security) and then call the <code>handleConnection(Socket)</code> </summary>
+    /// {<seealso cref= #handleConnection(Socket)}.</P>
+    /// 
+    /// <P>Once a NetAdapter is connected with the host, a version check is performed
+    /// followed by a simple authentication step.  The authentication is dependent
+    /// upon a secret shared between the NetAdapter and the host.  Both will use
+    /// a default value, that each will agree with if you don't provide a secret
+    /// of your own.  To set the secret, add the following line to your
+    /// onewire.properties file:
+    /// <ul>
+    ///    <li>NetAdapter.secret="This is my custom secret"</li>
+    /// </ul>
+    /// Optionally, the secret can be set by calling the <code>setSecret(String)</code> </seealso>
+    /// {<seealso cref= #setSecret(String)}</P>
+    /// 
+    /// <P>The NetAdapter and NetAdapterSim support multicast broadcasts for
+    /// automatic discovery of compatible servers on your LAN.  To start the
+    /// multicast listener for this NetAdapterSim, call the
+    /// <code>createMulticastListener()</code> method </seealso>
+    /// {<seealso cref= #createMulticastListener()}.</P>
+    /// 
+    /// <P>For information on creating the client component, see the JavaDocs
+    /// for the  <seealso cref="com.dalsemi.onewire.adapter.NetAdapter NetAdapter"/>.
+    /// </seealso>
+    /// <seealso cref= NetAdapter
+    /// 
+    /// @author SH
+    /// @version    1.00, 9 Jan 2002 </seealso>
     public class NetAdapterSim : NetAdapterConstants
     {
 	   protected internal static bool SIM_DEBUG = false;
@@ -447,7 +448,7 @@ namespace com.dalsemi.onewire.adapter
 				{
 				   if (sock != null)
 				   {
-					  //TODO sock.close();
+                      sock.Dispose();
 				   }
 				}
 				catch (System.IO.IOException)

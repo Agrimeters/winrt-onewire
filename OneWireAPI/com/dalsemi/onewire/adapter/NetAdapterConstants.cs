@@ -93,7 +93,6 @@ namespace com.dalsemi.onewire.adapter
 	{
 	   public const bool DEBUG = true;
 	   public const int versionUID = 1;
-	   public const bool BUFFERED_OUTPUT = true;
 	   public const string DEFAULT_PORT = "6161";
 	   public const string DEFAULT_SECRET = "Adapter Secret Default";
 	   public const string DEFAULT_MULTICAST_GROUP = "228.5.6.7";

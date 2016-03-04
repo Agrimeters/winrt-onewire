@@ -34,11 +34,13 @@ using System.Diagnostics;
 namespace com.dalsemi.onewire.adapter
 {
 
-
     using com.dalsemi.onewire;
     using com.dalsemi.onewire.utils;
     using System.Threading.Tasks;
     using Windows.Storage.Streams;
+    using Windows.Networking.Sockets;
+    using Windows.Networking;
+
     /// <summary>
     /// <P>NetAdapter is a network-based DSPortAdapter.  It allows for the use of
     /// an actual DSPortAdapter which isn't on the local machine, but rather is
@@ -211,10 +213,14 @@ namespace com.dalsemi.onewire.adapter
 	   protected internal int datagramPort = -1;
 
 	   /// <summary>
-	   /// Creates an instance of NetAdapter that isn't connected.  Must call
-	   /// selectPort(String); or selectPort(Socket);
-	   /// </summary>
-	   public NetAdapter()
+	   /// Used to block waiting for multicast responses </summary>
+       protected ArrayList vPorts = null;
+
+       /// <summary>
+       /// Creates an instance of NetAdapter that isn't connected.  Must call
+       /// selectPort(String); or selectPort(Socket);
+       /// </summary>
+       public NetAdapter()
 	   {
 		  try
 		  {
@@ -404,7 +410,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		   get
 		   {
-			  ArrayList v = new ArrayList();
+              vPorts = new ArrayList();
     
 			  // figure out if multicast is enabled
 			  if (multicastEnabled == null)
@@ -477,8 +483,10 @@ namespace com.dalsemi.onewire.adapter
 					}
 				 }
     
-				 Windows.Networking.Sockets.DatagramSocket socket = null;
-				 try
+				 DatagramSocket socket = null;
+                 DataWriter writer = null;
+
+                 try
 				 {
 					//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 					if (NetAdapterConstants_Fields.DEBUG)
@@ -487,70 +495,55 @@ namespace com.dalsemi.onewire.adapter
 					   Debug.WriteLine("DEBUG: joining group: " + multicastGroup);
 					}
 					//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-    
+
 					// create the multi-cast socket
-					socket = new Windows.Networking.Sockets.DatagramSocket();
-//TODO
-					//// create the group's InetAddress
-					//group = InetAddress.getByName(multicastGroup);
-					//// join the group
-					//socket.joinGroup(group);
-    
-					// convert the versionUID to a byte[]
-					byte[] versionBytes = Convert.toByteArray(NetAdapterConstants_Fields.versionUID);
-    
+					socket = new DatagramSocket();
+                    socket.Control.MulticastOnly = true;
+                    socket.MessageReceived += Multicast_MessageReceived;
+
+                    var t = Task.Run(async () =>
+                    {
+                        await socket.BindServiceNameAsync(datagramPort.ToString());
+                    });
+                    t.Wait();
+
+                    //join the multicast group
+                    socket.JoinMulticastGroup(new HostName(multicastGroup));
+
+                    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                    if (NetAdapterConstants_Fields.DEBUG)
+                    {
+                        Debug.WriteLine("DEBUG: waiting for multicast packets");
+                    }
+                    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+
 					// send a packet with the versionUID
-//TODO					DatagramPacket outPacket = new DatagramPacket(versionBytes, 4, group, datagramPort);
-//TODO					socket.send(outPacket);
-    
-					// set a timeout of 1/2 second for the receive
-//TODO					socket.SoTimeout = 500;
-    
-					byte[] receiveBuffer = new byte[32];
-					for (;;)
-					{
-					   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-					   if (NetAdapterConstants_Fields.DEBUG)
-					   {
-						  Debug.WriteLine("DEBUG: waiting for multicast packet");
-					   }
-					   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-//TODO					   DatagramPacket inPacket = new DatagramPacket(receiveBuffer, receiveBuffer.Length);
-//TODO					   socket.receive(inPacket);
-    
-//TODO					   int length = inPacket.Length;
-//TODO					   byte[] data = inPacket.Data;
-					   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-					   if (NetAdapterConstants_Fields.DEBUG)
-					   {
-//TODO						  Debug.WriteLine("DEBUG: packet.length=" + length);
-						  Debug.WriteLine("DEBUG: expecting=" + 5);
-					   }
-					   //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-//TODO
-					   //if (length == 5 && data[4] == 0xFF)
-					   //{
-						  //int listenPort = Convert.toInt(data, 0, 4);
-						  //v.Add(inPacket.Address.HostName + ":" + listenPort);
-					   //}
-					}
+                    writer = new DataWriter(socket.OutputStream);
+                    writer.WriteInt32(NetAdapterConstants_Fields.versionUID);
+                    var t1 = Task.Run(async() =>
+                    {
+                        await writer.StoreAsync();
+                    });
+
+                    // wait 1/2 second for responses
+                    Thread.Sleep(500);
 				 }
 				 catch (Exception)
 				 { //drain
-                     ;
+                     Debugger.Break();
 				 }
 				 finally
 				 {
 					try
 					{
-                       Debugger.Break();
-					   //socket.leaveGroup(group);
-					   //socket.close();
+                       writer.DetachBuffer();
+                       writer.Dispose();
+                       socket.Dispose();
 					}
 					catch (Exception)
 					{ //drain
-		                ;
-					}
+                        Debugger.Break();
+                    }
 				 }
 			  }
     
@@ -563,41 +556,71 @@ namespace com.dalsemi.onewire.adapter
 					server = OneWireAccessProvider.getProperty("NetAdapter.host" + i);
 					if (!string.ReferenceEquals(server, null))
 					{
-					   v.Add(server);
+					   vPorts.Add(server);
 					}
 				 }
 			  }
 			  catch (Exception)
 			  {
-				  ;
+                  Debugger.Break();
 			  }
     
-			  return v.GetEnumerator();
+			  return vPorts.GetEnumerator();
 		   }
 	   }
 
-	   /// <summary>
-	   /// Specifies a platform appropriate port name for this adapter.  Note that
-	   /// even though the port has been selected, it's ownership may be relinquished
-	   /// if it is not currently held in a 'exclusive' block.  This class will then
-	   /// try to re-aquire the port when needed.  If the port cannot be re-aquired
-	   /// ehen the exception <code>PortInUseException</code> will be thrown.
-	   /// </summary>
-	   /// <param name="portName">  Address to connect this NetAdapter to, in the form of
-	   /// "hostname:port".  For example, "shughes.dalsemi.com:6161", where 6161
-	   /// is the port number to connect to.  The use of NetAdapter.DEFAULT_PORT
-	   /// is recommended.
-	   /// </param>
-	   /// <returns> <code>true</code> if the port was aquired, <code>false</code>
-	   /// if the port is not available.
-	   /// </returns>
-	   /// <exception cref="OneWireIOException"> If port does not exist, or unable to communicate with port. </exception>
-	   /// <exception cref="OneWireException"> If port does not exist </exception>
-	   public override bool selectPort(string portName)
+        private void Multicast_MessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
+        {
+            DataReader reader = args.GetDataReader();
+            uint length = reader.UnconsumedBufferLength;
+
+            if (length == 5)
+            {
+                string port = reader.ReadInt32().ToString();
+                byte terminator = reader.ReadByte();
+                if ((port == sender.Information.RemotePort) && (terminator == 0xFF))
+                {
+                    vPorts.Add(sender.Information.RemoteAddress + ":" + sender.Information.RemotePort);
+                }
+                else
+                {
+                    Debugger.Break();
+                }
+            }
+            else
+            {
+                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                if (NetAdapterConstants_Fields.DEBUG)
+                {
+                    Debug.WriteLine("DEBUG: packet.length=" + length);
+                    Debug.WriteLine("DEBUG: expecting=" + 5);
+                }
+                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+            }
+        }
+
+        /// <summary>
+        /// Specifies a platform appropriate port name for this adapter.  Note that
+        /// even though the port has been selected, it's ownership may be relinquished
+        /// if it is not currently held in a 'exclusive' block.  This class will then
+        /// try to re-aquire the port when needed.  If the port cannot be re-aquired
+        /// ehen the exception <code>PortInUseException</code> will be thrown.
+        /// </summary>
+        /// <param name="portName">  Address to connect this NetAdapter to, in the form of
+        /// "hostname:port".  For example, "shughes.dalsemi.com:6161", where 6161
+        /// is the port number to connect to.  The use of NetAdapter.DEFAULT_PORT
+        /// is recommended.
+        /// </param>
+        /// <returns> <code>true</code> if the port was aquired, <code>false</code>
+        /// if the port is not available.
+        /// </returns>
+        /// <exception cref="OneWireIOException"> If port does not exist, or unable to communicate with port. </exception>
+        /// <exception cref="OneWireException"> If port does not exist </exception>
+        public override bool selectPort(string portName)
 	   {
 		  lock (conn)
 		  {
-			 Windows.Networking.Sockets.StreamSocket s = null;
+			 StreamSocket s = null;
 			 try
 			 {
 				string port = NetAdapterConstants_Fields.DEFAULT_PORT;
@@ -631,13 +654,21 @@ namespace com.dalsemi.onewire.adapter
 				   resetSecret();
 				   useCustomSecret = false;
 				}
-                s = new Windows.Networking.Sockets.StreamSocket();
-                //TODO s = new Socket(portName, port);
+
+                s = new StreamSocket();
+                s.Control.KeepAlive = false;
+                s.Control.NoDelay = true;
+                var t = Task.Run(async () =>
+                {
+                    await s.ConnectAsync(new HostName(portName), port);
+                });
+                t.Wait();
+                
 			 }
-			 catch (System.IO.IOException ioe)
-			 {
-				throw new OneWireIOException("Can't reach server: " + ioe.Message);
-			 }
+             catch (System.Runtime.InteropServices.COMException e)
+             {
+				throw new OneWireIOException("Can't reach server: " + e.Message);
+             }
 
 			 return selectPort(s);
 		  }
@@ -653,7 +684,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// </returns>
 	   /// <exception cref="OneWireIOException"> If port does not exist, or unable to communicate with port. </exception>
 	   /// <exception cref="OneWireException"> If port does not exist </exception>
-	   public virtual bool selectPort(Windows.Networking.Sockets.StreamSocket sock)
+	   public virtual bool selectPort(StreamSocket sock)
 	   {
 		  bool bSuccess = false;
 		  lock (conn)
