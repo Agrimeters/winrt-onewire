@@ -772,14 +772,20 @@ namespace com.dalsemi.onewire.adapter
 		  {
 			 lock (conn)
 			 {
-				conn.output.WriteByte(NetAdapterConstants_Fields.CMD_CLOSECONNECTION);
-                var t = Task.Run(async () =>
+                if(conn.output != null)
                 {
-                    await conn.output.StoreAsync();
-                });
-                t.Wait();
-//TODO				conn.sock.close();
-				conn = NetAdapterConstants_Fields.EMPTY_CONNECTION;
+                    conn.output.WriteByte(NetAdapterConstants_Fields.CMD_CLOSECONNECTION);
+                    var t = Task.Run(async () =>
+                    {
+                        await conn.output.StoreAsync();
+                    });
+                    t.Wait();
+                }
+                if(conn.sock != null)
+                {
+                    conn.sock.Dispose();
+                }
+                conn = NetAdapterConstants_Fields.EMPTY_CONNECTION;
 			 }
 		  }
 		  catch (Exception e)

@@ -40,86 +40,86 @@ namespace com.dalsemi.onewire
     using com.dalsemi.onewire.adapter;
     using System.Collections.Generic;
     using System.IO;
-
-    /// <summary>
-    /// The OneWireAccessProvider class manages the Dallas Semiconductor
-    /// adapter class derivatives of <code>DSPortAdapter</code>.  An enumeration of all
-    /// available adapters can be accessed through the
-    /// member function <code>EnumerateAllAdapters</code>.  This enables an
-    /// application to be adapter independent. There are also facilities to get a system
-    /// appropriate default adapter/port combination.<para>
-    /// 
-    /// <H3> Usage </H3>
-    /// 
-    /// <DL>
-    /// <DD> <H4> Example 1</H4>
-    /// Get an instance of the default 1-Wire adapter.  The adapter will be ready
-    /// to use if no exceptions are thrown.
-    /// <PRE> <CODE>
-    ///  try
-    ///  {
-    ///     DSPortAdapter adapter = OneWireAccessProvider.getDefaultAdapter();
-    /// 
-    ///     System.out.println("Adapter: " + adapter.getAdapterName() + " Port: " + adapter.getPortName());
-    /// 
-    ///     // use the adapter ...
-    /// 
-    ///  }
-    ///  catch(Exception e)
-    ///  {
-    ///     System.out.println("Default adapter not present: " + e);
-    ///  }
-    /// </CODE> </PRE>
-    /// </DL>
-    /// 
-    /// <DL>
-    /// <DD> <H4> Example 2</H4>
-    /// Enumerate through the available adapters and ports.
-    /// <PRE> <CODE>
-    ///  DSPortAdapter adapter;
-    ///  String        port;
-    /// 
-    ///  // get the adapters
-    ///  for (Enumeration adapter_enum = OneWireAccessProvider.enumerateAllAdapters();
-    ///                                  adapter_enum.hasMoreElements(); )
-    ///  {
-    ///     // cast the enum as a DSPortAdapter
-    ///     adapter = ( DSPortAdapter ) adapter_enum.nextElement();
-    /// 
-    ///     System.out.print("Adapter: " + adapter.getAdapterName() + " with ports: ");
-    /// 
-    ///     // get the ports
-    ///     for (Enumeration port_enum = adapter.getPortNames();
-    ///             port_enum.hasMoreElements(); )
-    ///     {
-    ///        // cast the enum as a String
-    ///        port = ( String ) port_enum.nextElement();
-    /// 
-    ///        System.out.print(port + " ");
-    ///     }
-    /// 
-    ///     System.out.println();
-    ///  }
-    /// </CODE> </PRE>
-    /// </DL>
-    /// 
-    /// <DL>
-    /// <DD> <H4> Example 3</H4>
-    /// Display the default adapter name and port without getting an instance of the adapter.
-    /// <PRE> <CODE>
-    ///  System.out.println("Default Adapter: " +
-    ///                      OneWireAccessProvider.getProperty("onewire.adapter.default"));
-    ///  System.out.println("Default Port: " +
-    ///                      OneWireAccessProvider.getProperty("onewire.port.default"));
-    /// </CODE> </PRE>
-    /// </DL>
-    /// 
-    /// </para>
-    /// </summary>
-    /// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter
-    /// 
-    /// @version    0.00, 30 August 2000
-    /// @author     DS </seealso>
+    using System.Threading.Tasks;
+    using Windows.Storage.Streams;    /// <summary>
+                                      /// The OneWireAccessProvider class manages the Dallas Semiconductor
+                                      /// adapter class derivatives of <code>DSPortAdapter</code>.  An enumeration of all
+                                      /// available adapters can be accessed through the
+                                      /// member function <code>EnumerateAllAdapters</code>.  This enables an
+                                      /// application to be adapter independent. There are also facilities to get a system
+                                      /// appropriate default adapter/port combination.<para>
+                                      /// 
+                                      /// <H3> Usage </H3>
+                                      /// 
+                                      /// <DL>
+                                      /// <DD> <H4> Example 1</H4>
+                                      /// Get an instance of the default 1-Wire adapter.  The adapter will be ready
+                                      /// to use if no exceptions are thrown.
+                                      /// <PRE> <CODE>
+                                      ///  try
+                                      ///  {
+                                      ///     DSPortAdapter adapter = OneWireAccessProvider.getDefaultAdapter();
+                                      /// 
+                                      ///     System.out.println("Adapter: " + adapter.getAdapterName() + " Port: " + adapter.getPortName());
+                                      /// 
+                                      ///     // use the adapter ...
+                                      /// 
+                                      ///  }
+                                      ///  catch(Exception e)
+                                      ///  {
+                                      ///     System.out.println("Default adapter not present: " + e);
+                                      ///  }
+                                      /// </CODE> </PRE>
+                                      /// </DL>
+                                      /// 
+                                      /// <DL>
+                                      /// <DD> <H4> Example 2</H4>
+                                      /// Enumerate through the available adapters and ports.
+                                      /// <PRE> <CODE>
+                                      ///  DSPortAdapter adapter;
+                                      ///  String        port;
+                                      /// 
+                                      ///  // get the adapters
+                                      ///  for (Enumeration adapter_enum = OneWireAccessProvider.enumerateAllAdapters();
+                                      ///                                  adapter_enum.hasMoreElements(); )
+                                      ///  {
+                                      ///     // cast the enum as a DSPortAdapter
+                                      ///     adapter = ( DSPortAdapter ) adapter_enum.nextElement();
+                                      /// 
+                                      ///     System.out.print("Adapter: " + adapter.getAdapterName() + " with ports: ");
+                                      /// 
+                                      ///     // get the ports
+                                      ///     for (Enumeration port_enum = adapter.getPortNames();
+                                      ///             port_enum.hasMoreElements(); )
+                                      ///     {
+                                      ///        // cast the enum as a String
+                                      ///        port = ( String ) port_enum.nextElement();
+                                      /// 
+                                      ///        System.out.print(port + " ");
+                                      ///     }
+                                      /// 
+                                      ///     System.out.println();
+                                      ///  }
+                                      /// </CODE> </PRE>
+                                      /// </DL>
+                                      /// 
+                                      /// <DL>
+                                      /// <DD> <H4> Example 3</H4>
+                                      /// Display the default adapter name and port without getting an instance of the adapter.
+                                      /// <PRE> <CODE>
+                                      ///  System.out.println("Default Adapter: " +
+                                      ///                      OneWireAccessProvider.getProperty("onewire.adapter.default"));
+                                      ///  System.out.println("Default Port: " +
+                                      ///                      OneWireAccessProvider.getProperty("onewire.port.default"));
+                                      /// </CODE> </PRE>
+                                      /// </DL>
+                                      /// 
+                                      /// </para>
+                                      /// </summary>
+                                      /// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter
+                                      /// 
+                                      /// @version    0.00, 30 August 2000
+                                      /// @author     DS </seealso>
     public class OneWireAccessProvider
 	{
 
@@ -302,7 +302,7 @@ namespace com.dalsemi.onewire
 		  {
 			 // cast the enum as a DSPortAdapter
 			 adapter = (DSPortAdapter) adapter_enum.Current;
-
+             
 			 // see if this is the type of adapter we want
 			 if ((found_adapter != null) || (!adapter.AdapterName.Equals(adapterName)))
 			 {
@@ -443,25 +443,58 @@ namespace com.dalsemi.onewire
             string ret_str = null;
             DSPortAdapter adapter_instance;
 
-            // try system properties
-            try
-            {
-                // This doesn't work on WinRT...
-                var table = Environment.GetEnvironmentVariables();
-                ret_str = (string)table[propName];
-            }
-            catch (System.Exception)
-            {
-                ret_str = null;
-            }
-
             // if defaults not found then try onewire.properties file
             if (string.ReferenceEquals(ret_str, null))
             {
                 // Check local filesystem
                 if (string.ReferenceEquals(ret_str, null))
                 {
-                    //TODO
+                    if (propertyTable == null)
+                    {
+                        var t = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                var localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+                                Debug.WriteLine("Attempting to open: " + localFolder.Path + "\\onewire.properties");
+
+                                if(File.Exists(localFolder.Path + "\\onewire.properties"))
+                                {
+                                    StorageFile localFile = await localFolder.GetFileAsync("onewire.properties");
+                                    Debug.WriteLine(localFile.Path);
+                                    Stream stream = await localFile.OpenStreamForReadAsync();
+
+                                    propertyTable = new Dictionary<string, string>();
+
+                                    using (var reader = new StreamReader(stream))
+                                    {
+                                        while (!reader.EndOfStream)
+                                        {
+                                            string line = reader.ReadLine();
+                                            string[] st = line.Split(new char[] { '=' });
+
+                                            if (st.Length < 2)
+                                                continue;
+                                            else if (st.Length == 2)
+                                            {
+                                                propertyTable.Add(st[0].Trim(), st[1].Trim());
+                                            }
+                                            else if (st.Length > 2)
+                                            {
+                                                Debug.WriteLine("Property ignored as it has more than one '='!");
+                                                continue;
+                                            }
+                                        };
+                                    }
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                Debugger.Break();
+                            }
+                        });
+                        t.Wait();
+                    }
                 }
 
                 // Use built in defaults OneWireAPI.Resources.onewire_properties
@@ -501,8 +534,12 @@ namespace com.dalsemi.onewire
                             Debug.WriteLine("\t" + key + "=" + propertyTable[key]);
                         }
                     }
+                }
+
+                if (propertyTable != null)
+                {
                     propertyTable.TryGetValue(propName, out ret_str);
-                    if(ret_str != null)
+                    if (ret_str != null)
                     {
                         Debug.WriteLine("Found: " + propName + "=" + ret_str);
                     }

@@ -1323,7 +1323,7 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         public static void Main(string[] args)
         {
-            DSPortAdapter adapter = com.dalsemi.onewire.OneWireAccessProvider.DefaultAdapter;
+            DSPortAdapter adapter = OneWireAccessProvider.DefaultAdapter;
 
             NetAdapterHost host = new NetAdapterHost(adapter, true);
 
