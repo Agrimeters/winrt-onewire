@@ -197,7 +197,7 @@ namespace com.dalsemi.onewire.adapter
         {
             get
             {
-                return "DS2490";
+                return "UsbAdapter";
             }
         }
 
@@ -210,7 +210,7 @@ namespace com.dalsemi.onewire.adapter
         {
             get
             {
-                return "DS2490 USB Port";
+                return "DS2490 based master";
             }
         }
 

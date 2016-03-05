@@ -396,6 +396,33 @@ namespace com.dalsemi.onewire
 		   }
 	   }
 
+        private static void loadTable(Dictionary<string, string> table, StreamReader reader)
+        { 
+            while (!reader.EndOfStream)
+            {
+                string line = reader.ReadLine();
+                string[] st = line.Split(new char[] { '=' });
+
+                if (st.Length< 2)
+                    continue;
+                else if (st.Length == 2)
+                {
+                    if (st[0].StartsWith("#"))
+                    {
+                        Debug.WriteLine("Commented out property >> " + st[0] + "=" + st[1]);
+                        continue;
+                    }
+
+                    table.Add(st[0].Trim(), st[1].Trim());
+                }
+                else if (st.Length > 2)
+                {
+                    Debug.WriteLine("Property ignored as it has more than one '='!");
+                    continue;
+                }
+            };
+        }
+
         /// <summary>
         /// Gets the specfied onewire property.
         /// Looks for the property in the following locations:
@@ -453,10 +480,11 @@ namespace com.dalsemi.onewire
                             try
                             {
                                 var localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-                                Debug.WriteLine("Attempting to open: " + localFolder.Path + "\\onewire.properties");
 
                                 if(File.Exists(localFolder.Path + "\\onewire.properties"))
                                 {
+                                    Debug.WriteLine("Loading onewire.properties from " + localFolder.Path);
+
                                     StorageFile localFile = await localFolder.GetFileAsync("onewire.properties");
                                     Debug.WriteLine(localFile.Path);
                                     Stream stream = await localFile.OpenStreamForReadAsync();
@@ -465,23 +493,7 @@ namespace com.dalsemi.onewire
 
                                     using (var reader = new StreamReader(stream))
                                     {
-                                        while (!reader.EndOfStream)
-                                        {
-                                            string line = reader.ReadLine();
-                                            string[] st = line.Split(new char[] { '=' });
-
-                                            if (st.Length < 2)
-                                                continue;
-                                            else if (st.Length == 2)
-                                            {
-                                                propertyTable.Add(st[0].Trim(), st[1].Trim());
-                                            }
-                                            else if (st.Length > 2)
-                                            {
-                                                Debug.WriteLine("Property ignored as it has more than one '='!");
-                                                continue;
-                                            }
-                                        };
+                                        loadTable(propertyTable, reader);
                                     }
                                 }
                             }
@@ -500,29 +512,15 @@ namespace com.dalsemi.onewire
                 {
                     if(propertyTable == null)
                     {
+                        Debug.WriteLine("Loading properties from OneWireAPI.Resources.onewire_properties");
+
                         propertyTable = new Dictionary<string, string>();
 
                         Assembly asm = typeof(OneWireAccessProvider).GetTypeInfo().Assembly;
                         using (Stream stream = asm.GetManifestResourceStream("OneWireAPI.Resources.onewire_properties"))
-                        using (var reader = new StreamReader(stream))
+                        using (StreamReader reader = new StreamReader(stream))
                         {
-                            while (!reader.EndOfStream)
-                            {
-                                string line = reader.ReadLine();
-                                string[] st = line.Split(new char[] { '=' });
-
-                                if (st.Length < 2)
-                                    continue;
-                                else if (st.Length == 2)
-                                {
-                                    propertyTable.Add(st[0].Trim(), st[1].Trim());
-                                }
-                                else if (st.Length > 2)
-                                {
-                                    Debug.WriteLine("Property ignored as it has more than one '='!");
-                                    continue;
-                                }
-                            };
+                            loadTable(propertyTable, reader);
                         }
 
                         Debug.WriteLine("Property Table loaded!");
