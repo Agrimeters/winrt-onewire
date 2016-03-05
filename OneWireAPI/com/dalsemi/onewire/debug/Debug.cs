@@ -30,8 +30,7 @@ using System.Diagnostics;
  */
 namespace com.dalsemi.onewire.debug
 {
-
-	using Convert = com.dalsemi.onewire.utils.Convert;
+	using Convert = utils.Convert;
 
 	/// <summary>
 	/// <para>This class is intended to help both developers of the 1-Wire API for
@@ -76,14 +75,16 @@ namespace com.dalsemi.onewire.debug
 			  {
 				 try
 				 {
-					@out = new StreamWriter(new System.IO.FileStream(logFile, System.IO.FileMode.Create, System.IO.FileAccess.Write));
+                    @out = new StreamWriter(new FileStream(logFile, FileMode.Create, FileAccess.Write));
+                    @out.AutoFlush = true;
 				 }
 				 catch (System.Exception e)
 				 {
 					@out = null;
-					debug("Error in Debug Static Constructor", e);
-				 }
-			  }
+                    DEBUG = false;
+					debug("Error opening log file in Debug Static Constructor", e);
+                 }
+              }
 		   }
 		}
 
@@ -135,8 +136,8 @@ namespace com.dalsemi.onewire.debug
 	   {
 		  if (DEBUG)
 		  {
-			 @out.WriteLine(">> " + x);
-		  }
+             @out.WriteLine(">> " + x);
+          }
 	   }
 
 	   /// <summary>
@@ -156,13 +157,13 @@ namespace com.dalsemi.onewire.debug
 	   /// </summary>
 	   /// <param name="lbl"> the message to print out above the array </param>
 	   /// <param name="bytes"> the byte array to print out </param>
-		public static void debug(string lbl, byte[] bytes)
-		{
-		  if (DEBUG)
-		  {
-			 debug(lbl, bytes, 0, bytes.Length);
-		  }
-		}
+	   public static void debug(string lbl, byte[] bytes)
+	   {
+	     if (DEBUG)
+	     {
+	   	    debug(lbl, bytes, 0, bytes.Length);
+		 }
+	   }
 
 	   /// <summary>
 	   /// Prints the specified array of bytes with a given label
@@ -236,8 +237,9 @@ namespace com.dalsemi.onewire.debug
 			 @out.WriteLine(">> " + lbl);
 			 @out.WriteLine(">>    " + t.Message);
 			 @out.WriteLine(t.StackTrace);
-		  }
-	   }
+             @out.WriteLine(Environment.StackTrace);
+           }
+        }
 
 	   /// <summary>
 	   /// Prints out an exception stack trace for debugging purposes.
@@ -249,14 +251,8 @@ namespace com.dalsemi.onewire.debug
 	   {
 		  if (DEBUG)
 		  {
-			 try
-			 {
-				throw new Exception("DEBUG STACK TRACE");
-			 }
-			 catch (System.Exception e)
-			 {
-				@out.WriteLine(e.StackTrace);
-			 }
+             @out.WriteLine("DEBUG STACK TRACE");
+             @out.WriteLine(Environment.StackTrace);
 		  }
 	   }
 

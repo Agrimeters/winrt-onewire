@@ -202,7 +202,6 @@ namespace com.dalsemi.onewire
 			 return (adapter_vector.GetEnumerator());
 		  }
 
-#if false //TODO
           // DS2490 - USB
           try
           {
@@ -220,7 +219,6 @@ namespace com.dalsemi.onewire
           {
               // DRAIN
           }
-#endif
 
 #if false //TODO
           // DS2480B - Serial
@@ -244,16 +242,15 @@ namespace com.dalsemi.onewire
 		  {
 			 // DRAIN
 		  }
-
+#endif
 		  if ((!usb_loaded) && (!serial_loaded))
 		  {
 		      Debug.WriteLine("");
 			  Debug.WriteLine("Standard drivers for 1-Wire are not found.");
 			  Debug.WriteLine("Please download the latest drivers from http://www.ibutton.com ");
- 			  Debug.WriteLine("Or install RXTX Serial Communications API from http://www.rxtx.org ");
 			  Debug.WriteLine("");
 		  }
-#endif
+
           // get the network adapter
           try
 		  {
