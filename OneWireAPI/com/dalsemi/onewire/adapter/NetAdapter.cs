@@ -436,7 +436,7 @@ namespace com.dalsemi.onewire.adapter
     
 			  // if multicasting is enabled, we'll look for servers dynamically
 			  // and add them to the list
-			  if (multicastEnabled.HasValue)
+			  if (multicastEnabled.HasValue && multicastEnabled== true)
 			  {
 				 // figure out what the datagram listen port is
 				 if (datagramPort == -1)
@@ -562,7 +562,7 @@ namespace com.dalsemi.onewire.adapter
 			  }
 			  catch (Exception)
 			  {
-                  Debugger.Break();
+                  ;
 			  }
     
 			  return vPorts.GetEnumerator();

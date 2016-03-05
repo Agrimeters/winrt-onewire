@@ -16,6 +16,9 @@ using Windows.UI.Xaml.Navigation;
 //using Windows.Devices.I2c; //IoT only...
 using Windows.Devices.Usb;
 using Windows.Devices.Enumeration;
+using System.Reflection;
+using Windows.Storage.Streams;
+using System.Resources;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
