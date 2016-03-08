@@ -398,46 +398,30 @@ namespace com.dalsemi.onewire.adapter
         /// <param name="present">flag set (1) if device presence detected</param>
         /// <returns>
         /// true  - DS2490 1-Wire is NOT shorted
-        /// true - Could not detect DS2490 or 1-Wire shorted
+        /// false - Could not detect DS2490 or 1-Wire shorted
         /// </returns>
         private bool ShortCheck(out bool present, out bool vpp)
         {
+            present = true;
 
-            // Issue 1-WIRE RESET, read status
-
-            byte nResultRegisters;
-
-            present = false;
-
-            UsbIo.ReadStatus(out nResultRegisters);
-
+            // read VPP state
+            UsbIo.ReadStatus(true);
             vpp = UsbState.ProgrammingVoltagePresent;
 
-            // check for short
-            for (var i = 0; i < nResultRegisters; i++)
+            // check if 1-Wire bus is shorted
+            UsbIo.Comm_OneWireReset(false);
+            if(UsbIo.LastError != 0)
             {
-                // check for SH bit (0x02), ignore 0xA5
-                if ((UsbState.CommResultCodes[i] & Ds2490.COMMCMDERRORRESULT_SH) != 0)
-                {
-                    // short detected
-                    return false;
-                }
-            }
+                UsbAdapterState.CommCmdErrorResult err = (UsbAdapterState.CommCmdErrorResult)UsbIo.LastError;
 
-            // check for No 1-Wire device condition
-            present = true;
-            // loop through result registers
-            for (var i = 0; i < nResultRegisters; i++)
-            {
-                // only check for error conditions when the condition is not a ONEWIREDEVICEDETECT
-                if (UsbState.CommResultCodes[i] != Ds2490.ONEWIREDEVICEDETECT)
+                if ((err & UsbAdapterState.CommCmdErrorResult.NRS) == UsbAdapterState.CommCmdErrorResult.NRS)
                 {
-                    // check for NRS bit (0x01)
-                    if ((UsbState.CommResultCodes[i] & Ds2490.COMMCMDERRORRESULT_NRS) != 0)
-                    {
-                        // empty bus detected
-                        present = false;
-                    }
+                    present = false;
+                }
+
+                if ((err & UsbAdapterState.CommCmdErrorResult.SH) == UsbAdapterState.CommCmdErrorResult.SH)
+                {
+                    return false;
                 }
             }
 
@@ -596,22 +580,15 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         private void UsbMasterReset()
         {
-            byte nResultRegisters;
-
             if (doDebugMessages)
             {
                 Debug.WriteLine("DEBUG: UsbMasterReset");
             }
 
-            // Reset master
             UsbIo.Control_ResetDevice();
-
-            // reset state variables to match device
-            owState.oneWireSpeed = SPEED_REGULAR;
-
             UsbIo.Comm_SetDuration(0, 0x00, "5V pullup, Infinite");
-//            UsbIo.Comm_SetDuration(Ds2490.COMM.TYPE, 0x40, "12V pullup, 512us");
-//            UsbIo.Mode_Pulse(Ds2490.ENABLEPULSE_PRGE, 0x00, "Disable 5V Strong PU, Enable 12V Program Pulse");
+            UsbIo.Comm_SetDuration(Ds2490.COMM.TYPE, 0x40, "12V pullup, 512us");
+            UsbIo.Mode_Pulse(Ds2490.ENABLEPULSE_PRGE, 0x00, "Disable 5V Strong PU, Enable 12V Program Pulse");
         }
 
         /// <summary>
@@ -1883,7 +1860,7 @@ namespace com.dalsemi.onewire.adapter
         ///          result of this operation </returns>
         public virtual int oneWireReset()
         {
-            UsbIo.Comm_OneWireReset();
+            UsbIo.Comm_OneWireReset(true);
 
             //// append the reset command at the current speed
             //packet.writer.Write((byte)(FUNCTION_RESET | UsbState.uSpeedMode)); //TODO .Append

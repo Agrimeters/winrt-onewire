@@ -241,7 +241,7 @@ namespace com.dalsemi.onewire.adapter
         }
 
         [Flags]
-        private enum CommCmdErrorResult
+        public enum CommCmdErrorResult
         {
             /// <summary>
             /// A value of 1 indicates an error with one of the following: 1-WIRE RESET
@@ -260,6 +260,11 @@ namespace com.dalsemi.onewire.adapter
             /// A value of 1 indicates that a 1-WIRE RESET revealed an Alarming Presence Pulse.
             /// </summary>
             APP = 0x04,
+            /// <summary>
+            /// During a PULSE with TYPE=1 or WRITE EPROM command the 12V programming pulse
+            /// not seen on 1-Wire bus
+            /// </summary>
+            VPP = 0x08,
             /// <summary>
             /// A value of 1 indicates an error with one of the following: Error when reading
             /// the confirmation byte with a SET PATH command. There was a difference between
@@ -425,35 +430,45 @@ namespace com.dalsemi.onewire.adapter
 
         public void PrintErrorResult(byte value)
         {
+            if (value == Ds2490.ONEWIREDEVICEDETECT)
+            {
+                Debug.WriteLine("1-Wire Device Detect Byte");
+                return;
+            }
+
             CommCmdErrorResult result = (CommCmdErrorResult)value;
 
             if ((result & CommCmdErrorResult.NRS) == CommCmdErrorResult.NRS)
             {
-                Debug.WriteLine("A 1-WIRE RESET did not reveal a Presence Pulse. SET PATH command did not get a Presence Pulse from the branch that was to be connected. No response from one or more ROM ID bits during a SEARCH ACCESS command.");
+                Debug.WriteLine("Error Result: A 1-WIRE RESET did not reveal a Presence Pulse. SET PATH command did not get a Presence Pulse from the branch that was to be connected. No response from one or more ROM ID bits during a SEARCH ACCESS command.");
             }
             if ((result & CommCmdErrorResult.SH) == CommCmdErrorResult.SH)
             {
-                Debug.WriteLine("A 1-WIRE RESET revealed a short to the 1-Wire bus or the SET PATH command could not successfully connect a branch due to a short.");
+                Debug.WriteLine("Error Result: A 1-WIRE RESET revealed a short to the 1-Wire bus or the SET PATH command could not successfully connect a branch due to a short.");
             }
             if ((result & CommCmdErrorResult.APP) == CommCmdErrorResult.APP)
             {
-                Debug.WriteLine("A 1-WIRE RESET revealed an Alarming Presence Pulse.");
+                Debug.WriteLine("Error Result: A 1-WIRE RESET revealed an Alarming Presence Pulse.");
+            }
+            if ((result & CommCmdErrorResult.VPP) == CommCmdErrorResult.VPP)
+            {
+                Debug.WriteLine("Error Result: During a PULSE with TYPE=1 or WRITE EPROM command the 12V programming pulse not seen on 1-Wire bus.");
             }
             if ((result & CommCmdErrorResult.CMP) == CommCmdErrorResult.CMP)
             {
-                Debug.WriteLine("Error when reading the confirmation byte with a SET PATH command. There was a difference between the byte written and then read back with a BYTE I/O command,");
+                Debug.WriteLine("Error Result: Error when reading the confirmation byte with a SET PATH command. There was a difference between the byte written and then read back with a BYTE I/O command,");
             }
             if ((result & CommCmdErrorResult.CRC) == CommCmdErrorResult.CRC)
             {
-                Debug.WriteLine("A CRC error occurred when executing one of the following commands: WRITE SRAM PAGE, READ CRC PROT PAGE, or READ REDIRECT PAGE W/CRC.");
+                Debug.WriteLine("Error Result: A CRC error occurred when executing one of the following commands: WRITE SRAM PAGE, READ CRC PROT PAGE, or READ REDIRECT PAGE W/CRC.");
             }
             if ((result & CommCmdErrorResult.RDP) == CommCmdErrorResult.RDP)
             {
-                Debug.WriteLine("A READ REDIRECT PAGE WITH/CRC encountered a page that is redirected.");
+                Debug.WriteLine("Error Result: A READ REDIRECT PAGE WITH/CRC encountered a page that is redirected.");
             }
             if ((result & CommCmdErrorResult.EOS) == CommCmdErrorResult.EOS)
             {
-                Debug.WriteLine("A SEARCH ACCESS with SM = 1 ended sooner than expected reporting less ROM ID’s than specified in the “number of devices” parameter.");
+                Debug.WriteLine("Error Result: A SEARCH ACCESS with SM = 1 ended sooner than expected reporting less ROM ID’s than specified in the “number of devices” parameter.");
             }
         }
 

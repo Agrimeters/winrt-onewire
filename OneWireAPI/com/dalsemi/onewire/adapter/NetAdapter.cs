@@ -528,7 +528,6 @@ namespace com.dalsemi.onewire.adapter
                         writer.WriteInt32(NetAdapterConstants_Fields.versionUID);
                         await writer.StoreAsync();
                     });
-                    t1.Wait();
 
                     // wait 1/2 second for responses
                     Thread.Sleep(500);

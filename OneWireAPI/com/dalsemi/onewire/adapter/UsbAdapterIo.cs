@@ -57,6 +57,8 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         private TypedEventHandler<UsbInterruptInPipe, UsbInterruptInEventArgs> interruptEventHandler = null;
 
+        public byte LastError { get; private set; }
+
         /// <summary>
         /// UsbAdapterIo Constructor called by UsbAdapter class
         /// </summary>
@@ -85,9 +87,12 @@ namespace com.dalsemi.onewire.adapter
                 0,
                 "USB Communication: RESET_DEVICE");
 
-            byte nRegs;
-            ReadStatus(out nRegs);
-            usbState.PrintState();
+            if (0 != ReadStatus(true))
+                usbState.PrintErrorResult(LastError);
+
+            owState.oneWireSpeed = usbState.BusCommSpeed;
+
+//TODO            usbState.PrintState();
         }
 
         /// <summary>
@@ -96,7 +101,7 @@ namespace com.dalsemi.onewire.adapter
         /// <param name="type"></param>
         /// <param name="duration"></param>
         /// <param name="description"></param>
-        public void Comm_SetDuration(ushort type, uint duration, string description)
+        public byte Comm_SetDuration(ushort type, uint duration, string description)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.COMM,
@@ -104,22 +109,18 @@ namespace com.dalsemi.onewire.adapter
                 duration,
                 "USB Communication: SetDuration - " + description);
 
-            int nRegs;
-            ReadResult(out nRegs);
+            if (0 != ReadResult(true))
+                usbState.PrintErrorResult(LastError);
 
-            if (nRegs > 0)
-            {
-                for (int i = 0; i < nRegs; i++)
-                    Debug.WriteLine("{0:X02} ", usbState.CommResultCodes[i]);
-            }
+//TODO            usbState.PrintState();
 
-            usbState.PrintState();
+            return LastError;
         }
 
         /// <summary>
         /// Issue Communication 1-Wire RESET to USB device
         /// </summary>
-        public void Comm_OneWireReset()
+        public byte Comm_OneWireReset(bool ignoreDevice)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.COMM,
@@ -127,9 +128,12 @@ namespace com.dalsemi.onewire.adapter
                 usbState.BusCommSpeed,
                 "USB Communication: One-Wire Reset");
 
-            int nRegs;
-            ReadResult(out nRegs);
-            usbState.PrintState();
+            if (0 != ReadResult(ignoreDevice))
+                usbState.PrintErrorResult(LastError);
+
+//TODO            usbState.PrintState();
+
+            return LastError;
         }
 
         /// <summary>
@@ -138,17 +142,21 @@ namespace com.dalsemi.onewire.adapter
         /// <param name="index"></param>
         /// <param name="length"></param>
         /// <param name="description"></param>
-        public void Mode_Pulse(uint index, uint length, string description)
+        public byte Mode_Pulse(uint index, uint length, string description)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.MODE,
-                Ds2490.Mode.PULSE_EN,
+                Ds2490.Mode.PULSE_EN | Ds2490.COMM.NTF,
                 Ds2490.ENABLEPULSE_PRGE,
                 "USB Mode: PULSE_EN - " + description);
 
-            byte nRegs;
-            ReadStatus(out nRegs);
-            usbState.PrintState();
+            byte Status = ReadStatus(true);
+            if (Status != 0)
+                usbState.PrintErrorResult(Status);
+
+//TODO            usbState.PrintState();
+
+            return LastError;
         }
 
         /// <summary>
@@ -256,7 +264,7 @@ namespace com.dalsemi.onewire.adapter
         /// Read Status data
         /// </summary>
         /// <param name="nResultRegisters"></param>
-        public void ReadStatus(out byte nResultRegisters)
+        public byte ReadStatus(bool ignoreDevice)
         {
             lock(syncObject)
             {
@@ -272,10 +280,8 @@ namespace com.dalsemi.onewire.adapter
 
                 UnregisterFromInterruptEvent();
 
-                if (usbState.CommResultCodes != null)
-                    nResultRegisters = (byte)usbState.CommResultCodes.Length;
-                else
-                    nResultRegisters = 0;
+                LastError = GetErrorResult(ignoreDevice);
+                return LastError;
             }
         }
 
@@ -283,7 +289,7 @@ namespace com.dalsemi.onewire.adapter
         /// Read Result data
         /// </summary>
         /// <param name="nResultRegisters"></param>
-        public void ReadResult(out int nResultRegisters)
+        public byte ReadResult(bool ignoreDevice)
         {
             lock (syncObject)
             {
@@ -299,28 +305,31 @@ namespace com.dalsemi.onewire.adapter
 
                 UnregisterFromInterruptEvent();
 
-                if (usbState.CommResultCodes != null)
-                {
-                    nResultRegisters = usbState.CommResultCodes.Length;
-                    foreach(byte item in usbState.CommResultCodes)
-                    {
-                        if (item == 0xA5)
-                        {
-                            Debug.WriteLine("1-Wire Device Detect Byte");
-                        }
-                        else if (item != 0)
-                        {
-                            usbState.PrintErrorResult(item);
-                        }
-                    }
-                }
-                else
-                {
-                    nResultRegisters = 0;
-                }
+                LastError = GetErrorResult(ignoreDevice);
+                return LastError;
             }
         }
 
+        public byte GetErrorResult(bool ignoreDevice)
+        {
+            if(usbState.CommResultCodes != null)
+            {
+                foreach(byte item in usbState.CommResultCodes)
+                {
+                    if (!ignoreDevice && item == Ds2490.ONEWIREDEVICEDETECT)
+                    {
+                        return Ds2490.ONEWIREDEVICEDETECT;
+                    }
+                    else if(ignoreDevice && item == Ds2490.ONEWIREDEVICEDETECT)
+                    {
+                        continue;
+                    }
+
+                    return item;
+                }
+            }
+            return 0;
+        }
         /// <summary>
         /// Register for the interrupt that is triggered when the device sends an interrupt to us
         /// 
