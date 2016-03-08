@@ -85,20 +85,20 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// Log file </summary>
-	   protected internal TextWriter logFile;
+	   protected internal StreamWriter logFile = null;
 
-	   /// <summary>
-	   /// exec command, command string to start the simulator </summary>
-	   protected internal string execCommand;
+        /// <summary>
+        /// exec command, command string to start the simulator </summary>
+        //protected internal string execCommand;
 
-	   protected internal Object process; //Process
-	   protected internal System.IO.StreamReader processOutput;
-	   protected internal System.IO.StreamReader processError;
-	   protected internal System.IO.StreamWriter processInput;
+ 	    protected internal Object process; //Process
+        protected internal System.IO.StreamReader processOutput = null;
+        protected internal System.IO.StreamWriter processInput = null;
 
-	   /// <summary>
-	   /// fake address, returned from all search or getAddress commands </summary>
-	   protected internal byte[] fakeAddress = null;
+
+       /// <summary>
+       /// fake address, returned from all search or getAddress commands </summary>
+        protected internal byte[] fakeAddress = null;
 
        /// <summary>
        /// The server socket for listening for connections </summary>
@@ -206,33 +206,37 @@ namespace com.dalsemi.onewire.adapter
 	   /// cannot be created on the specified port. </exception>
 	   public NetAdapterSim(string execCmd, string logFilename, string serviceName, bool multiThread)
 	   {
-            // save references to file and command
-            this.execCommand = execCmd;
-            this.process = null; //TODO Runtime.Runtime.exec(execCmd);
-            //this.processOutput = new System.IO.StreamReader(this.process.InputStream);
-            //this.processError = new System.IO.StreamReader(this.process.ErrorStream);
-            //this.processInput = new System.IO.StreamWriter(this.process.OutputStream);
+            //// save references to file and command
+            //this.execCommand = execCmd;
+            //this.process = null; //TODO Runtime.Runtime.exec(execCmd);
+            this.processOutput =
+                new StreamReader(new FileStream(Windows.Storage.ApplicationData.Current.LocalFolder.Path + "\\processOutput.txt", FileMode.Create, FileAccess.Write));
 
-            // wait until process is ready
-            int complete = 0;
-            while (complete < 2)
-            {
-                string line = processOutput.ReadLine();
-                if (complete == 0 && line.IndexOf("read ok (data=17)", StringComparison.Ordinal) >= 0)
-                {
-                    complete++;
-                    continue;
-                }
-                if (complete == 1 && line.IndexOf(PROMPT, StringComparison.Ordinal) >= 0)
-                {
-                    complete++;
-                    continue;
-                }
-            }
+            this.processInput =
+                new StreamWriter(new FileStream(Windows.Storage.ApplicationData.Current.LocalFolder.Path + "\\processInput.txt", FileMode.Create, FileAccess.Write));
 
+            //// wait until process is ready
+            //int complete = 0;
+            //while (complete < 2)
+            //{
+            //    string line = processOutput.ReadLine();
+            //    if (complete == 0 && line.IndexOf("read ok (data=17)", StringComparison.Ordinal) >= 0)
+            //    {
+            //        complete++;
+            //        continue;
+            //    }
+            //    if (complete == 1 && line.IndexOf(PROMPT, StringComparison.Ordinal) >= 0)
+            //    {
+            //        complete++;
+            //        continue;
+            //    }
+            //}
+
+            System.Diagnostics.Debug.WriteLine(Windows.Storage.ApplicationData.Current.LocalFolder.Path);
             if (!string.ReferenceEquals(logFilename, null))
             {
-                this.logFile = File.CreateText(logFilename);
+                this.logFile = new StreamWriter(new FileStream(logFilename, FileMode.Create, FileAccess.Write));
+                this.logFile.AutoFlush = true;
             }
 
             // Make sure we loaded the address of the device
@@ -242,12 +246,13 @@ namespace com.dalsemi.onewire.adapter
             this.serverSocket.Control.NoDelay = true;
 
             // set multithreaded flag
-            this.singleThreaded = !multiThread;
-            if (multiThread)
-            {
-                this.hashHandlers = new Hashtable();
-                this.timeoutInSeconds = 0;
-            }
+            // always multithreaded in windows
+            //this.singleThreaded = !multiThread;
+            //if (multiThread)
+            //{
+            //    this.hashHandlers = new Hashtable();
+            //    this.timeoutInSeconds = 0;
+            //}
 
             // get the shared secret
             string secret = OneWireAccessProvider.getProperty("NetAdapter.secret");
@@ -301,32 +306,32 @@ namespace com.dalsemi.onewire.adapter
 	   public NetAdapterSim(string execCmd, string logFilename, StreamSocketListener serverSock, bool multiThread)
 	   {
             // save references to file and command
-            this.execCommand = execCmd;
-            this.process = null; //TODO Runtime.Runtime.exec(execCmd);
-            //TODO this.processOutput = new System.IO.StreamReader(this.process.InputStream);
-            //TODO this.processError = new System.IO.StreamReader(this.process.ErrorStream);
-            //TODO this.processInput = new System.IO.StreamWriter(this.process.OutputStream);
+            //this.execCommand = execCmd;
+            //this.process = null; //TODO Runtime.Runtime.exec(execCmd);
+            //this.processOutput = new System.IO.StreamReader(this.process.InputStream);
+            //this.processInput = new System.IO.StreamWriter(this.process.OutputStream);
 
             // wait  until process is ready
-            int complete = 0;
-            while (complete < 2)
-            {
-                string line = processOutput.ReadLine();
-                if (complete == 0 && line.IndexOf("read ok (data=17)", StringComparison.Ordinal) >= 0)
-                {
-                    complete++;
-                    continue;
-                }
-                if (complete == 1 && line.IndexOf(PROMPT, StringComparison.Ordinal) >= 0)
-                {
-                    complete++;
-                    continue;
-                }
-            }
+            //int complete = 0;
+            //while (complete < 2)
+            //{
+            //    string line = processOutput.ReadLine();
+            //    if (complete == 0 && line.IndexOf("read ok (data=17)", StringComparison.Ordinal) >= 0)
+            //    {
+            //        complete++;
+            //        continue;
+            //    }
+            //    if (complete == 1 && line.IndexOf(PROMPT, StringComparison.Ordinal) >= 0)
+            //    {
+            //        complete++;
+            //        continue;
+            //    }
+            //}
 
             if (!string.ReferenceEquals(logFilename, null))
             {
-                this.logFile = File.CreateText(logFilename);
+                this.logFile = new StreamWriter(new FileStream(logFilename, FileMode.Create, FileAccess.Write));
+                this.logFile.AutoFlush = true;
             }
 
             // Make sure we loaded the address of the device
@@ -1852,6 +1857,7 @@ namespace com.dalsemi.onewire.adapter
 
               System.Diagnostics.Debug.WriteLine("Starting NetAdapter Host...");
           });
+          t.Wait();
 
           System.Diagnostics.Debug.WriteLine("NetAdapter Host Started");
         }

@@ -99,11 +99,9 @@ namespace com.dalsemi.onewire.adapter
 
           // create multicast socket
           socket = new DatagramSocket(); // MulticastSocket(multicastPort);
-
-          socket.Control.MulticastOnly = true;
-
-		  handlingPacket = false;
           socket.MessageReceived += Multicast_MessageReceived;
+          socket.Control.MulticastOnly = true;
+		  handlingPacket = false;
 
           var t = Task.Run(async () =>
           {

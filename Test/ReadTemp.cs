@@ -156,7 +156,7 @@ namespace Test
 
                         while (f.MoveNext())
                         {
-                            Debug.WriteLine("   Port name : " + ((string)f.Current));
+                            Debug.WriteLine("   Port name : " + ((DeviceInformation)f.Current).Id);
                         }
                     }
 

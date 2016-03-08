@@ -36,138 +36,138 @@ namespace com.dalsemi.onewire.adapter
 {
 
     // imports
-	using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
+    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
     using CRC8 = com.dalsemi.onewire.utils.CRC8;
     using Bit = com.dalsemi.onewire.utils.Bit;
-
-    /// <summary>
-    /// The USerialAdapter class implememts the DSPortAdapter interface
-    /// for a DS2480 based serial adapter such as the DS9097U-009 or
-    /// DS9097U-S09. <para>
-    /// 
-    /// Instances of valid USerialAdapter's are retrieved from methods in
-    /// <seealso cref="com.dalsemi.onewire.OneWireAccessProvider OneWireAccessProvider"/>.
-    /// 
-    /// <P>The DSPortAdapter methods can be organized into the following categories: </P>
-    /// <UL>
-    ///   <LI> <B> Information </B>
-    ///     <UL>
-    ///       <LI> <seealso cref="#getAdapterName() getAdapterName"/>
-    ///       <LI> <seealso cref="#getPortTypeDescription() getPortTypeDescription"/>
-    ///       <LI> <seealso cref="#getClassVersion() getClassVersion"/>
-    ///       <LI> <seealso cref="#adapterDetected() adapterDetected"/>
-    ///       <LI> <seealso cref="#getAdapterVersion() getAdapterVersion"/>
-    ///       <LI> <seealso cref="#getAdapterAddress() getAdapterAddress"/>
-    ///     </UL>
-    ///   <LI> <B> Port Selection </B>
-    ///     <UL>
-    ///       <LI> <seealso cref="#getPortNames() getPortNames"/>
-    ///       <LI> <seealso cref="#selectPort(String) selectPort"/>
-    ///       <LI> <seealso cref="#getPortName() getPortName"/>
-    ///       <LI> <seealso cref="#freePort() freePort"/>
-    ///     </UL>
-    ///   <LI> <B> Adapter Capabilities </B>
-    ///     <UL>
-    ///       <LI> <seealso cref="#canOverdrive() canOverdrive"/>
-    ///       <LI> <seealso cref="#canHyperdrive() canHyperdrive"/>
-    ///       <LI> <seealso cref="#canFlex() canFlex"/>
-    ///       <LI> <seealso cref="#canProgram() canProgram"/>
-    ///       <LI> <seealso cref="#canDeliverPower() canDeliverPower"/>
-    ///       <LI> <seealso cref="#canDeliverSmartPower() canDeliverSmartPower"/>
-    ///       <LI> <seealso cref="#canBreak() canBreak"/>
-    ///     </UL>
-    ///   <LI> <B> 1-Wire Network Semaphore </B>
-    ///     <UL>
-    ///       <LI> <seealso cref="#beginExclusive(boolean) beginExclusive"/>
-    ///       <LI> <seealso cref="#endExclusive() endExclusive"/>
-    ///     </UL>
-    ///   <LI> <B> 1-Wire Device Discovery </B>
-    ///     <UL>
-    ///       <LI> Selective Search Options
-    ///         <UL>
-    ///          <LI> <seealso cref="#targetAllFamilies() targetAllFamilies"/>
-    ///          <LI> <seealso cref="#targetFamily(int) targetFamily(int)"/>
-    ///          <LI> <seealso cref="#targetFamily(byte[]) targetFamily(byte[])"/>
-    ///          <LI> <seealso cref="#excludeFamily(int) excludeFamily(int)"/>
-    ///          <LI> <seealso cref="#excludeFamily(byte[]) excludeFamily(byte[])"/>
-    ///          <LI> <seealso cref="#setSearchOnlyAlarmingDevices() setSearchOnlyAlarmingDevices"/>
-    ///          <LI> <seealso cref="#setNoResetSearch() setNoResetSearch"/>
-    ///          <LI> <seealso cref="#setSearchAllDevices() setSearchAllDevices"/>
-    ///         </UL>
-    ///       <LI> Search With Automatic 1-Wire Container creation
-    ///         <UL>
-    ///          <LI> <seealso cref="#getAllDeviceContainers() getAllDeviceContainers"/>
-    ///          <LI> <seealso cref="#getFirstDeviceContainer() getFirstDeviceContainer"/>
-    ///          <LI> <seealso cref="#getNextDeviceContainer() getNextDeviceContainer"/>
-    ///         </UL>
-    ///       <LI> Search With NO 1-Wire Container creation
-    ///         <UL>
-    ///          <LI> <seealso cref="#findFirstDevice() findFirstDevice"/>
-    ///          <LI> <seealso cref="#findNextDevice() findNextDevice"/>
-    ///          <LI> <seealso cref="#getAddress(byte[]) getAddress(byte[])"/>
-    ///          <LI> <seealso cref="#getAddressAsLong() getAddressAsLong"/>
-    ///          <LI> <seealso cref="#getAddressAsString() getAddressAsString"/>
-    ///         </UL>
-    ///       <LI> Manual 1-Wire Container creation
-    ///         <UL>
-    ///          <LI> <seealso cref="#getDeviceContainer(byte[]) getDeviceContainer(byte[])"/>
-    ///          <LI> <seealso cref="#getDeviceContainer(long) getDeviceContainer(long)"/>
-    ///          <LI> <seealso cref="#getDeviceContainer(String) getDeviceContainer(String)"/>
-    ///          <LI> <seealso cref="#getDeviceContainer() getDeviceContainer()"/>
-    ///         </UL>
-    ///     </UL>
-    ///   <LI> <B> 1-Wire Network low level access (usually not called directly) </B>
-    ///     <UL>
-    ///       <LI> Device Selection and Presence Detect
-    ///         <UL>
-    ///          <LI> <seealso cref="#isPresent(byte[]) isPresent(byte[])"/>
-    ///          <LI> <seealso cref="#isPresent(long) isPresent(long)"/>
-    ///          <LI> <seealso cref="#isPresent(String) isPresent(String)"/>
-    ///          <LI> <seealso cref="#isAlarming(byte[]) isAlarming(byte[])"/>
-    ///          <LI> <seealso cref="#isAlarming(long) isAlarming(long)"/>
-    ///          <LI> <seealso cref="#isAlarming(String) isAlarming(String)"/>
-    ///          <LI> <seealso cref="#select(byte[]) select(byte[])"/>
-    ///          <LI> <seealso cref="#select(long) select(long)"/>
-    ///          <LI> <seealso cref="#select(String) select(String)"/>
-    ///         </UL>
-    ///       <LI> Raw 1-Wire IO
-    ///         <UL>
-    ///          <LI> <seealso cref="#reset() reset"/>
-    ///          <LI> <seealso cref="#putBit(boolean) putBit"/>
-    ///          <LI> <seealso cref="#getBit() getBit"/>
-    ///          <LI> <seealso cref="#putByte(int) putByte"/>
-    ///          <LI> <seealso cref="#getByte() getByte"/>
-    ///          <LI> <seealso cref="#getBlock(int) getBlock(int)"/>
-    ///          <LI> <seealso cref="#getBlock(byte[], int) getBlock(byte[], int)"/>
-    ///          <LI> <seealso cref="#getBlock(byte[], int, int) getBlock(byte[], int, int)"/>
-    ///          <LI> <seealso cref="#dataBlock(byte[], int, int) dataBlock(byte[], int, int)"/>
-    ///         </UL>
-    ///       <LI> 1-Wire Speed and Power Selection
-    ///         <UL>
-    ///          <LI> <seealso cref="#setPowerDuration(int) setPowerDuration"/>
-    ///          <LI> <seealso cref="#startPowerDelivery(int) startPowerDelivery"/>
-    ///          <LI> <seealso cref="#setProgramPulseDuration(int) setProgramPulseDuration"/>
-    ///          <LI> <seealso cref="#startProgramPulse(int) startProgramPulse"/>
-    ///          <LI> <seealso cref="#startBreak() startBreak"/>
-    ///          <LI> <seealso cref="#setPowerNormal() setPowerNormal"/>
-    ///          <LI> <seealso cref="#setSpeed(int) setSpeed"/>
-    ///          <LI> <seealso cref="#getSpeed() getSpeed"/>
-    ///         </UL>
-    ///     </UL>
-    ///   <LI> <B> Advanced </B>
-    ///     <UL>
-    ///        <LI> <seealso cref="#registerOneWireContainerClass(int, Class) registerOneWireContainerClass"/>
-    ///     </UL>
-    ///  </UL>
-    /// 
-    /// </para>
-    /// </summary>
-    /// <seealso cref= com.dalsemi.onewire.OneWireAccessProvider </seealso>
-    /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer
-    /// 
-    ///  @version    0.10, 24 Aug 2001
-    ///  @author     DS
-    ///  </seealso>
+    using System.Threading.Tasks;
+    using Windows.Storage.Streams;    /// <summary>
+                                      /// The USerialAdapter class implememts the DSPortAdapter interface
+                                      /// for a DS2480 based serial adapter such as the DS9097U-009 or
+                                      /// DS9097U-S09. <para>
+                                      /// 
+                                      /// Instances of valid USerialAdapter's are retrieved from methods in
+                                      /// <seealso cref="com.dalsemi.onewire.OneWireAccessProvider OneWireAccessProvider"/>.
+                                      /// 
+                                      /// <P>The DSPortAdapter methods can be organized into the following categories: </P>
+                                      /// <UL>
+                                      ///   <LI> <B> Information </B>
+                                      ///     <UL>
+                                      ///       <LI> <seealso cref="#getAdapterName() getAdapterName"/>
+                                      ///       <LI> <seealso cref="#getPortTypeDescription() getPortTypeDescription"/>
+                                      ///       <LI> <seealso cref="#getClassVersion() getClassVersion"/>
+                                      ///       <LI> <seealso cref="#adapterDetected() adapterDetected"/>
+                                      ///       <LI> <seealso cref="#getAdapterVersion() getAdapterVersion"/>
+                                      ///       <LI> <seealso cref="#getAdapterAddress() getAdapterAddress"/>
+                                      ///     </UL>
+                                      ///   <LI> <B> Port Selection </B>
+                                      ///     <UL>
+                                      ///       <LI> <seealso cref="#getPortNames() getPortNames"/>
+                                      ///       <LI> <seealso cref="#selectPort(String) selectPort"/>
+                                      ///       <LI> <seealso cref="#getPortName() getPortName"/>
+                                      ///       <LI> <seealso cref="#freePort() freePort"/>
+                                      ///     </UL>
+                                      ///   <LI> <B> Adapter Capabilities </B>
+                                      ///     <UL>
+                                      ///       <LI> <seealso cref="#canOverdrive() canOverdrive"/>
+                                      ///       <LI> <seealso cref="#canHyperdrive() canHyperdrive"/>
+                                      ///       <LI> <seealso cref="#canFlex() canFlex"/>
+                                      ///       <LI> <seealso cref="#canProgram() canProgram"/>
+                                      ///       <LI> <seealso cref="#canDeliverPower() canDeliverPower"/>
+                                      ///       <LI> <seealso cref="#canDeliverSmartPower() canDeliverSmartPower"/>
+                                      ///       <LI> <seealso cref="#canBreak() canBreak"/>
+                                      ///     </UL>
+                                      ///   <LI> <B> 1-Wire Network Semaphore </B>
+                                      ///     <UL>
+                                      ///       <LI> <seealso cref="#beginExclusive(boolean) beginExclusive"/>
+                                      ///       <LI> <seealso cref="#endExclusive() endExclusive"/>
+                                      ///     </UL>
+                                      ///   <LI> <B> 1-Wire Device Discovery </B>
+                                      ///     <UL>
+                                      ///       <LI> Selective Search Options
+                                      ///         <UL>
+                                      ///          <LI> <seealso cref="#targetAllFamilies() targetAllFamilies"/>
+                                      ///          <LI> <seealso cref="#targetFamily(int) targetFamily(int)"/>
+                                      ///          <LI> <seealso cref="#targetFamily(byte[]) targetFamily(byte[])"/>
+                                      ///          <LI> <seealso cref="#excludeFamily(int) excludeFamily(int)"/>
+                                      ///          <LI> <seealso cref="#excludeFamily(byte[]) excludeFamily(byte[])"/>
+                                      ///          <LI> <seealso cref="#setSearchOnlyAlarmingDevices() setSearchOnlyAlarmingDevices"/>
+                                      ///          <LI> <seealso cref="#setNoResetSearch() setNoResetSearch"/>
+                                      ///          <LI> <seealso cref="#setSearchAllDevices() setSearchAllDevices"/>
+                                      ///         </UL>
+                                      ///       <LI> Search With Automatic 1-Wire Container creation
+                                      ///         <UL>
+                                      ///          <LI> <seealso cref="#getAllDeviceContainers() getAllDeviceContainers"/>
+                                      ///          <LI> <seealso cref="#getFirstDeviceContainer() getFirstDeviceContainer"/>
+                                      ///          <LI> <seealso cref="#getNextDeviceContainer() getNextDeviceContainer"/>
+                                      ///         </UL>
+                                      ///       <LI> Search With NO 1-Wire Container creation
+                                      ///         <UL>
+                                      ///          <LI> <seealso cref="#findFirstDevice() findFirstDevice"/>
+                                      ///          <LI> <seealso cref="#findNextDevice() findNextDevice"/>
+                                      ///          <LI> <seealso cref="#getAddress(byte[]) getAddress(byte[])"/>
+                                      ///          <LI> <seealso cref="#getAddressAsLong() getAddressAsLong"/>
+                                      ///          <LI> <seealso cref="#getAddressAsString() getAddressAsString"/>
+                                      ///         </UL>
+                                      ///       <LI> Manual 1-Wire Container creation
+                                      ///         <UL>
+                                      ///          <LI> <seealso cref="#getDeviceContainer(byte[]) getDeviceContainer(byte[])"/>
+                                      ///          <LI> <seealso cref="#getDeviceContainer(long) getDeviceContainer(long)"/>
+                                      ///          <LI> <seealso cref="#getDeviceContainer(String) getDeviceContainer(String)"/>
+                                      ///          <LI> <seealso cref="#getDeviceContainer() getDeviceContainer()"/>
+                                      ///         </UL>
+                                      ///     </UL>
+                                      ///   <LI> <B> 1-Wire Network low level access (usually not called directly) </B>
+                                      ///     <UL>
+                                      ///       <LI> Device Selection and Presence Detect
+                                      ///         <UL>
+                                      ///          <LI> <seealso cref="#isPresent(byte[]) isPresent(byte[])"/>
+                                      ///          <LI> <seealso cref="#isPresent(long) isPresent(long)"/>
+                                      ///          <LI> <seealso cref="#isPresent(String) isPresent(String)"/>
+                                      ///          <LI> <seealso cref="#isAlarming(byte[]) isAlarming(byte[])"/>
+                                      ///          <LI> <seealso cref="#isAlarming(long) isAlarming(long)"/>
+                                      ///          <LI> <seealso cref="#isAlarming(String) isAlarming(String)"/>
+                                      ///          <LI> <seealso cref="#select(byte[]) select(byte[])"/>
+                                      ///          <LI> <seealso cref="#select(long) select(long)"/>
+                                      ///          <LI> <seealso cref="#select(String) select(String)"/>
+                                      ///         </UL>
+                                      ///       <LI> Raw 1-Wire IO
+                                      ///         <UL>
+                                      ///          <LI> <seealso cref="#reset() reset"/>
+                                      ///          <LI> <seealso cref="#putBit(boolean) putBit"/>
+                                      ///          <LI> <seealso cref="#getBit() getBit"/>
+                                      ///          <LI> <seealso cref="#putByte(int) putByte"/>
+                                      ///          <LI> <seealso cref="#getByte() getByte"/>
+                                      ///          <LI> <seealso cref="#getBlock(int) getBlock(int)"/>
+                                      ///          <LI> <seealso cref="#getBlock(byte[], int) getBlock(byte[], int)"/>
+                                      ///          <LI> <seealso cref="#getBlock(byte[], int, int) getBlock(byte[], int, int)"/>
+                                      ///          <LI> <seealso cref="#dataBlock(byte[], int, int) dataBlock(byte[], int, int)"/>
+                                      ///         </UL>
+                                      ///       <LI> 1-Wire Speed and Power Selection
+                                      ///         <UL>
+                                      ///          <LI> <seealso cref="#setPowerDuration(int) setPowerDuration"/>
+                                      ///          <LI> <seealso cref="#startPowerDelivery(int) startPowerDelivery"/>
+                                      ///          <LI> <seealso cref="#setProgramPulseDuration(int) setProgramPulseDuration"/>
+                                      ///          <LI> <seealso cref="#startProgramPulse(int) startProgramPulse"/>
+                                      ///          <LI> <seealso cref="#startBreak() startBreak"/>
+                                      ///          <LI> <seealso cref="#setPowerNormal() setPowerNormal"/>
+                                      ///          <LI> <seealso cref="#setSpeed(int) setSpeed"/>
+                                      ///          <LI> <seealso cref="#getSpeed() getSpeed"/>
+                                      ///         </UL>
+                                      ///     </UL>
+                                      ///   <LI> <B> Advanced </B>
+                                      ///     <UL>
+                                      ///        <LI> <seealso cref="#registerOneWireContainerClass(int, Class) registerOneWireContainerClass"/>
+                                      ///     </UL>
+                                      ///  </UL>
+                                      /// 
+                                      /// </para>
+                                      /// </summary>
+                                      /// <seealso cref= com.dalsemi.onewire.OneWireAccessProvider </seealso>
+                                      /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer
+                                      /// 
+                                      ///  @version    0.10, 24 Aug 2001
+                                      ///  @author     DS
+                                      ///  </seealso>
     public class USerialAdapter : DSPortAdapter
     {
 
@@ -2566,6 +2566,98 @@ namespace com.dalsemi.onewire.adapter
             }
         }
 
+        // Track Read Operation
+        private CancellationTokenSource ReadCancellationTokenSource;
+        private Object ReadCancelLock = new Object();
+
+        private Boolean IsReadTaskPending;
+        private uint ReadBytesCounter = 0;
+        DataReader DataReaderObject = null;
+
+        // Track Write Operation
+        private CancellationTokenSource WriteCancellationTokenSource;
+        private Object WriteCancelLock = new Object();
+
+        private Boolean IsWriteTaskPending;
+        private uint WriteBytesCounter = 0;
+        DataWriter DataWriteObject = null;
+
+        bool WriteBytesAvailable = false;
+
+        private void ResetReadCancellationTokenSource()
+        {
+            // Create a new cancellation token source so that can cancel all the tokens again
+            ReadCancellationTokenSource = new CancellationTokenSource();
+
+            // Hook the cancellation callback (called whenever Task.cancel is called)
+            ReadCancellationTokenSource.Token.Register(() => NotifyReadCancelingTask());
+        }
+
+        private void ResetWriteCancellationTokenSource()
+        {
+            // Create a new cancellation token source so that can cancel all the tokens again
+            WriteCancellationTokenSource = new CancellationTokenSource();
+
+            // Hook the cancellation callback (called whenever Task.cancel is called)
+            WriteCancellationTokenSource.Token.Register(() => NotifyWriteCancelingTask());
+        }
+
+        /// <summary>
+        /// Print a status message saying we are canceling a task and disable all buttons to prevent multiple cancel requests.
+        /// <summary>
+        private async void NotifyReadCancelingTask()
+        {
+            Debug.WriteLine("Canceling Read... Please wait...");
+        }
+
+        private async void NotifyWriteCancelingTask()
+        {
+            Debug.WriteLine("Canceling Write... Please wait...");
+        }
+
+        private async Task ReadAsyncEx(CancellationToken cancellationToken)
+        {
+
+            Task<UInt32> loadAsyncTask;
+
+            uint ReadBufferLength = 1024;
+
+            // Don't start any IO if we canceled the task
+            lock (ReadCancelLock)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // Cancellation Token will be used so we can stop the task operation explicitly
+                // The completion function should still be called so that we can properly handle a canceled task
+                DataReaderObject.InputStreamOptions = InputStreamOptions.Partial;
+                loadAsyncTask = DataReaderObject.LoadAsync(ReadBufferLength).AsTask(cancellationToken);
+            }
+
+            UInt32 bytesRead = await loadAsyncTask;
+            Debug.WriteLine("Read completed - " + bytesRead.ToString() + " bytes were read");
+        }
+
+        private async Task WriteAsync(byte[] buffer, CancellationToken cancellationToken)
+        {
+
+            Task<UInt32> storeAsyncTask;
+
+            DataWriteObject.WriteBytes(buffer);
+
+            // Don't start any IO if we canceled the task
+            lock (WriteCancelLock)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // Cancellation Token will be used so we can stop the task operation explicitly
+                // The completion function should still be called so that we can properly handle a canceled task
+                storeAsyncTask = DataWriteObject.StoreAsync().AsTask(cancellationToken);
+            }
+
+            UInt32 bytesWritten = await storeAsyncTask;
+            Debug.WriteLine("Write completed - " + bytesWritten.ToString() + " bytes written");
+        }
+
         /// <summary>
         /// Verify that the DS2480 based adapter is present on the open port.
         /// </summary>
@@ -2579,6 +2671,63 @@ namespace com.dalsemi.onewire.adapter
             // check if adapter has already be verified to be present
             if (!adapterPresent)
             {
+                ResetReadCancellationTokenSource();
+                ResetWriteCancellationTokenSource();
+
+                var t = Task.Run(async () =>
+                {
+                    serial.port.IsDataTerminalReadyEnabled = false;
+                    serial.port.IsRequestToSendEnabled = false;
+                    new System.Threading.ManualResetEvent(false).WaitOne(1000);
+
+                    serial.port.IsDataTerminalReadyEnabled = true;
+                    serial.port.IsRequestToSendEnabled = true;
+                    new System.Threading.ManualResetEvent(false).WaitOne(1000);
+
+                    serial.port.BreakSignalState = true;
+                    new System.Threading.ManualResetEvent(false).WaitOne(100);
+                    serial.port.BreakSignalState = false;
+                    new System.Threading.ManualResetEvent(false).WaitOne(10);
+
+                    DataWriteObject = new DataWriter(serial.port.OutputStream);
+                    await WriteAsync(new byte[] { 0xC1 }, WriteCancellationTokenSource.Token);
+                    DataWriteObject.DetachStream();
+                    DataWriteObject = null;
+                    new System.Threading.ManualResetEvent(false).WaitOne(10);
+
+                    DataWriteObject = new DataWriter(serial.port.OutputStream);
+                    await WriteAsync(new byte[] { 0x17, 0x45, 0x59, 0x3F, 0x0F, 0x95 }, WriteCancellationTokenSource.Token);
+                    DataWriteObject.DetachStream();
+                    DataWriteObject = null;
+
+                    DataReaderObject = new DataReader(serial.port.InputStream);
+                    await ReadAsyncEx(ReadCancellationTokenSource.Token);
+                    DataReaderObject.DetachStream();
+                    DataReaderObject = null;
+                });
+
+                t.Wait();
+
+                serial.RTS = false;
+                serial.DTR = false;
+                serial.write(0x00);
+                Thread.Sleep(1000);
+                serial.RTS = true;
+                serial.DTR = true;
+                Thread.Sleep(1000);
+                serial.sendBreak(100);
+                Thread.Sleep(10);
+                serial.write(0xC1);
+                Thread.Sleep(10);
+                byte[] data = new byte[] { 0x17, 0x45, 0x59, 0x3F, 0x0F, 0x95 };
+                serial.write(data);
+                serial.write(data);
+                serial.write(data);
+                serial.write(data);
+                serial.write(data);
+                Thread.Sleep(10);
+                byte[] x = serial.readWithTimeout(6);
+
 
                 // do a master reset
                 uMasterReset();
@@ -2628,7 +2777,6 @@ namespace com.dalsemi.onewire.adapter
             // try to aquire the port
             try
             {
-
                 // set the baud rate
                 serial.BaudRate = 9600;
 
@@ -2640,8 +2788,8 @@ namespace com.dalsemi.onewire.adapter
                 uState.ubaud = UAdapterState.BAUD_9600;
 
                 // send a break to reset DS2480
-                serial.sendBreak(10);
-                sleep(5);
+                serial.sendBreak(500);
+                sleep(10);
 
                 // send the timing byte
                 serial.flush();

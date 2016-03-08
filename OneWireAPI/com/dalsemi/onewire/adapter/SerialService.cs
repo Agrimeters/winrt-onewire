@@ -24,12 +24,6 @@ namespace com.dalsemi.onewire.adapter
         /// The DeviceInformation device id used to open the serial port</summary>
         private string deviceId;
         /// <summary>
-        /// The input stream, for reading data from the serial port </summary>
-        private DataReader serialInputStream = null;
-        /// <summary>
-        /// The output stream, for writing data to the serial port </summary>
-        //private DataWriter serialOutputStream = null;
-        /// <summary>
         /// The hash code of the thread that currently owns this serial port </summary>
         //private int currentThreadHash = 0;
         /// <summary>
@@ -52,6 +46,14 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// static list of all unique SerialService classes </summary>
         private static Hashtable uniqueServices = new Hashtable();
+
+        public SerialDevice port
+        {
+            get
+            {
+                return serialPort;
+            }
+        }
 
         /// <summary>
         /// do not use default constructor
@@ -122,21 +124,14 @@ namespace com.dalsemi.onewire.adapter
             {
                 lock (this)
                 {
-                    return ((serialPort.Handshake == SerialHandshake.RequestToSend) ? true : false);
+                    return serialPort.IsRequestToSendEnabled;
                 }
             }
             set
             {
                 lock (this)
                 {
-                    if (value)
-                    {
-                        serialPort.Handshake = SerialHandshake.RequestToSend;
-                    }
-                    else
-                    {
-                        serialPort.Handshake = SerialHandshake.None;
-                    }
+                    serialPort.IsRequestToSendEnabled = true;
                 }
             }
         }
@@ -263,21 +258,20 @@ namespace com.dalsemi.onewire.adapter
             }
 
             // thows: "Exception thrown: 'System.NotImplementedException' in OneWireAPI.dll"
-            //TODO await serialOutputStream.FlushAsync();
+            //var x = await serialPort.OutputStream.FlushAsync();
         }
 
         public virtual void write(byte data)
         {
             var t = Task.Run(async () =>
             {
-                using (var writer = new DataWriter(serialPort.OutputStream))
+                using (DataWriter writer = new DataWriter(serialPort.OutputStream))
                 {
                     System.Diagnostics.Debug.WriteLine("WriteTimeout: " + serialPort.WriteTimeout.Milliseconds);
 
                     writer.WriteByte(data);
                     var count = await writer.StoreAsync();
-                    Debug.WriteLine("BytesWritten = " + count);
-                    System.Diagnostics.Debug.WriteLine("\t0x{0:X02}", data);
+                    debug.Debug.debug(serialPort.PortName + " Transmit", new byte[] { data });
                     writer.DetachStream();
                 }
             });
@@ -292,15 +286,13 @@ namespace com.dalsemi.onewire.adapter
         {
             var t = Task.Run(async() =>
             {
-                using (var writer = new DataWriter(serialPort.OutputStream))
+                using (DataWriter writer = new DataWriter(serialPort.OutputStream))
                 {
                     System.Diagnostics.Debug.WriteLine("WriteTimeout: " + serialPort.WriteTimeout.Milliseconds);
 
                     writer.WriteBytes(data);
                     var count = await writer.StoreAsync();
-                    Debug.WriteLine("BytesWritten = " + count);
-                    foreach (var item in data)
-                        System.Diagnostics.Debug.WriteLine("\t0x{0:X02}", item);
+                    debug.Debug.debug(serialPort.PortName + " Transmit", data);
                     writer.DetachStream();
                 }
             });
@@ -311,74 +303,51 @@ namespace com.dalsemi.onewire.adapter
             }
         }
 
-        // Track Read Operation
-        private CancellationTokenSource ReadCancellationTokenSource;
-        private Object ReadCancelLock = new Object();
-
-        private Boolean IsReadTaskPending;
-        private uint ReadBytesCounter = 0;
-
-        private async Task<byte[]> ReadAsync(uint ReadBufferLength, CancellationToken cancellationToken)
-        {
-            Task<UInt32> loadAsyncTask;
-
-            // Don't start any IO if we canceled the task
-            lock (ReadCancelLock)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                // Cancellation Token will be used so we can stop the task operation explicitly
-                // The completion function should still be called so that we can properly handle a canceled task
-                serialInputStream.InputStreamOptions = InputStreamOptions.Partial;
-                loadAsyncTask = serialInputStream.LoadAsync(ReadBufferLength).AsTask(cancellationToken);
-            }
-
-            System.Diagnostics.Debug.WriteLine("ReadTimeout: " + serialPort.ReadTimeout.Milliseconds);
-
-            byte[] bytes = null;
-            UInt32 bytesRead = await loadAsyncTask;
-            if (bytesRead > 0)
-            {
-                bytes = new byte[bytesRead];
-                serialInputStream.ReadBytes(bytes);
-            }
-
-            Debug.WriteLine("Read completed - " + bytesRead.ToString() + " bytes were read");
-            return bytes;
-        }
-
         public virtual byte[] readWithTimeout(int length)
         {
-            ReadCancellationTokenSource = new CancellationTokenSource();
-
-            var t = Task<byte[]>.Run(async () =>
+            var t = Task<byte[]>.Run(async () => 
             {
                 byte[] result = null;
+
+                uint bytesRead = 0;
                 try
                 {
-                    Debug.WriteLine("Reading...");
-                    IsReadTaskPending = true;
-                    serialInputStream = new DataReader(serialPort.InputStream);
-                    result = await ReadAsync(6, ReadCancellationTokenSource.Token);
+                    using (DataReader reader = new DataReader(serialPort.InputStream))
+                    {
+                        Debug.WriteLine("ReadTimeout: " + serialPort.ReadTimeout);
+
+                        reader.InputStreamOptions = InputStreamOptions.Partial;
+                        bytesRead = await reader.LoadAsync((uint)length);
+
+                        if (bytesRead == 0)
+                        {
+                            result = null;
+                        }
+                        else
+                        {
+                            result = new byte[bytesRead];
+                            reader.ReadBytes(result);
+                            if (reader.UnconsumedBufferLength > 0)
+                            {
+                                throw new Exception();
+                            }
+                        }
+                        reader.DetachStream();
+                    }
                 }
-                catch(Exception exception)
+                catch (Exception)
                 {
-                    Debug.WriteLine(exception.Message.ToString());
-                }
-                finally
-                {
-                    IsReadTaskPending = false;
-                    serialInputStream.DetachStream();
-                    serialInputStream = null;
+                    Debugger.Break();
                 }
                 return result;
             });
 
             t.Wait();
 
-            if (t.Status != TaskStatus.RanToCompletion)
+            if(t.Status != TaskStatus.RanToCompletion)
             {
-                Debug.WriteLine("Error reading from serial port!");
+                Debug.WriteLine("readWithTimeout failed!");
+                return null;
             }
 
             return t.Result;
@@ -501,10 +470,8 @@ namespace com.dalsemi.onewire.adapter
                 // flow i/o
                 serialPort.Handshake = SerialHandshake.None;
 
-                //serialInputStream = new DataReader(serialPort.InputStream);
-                //serialOutputStream = new DataWriter(serialPort.OutputStream);
                 // bug workaround
-                //TODO write((byte)0);
+                write((byte)0);
 
                 // settings
                 System.Diagnostics.Debug.WriteLine("ReadTimeout: " + serialPort.ReadTimeout.Milliseconds);
@@ -598,3 +565,4 @@ namespace com.dalsemi.onewire.adapter
 
     }
 }
+

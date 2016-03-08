@@ -75,12 +75,6 @@ namespace com.dalsemi.onewire.adapter
         /// Enable/disable debug messages </summary>
         private static bool doDebugMessages = true;
         /// <summary>
-        /// The USB port name of this object</summary>
-        private readonly string usbDeviceName;
-        /// <summary>
-        /// The USB port object for setting USB port parameters </summary>
-        private UsbDevice usbDevice = null;
-        /// <summary>
         /// The DeviceInformation device id used to open the USB port</summary>
         private string deviceId;
 
@@ -94,7 +88,13 @@ namespace com.dalsemi.onewire.adapter
 
         /// <summary>
         /// USB Adapter state </summary>
-        private UsbAdapterState uState;
+        private UsbAdapterState UsbState;
+
+        /// <summary>
+        /// Pointer to hold the USB IO class
+        /// </summary>
+        private UsbAdapterIo UsbIo;
+
 
         /// <summary>
         /// Flag to indicate have a local begin/end Exclusive use of serial </summary>
@@ -110,14 +110,6 @@ namespace com.dalsemi.onewire.adapter
         private bool extraBytesReceived;
 
         /// <summary>
-        /// Adapter Status registers </summary>
-        private Ds2490.UsbStatusPacket statusPacket;
-
-        /// <summary>
-        /// Event used to read interrupt only once </summary>
-        private AutoResetEvent waitStatus;
-
-        /// <summary>
         /// Vector of thread hash codes that have done an open but no close </summary>
         private readonly ArrayList users = new ArrayList(4);
 
@@ -128,12 +120,9 @@ namespace com.dalsemi.onewire.adapter
 
         public UsbAdapter()
         {
-            usbDevice = null;
             owState = new OneWireState();
-            uState = new UsbAdapterState(owState);
-            uBuild = new UsbPacketBuilder(uState);
-            statusPacket = new Ds2490.UsbStatusPacket();
-            waitStatus = new AutoResetEvent(false);
+            UsbState = new UsbAdapterState(owState);
+            uBuild = new UsbPacketBuilder(UsbState);
             adapterPresent = false;
             haveLocalUse = false;
             syncObject = new object();
@@ -312,7 +301,7 @@ namespace com.dalsemi.onewire.adapter
             {
                 var t = Task<UsbDevice>.Run(async () =>
                 {
-                    // @"USB\VID_04FA&PID_2490\6&F0F8E95&0&2"
+                    // Input -> @"USB\VID_04FA&PID_2490\6&F0F8E95&0&2"
                     string[] st = portName.Split(new char[] { '\\' });
                     StringBuilder deviceInstance = new StringBuilder();
                     deviceInstance.Append(@"\\?\");
@@ -323,6 +312,7 @@ namespace com.dalsemi.onewire.adapter
                     deviceInstance.Append(st[2].ToLower());
                     deviceInstance.Append('#');
                     deviceInstance.Append("{dee824ef-729b-4a0e-9c14-b7117d33a817}");
+                    // Output -> @"\\?\USB#VID_04FA&PID_2490#6&f0f8e95&0&2#{dee824ef-729b-4a0e-9c14-b7117d33a817}"
 
                     deviceId = deviceInstance.ToString();
                     return await UsbDevice.FromIdAsync(deviceId);
@@ -334,7 +324,7 @@ namespace com.dalsemi.onewire.adapter
                     throw new System.IO.IOException("Failed to open (" + portName + ")");
                 }
 
-                usbDevice = t.Result;
+                UsbIo = new UsbAdapterIo(t.Result, deviceId, UsbState, owState);
 
                 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
                 if (doDebugMessages)
@@ -359,10 +349,10 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         public override void freePort()
         {
-            if (usbDevice != null)
+            if (UsbIo.usbDevice != null)
             {
-                usbDevice.Dispose();
-                usbDevice = null;
+                UsbIo.usbDevice.Dispose();
+                UsbIo = null;
             }
         }
 
@@ -388,7 +378,10 @@ namespace com.dalsemi.onewire.adapter
             {
                 lock (this)
                 {
-                    return (usbDevice != null) ? true : false;
+                    if (UsbIo != null)
+                        return (UsbIo.usbDevice != null) ? true : false;
+                    else
+                        return false;
                 }
             }
         }
@@ -397,188 +390,37 @@ namespace com.dalsemi.onewire.adapter
         //-------- Adapter detection
         //--------
 
-        private bool SendCommand(byte req, uint value, uint index, string description)
-        {
-            bool result = true;
-
-            if (doDebugMessages)
-            {
-                Debug.WriteLine("DEBUG: SetupCommand - " + description);
-            }
-
-            // try to aquire the port
-            try
-            {
-                if (!PortOpen)
-                {
-                    throw new System.IO.IOException("Port Not Open");
-                }
-
-                //
-                // RESET_DEVICE
-                //
-                var t = Task<uint>.Run(async () =>
-                {
-                    UsbSetupPacket setupPacket = new UsbSetupPacket
-                    {
-                        RequestType = new UsbControlRequestType
-                        {
-                            Direction = UsbTransferDirection.Out,
-                            Recipient = UsbControlRecipient.Device,
-                            ControlTransferType = UsbControlTransferType.Vendor
-                        },
-                        Request = req,
-                        Value = value,
-                        Index = index,
-                        Length = 0
-                    };
-
-                    return await usbDevice.SendControlOutTransferAsync(setupPacket);
-                });
-
-                t.Wait();
-
-                if (t.Status != TaskStatus.RanToCompletion)
-                {
-                    Debug.WriteLine("USBAdapter-" + description + " failed to send packet");
-                }
-                System.Diagnostics.Debug.WriteLine("SendControlOut HResult = {0:X08}", t.Result.ToString());
-            }
-            catch (System.IO.IOException e)
-            {
-                if (doDebugMessages)
-                {
-                    Debug.WriteLine("USBAdapter-" + description + ": " + e);
-                }
-            }
-
-            return result;
-        }
-
-        private UInt32 registeredInterruptPipeIndex; // Pipe index of the pipe we that we registered for. Only valid if registeredInterrupt is true
-        private bool registeredInterrupt;
-
-        private void OnStatusChangeEvent(UsbInterruptInPipe sender, UsbInterruptInEventArgs eventArgs)
-        {
-            IBuffer buffer = eventArgs.InterruptData;
-
-            if (buffer.Length > 0)
-            {
-                DataReader reader = DataReader.FromBuffer(buffer);
-
-                statusPacket.UpdateUsbStatusPacket(reader, buffer.Length);
-
-                waitStatus.Set();
-            }
-        }
-
-        private TypedEventHandler<UsbInterruptInPipe, UsbInterruptInEventArgs> interruptEventHandler = null;
-
-        private void GetStatus(out byte nResultRegisters)
-        {
-            interruptEventHandler = new TypedEventHandler<UsbInterruptInPipe, UsbInterruptInEventArgs>(this.OnStatusChangeEvent);
-
-            statusPacket.Updated = false;
-            statusPacket.CommResultCodes = null;
-
-            RegisterForInterruptEvent(Ds2490.Pipe.InterruptInPipeIndex, interruptEventHandler);
-
-            while (!statusPacket.Updated)
-                waitStatus.WaitOne();
-
-            UnregisterFromInterruptEvent();
-
-            if (statusPacket.CommResultCodes != null)
-                nResultRegisters = (byte)statusPacket.CommResultCodes.Length;
-            else
-                nResultRegisters = 0;
-        }
-
-        /// <summary>
-        /// Register for the interrupt that is triggered when the device sends an interrupt to us
-        /// 
-        /// The DefaultInterface on the the device is the first interface on the device. We navigate to
-        /// the InterruptInPipes because that collection contains all the interrupt in pipes for the
-        /// selected interface setting.
-        ///
-        /// Each pipe has a property that links to an EndpointDescriptor. This descriptor can be used to find information about
-        /// the pipe (e.g. type, id, etc...). The EndpointDescriptor trys to mirror the EndpointDescriptor that is defined in the Usb Spec.
-        ///
-        /// The function also saves the event token so that we can unregister from the even later on.
-        /// </summary>
-        /// <param name="pipeIndex">The index of the pipe found in UsbInterface.InterruptInPipes. It is not the endpoint number</param>
-        /// <param name="eventHandler">Event handler that will be called when the event is raised</param>
-        private void RegisterForInterruptEvent(UInt32 pipeIndex, TypedEventHandler<UsbInterruptInPipe, UsbInterruptInEventArgs> eventHandler)
-        {
-            var interruptInPipes = usbDevice.DefaultInterface.InterruptInPipes;
-
-            if (!registeredInterrupt && (pipeIndex < interruptInPipes.Count))
-            {
-                var interruptInPipe = interruptInPipes[(int)pipeIndex];
-
-                registeredInterrupt = true;
-                registeredInterruptPipeIndex = pipeIndex;
-
-                // Save the interrupt handler so we can use it to unregister
-                interruptEventHandler = eventHandler;
-
-                interruptInPipe.DataReceived += interruptEventHandler;
-            }
-        }
-
-        /// <summary>
-        /// Unregisters from the interrupt event that was registered for in the RegisterForInterruptEvent();
-        /// </summary>
-        private void UnregisterFromInterruptEvent()
-        {
-            if (registeredInterrupt)
-            {
-                // Search for the correct pipe that we know we used to register events
-                var interruptInPipe = usbDevice.DefaultInterface.InterruptInPipes[(int)registeredInterruptPipeIndex];
-                interruptInPipe.DataReceived -= interruptEventHandler;
-
-                registeredInterrupt = false;
-            }
-        }
-
         /// <summary>
         /// Check to see if there is a short on the 1-Wire bus. Used to stop 
         /// communication with the DS2490 while the short is in effect to not
         /// overrun the buffers.
         /// </summary>
         /// <param name="present">flag set (1) if device presence detected</param>
-        /// <param name="vpp">flag set (1) if Vpp programming voltage detected</param>
         /// <returns>
         /// true  - DS2490 1-Wire is NOT shorted
         /// true - Could not detect DS2490 or 1-Wire shorted
         /// </returns>
         private bool ShortCheck(out bool present, out bool vpp)
         {
+
+            // Issue 1-WIRE RESET, read status
+
             byte nResultRegisters;
 
             present = false;
 
-            GetStatus(out nResultRegisters);
+            UsbIo.ReadStatus(out nResultRegisters);
 
-            // get vpp present flag
-            vpp = ((statusPacket.StatusFlags & Ds2490.STATUSFLAGS_12VP) != 0);
+            vpp = UsbState.ProgrammingVoltagePresent;
 
-            //	Check for short
-            if (statusPacket.CommBufferStatus != 0)
+            // check for short
+            for (var i = 0; i < nResultRegisters; i++)
             {
-                return false;
-            }
-            else
-            {
-                // check for short
-                for (var i = 0; i < nResultRegisters; i++)
+                // check for SH bit (0x02), ignore 0xA5
+                if ((UsbState.CommResultCodes[i] & Ds2490.COMMCMDERRORRESULT_SH) != 0)
                 {
-                    // check for SH bit (0x02), ignore 0xA5
-                    if ((statusPacket.CommResultCodes[i] & Ds2490.COMMCMDERRORRESULT_SH) != 0)
-                    {
-                        // short detected
-                        return false;
-                    }
+                    // short detected
+                    return false;
                 }
             }
 
@@ -588,10 +430,10 @@ namespace com.dalsemi.onewire.adapter
             for (var i = 0; i < nResultRegisters; i++)
             {
                 // only check for error conditions when the condition is not a ONEWIREDEVICEDETECT
-                if (statusPacket.CommResultCodes[i] != Ds2490.ONEWIREDEVICEDETECT)
+                if (UsbState.CommResultCodes[i] != Ds2490.ONEWIREDEVICEDETECT)
                 {
                     // check for NRS bit (0x01)
-                    if ((statusPacket.CommResultCodes[i] & Ds2490.COMMCMDERRORRESULT_NRS) != 0)
+                    if ((UsbState.CommResultCodes[i] & Ds2490.COMMCMDERRORRESULT_NRS) != 0)
                     {
                         // empty bus detected
                         present = false;
@@ -610,7 +452,7 @@ namespace com.dalsemi.onewire.adapter
         ///           was read from the DS2480
         /// </returns>
         ///  <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
-        private bool uVerify()
+        private bool UsbVerify()
         {
             try
             {
@@ -623,14 +465,14 @@ namespace com.dalsemi.onewire.adapter
             {
                 if (doDebugMessages)
                 {
-                    Debug.WriteLine("USBAdapter-uVerify: " + ioe);
+                    Debug.WriteLine("UsbAdapter-UsbVerify: " + ioe);
                 }
             }
             catch (OneWireIOException e)
             {
                 if (doDebugMessages)
                 {
-                    Debug.WriteLine("USBAdapter-uVerify: " + e);
+                    Debug.WriteLine("UsbAdapter-UsbVerify: " + e);
                 }
             }
 
@@ -721,16 +563,16 @@ namespace com.dalsemi.onewire.adapter
             {
 
                 // do a master reset
-                uMasterReset();
+                UsbMasterReset();
 
                 // attempt to verify
-                if (!uVerify())
+                if (!UsbVerify())
                 {
 
                     // do a master reset and try again
-                    uMasterReset();
+                    UsbMasterReset();
 
-                    if (!uVerify())
+                    if (!UsbVerify())
                     {
 
                         rt = false;
@@ -752,46 +594,24 @@ namespace com.dalsemi.onewire.adapter
         /// Do a master reset on the DS2490.  This initiates
         /// a master rest cycle.
         /// </summary>
-        private void uMasterReset()
+        private void UsbMasterReset()
         {
+            byte nResultRegisters;
 
             if (doDebugMessages)
             {
-                Debug.WriteLine("DEBUG: uMasterReset");
+                Debug.WriteLine("DEBUG: UsbMasterReset");
             }
 
-            SendCommand(
-                Ds2490.CMD_TYPE.CONTROL,
-                Ds2490.CTL.RESET_DEVICE,
-                0x0000,
-                "uMasterReset"
-                );
+            // Reset master
+            UsbIo.Control_ResetDevice();
 
             // reset state variables to match device
             owState.oneWireSpeed = SPEED_REGULAR;
-            uState.uSpeedMode = UsbAdapterState.USPEED_REGULAR;
 
-            // set the strong pullup duration to infinite
-            SendCommand(
-                Ds2490.CMD_TYPE.COMM,
-                Ds2490.COMM.SET_DURATION | Ds2490.COMM.IM,
-                0x0000,
-                "Set duration to infinite");
-
-            // set the 12V pullup duration to 512us
-            SendCommand(
-                Ds2490.CMD_TYPE.COMM,
-                Ds2490.COMM.SET_DURATION | Ds2490.COMM.IM | Ds2490.COMM.TYPE,
-                0x0040,
-                "Set 12V pullup duration to 512us");
-
-            // disable strong pullup, but leave program pulse enabled (faster)
-            SendCommand(
-                Ds2490.CMD_TYPE.MODE,
-                Ds2490.Mode.PULSE_EN,
-                Ds2490.ENABLEPULSE_PRGE,
-                "disable strong pullup, but leave program pulse enabled");
-
+            UsbIo.Comm_SetDuration(0, 0x00, "5V pullup, Infinite");
+//            UsbIo.Comm_SetDuration(Ds2490.COMM.TYPE, 0x40, "12V pullup, 512us");
+//            UsbIo.Mode_Pulse(Ds2490.ENABLEPULSE_PRGE, 0x00, "Disable 5V Strong PU, Enable 12V Program Pulse");
         }
 
         /// <summary>
@@ -813,7 +633,7 @@ namespace com.dalsemi.onewire.adapter
                 beginLocalExclusive();
                 uAdapterPresent();
 
-                rt = uVerify();
+                rt = UsbVerify();
             }
             catch (OneWireException)
             {
@@ -1657,14 +1477,14 @@ namespace com.dalsemi.onewire.adapter
         /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
         private void beginLocalExclusive()
         {
-            //// check if there is no such port
-            //if (!PortOpen)
-            //{
-            //    throw new OneWireException("USerialAdapter: port not selected ");
-            //}
+            // check if there is no such port
+            if (!PortOpen)
+            {
+                throw new OneWireException("USerialAdapter: port not selected ");
+            }
 
-            //// check if already have exclusive use
-            //if (serial.haveExclusive())
+            // check if already have exclusive use
+            //if (userPort.haveExclusive())
             //{
             //    return;
             //}
@@ -1696,15 +1516,15 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         private void endLocalExclusive()
         {
-            //lock (syncObject)
-            //{
-            //    if (haveLocalUse)
-            //    {
-            //        haveLocalUse = false;
+            lock (syncObject)
+            {
+                if (haveLocalUse)
+                {
+                    haveLocalUse = false;
 
             //        serial.endExclusive();
-            //    }
-            //}
+                }
+            }
         }
 
 	   //--------
@@ -2063,24 +1883,20 @@ namespace com.dalsemi.onewire.adapter
         ///          result of this operation </returns>
         public virtual int oneWireReset()
         {
-            SendCommand(
-                Ds2490.CMD_TYPE.COMM,
-                Ds2490.COMM._1_WIRE_RESET | Ds2490.COMM.F | Ds2490.COMM.IM | Ds2490.COMM.SE,
-                uState.uSpeedMode,
-                "One-Wire Reset");
+            UsbIo.Comm_OneWireReset();
 
             //// append the reset command at the current speed
-            //packet.writer.Write((byte)(FUNCTION_RESET | uState.uSpeedMode)); //TODO .Append
+            //packet.writer.Write((byte)(FUNCTION_RESET | UsbState.uSpeedMode)); //TODO .Append
 
 
             //// check if not streaming resets
-            //if (!uState.streamResets)
+            //if (!UsbState.streamResets)
             //{
             //    newPacket();
             //}
 
             //// check for 2480 wait on extra bytes packet
-            //if (uState.longAlarmCheck && ((uState.uSpeedMode == UsbAdapterState.USPEED_REGULAR) || (uState.uSpeedMode == UsbAdapterState.USPEED_FLEX)))
+            //if (UsbState.longAlarmCheck && ((UsbState.UsbSpeedMode == UsbAdapterState.USPEED_REGULAR) || (UsbState.uSpeedMode == UsbAdapterState.USPEED_FLEX)))
             //{
             //    newPacket();
             //}
@@ -2103,9 +1919,6 @@ namespace com.dalsemi.onewire.adapter
         ///            for long lines
         /// <li>     2 (SPEED_OVERDRIVE) set to normal communciation speed to
         ///            overdrive
-        /// <li>     3 (SPEED_HYPERDRIVE) set to normal communciation speed to
-        ///            hyperdrive
-        /// <li>    >3 future speeds
         /// </ul>
         ///  </param>
         public override int Speed

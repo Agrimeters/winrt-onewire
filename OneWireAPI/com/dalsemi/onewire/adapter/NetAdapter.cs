@@ -498,8 +498,8 @@ namespace com.dalsemi.onewire.adapter
 
 					// create the multi-cast socket
 					socket = new DatagramSocket();
-                    socket.Control.MulticastOnly = true;
                     socket.MessageReceived += Multicast_MessageReceived;
+                    socket.Control.MulticastOnly = true;
 
                     var t = Task.Run(async () =>
                     {
@@ -517,20 +517,32 @@ namespace com.dalsemi.onewire.adapter
                     }
                     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
-					// send a packet with the versionUID
-                    writer = new DataWriter(socket.OutputStream);
-                    writer.WriteInt32(NetAdapterConstants_Fields.versionUID);
                     var t1 = Task.Run(async() =>
                     {
+                        IOutputStream outputStream;
+                        HostName remoteHostname = new HostName(multicastGroup);
+                        outputStream = await socket.GetOutputStreamAsync(remoteHostname, datagramPort.ToString());
+
+                        // send a packet with the versionUID
+                        writer = new DataWriter(outputStream);
+                        writer.WriteInt32(NetAdapterConstants_Fields.versionUID);
                         await writer.StoreAsync();
                     });
+                    t1.Wait();
 
                     // wait 1/2 second for responses
                     Thread.Sleep(500);
 				 }
-				 catch (Exception)
+				 catch (Exception exception)
 				 { //drain
-                     Debugger.Break();
+                    socket.Dispose();
+                    socket = null;
+
+                    // If this is an unknown status it means that the error is fatal and retry will likely fail.
+                    if (SocketError.GetStatus(exception.HResult) == SocketErrorStatus.Unknown)
+                    {
+                        throw;
+                    }
 				 }
 				 finally
 				 {
@@ -539,6 +551,7 @@ namespace com.dalsemi.onewire.adapter
                        writer.DetachBuffer();
                        writer.Dispose();
                        socket.Dispose();
+                       socket = null;
 					}
 					catch (Exception)
 					{ //drain

@@ -115,6 +115,7 @@
     <Compile Include="com\dalsemi\onewire\adapter\NetAdapterConstants.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\NetAdapterHost.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\NetAdapterSim.cs" />
+    <Compile Include="com\dalsemi\onewire\adapter\UsbAdapterIo.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\UsbPacketBuilder.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\UsbAdapterState.cs" />
     <Compile Include="com\dalsemi\onewire\adapter\UsbAdapter.cs" />

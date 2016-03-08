@@ -168,9 +168,9 @@ namespace com.dalsemi.onewire.adapter
 	   //--------
 
 	   /// <summary>
-	   /// The current state of the U brick, passed into constructor.
+	   /// The current state of the DS2490, passed into constructor.
 	   /// </summary>
-	   private UsbAdapterState uState;
+	   private UsbAdapterState UsbState;
 
 	   /// <summary>
 	   /// The current current count for the number of return bytes from
@@ -188,25 +188,20 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   protected internal ArrayList packetsVector;
 
-	   /// <summary>
-	   /// Flag to send only 'bit' commands to the DS2480
-	   /// </summary>
-	   protected internal bool bitsOnly;
-
 	   //--------
 	   //-------- Constructors
 	   //--------
 
 	   /// <summary>
-	   /// Constructs a new u packet builder.
+	   /// Constructs a new USB packet builder.
 	   /// </summary>
-	   /// <param name="startUState">   the object that contains the U brick state
+	   /// <param name="startUState">   the object that contains the DS2490 state
 	   ///                        which is reference when creating packets </param>
 	   public UsbPacketBuilder(UsbAdapterState startUState)
 	   {
 
 		  // get a reference to the U state
-		  uState = startUState;
+		  UsbState = startUState;
 
 		  // create the buffer for the data
 		  packet = new RawSendPacket();
@@ -217,23 +212,6 @@ namespace com.dalsemi.onewire.adapter
 		  // restart the packet to initialize
 		  restart();
 
-          // Default on SunOS to bit-banging
-          //TODO bitsOnly = (System.Environment.GetEnvironmentVariable("os.name").IndexOf("SunOS") != -1);
-          bitsOnly = false;
-
-		  // check for a bits only property
-		  string bits = OneWireAccessProvider.getProperty("onewire.serial.forcebitsonly");
-		  if (!string.ReferenceEquals(bits, null))
-		  {
-			 if (bits.IndexOf("true", StringComparison.Ordinal) != -1)
-			 {
-				bitsOnly = true;
-			 }
-			 else if (bits.IndexOf("false", StringComparison.Ordinal) != -1)
-			 {
-				bitsOnly = false;
-			 }
-		  }
 	   }
 
 	   //--------
@@ -309,10 +287,7 @@ namespace com.dalsemi.onewire.adapter
 		  int i, j;
 
 		  // set to data mode
-		  if (!bitsOnly)
-		  {
-			 setToDataMode();
-		  }
+          setToDataMode();
 
 		  // provide debug output
 		  if (doDebugMessages)
@@ -327,52 +302,40 @@ namespace com.dalsemi.onewire.adapter
 		  for (i = 0; i < dataBytesValue.Length; i++)
 		  {
 			 // convert the rest to OneWireIOExceptions
-			 if (bitsOnly)
-			 {
-				// change byte to bits
-				byte_value = dataBytesValue [i];
-				for (j = 0; j < 8; j++)
-				{
-				   dataBit(((byte_value & 0x01) == 0x01), false);
-				   byte_value = (byte)((int)((uint)byte_value >> 1));
-				}
-			 }
-			 else
-			 {
-				// append the data
-                packet.writer.Write(dataBytesValue[i]);
-				//TODO packet.buffer.Append(dataBytesValue [i]);
+			// append the data
+            packet.writer.Write(dataBytesValue[i]);
+			//TODO packet.buffer.Append(dataBytesValue [i]);
 
-				// provide debug output
-				if (doDebugMessages)
-				{
-				   Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[] byte[" + ((int) dataBytesValue [i] & 0x00FF).ToString("x") + "]");
-				}
+			// provide debug output
+			if (doDebugMessages)
+			{
+				Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[] byte[" + ((int) dataBytesValue [i] & 0x00FF).ToString("x") + "]");
+			}
 
-				// check for duplicates needed for special characters
-				if (((byte)(dataBytesValue [i] & 0x00FF) == UsbAdapterState.MODE_COMMAND) || (((byte)(dataBytesValue [i] & 0x00FF) == UsbAdapterState.MODE_SPECIAL) && (uState.revision == UsbAdapterState.CHIP_VERSION1)))
-				{
-				   // duplicate this data byte
-                   packet.writer.Write(dataBytesValue[i]);
-				   //TODO packet.buffer.Append(dataBytesValue [i]);
-				}
+			// check for duplicates needed for special characters
+            //TODO
+			//if (((byte)(dataBytesValue [i] & 0x00FF) == UsbAdapterState.MODE_COMMAND) || (((byte)(dataBytesValue [i] & 0x00FF) == UsbAdapterState.MODE_SPECIAL) && (uState.revision == UsbAdapterState.CHIP_VERSION1)))
+			//{
+			//	// duplicate this data byte
+   //             packet.writer.Write(dataBytesValue[i]);
+			//	//TODO packet.buffer.Append(dataBytesValue [i]);
+			//}
 
-				// add to the return number of bytes
-				totalReturnLength++;
-				packet.returnLength++;
+			// add to the return number of bytes
+			totalReturnLength++;
+			packet.returnLength++;
 
-				// provide debug output
-				if (doDebugMessages)
-				{
-				   Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[] returnlength " + packet.returnLength + " bufferLength " + packet.buffer.Length);
-				}
+			// provide debug output
+			if (doDebugMessages)
+			{
+				Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[] returnlength " + packet.returnLength + " bufferLength " + packet.buffer.Length);
+			}
 
-				// check for packet too large or not streaming bytes
-				if ((packet.buffer.Length > MAX_BYTES_STREAMED) || !uState.streamBytes)
-				{
-				   newPacket();
-				}
-			 }
+			// check for packet too large or not streaming bytes
+//TODO			if ((packet.buffer.Length > MAX_BYTES_STREAMED) || !UsbState.streamBytes)
+			{
+				newPacket();
+			}
 		  }
 
 		  return ret_value;
@@ -467,7 +430,7 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
 		  // append the bit with polarity and strong5V options
-          packet.writer.Write((byte)(FUNCTION_BIT | uState.uSpeedMode | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
+          packet.writer.Write((byte)(FUNCTION_BIT | UsbState.BusCommSpeed | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
           //TODOpacket.buffer.Append((FUNCTION_BIT | uState.uSpeedMode | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
 
           // add to the return number of bytes
@@ -475,7 +438,7 @@ namespace com.dalsemi.onewire.adapter
 		  packet.returnLength++;
 
 		  // check for packet too large or not streaming bits
-		  if ((packet.buffer.Length > MAX_BYTES_STREAMED) || !uState.streamBits)
+//TODO		  if ((packet.buffer.Length > MAX_BYTES_STREAMED) || !UsbState.streamBits)
 		  {
 			 newPacket();
 		  }
@@ -499,7 +462,7 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
           // search mode on
-          packet.writer.Write((byte)(FUNCTION_SEARCHON | uState.uSpeedMode));
+          packet.writer.Write((byte)(FUNCTION_SEARCHON | UsbState.BusCommSpeed));
 		  //TODO packet.buffer.Append((FUNCTION_SEARCHON | uState.uSpeedMode));
 
 		  // set to data mode
@@ -563,7 +526,7 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
           // search mode off
-          packet.writer.Write((byte)(FUNCTION_SEARCHOFF | uState.uSpeedMode));
+          packet.writer.Write((byte)(FUNCTION_SEARCHOFF | UsbState.BusCommSpeed));
 		  //TODO packet.buffer.Append((FUNCTION_SEARCHOFF | uState.uSpeedMode));
 
 		  // add to the return number of bytes
@@ -583,7 +546,7 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
 		  // search mode off and change speed
-          packet.writer.Write((byte)(FUNCTION_SEARCHOFF | uState.uSpeedMode));
+          packet.writer.Write((byte)(FUNCTION_SEARCHOFF | UsbState.BusCommSpeed));
 		  //TODO packet.buffer.Append((FUNCTION_SEARCHOFF | uState.uSpeedMode));
 
 		  // no return byte
@@ -598,16 +561,17 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   public virtual void setToCommandMode()
 	   {
-		  if (!uState.inCommandMode)
-		  {
+          //TODO
+		  //if (!UsbState.inCommandMode)
+		  //{
 
-			 // append the command to switch
-             packet.writer.Write(UsbAdapterState.MODE_COMMAND);
-			 //TODO packet.buffer.Append(UsbAdapterState.MODE_COMMAND);
+			 //// append the command to switch
+    //         packet.writer.Write(UsbAdapterState.MODE_COMMAND);
+			 ////TODO packet.buffer.Append(UsbAdapterState.MODE_COMMAND);
 
-			 // switch the state
-			 uState.inCommandMode = true;
-		  }
+			 //// switch the state
+			 //UsbState.inCommandMode = true;
+		  //}
 	   }
 
 	   /// <summary>
@@ -615,16 +579,17 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   public virtual void setToDataMode()
 	   {
-		  if (uState.inCommandMode)
-		  {
+          //TODO
+		  //if (UsbState.inCommandMode)
+		  //{
 
-			 // append the command to switch
-             packet.writer.Write(UsbAdapterState.MODE_DATA);
-			 //TODO packet.buffer.Append(UsbAdapterState.MODE_DATA);
+			 //// append the command to switch
+    //         packet.writer.Write(UsbAdapterState.MODE_DATA);
+			 ////TODO packet.buffer.Append(UsbAdapterState.MODE_DATA);
 
-			 // switch the state
-			 uState.inCommandMode = false;
-		  }
+			 //// switch the state
+			 //UsbState.inCommandMode = false;
+		  //}
 	   }
 
 	   /// <summary>
@@ -636,7 +601,6 @@ namespace com.dalsemi.onewire.adapter
 	   ///          result of this operation </returns>
 	   public virtual int getParameter(int parameter)
 	   {
-
 		  // set to command mode
 		  setToCommandMode();
 
@@ -745,34 +709,7 @@ namespace com.dalsemi.onewire.adapter
 		  for (i = 0; i < len; i++)
 		  {
 			 // convert the rest to OneWireIOExceptions
-			 if (bitsOnly)
-			 {
-				temp_offset = responseOffset + 8 * i;
-
-				// provide debug output
-				if (doDebugMessages)
-				{
-				   Debug.WriteLine("DEBUG: UPacketbuilder-interpretDataBytes[] responseOffset " + responseOffset + " offset " + offset + " lenbuf " + dataByteResponse.Length);
-				}
-
-				// loop through and interpret each bit
-				result_byte = 0;
-				for (j = 0; j < 8; j++)
-				{
-				   result_byte = (byte)((int)((uint)result_byte >> 1));
-
-				   if (interpretOneWireBit(dataByteResponse [temp_offset + j]))
-				   {
-					  result_byte |= (byte)0x80;
-				   }
-				}
-
-				result[offset + i] = (byte)(result_byte & 0xFF);
-			 }
-			 else
-			 {
-				result[offset + i] = (byte)dataByteResponse[responseOffset + i];
-			 }
+             result[offset + i] = (byte)dataByteResponse[responseOffset + i];
 		  }
 	   }
 
@@ -790,8 +727,8 @@ namespace com.dalsemi.onewire.adapter
 		  {
 
 			 // retrieve the chip version and program voltage state
-			 uState.revision = (byte)(UsbAdapterState.CHIP_VERSION_MASK & resetResponse);
-			 uState.programVoltageAvailable = ((UsbAdapterState.PROGRAM_VOLTAGE_MASK & resetResponse) != 0);
+			 //TODO UsbState.revision = (byte)(UsbAdapterState.CHIP_VERSION_MASK & resetResponse);
+//TODO              UsbState.programVoltageAvailable = ((UsbAdapterState.PROGRAM_VOLTAGE_MASK & resetResponse) != 0);
 
 			 // provide debug output
 			 if (doDebugMessages)
@@ -808,22 +745,23 @@ namespace com.dalsemi.onewire.adapter
 				case RESPONSE_RESET_PRESENCE :
 
 				   // if in long alarm check, record this as a non alarm reset
-				   if (uState.longAlarmCheck)
-				   {
+//TODO
+				   //if (UsbState.longAlarmCheck)
+				   //{
 
-					  // check if can give up checking
-					  if (uState.lastAlarmCount++ > UsbAdapterState.MAX_ALARM_COUNT)
-					  {
-						 uState.longAlarmCheck = false;
-					  }
-				   }
+					  //// check if can give up checking
+					  //if (UsbState.lastAlarmCount++ > UsbAdapterState.MAX_ALARM_COUNT)
+					  //{
+						 //UsbState.longAlarmCheck = false;
+					  //}
+				   //}
 
 				   return DSPortAdapter.RESET_PRESENCE;
 				case RESPONSE_RESET_ALARM :
 
 				   // alarm presense so go into DS2480 long alarm check mode
-				   uState.longAlarmCheck = true;
-				   uState.lastAlarmCount = 0;
+//TODO				   UsbState.longAlarmCheck = true;
+//TODO				   UsbState.lastAlarmCount = 0;
 
 				   return DSPortAdapter.RESET_ALARM;
 				case RESPONSE_RESET_NOPRESENCE :

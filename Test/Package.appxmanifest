@@ -8,7 +8,7 @@
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.0.0" MaxVersionTested="10.0.0.0" />
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.10240.0" MaxVersionTested="10.0.10240.0" />
   </Dependencies>
   <Resources>
     <Resource Language="x-generate" />
@@ -23,18 +23,20 @@
     </Application>
   </Applications>
   <Capabilities>
-    <Capability Name="internetClient" />
     <Capability Name="internetClientServer" />
     <Capability Name="privateNetworkClientServer" />
+    
     <DeviceCapability Name="serialcommunication">
       <Device Id="any">
         <Function Type="name:serialPort" />
       </Device>
     </DeviceCapability>
+    
     <DeviceCapability Name="usb">
       <Device Id="vidpid:04FA 2490">
         <Function Type="name:vendorSpecific" />
       </Device>
     </DeviceCapability>
+    
   </Capabilities>
 </Package>

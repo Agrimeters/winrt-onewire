@@ -35,7 +35,7 @@ namespace Test
 
             //string[] args = null;
             //string[] args = { "DS9097U", "COM8" };
-            string[] args = { "UsbAdapter", @"USB\VID_04FA&PID_2490\6&f0f8e95&0&6",  };
+            string[] args = { "UsbAdapter", @"USB\VID_04FA&PID_2490\6&f0f8e95&0&6" };
             //string[] args = { "NetAdapter", @"192.168.1.187:6161", };
 
             // Print default access provider settings

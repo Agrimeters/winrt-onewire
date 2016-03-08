@@ -220,7 +220,6 @@ namespace com.dalsemi.onewire
               // DRAIN
           }
 
-#if false //TODO
           // DS2480B - Serial
           try
           {
@@ -242,7 +241,7 @@ namespace com.dalsemi.onewire
 		  {
 			 // DRAIN
 		  }
-#endif
+
 		  if ((!usb_loaded) && (!serial_loaded))
 		  {
 		      Debug.WriteLine("");
@@ -480,6 +479,7 @@ namespace com.dalsemi.onewire
                             try
                             {
                                 var localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+                                Debug.WriteLine(Windows.Storage.ApplicationData.Current.LocalFolder.Path);
 
                                 if(File.Exists(localFolder.Path + "\\onewire.properties"))
                                 {
@@ -512,7 +512,7 @@ namespace com.dalsemi.onewire
                 {
                     if(propertyTable == null)
                     {
-                        Debug.WriteLine("Loading properties from OneWireAPI.Resources.onewire_properties");
+                        Debug.WriteLine("Loading -> OneWireAPI.Resources.onewire_properties");
 
                         propertyTable = new Dictionary<string, string>();
 
