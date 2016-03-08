@@ -428,6 +428,69 @@ namespace com.dalsemi.onewire.adapter
 		    //uParameters [DSPortAdapter.SPEED_FLEX].sampleOffsetTime = UParameterSettings.SAMPLEOFFSET_TIME_10us;
 	    }
 
+        /// <summary>
+        /// Interrupt Handler
+        /// </summary>
+        /// <param name="m"></param>
+        /// <param name="length"></param>
+        public void OnStateUpdate(DataReader m, uint length)
+        {
+            lock (syncObject)
+            {
+                EnableFlags enableflags = (EnableFlags)m.ReadByte();
+
+                StrongPullup = ((enableflags & EnableFlags.SPUE) == EnableFlags.SPUE) ? true : false;
+                oneWireState.oneWireLevel = (byte)((StrongPullup == true) ? 1 : 0);
+                DynamicSpeedChange = ((enableflags & EnableFlags.SPCE) == EnableFlags.SPCE) ? true : false;
+                BusCommSpeed = m.ReadByte();
+                oneWireState.oneWireSpeed = BusCommSpeed;
+                StrongPullupDuration = m.ReadByte();
+                ProgPullupDuration = m.ReadByte();
+                PulldownSlewRateControl = m.ReadByte();
+                Write1LowTime = m.ReadByte();
+                DSOW0RecoveryTime = m.ReadByte();
+                var rsvd1 = m.ReadByte();
+
+                StatusFlags statusflags = (StatusFlags)m.ReadByte();
+
+                StrongPullup1 = ((statusflags & StatusFlags.SPUA) == StatusFlags.SPUA) ? true : false;
+                ProgrammingVoltagePresent = ((statusflags & StatusFlags.PVP) == StatusFlags.PVP) ? true : false;
+                oneWireState.canProgram = ProgrammingVoltagePresent;
+                PowerMode = ((statusflags & StatusFlags.PMOD) == StatusFlags.PMOD) ? true : false;
+                Halt = ((statusflags & StatusFlags.HALT) == StatusFlags.HALT) ? true : false;
+                Idle = ((statusflags & StatusFlags.IDLE) == StatusFlags.IDLE) ? true : false;
+                Ep0Fifo = ((statusflags & StatusFlags.EP0F) == StatusFlags.EP0F) ? true : false;
+
+                Cmd = m.ReadUInt16();
+                CmdBufferStatus = m.ReadByte();
+
+                OneWireWriteBufferStatus = m.ReadByte();
+                OneWireReadBufferStatus = m.ReadByte();
+
+                var rsvd2 = m.ReadByte();
+                var rsvd3 = m.ReadByte();
+
+                var len = length - 16;
+                if (len > 0)
+                {
+                    byte[] buff = new byte[len];
+                    for (int i = 0; i < len; i++)
+                        buff[i] = m.ReadByte();
+                    CommResultCodes = buff;
+                }
+                else
+                {
+                    CommResultCodes = null;
+                }
+
+                Updated = true;
+            }
+        }
+
+        /// <summary>
+        /// Decode the Error Result
+        /// </summary>
+        /// <param name="value"></param>
         public void PrintErrorResult(byte value)
         {
             if (value == Ds2490.ONEWIREDEVICEDETECT)
@@ -477,7 +540,7 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         public void PrintState()
         {
-            lock(syncObject)
+            lock (syncObject)
             {
                 Debug.WriteLine("5V Strong Pullup: " + StrongPullup);
                 Debug.WriteLine("Dynamic Speed Change: " + DynamicSpeedChange);
@@ -494,7 +557,7 @@ namespace com.dalsemi.onewire.adapter
                         break;
                 }
                 var duration = GetPullUpDurationValue(StrongPullupDuration);
-                Debug.WriteLine("1-Wire Strong Pullup Duration: " + ((duration == 0)? "INFINITE": (duration + "ms")));
+                Debug.WriteLine("1-Wire Strong Pullup Duration: " + ((duration == 0) ? "INFINITE" : (duration + "ms")));
                 Debug.WriteLine("12V Pullup Duration: {0:X02}h", ProgPullupDuration);
                 Debug.Write("PulldownSlewRateControl: ");
                 switch (PulldownSlewRateControl)
@@ -525,7 +588,7 @@ namespace com.dalsemi.onewire.adapter
                         break;
                 }
                 Debug.Write("Write1LowTime: ");
-                switch(Write1LowTime)
+                switch (Write1LowTime)
                 {
                     case 0x00:
                         Debug.WriteLine("4us");
@@ -553,7 +616,7 @@ namespace com.dalsemi.onewire.adapter
                         break;
                 }
                 Debug.Write("DSOW0RecoveryTime: ");
-                switch(DSOW0RecoveryTime)
+                switch (DSOW0RecoveryTime)
                 {
                     case 0x00:
                         Debug.WriteLine("10us");
@@ -595,60 +658,5 @@ namespace com.dalsemi.onewire.adapter
             }
         }
 
-        /// <summary>
-        /// Interrupt Handler
-        /// </summary>
-        /// <param name="m"></param>
-        /// <param name="length"></param>
-        public void OnStateUpdate(DataReader m, uint length)
-        {
-            lock (syncObject)
-            {
-                EnableFlags enableflags = (EnableFlags)m.ReadByte();
-                StrongPullup = ((enableflags & EnableFlags.SPUE) == EnableFlags.SPUE) ? true : false;
-                DynamicSpeedChange = ((enableflags & EnableFlags.SPCE) == EnableFlags.SPCE) ? true : false;
-                BusCommSpeed = m.ReadByte();
-                StrongPullupDuration = m.ReadByte();
-                ProgPullupDuration = m.ReadByte();
-                PulldownSlewRateControl = m.ReadByte();
-                Write1LowTime = m.ReadByte();
-                DSOW0RecoveryTime = m.ReadByte();
-                var rsvd = m.ReadByte();
-
-                StatusFlags statusflags = (StatusFlags)m.ReadByte();
-                StrongPullup1 = ((statusflags & StatusFlags.SPUA) == StatusFlags.SPUA) ? true : false;
-                ProgrammingVoltagePresent = ((statusflags & StatusFlags.PVP) == StatusFlags.PVP) ? true : false;
-                PowerMode = ((statusflags & StatusFlags.PMOD) == StatusFlags.PMOD) ? true : false;
-                Halt = ((statusflags & StatusFlags.HALT) == StatusFlags.HALT) ? true : false;
-                Idle = ((statusflags & StatusFlags.IDLE) == StatusFlags.IDLE) ? true : false;
-                Ep0Fifo = ((statusflags & StatusFlags.EP0F) == StatusFlags.EP0F) ? true : false;
-
-                Cmd = m.ReadUInt16(); // Validate endianess
-                CmdBufferStatus = m.ReadByte();
-
-                OneWireWriteBufferStatus = m.ReadByte();
-                OneWireReadBufferStatus = m.ReadByte();
-
-                rsvd = m.ReadByte();
-                rsvd = m.ReadByte();
-
-                var len = length - 16;
-                if (len > 0)
-                {
-                    byte[] buff = new byte[len];
-                    for (int i = 0; i < len; i++)
-                        buff[i] = m.ReadByte();
-                    CommResultCodes = buff;
-                }
-                else
-                {
-                    CommResultCodes = null;
-                }
-
-                Updated = true;
-            }
-        }
-
     }
-
 }

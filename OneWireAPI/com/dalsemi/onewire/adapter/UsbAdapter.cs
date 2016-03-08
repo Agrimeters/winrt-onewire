@@ -391,15 +391,13 @@ namespace com.dalsemi.onewire.adapter
         //--------
 
         /// <summary>
-        /// Check to see if there is a short on the 1-Wire bus. Used to stop 
-        /// communication with the DS2490 while the short is in effect to not
-        /// overrun the buffers.
+        /// Check to see if there is a short on the 1-Wire bus.
         /// </summary>
-        /// <param name="present">flag set (1) if device presence detected</param>
+        /// <param name="present"></param>
+        /// <param name="vpp"></param>
         /// <returns>
-        /// true  - DS2490 1-Wire is NOT shorted
-        /// false - Could not detect DS2490 or 1-Wire shorted
-        /// </returns>
+        /// true = DS2490 1-Wire is not shorted
+        /// false = DS2490 1-Wire is shorted</returns>
         private bool ShortCheck(out bool present, out bool vpp)
         {
             present = true;
@@ -429,13 +427,12 @@ namespace com.dalsemi.onewire.adapter
         }
 
         /// <summary>
-        ///  Read and verify the baud rate with the DS2480 chip and perform a
-        ///  single bit MicroLAN operation.  This is used as a DS2480 detect.
+        /// Verifies if 1-Wire bus is shorted, VPP, and if devices are present
         /// </summary>
-        ///  <returns>  'true' if the correct baud rate and bit operation
-        ///           was read from the DS2480
+        /// <returns>
+        /// true = DS2490 1-Wire shorted
+        /// false = DS2490 1-Wire is not shorted
         /// </returns>
-        ///  <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
         private bool UsbVerify()
         {
             try
@@ -545,20 +542,17 @@ namespace com.dalsemi.onewire.adapter
             // check if adapter has already be verified to be present
             if (!adapterPresent)
             {
-
                 // do a master reset
                 UsbMasterReset();
 
                 // attempt to verify
                 if (!UsbVerify())
                 {
-
                     // do a master reset and try again
                     UsbMasterReset();
 
                     if (!UsbVerify())
                     {
-
                         rt = false;
                     }
                 }
@@ -586,9 +580,9 @@ namespace com.dalsemi.onewire.adapter
             }
 
             UsbIo.Control_ResetDevice();
-            UsbIo.Comm_SetDuration(0, 0x00, "5V pullup, Infinite");
-            UsbIo.Comm_SetDuration(Ds2490.COMM.TYPE, 0x40, "12V pullup, 512us");
-            UsbIo.Mode_Pulse(Ds2490.ENABLEPULSE_PRGE, 0x00, "Disable 5V Strong PU, Enable 12V Program Pulse");
+//            UsbIo.Comm_SetDuration(0, 0x00, "5V pullup, Infinite");
+//            UsbIo.Comm_SetDuration(Ds2490.COMM.TYPE, 0x40, "12V pullup, 512us");
+//            UsbIo.Mode_Pulse(Ds2490.ENABLEPULSE_PRGE, 0x00, "Disable 5V Strong PU, Enable 12V Program Pulse");
         }
 
         /// <summary>
@@ -605,7 +599,6 @@ namespace com.dalsemi.onewire.adapter
 
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
                 uAdapterPresent();
@@ -618,7 +611,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -1421,30 +1413,30 @@ namespace com.dalsemi.onewire.adapter
             Array.Copy(family, 0, owState.searchExcludeFamilies, 0, family.Length);
         }
 
-	   //--------
-	   //-------- 1-Wire Network Semaphore methods
-	   //--------
+ 	    //--------
+	    //-------- 1-Wire Network Semaphore methods
+	    //--------
 
-	   /// <summary>
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <param name="blocking"> <code>true</code> if want to block waiting
-	   ///                 for an excluse access to the adapter </param>
-	   /// <returns> <code>true</code> </returns>
-	   public override bool beginExclusive(bool blocking)
-	   {
+        /// <summary>
+        /// begin exclusive access
+        /// </summary>
+        /// <param name="blocking"></param>
+        /// <returns>
+        /// true
+        /// </returns>
+	    public override bool beginExclusive(bool blocking)
+	    {
 			//DEBUG!!! RIGHT NOW THIS IS NOT IMPLEMENTED!!!
 			return true;
-	   }
+	    }
 
-	   /// <summary>
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// 
-	   /// </summary>
-	   public override void endExclusive()
-	   {
+        /// <summary>
+        /// end exclusive
+        /// </summary>
+        public override void endExclusive()
+	    {
 			//DEBUG!!! RIGHT NOW THIS IS NOT IMPLEMENTED!!!
-	   }
+	    }
 
         /// <summary>
         /// Gets exclusive use of the 1-Wire to communicate with an iButton or
@@ -1457,34 +1449,34 @@ namespace com.dalsemi.onewire.adapter
             // check if there is no such port
             if (!PortOpen)
             {
-                throw new OneWireException("USerialAdapter: port not selected ");
+                throw new OneWireException("UsbAdapter: port not selected ");
             }
 
             // check if already have exclusive use
-            //if (userPort.haveExclusive())
-            //{
-            //    return;
-            //}
-            //else
-            //{
-            //    while (!haveLocalUse)
-            //    {
-            //        lock (syncObject)
-            //        {
-            //            haveLocalUse = serial.beginExclusive(false);
-            //        }
-            //        if (!haveLocalUse)
-            //        {
-            //            try
-            //            {
-            //                Thread.Sleep(50);
-            //            }
-            //            catch (Exception)
-            //            {
-            //            }
-            //        }
-            //    }
-            //}
+            if (haveExclusive())
+            {
+                return;
+            }
+            else
+            {
+                while (!haveLocalUse)
+                {
+                    lock (syncObject)
+                    {
+                        haveLocalUse = beginExclusive(false);
+                    }
+                    if (!haveLocalUse)
+                    {
+                        try
+                        {
+                            Thread.Sleep(50);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -1499,34 +1491,40 @@ namespace com.dalsemi.onewire.adapter
                 {
                     haveLocalUse = false;
 
-            //        serial.endExclusive();
+                    endExclusive();
                 }
             }
         }
 
-	   //--------
-	   //-------- Primitive 1-Wire Network data methods
-	   //--------
+        //TODO
+        internal bool haveExclusive()
+        {
+            return true;
+        }
 
-	   /// <summary>
-	   /// Sends a bit to the 1-Wire Network.
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <param name="bitValue">  the bit value to send to the 1-Wire Network. </param>
-	   public override void putBit(bool bitValue)
-	   {
-		  //this will not be implemented
-	   }
+        //--------
+        //-------- Primitive 1-Wire Network data methods
+        //--------
 
-	   /// <summary>
-	   /// Gets a bit from the 1-Wire Network.
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <returns>  <code>true</code> </returns>
-	   public override bool getBit
-	   {
+        /// <summary>
+        /// Sends a bit to the 1-Wire Network.
+        /// This method does nothing in <code>DumbAdapter</code>.
+        /// </summary>
+        /// <param name="bitValue">  the bit value to send to the 1-Wire Network. </param>
+        public override void putBit(bool bitValue)
+	    {
+            throw new NotImplementedException();
+            //this will not be implemented
+        }
+
+        /// <summary>
+        /// gets a bit on the 1-Wire network
+        /// </summary>
+        public override bool getBit
+	    {
 		   get
 		   {
+              throw new NotImplementedException();
 			  //this will not be implemented
 			  return true;
 		   }
@@ -1538,18 +1536,21 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="byteValue">  the byte value to send to the 1-Wire Network. </param>
 	   public override void putByte(int byteValue)
 	   {
-		  //this will not be implemented
-	   }
+           throw new NotImplementedException();
+           //this will not be implemented
+       }
 
-	   /// <summary>
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <returns> the value 0x0ff </returns>
-	   public override int Byte
+       /// <summary>
+       /// This method does nothing in <code>DumbAdapter</code>.
+       /// </summary>
+       /// <returns> the value 0x0ff </returns>
+       public override int Byte
 	   {
 		   get
 		   {
+              throw new NotImplementedException();
 			  //this will not be implemented
+
 			  return 0x0ff;
 		   }
 	   }
@@ -1562,6 +1563,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <returns> a new byte array of length <code>len</code> </returns>
 	   public override byte[] getBlock(int len)
 	   {
+          throw new NotImplementedException();
 		  //this will not be implemented
 		  return new byte[len];
 	   }
@@ -1573,6 +1575,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="len">     length of data bytes to receive </param>
 	   public override void getBlock(byte[] arr, int len)
 	   {
+          throw new NotImplementedException();
 		  //this will not be implemented
 	   }
 
@@ -1584,6 +1587,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="len">     length of data bytes to receive </param>
 	   public override void getBlock(byte[] arr, int off, int len)
 	   {
+          throw new NotImplementedException();
 		  //this will not be implemented
 	   }
 
@@ -1595,6 +1599,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="len">        length of data to send / receive starting at 'off' </param>
 	   public override void dataBlock(byte[] dataBlock, int off, int len)
 	   {
+          throw new NotImplementedException();
 		  //this will not be implemented
 	   }
 
@@ -1621,7 +1626,6 @@ namespace com.dalsemi.onewire.adapter
         {
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
@@ -1748,18 +1752,9 @@ namespace com.dalsemi.onewire.adapter
 		   return true;
 	   }
 
-	   /// <summary>
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// 
-	   /// </summary>
-	   public override void startBreak()
-	   {
-	   }
-
-	   /// <summary>
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// 
-	   /// </summary>
+       /// <summary>
+       /// 
+       /// </summary>
 	   public override void setPowerNormal()
 	   {
             try
@@ -1815,27 +1810,6 @@ namespace com.dalsemi.onewire.adapter
                         }
                     }
                 }
-                else if (owState.oneWireLevel == LEVEL_BREAK)
-                {
-
-                    //// restore power
-                    //serial.DTR = true;
-                    //serial.RTS = true;
-
-                    //// wait for power to come up
-                    //sleep(300);
-
-                    // set the level state
-                    owState.oneWireLevel = LEVEL_NORMAL;
-
-                    // set the DS2480 to the correct mode and verify
-                    adapterPresent = false;
-
-                    if (!uAdapterPresent())
-                    {
-                        throw new OneWireIOException("Did not get a response back from adapter after break");
-                    }
-                }
             }
             catch (IOException ioe)
             {
@@ -1843,7 +1817,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -1860,6 +1833,7 @@ namespace com.dalsemi.onewire.adapter
         ///          result of this operation </returns>
         public virtual int oneWireReset()
         {
+            // disable strong pull ups prior to reset
             UsbIo.Comm_OneWireReset(true);
 
             //// append the reset command at the current speed

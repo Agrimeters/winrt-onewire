@@ -17,6 +17,11 @@ namespace com.dalsemi.onewire.adapter
     public class UsbAdapterIo
     {
         /// <summary>
+        /// Result code
+        /// </summary>
+        private const byte RESULT_SUCCESS = 0;
+
+        /// <summary>
         /// Flag to enable debug messages
         /// </summary>
         private bool doDebugMessages = true;
@@ -87,7 +92,7 @@ namespace com.dalsemi.onewire.adapter
                 0,
                 "USB Communication: RESET_DEVICE");
 
-            if (0 != ReadStatus(true))
+            if (RESULT_SUCCESS != ReadStatus(true))
                 usbState.PrintErrorResult(LastError);
 
             owState.oneWireSpeed = usbState.BusCommSpeed;
@@ -109,7 +114,7 @@ namespace com.dalsemi.onewire.adapter
                 duration,
                 "USB Communication: SetDuration - " + description);
 
-            if (0 != ReadResult(true))
+            if (RESULT_SUCCESS != ReadResult(true))
                 usbState.PrintErrorResult(LastError);
 
 //TODO            usbState.PrintState();
@@ -128,7 +133,7 @@ namespace com.dalsemi.onewire.adapter
                 usbState.BusCommSpeed,
                 "USB Communication: One-Wire Reset");
 
-            if (0 != ReadResult(ignoreDevice))
+            if (RESULT_SUCCESS != ReadResult(ignoreDevice))
                 usbState.PrintErrorResult(LastError);
 
 //TODO            usbState.PrintState();
@@ -151,7 +156,7 @@ namespace com.dalsemi.onewire.adapter
                 "USB Mode: PULSE_EN - " + description);
 
             byte Status = ReadStatus(true);
-            if (Status != 0)
+            if (RESULT_SUCCESS != Status)
                 usbState.PrintErrorResult(Status);
 
 //TODO            usbState.PrintState();
