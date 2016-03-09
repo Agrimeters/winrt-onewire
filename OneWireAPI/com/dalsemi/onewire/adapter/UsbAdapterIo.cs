@@ -95,7 +95,56 @@ namespace com.dalsemi.onewire.adapter
             if (RESULT_SUCCESS != ReadStatus(true))
                 usbState.PrintErrorResult(LastError);
 
-            owState.oneWireSpeed = usbState.BusCommSpeed;
+//TODO            usbState.PrintState();
+        }
+
+        /// <summary>
+        /// Halt execution when DONE
+        /// </summary>
+        public void Control_HalExecWhenDone()
+        {
+            SendCommand(
+                Ds2490.CMD_TYPE.CONTROL,
+                Ds2490.CTL.HALT_EXE_DONE,
+                0,
+                "USB Communication: HALT_EXE_DONE");
+
+            if (RESULT_SUCCESS != ReadStatus(true))
+                usbState.PrintErrorResult(LastError);
+
+//TODO            usbState.PrintState();
+        }
+
+        /// <summary>
+        /// Halt execution when IDLE
+        /// </summary>
+        public void Control_HalExecWhenIdle()
+        {
+            SendCommand(
+                Ds2490.CMD_TYPE.CONTROL,
+                Ds2490.CTL.HALT_EXE_IDLE,
+                0,
+                "USB Communication: HALT_EXE_IDLE");
+
+            if (RESULT_SUCCESS != ReadStatus(true))
+                usbState.PrintErrorResult(LastError);
+
+//TODO            usbState.PrintState();
+        }
+
+        /// <summary>
+        /// Halt execution when IDLE
+        /// </summary>
+        public void Control_ResumeExec()
+        {
+            SendCommand(
+                Ds2490.CMD_TYPE.CONTROL,
+                Ds2490.CTL.RESUME_EXE,
+                0,
+                "USB Communication: RESUME_EXE");
+
+            if (RESULT_SUCCESS != ReadStatus(true))
+                usbState.PrintErrorResult(LastError);
 
 //TODO            usbState.PrintState();
         }
@@ -103,15 +152,15 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Issue Communication SetDuration to USB device
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="type">0 = 5V, 1 = 12V</param>
         /// <param name="duration"></param>
         /// <param name="description"></param>
-        public byte Comm_SetDuration(ushort type, uint duration, string description)
+        public byte Comm_SetDuration(ushort type, byte duration, string description)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.COMM,
                 (uint)(Ds2490.COMM.SET_DURATION | Ds2490.COMM.IM | type | Ds2490.COMM.NTF),
-                duration,
+                (uint)duration,
                 "USB Communication: SetDuration - " + description);
 
             if (RESULT_SUCCESS != ReadResult(true))
@@ -142,18 +191,51 @@ namespace com.dalsemi.onewire.adapter
         }
 
         /// <summary>
-        /// Issue Mode Pulse to USB device
+        /// Pulse
+        /// 
+        /// This command is used to generate a strong pullup to 5V in 
+        /// order to provide extra power for an attached iButton device, 
+        /// e.g., temperature sensor, EEPROM, SHA-1, or crypto iButton. 
+        /// The pulse duration is determined by the value in the mode register.
+        /// 
+        /// The HALT EXECUTION WHEN DONE or HALT EXECUTION WHEN IDLE control 
+        /// commands are used to terminate an infinite duration pulse.
         /// </summary>
-        /// <param name="index"></param>
-        /// <param name="length"></param>
+        public byte Comm_Pulse(string description)
+        {
+            SendCommand(
+                Ds2490.CMD_TYPE.COMM,
+                Ds2490.COMM.PULSE | Ds2490.COMM.IM | Ds2490.COMM.NTF,
+                usbState.BusCommSpeed,
+                "USB Communication: Pulse - " + description);
+
+            if (RESULT_SUCCESS != ReadResult(true))
+                usbState.PrintErrorResult(LastError);
+
+            //TODO            usbState.PrintState();
+
+            return LastError;
+        }
+
+        /// <summary>
+        /// Enable Pulse
+        /// 
+        /// This command is used to enable or disable a 1-Wire strong pullup pulse to 5V.
+        /// One bit position in the parameter byte is used to control the enabled/disabled
+        /// state for the pulse. The pulse is enabled when the respective bit is set to a 1
+        /// and disabled when set to a 0. The DS2490 power-up default state for strong 
+        /// pullup is disabled
+        /// </summary>
+        /// <param name="rail">Pass in Ds2490.ENABLEPULSE_PRGE, or Ds2490.ENABLEPULSE_SPUE</param>
         /// <param name="description"></param>
-        public byte Mode_Pulse(uint index, uint length, string description)
+        /// <returns></returns>
+        public byte Mode_EnablePulse(byte rail, string description)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.MODE,
                 Ds2490.Mode.PULSE_EN | Ds2490.COMM.NTF,
-                Ds2490.ENABLEPULSE_PRGE,
-                "USB Mode: PULSE_EN - " + description);
+                rail,
+                "USB Mode: ENABLE_PULSE - " + description);
 
             byte Status = ReadStatus(true);
             if (RESULT_SUCCESS != Status)

@@ -80,7 +80,7 @@ namespace com.dalsemi.onewire.adapter
 
         /// <summary>
         /// USB Adapter packet builder </summary>
-        internal UsbPacketBuilder uBuild;
+        internal UsbPacketBuilder UsbBuild;
 
         /// <summary>
         /// State of the OneWire </summary>
@@ -122,7 +122,7 @@ namespace com.dalsemi.onewire.adapter
         {
             owState = new OneWireState();
             UsbState = new UsbAdapterState(owState);
-            uBuild = new UsbPacketBuilder(UsbState);
+            UsbBuild = new UsbPacketBuilder(UsbState);
             adapterPresent = false;
             haveLocalUse = false;
             syncObject = new object();
@@ -580,7 +580,7 @@ namespace com.dalsemi.onewire.adapter
             }
 
             UsbIo.Control_ResetDevice();
-//            UsbIo.Comm_SetDuration(0, 0x00, "5V pullup, Infinite");
+//            PowerDuration = DSPortAdapter.DELIVERY_INFINITE;
 //            UsbIo.Comm_SetDuration(Ds2490.COMM.TYPE, 0x40, "12V pullup, 512us");
 //            UsbIo.Mode_Pulse(Ds2490.ENABLEPULSE_PRGE, 0x00, "Disable 5V Strong PU, Enable 12V Program Pulse");
         }
@@ -640,62 +640,22 @@ namespace com.dalsemi.onewire.adapter
         /// this method always returns <code>true</code>.
         /// </summary>
         /// <returns>  <code>true</code> </returns>
-        public override bool canHyperdrive()
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Applications might check this method and not attempt operation unless this method
-        /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-        /// this method always returns <code>true</code>.
-        /// </summary>
-        /// <returns>  <code>true</code> </returns>
         public override bool canFlex()
         {
             return true;
         }
 
         /// <summary>
-        /// Applications might check this method and not attempt operation unless this method
-        /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-        /// this method always returns <code>true</code>.
+        /// Returns whether the adapter can physically support strong 5 volt power
+        /// mode.
         /// </summary>
-        /// <returns>  <code>true</code> </returns>
-        public override bool canProgram()
-        {
-            return false;
-        }
-
-        /// <summary>
-        /// Applications might check this method and not attempt operation unless this method
-        /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-        /// this method always returns <code>true</code>.
-        /// </summary>
-        /// <returns>  <code>true</code> </returns>
+        /// <returns>  <code>true</code> if this port adapter can do strong 5 volt
+        /// mode, <code>false</code> otherwise.
+        /// </returns>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error with the adapter </exception>
+        /// <exception cref="OneWireException"> on a setup error with the 1-Wire
+        ///         adapter </exception>
         public override bool canDeliverPower()
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Applications might check this method and not attempt operation unless this method
-        /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-        /// this method always returns <code>true</code>.
-        /// </summary>
-        /// <returns>  <code>true</code> </returns>
-        public override bool canDeliverSmartPower()
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Applications might check this method and not attempt operation unless this method
-        /// returns <code>true</code>. To make sure that a wide variety of applications can use this class,
-        /// this method always returns <code>true</code>.
-        /// </summary>
-        /// <returns>  <code>true</code> </returns>
-        public override bool canBreak()
         {
             return true;
         }
@@ -941,7 +901,6 @@ namespace com.dalsemi.onewire.adapter
                 // make sure adapter is present
                 if (adapterDetected())
                 {
-
                     // check for pending power conditions
                     if (owState.oneWireLevel != LEVEL_NORMAL)
                     {
@@ -1186,8 +1145,6 @@ namespace com.dalsemi.onewire.adapter
         {
             int reset_offset = 0;
 
-            Debugger.Break();
-
             // make sure adapter is present
             if (uAdapterPresent())
             {
@@ -1199,39 +1156,39 @@ namespace com.dalsemi.onewire.adapter
                 }
 
                 // set the correct baud rate to stream this operation
-//TODO                StreamingSpeed = UPacketBuilder.OPERATION_SEARCH;
+                //StreamingSpeed = UPacketBuilder.OPERATION_SEARCH;
 
                 //// reset the packet
-                //uBuild.restart();
+                UsbBuild.restart();
 
-                //// add a reset/ search command
-                //if (!mState.skipResetOnSearch)
-                //{
-                //    reset_offset = oneWireReset();
-                //}
+                // add a reset/ search command
+                if (!mState.skipResetOnSearch)
+                {
+                    reset_offset = oneWireReset();
+                }
 
-                //if (mState.searchOnlyAlarmingButtons)
-                //{
-                //    uBuild.dataByte(ALARM_SEARCH_CMD);
-                //}
-                //else
-                //{
-                //    uBuild.dataByte(NORMAL_SEARCH_CMD);
-                //}
+                if (mState.searchOnlyAlarmingButtons)
+                {
+//                    UsbBuild.dataByte(ALARM_SEARCH_CMD);
+                }
+                else
+                {
+//                    UsbBuild.dataByte(NORMAL_SEARCH_CMD);
+                }
 
-                //// add search sequence based on mState
-                //int search_offset = uBuild.search(mState);
+                // add search sequence based on mState
+//                int search_offset = UsbBuild.search(mState);
 
-                //// send/receive the search
-                //byte[] result_array = uTransaction(uBuild);
+                // send/receive the search
+                //byte[] result_array = uTransaction(UsbBuild);
 
-                //// interpret search result and return
-                //if (!mState.skipResetOnSearch)
-                //{
-                //    uBuild.interpretOneWireReset(result_array[reset_offset]);
-                //}
+                // interpret search result and return
+                if (!mState.skipResetOnSearch)
+                {
+                //    UsbBuild.interpretOneWireReset(result_array[reset_offset]);
+                }
 
-                //TODO return uBuild.interpretSearch(mState, result_array, search_offset);
+                //TODO return UsbBuild.interpretSearch(mState, result_array, search_offset);
                 return false;
             }
             else
@@ -1640,17 +1597,17 @@ namespace com.dalsemi.onewire.adapter
                     }
 
                     //// build a message to read the baud rate from the U brick
-                    //uBuild.restart();
+                    //UsbBuild.restart();
 
-                    //int reset_offset = uBuild.oneWireReset();
+                    //int reset_offset = UsbBuild.oneWireReset();
 
                     //// send and receive
-                    //byte[] result_array = uTransaction(uBuild);
+                    //byte[] result_array = uTransaction(UsbBuild);
 
                     //// check the result
                     //if (result_array.Length == (reset_offset + 1))
                     //{
-                    //    return uBuild.interpretOneWireReset(result_array[reset_offset]);
+                    //    return UsbBuild.interpretOneWireReset(result_array[reset_offset]);
                     //}
                     //else
                     //{
@@ -1680,7 +1637,7 @@ namespace com.dalsemi.onewire.adapter
         //--------
 
         /// <summary>
-        /// This method does nothing in <code>DumbAdapter</code>.
+        /// Sets the duration of the 5V Strong Pullup
         /// </summary>
         /// <param name="timeFactor">
         /// <ul>
@@ -1694,10 +1651,38 @@ namespace com.dalsemi.onewire.adapter
         ///          setPowerNormal() method is called.
         /// </ul> </param>
         public override int PowerDuration
-	   {
+	    {
 		   set
 		   {
-		   }
+               switch(value)
+               {
+                   case DSPortAdapter.DELIVERY_HALF_SECOND:
+                       UsbIo.Comm_SetDuration(0, 0x1F, // .5/.016 = 31.25
+                           "DSPortAdapter.DELIVERY_HALF_SECOND");
+                       break;
+                   case DSPortAdapter.DELIVERY_ONE_SECOND:
+                       UsbIo.Comm_SetDuration(0, 0x3E, // 1/.016 = 62.5
+                           "DSPortAdapter.DELIVERY_ONE_SECOND");
+                       break;
+                   case DSPortAdapter.DELIVERY_TWO_SECONDS:
+                       UsbIo.Comm_SetDuration(0, 0x7D, // 2/.016 = 125
+                           "DSPortAdapter.DELIVERY_TWO_SECOND");
+                       break;
+                   case DSPortAdapter.DELIVERY_FOUR_SECONDS:
+                       UsbIo.Comm_SetDuration(0, 0xFA, // 4/.016 = 250
+                           "DSPortAdapter.DELIVERY_FOUR_SECOND");
+                       break;
+                   case DSPortAdapter.DELIVERY_INFINITE:
+                       UsbIo.Comm_SetDuration(0, 0x00, "DSPortAdapter.DELIVERY_INFINITE");
+                       break;
+                   case DSPortAdapter.DELIVERY_SMART_DONE:
+                       throw new NotSupportedException();
+                   default:
+                       UsbIo.Comm_SetDuration(0, UsbAdapterState.GetPullUpDurationByte(value),
+                           "PowerDuration Variable");
+                       break;
+                }
+           }
 	   }
 
 	   /// <summary>
@@ -1715,19 +1700,72 @@ namespace com.dalsemi.onewire.adapter
 	   /// <returns> <code>true</code> </returns>
 	   public override bool startPowerDelivery(int changeCondition)
 	   {
-		  return true;
-	   }
+            try
+            {
 
-	   /// <summary>
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <param name="timeFactor">
-	   /// <ul>
-	   /// <li>   7 (DELIVERY_EPROM) provide program pulse for 480 microseconds
-	   /// <li>   5 (DELIVERY_INFINITE) provide power until the
-	   ///          setPowerNormal() method is called.
-	   /// </ul> </param>
-	   public override int ProgramPulseDuration
+                // acquire exclusive use of the port
+                beginLocalExclusive();
+
+                if (changeCondition == CONDITION_AFTER_BIT)
+                {
+                    owState.levelChangeOnNextBit = true;
+                    owState.primedLevelValue = LEVEL_POWER_DELIVERY;
+                }
+                else if (changeCondition == CONDITION_AFTER_BYTE)
+                {
+                    owState.levelChangeOnNextByte = true;
+                    owState.primedLevelValue = LEVEL_POWER_DELIVERY;
+                }
+                else if (changeCondition == CONDITION_NOW)
+                {
+                    // make sure adapter is present
+                    if (uAdapterPresent())
+                    {
+                        // check for pending power conditions
+                        if (owState.oneWireLevel != LEVEL_NORMAL)
+                        {
+                            setPowerNormal();
+                        }
+
+                        UsbIo.Mode_EnablePulse(Ds2490.ENABLEPULSE_SPUE, "startPowerDelivery");
+                        UsbIo.Comm_Pulse("startPowerDelivery");
+
+                        return UsbState.StrongPullup;
+                    }
+                    else
+                    {
+                        throw new OneWireIOException("Error communicating with adapter");
+                    }
+                }
+                else
+                {
+                    throw new OneWireException("Invalid power delivery condition");
+                }
+
+                return false;
+            }
+            catch (IOException ioe)
+            {
+                throw new OneWireIOException(ioe.ToString());
+            }
+            finally
+            {
+
+                // release local exclusive use of port
+                endLocalExclusive();
+            }
+        }
+
+        /// <summary>
+        /// This method does nothing in <code>DumbAdapter</code>.
+        /// </summary>
+        /// <param name="timeFactor">
+        /// <ul>
+        /// <li>   7 (DELIVERY_EPROM) provide program pulse for 480 microseconds
+        /// <li>   5 (DELIVERY_INFINITE) provide power until the
+        ///          setPowerNormal() method is called.
+        /// </ul> </param>
+        public override int ProgramPulseDuration
 	   {
 		   set
 		   {
@@ -1753,61 +1791,44 @@ namespace com.dalsemi.onewire.adapter
 	   }
 
        /// <summary>
-       /// 
+       /// Terminate Pulse
+       /// An infinite duration pulse is terminated by using either of the 
+       /// HALT EXECUTION Control commands. To resume 1-Wire activity after 
+       /// the termination, use the RESUME EXECUTION Control command
        /// </summary>
-	   public override void setPowerNormal()
+       private void TerminatePulse()
+       {
+            do
+            {
+                UsbIo.Control_HalExecWhenIdle();
+                UsbIo.Control_ResumeExec();
+
+            } while (UsbState.StrongPullup);
+       }
+
+       /// <summary>
+       /// Sets the 1-Wire Network voltage to normal level.  This method is used
+       /// to disable 1-Wire conditions created by startPowerDelivery and
+       /// startProgramPulse.  This method will automatically be called if
+       /// a communication method is called while an outstanding power
+       /// command is taking place.
+       /// </summary>
+       /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
+       /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter
+       ///         or the adapter does not support this operation </exception>
+       public override void setPowerNormal()
 	   {
             try
             {
-                Debugger.Break();
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
                 if (owState.oneWireLevel == LEVEL_POWER_DELIVERY)
                 {
-
                     // make sure adapter is present
                     if (uAdapterPresent())
                     {
-
-                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                        // shughes - 8-28-2003
-                        // Fixed the Set Power Level Normal problem where adapter
-                        // is left in a bad state.  Removed bad fix: extra getBit()
-                        // SEE BELOW!
-                        // stop pulse command
-                        uBuild.sendCommand(UPacketBuilder.FUNCTION_STOP_PULSE, true);
-
-                        // start pulse with no prime
-                        uBuild.sendCommand(UPacketBuilder.FUNCTION_5VPULSE_NOW, false);
-                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-
-                        // add the command to stop the pulse
-                        int pulse_response_offset = uBuild.sendCommand(UPacketBuilder.FUNCTION_STOP_PULSE, true);
-
-                        // send and receive
-                        //byte[] result_array = uTransaction(uBuild);
-                        byte[] result_array = new byte[pulse_response_offset+1];
-
-                        // check the result
-                        if (result_array.Length == (pulse_response_offset + 1))
-                        {
-                            owState.oneWireLevel = LEVEL_NORMAL;
-
-                            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                            // shughes - 8-28-2003
-                            // This is a bad "fix", it was needed when we were causing
-                            // a bad condition.  Instead of fixing it here, we should
-                            // fix it where we were causing it..  Which we did!
-                            // SEE ABOVE!
-                            //getBit();
-                            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                        }
-                        else
-                        {
-                            throw new OneWireIOException("Did not get a response back from stop power delivery");
-                        }
+                        TerminatePulse();
                     }
                 }
             }

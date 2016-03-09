@@ -440,7 +440,8 @@ namespace com.dalsemi.onewire.adapter
                 EnableFlags enableflags = (EnableFlags)m.ReadByte();
 
                 StrongPullup = ((enableflags & EnableFlags.SPUE) == EnableFlags.SPUE) ? true : false;
-                oneWireState.oneWireLevel = (byte)((StrongPullup == true) ? 1 : 0);
+                oneWireState.oneWireLevel = (byte)((StrongPullup == true) ? 
+                    DSPortAdapter.LEVEL_POWER_DELIVERY : DSPortAdapter.LEVEL_NORMAL);
                 DynamicSpeedChange = ((enableflags & EnableFlags.SPCE) == EnableFlags.SPCE) ? true : false;
                 BusCommSpeed = m.ReadByte();
                 oneWireState.oneWireSpeed = BusCommSpeed;
