@@ -1,5 +1,8 @@
 ﻿using System.IO;
 using System.Text;
+using Windows.Storage.Streams;
+
+//TODO add Dispose...
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -48,9 +51,9 @@ namespace com.dalsemi.onewire.adapter
 	   /// <summary>
 	   /// StringBuffer of bytes to send
 	   /// </summary>
-	   //TODO public StringBuilder buffer;
        public MemoryStream buffer;
-       public BinaryWriter writer;
+//       public BinaryWriter writer;
+        public DataWriter writer;
 
 	   /// <summary>
 	   /// Expected length of return packet
@@ -66,9 +69,9 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   public RawSendPacket()
 	   {
-		  //TODO buffer = new StringBuilder();
           buffer = new MemoryStream();
-          writer = new BinaryWriter(buffer);
+          writer = new DataWriter(buffer.AsOutputStream());
+//          writer = new BinaryWriter(buffer);
 		  returnLength = 0;
 	   }
 	}

@@ -2486,7 +2486,12 @@ namespace com.dalsemi.onewire.adapter
 
                     uBuild.Packets.MoveNext();
                     RawSendPacket pkt = (RawSendPacket)uBuild.Packets.Current; //TODO .nextElement();
-                    pkt.writer.Flush();
+                    var t = Task.Run(async () =>
+                    {
+                        await pkt.writer.StoreAsync();
+                        await pkt.writer.FlushAsync();
+                    });
+                    
                     serial.write(pkt.buffer.ToArray());
 
                     // delay to let things settle
@@ -2570,8 +2575,8 @@ namespace com.dalsemi.onewire.adapter
         private CancellationTokenSource ReadCancellationTokenSource;
         private Object ReadCancelLock = new Object();
 
-        private Boolean IsReadTaskPending;
-        private uint ReadBytesCounter = 0;
+//TODO        private Boolean IsReadTaskPending;
+//TODO        private uint ReadBytesCounter = 0;
         DataReader DataReaderObject = null;
 
         // Track Write Operation
@@ -2947,7 +2952,12 @@ namespace com.dalsemi.onewire.adapter
                         offset = (int)inBuffer.Length;
 
                         // send the packet
-                        pkt.writer.Flush();
+                        var t = Task.Run(async () =>
+                        {
+                            await pkt.writer.StoreAsync();
+                            await pkt.writer.FlushAsync();
+                        });
+
                         serial.write(pkt.buffer.ToArray());
 
                         // wait on returnLength bytes in inBound

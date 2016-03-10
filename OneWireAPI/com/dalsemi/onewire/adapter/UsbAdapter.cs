@@ -34,6 +34,7 @@ using System.Diagnostics;
 
 namespace com.dalsemi.onewire.adapter
 {
+    using ErrorResult = UsbAdapterIo.ErrorResult;
 
     // imports
     using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
@@ -43,28 +44,30 @@ namespace com.dalsemi.onewire.adapter
     using System.Text;
     using System.IO;
     using Windows.Foundation;
-    using System.Threading;/// <summary>
-                           /// <para>This <code>DSPortAdapter</code> class was designed to be used for
-                           /// the iB-IDE's emulator.  The <code>DumbAdapter</code> allows
-                           /// programmers to add and remove <code>OneWireContainer</code>
-                           /// objects that will be found in its search.  The Java iButton
-                           /// emulator works by creating a class that subclasses all of
-                           /// <code>OneWireContainer16</code>'s relevant methods and redirecting them
-                           /// to the emulation code.  That object is then added to this class's
-                           /// list of <code>OneWireContainer</code>s.</para>
-                           /// 
-                           /// <para>Note that methods such as <code>selectPort</code> and
-                           /// <code>beginExclusive</code> by default do nothing.  This class is
-                           /// mainly meant for debugging using an emulated iButton.  It will do
-                           /// a poor job of debugging any multi-threading, port-sharing issues.
-                           /// 
-                           /// </para>
-                           /// </summary>
-                           /// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter </seealso>
-                           /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer
-                           /// 
-                           /// @version    0.00, 16 Mar 2001
-                           /// @author     K </seealso>
+    using System.Threading;
+    
+    /// <summary>
+    /// <para>This <code>DSPortAdapter</code> class was designed to be used for
+    /// the iB-IDE's emulator.  The <code>DumbAdapter</code> allows
+    /// programmers to add and remove <code>OneWireContainer</code>
+    /// objects that will be found in its search.  The Java iButton
+    /// emulator works by creating a class that subclasses all of
+    /// <code>OneWireContainer16</code>'s relevant methods and redirecting them
+    /// to the emulation code.  That object is then added to this class's
+    /// list of <code>OneWireContainer</code>s.</para>
+    /// 
+    /// <para>Note that methods such as <code>selectPort</code> and
+    /// <code>beginExclusive</code> by default do nothing.  This class is
+    /// mainly meant for debugging using an emulated iButton.  It will do
+    /// a poor job of debugging any multi-threading, port-sharing issues.
+    /// 
+    /// </para>
+    /// </summary>
+    /// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer
+    /// 
+    /// @version    0.00, 16 Mar 2001
+    /// @author     K </seealso>
     public class UsbAdapter : DSPortAdapter
     {
         //--------
@@ -94,7 +97,6 @@ namespace com.dalsemi.onewire.adapter
         /// Pointer to hold the USB IO class
         /// </summary>
         private UsbAdapterIo UsbIo;
-
 
         /// <summary>
         /// Flag to indicate have a local begin/end Exclusive use of serial </summary>
@@ -401,23 +403,25 @@ namespace com.dalsemi.onewire.adapter
         private bool ShortCheck(out bool present, out bool vpp)
         {
             present = true;
+            bool DeviceDetected;
 
             // read VPP state
-            UsbIo.ReadStatus(true);
+           
+            UsbIo.ReadStatus(out DeviceDetected);
             vpp = UsbState.ProgrammingVoltagePresent;
 
             // check if 1-Wire bus is shorted
-            UsbIo.Comm_OneWireReset(false);
-            if(UsbIo.LastError != 0)
+            UsbIo.Comm_OneWireReset(out DeviceDetected);
+            if(0 != UsbIo.LastError)
             {
-                UsbAdapterState.CommCmdErrorResult err = (UsbAdapterState.CommCmdErrorResult)UsbIo.LastError;
+                ErrorResult err = UsbIo.LastError;
 
-                if ((err & UsbAdapterState.CommCmdErrorResult.NRS) == UsbAdapterState.CommCmdErrorResult.NRS)
+                if ((err & ErrorResult.NRS) == ErrorResult.NRS)
                 {
                     present = false;
                 }
 
-                if ((err & UsbAdapterState.CommCmdErrorResult.SH) == UsbAdapterState.CommCmdErrorResult.SH)
+                if ((err & ErrorResult.SH) == ErrorResult.SH)
                 {
                     return false;
                 }
@@ -461,20 +465,18 @@ namespace com.dalsemi.onewire.adapter
         }
 
         /// <summary>
-        /// Write the raw U packet and then read the result.
+        /// Write the packet to EP2
         /// </summary>
-        /// <param name="tempBuild">  the U Packet Build where the packet to send
+        /// <param name="tempBuild">  the USB Packet Build where the packet to send
         ///                     resides
         /// </param>
         /// <returns>  the result array
         /// </returns>
         /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
-        private byte[] uTransaction(UPacketBuilder tempBuild)
+        private byte[] UsbTransaction(UsbPacketBuilder tempBuild, bool alarm_only)
         {
             int offset;
             byte[] ret_buffer = null;
-
-            Debugger.Break();
 
             try
             {
@@ -499,12 +501,14 @@ namespace com.dalsemi.onewire.adapter
                         offset = (int)inBuffer.Length;
 
                         // send the packet
-                        pkt.writer.Flush();
-                        //TODO serial.write(pkt.buffer.ToArray());
-
-                        // wait on returnLength bytes in inBound
-                        //TODO byte[] read = serial.readWithTimeout(pkt.returnLength);
-                        //TODO inBuffer.Write(read, 0, read.Length);
+                        var t = Task.Run(async () =>
+                        {
+                            await pkt.writer.StoreAsync();
+                            await pkt.writer.FlushAsync();
+                            await UsbIo.BulkEp_Write(0, pkt.buffer.ToArray(),
+                                "Write EP2, count=" + pkt.buffer.Length);
+                        });
+                        t.Wait();
                     }
 
                     // read the return packet
@@ -515,6 +519,39 @@ namespace com.dalsemi.onewire.adapter
                     // check for extra bytes in inBuffer
                     extraBytesReceived = (inBuffer.Length > tempBuild.totalReturnLength);
                 }
+
+                // Issue Search Command
+                bool DeviceDetected;
+                ErrorResult result = UsbIo.Comm_SearchAccess("UsbTransaction: ", alarm_only, 1, out DeviceDetected);
+
+                if(ErrorResult.NRS == (result & ErrorResult.NRS))
+                {
+                    Debug.WriteLine("Nothing found!");
+                    Debugger.Break();
+                }
+
+                do
+                {
+                    for (var i = 0; i < 200; i++)
+                    {
+                        result = UsbIo.ReadStatus(out DeviceDetected);
+                        if (ErrorResult.NRS == (result & ErrorResult.NRS))
+                        {
+                            Debug.WriteLine("Nothing found!");
+                            Debugger.Break();
+                        }
+                        else
+                        {
+                            UsbIo.PrintErrorResult();
+                            break;
+                        }
+
+                        Thread.Sleep(1);
+                    }
+
+                } while (!UsbState.Idle);
+
+                Debugger.Break();
 
                 return ret_buffer;
             }
@@ -894,7 +931,6 @@ namespace com.dalsemi.onewire.adapter
         {
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
@@ -928,7 +964,6 @@ namespace com.dalsemi.onewire.adapter
                     // perform a search
                     if (search(onewire_state))
                     {
-
                         // compare the found device with the desired device
                         for (int i = 0; i < 8; i++)
                         {
@@ -1148,18 +1183,11 @@ namespace com.dalsemi.onewire.adapter
             // make sure adapter is present
             if (uAdapterPresent())
             {
-
                 // check for pending power conditions
                 if (owState.oneWireLevel != LEVEL_NORMAL)
                 {
                     setPowerNormal();
                 }
-
-                // set the correct baud rate to stream this operation
-                //StreamingSpeed = UPacketBuilder.OPERATION_SEARCH;
-
-                //// reset the packet
-                UsbBuild.restart();
 
                 // add a reset/ search command
                 if (!mState.skipResetOnSearch)
@@ -1167,29 +1195,20 @@ namespace com.dalsemi.onewire.adapter
                     reset_offset = oneWireReset();
                 }
 
-                if (mState.searchOnlyAlarmingButtons)
-                {
-//                    UsbBuild.dataByte(ALARM_SEARCH_CMD);
-                }
-                else
-                {
-//                    UsbBuild.dataByte(NORMAL_SEARCH_CMD);
-                }
-
                 // add search sequence based on mState
-//                int search_offset = UsbBuild.search(mState);
+                int search_offset = UsbBuild.search(mState);
 
                 // send/receive the search
-                //byte[] result_array = uTransaction(UsbBuild);
+                byte[] result_array = UsbTransaction(UsbBuild, mState.searchOnlyAlarmingButtons);
+
 
                 // interpret search result and return
                 if (!mState.skipResetOnSearch)
                 {
-                //    UsbBuild.interpretOneWireReset(result_array[reset_offset]);
+                    UsbBuild.interpretOneWireReset(result_array[reset_offset]);
                 }
 
-                //TODO return UsbBuild.interpretSearch(mState, result_array, search_offset);
-                return false;
+                return UsbBuild.interpretSearch(mState, result_array, search_offset);
             }
             else
             {
@@ -1471,7 +1490,6 @@ namespace com.dalsemi.onewire.adapter
         public override void putBit(bool bitValue)
 	    {
             throw new NotImplementedException();
-            //this will not be implemented
         }
 
         /// <summary>
@@ -1482,8 +1500,6 @@ namespace com.dalsemi.onewire.adapter
 		   get
 		   {
               throw new NotImplementedException();
-			  //this will not be implemented
-			  return true;
 		   }
 	   }
 
@@ -1494,7 +1510,6 @@ namespace com.dalsemi.onewire.adapter
 	   public override void putByte(int byteValue)
 	   {
            throw new NotImplementedException();
-           //this will not be implemented
        }
 
        /// <summary>
@@ -1506,9 +1521,6 @@ namespace com.dalsemi.onewire.adapter
 		   get
 		   {
               throw new NotImplementedException();
-			  //this will not be implemented
-
-			  return 0x0ff;
 		   }
 	   }
 
@@ -1521,8 +1533,6 @@ namespace com.dalsemi.onewire.adapter
 	   public override byte[] getBlock(int len)
 	   {
           throw new NotImplementedException();
-		  //this will not be implemented
-		  return new byte[len];
 	   }
 
 	   /// <summary>
@@ -1533,7 +1543,6 @@ namespace com.dalsemi.onewire.adapter
 	   public override void getBlock(byte[] arr, int len)
 	   {
           throw new NotImplementedException();
-		  //this will not be implemented
 	   }
 
 	   /// <summary>
@@ -1545,7 +1554,6 @@ namespace com.dalsemi.onewire.adapter
 	   public override void getBlock(byte[] arr, int off, int len)
 	   {
           throw new NotImplementedException();
-		  //this will not be implemented
 	   }
 
 	   /// <summary>
@@ -1557,7 +1565,6 @@ namespace com.dalsemi.onewire.adapter
 	   public override void dataBlock(byte[] dataBlock, int off, int len)
 	   {
           throw new NotImplementedException();
-		  //this will not be implemented
 	   }
 
         /// <summary>
@@ -1596,24 +1603,28 @@ namespace com.dalsemi.onewire.adapter
                         setPowerNormal();
                     }
 
-                    //// build a message to read the baud rate from the U brick
-                    //UsbBuild.restart();
+                    bool DeviceDetect;
 
-                    //int reset_offset = UsbBuild.oneWireReset();
+                    ErrorResult result = UsbIo.Comm_OneWireReset(out DeviceDetect);
 
-                    //// send and receive
-                    //byte[] result_array = uTransaction(UsbBuild);
+                    if (DeviceDetect)
+                    {
+                        return DSPortAdapter.RESET_PRESENCE;
+                    }
+                    else if (ErrorResult.NRS == (result & ErrorResult.NRS))
+                    {
+                        return DSPortAdapter.RESET_NOPRESENCE;
+                    }
+                    if (ErrorResult.APP == (result & ErrorResult.APP))
+                    {
+                        return DSPortAdapter.RESET_ALARM;
+                    }
+                    if (ErrorResult.SH == (result & ErrorResult.SH))
+                    {
+                        return DSPortAdapter.RESET_SHORT;
+                    }
 
-                    //// check the result
-                    //if (result_array.Length == (reset_offset + 1))
-                    //{
-                    //    return UsbBuild.interpretOneWireReset(result_array[reset_offset]);
-                    //}
-                    //else
-                    //{
-                    //    throw new OneWireIOException("USBAdapter-reset: no return byte form 1-Wire reset");
-                    //}
-                    return 0; //TODO
+                    throw new OneWireIOException("USBAdapter-reset: no return byte form 1-Wire reset");
                 }
                 else
                 {
@@ -1626,7 +1637,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -1654,32 +1664,34 @@ namespace com.dalsemi.onewire.adapter
 	    {
 		   set
 		   {
-               switch(value)
+               bool DeviceDetected;
+
+               switch (value)
                {
                    case DSPortAdapter.DELIVERY_HALF_SECOND:
                        UsbIo.Comm_SetDuration(0, 0x1F, // .5/.016 = 31.25
-                           "DSPortAdapter.DELIVERY_HALF_SECOND");
+                           "DSPortAdapter.DELIVERY_HALF_SECOND", out DeviceDetected);
                        break;
                    case DSPortAdapter.DELIVERY_ONE_SECOND:
                        UsbIo.Comm_SetDuration(0, 0x3E, // 1/.016 = 62.5
-                           "DSPortAdapter.DELIVERY_ONE_SECOND");
+                           "DSPortAdapter.DELIVERY_ONE_SECOND", out DeviceDetected);
                        break;
                    case DSPortAdapter.DELIVERY_TWO_SECONDS:
                        UsbIo.Comm_SetDuration(0, 0x7D, // 2/.016 = 125
-                           "DSPortAdapter.DELIVERY_TWO_SECOND");
+                           "DSPortAdapter.DELIVERY_TWO_SECOND", out DeviceDetected);
                        break;
                    case DSPortAdapter.DELIVERY_FOUR_SECONDS:
                        UsbIo.Comm_SetDuration(0, 0xFA, // 4/.016 = 250
-                           "DSPortAdapter.DELIVERY_FOUR_SECOND");
+                           "DSPortAdapter.DELIVERY_FOUR_SECOND", out DeviceDetected);
                        break;
                    case DSPortAdapter.DELIVERY_INFINITE:
-                       UsbIo.Comm_SetDuration(0, 0x00, "DSPortAdapter.DELIVERY_INFINITE");
+                       UsbIo.Comm_SetDuration(0, 0x00, "DSPortAdapter.DELIVERY_INFINITE", out DeviceDetected);
                        break;
                    case DSPortAdapter.DELIVERY_SMART_DONE:
                        throw new NotSupportedException();
                    default:
                        UsbIo.Comm_SetDuration(0, UsbAdapterState.GetPullUpDurationByte(value),
-                           "PowerDuration Variable");
+                           "PowerDuration Variable", out DeviceDetected);
                        break;
                 }
            }
@@ -1702,6 +1714,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
             try
             {
+                bool DeviceDetected;
 
                 // acquire exclusive use of the port
                 beginLocalExclusive();
@@ -1727,8 +1740,8 @@ namespace com.dalsemi.onewire.adapter
                             setPowerNormal();
                         }
 
-                        UsbIo.Mode_EnablePulse(Ds2490.ENABLEPULSE_SPUE, "startPowerDelivery");
-                        UsbIo.Comm_Pulse("startPowerDelivery");
+                        UsbIo.Mode_EnablePulse(Ds2490.ENABLEPULSE_SPUE, "startPowerDelivery", out DeviceDetected);
+                        UsbIo.Comm_Pulse("startPowerDelivery", out DeviceDetected);
 
                         return UsbState.StrongPullup;
                     }
@@ -1756,40 +1769,6 @@ namespace com.dalsemi.onewire.adapter
             }
         }
 
-        /// <summary>
-        /// This method does nothing in <code>DumbAdapter</code>.
-        /// </summary>
-        /// <param name="timeFactor">
-        /// <ul>
-        /// <li>   7 (DELIVERY_EPROM) provide program pulse for 480 microseconds
-        /// <li>   5 (DELIVERY_INFINITE) provide power until the
-        ///          setPowerNormal() method is called.
-        /// </ul> </param>
-        public override int ProgramPulseDuration
-	   {
-		   set
-		   {
-		   }
-	   }
-
-	   /// <summary>
-	   /// This method does nothing in <code>DumbAdapter</code>.
-	   /// </summary>
-	   /// <param name="changeCondition">
-	   /// <ul>
-	   /// <li>   0 (CONDITION_NOW) operation should occur immediately.
-	   /// <li>   1 (CONDITION_AFTER_BIT) operation should be pending
-	   ///           execution immediately after the next bit is sent.
-	   /// <li>   2 (CONDITION_AFTER_BYTE) operation should be pending
-	   ///           execution immediately after next byte is sent.
-	   /// </ul>
-	   /// </param>
-	   /// <returns> <code>true</code> </returns>
-	   public override bool startProgramPulse(int changeCondition)
-	   {
-		   return true;
-	   }
-
        /// <summary>
        /// Terminate Pulse
        /// An infinite duration pulse is terminated by using either of the 
@@ -1798,10 +1777,12 @@ namespace com.dalsemi.onewire.adapter
        /// </summary>
        private void TerminatePulse()
        {
+            bool DeviceDetected;
+
             do
             {
-                UsbIo.Control_HalExecWhenIdle();
-                UsbIo.Control_ResumeExec();
+                UsbIo.Control_HalExecWhenIdle(out DeviceDetected);
+                UsbIo.Control_ResumeExec(out DeviceDetected);
 
             } while (UsbState.StrongPullup);
        }
@@ -1854,8 +1835,10 @@ namespace com.dalsemi.onewire.adapter
         ///          result of this operation </returns>
         public virtual int oneWireReset()
         {
+            bool DeviceDetected;
+
             // disable strong pull ups prior to reset
-            UsbIo.Comm_OneWireReset(true);
+            UsbIo.Comm_OneWireReset(out DeviceDetected);
 
             //// append the reset command at the current speed
             //packet.writer.Write((byte)(FUNCTION_RESET | UsbState.uSpeedMode)); //TODO .Append
@@ -1882,7 +1865,10 @@ namespace com.dalsemi.onewire.adapter
         //--------
 
         /// <summary>
-        /// This method does nothing in <code>DumbAdapter</code>.
+        /// This method takes an int representing the new speed of data
+        /// transfer on the 1-Wire Network. <para>
+        /// 
+        /// </para>
         /// </summary>
         /// <param name="speed">
         /// <ul>
@@ -1891,86 +1877,121 @@ namespace com.dalsemi.onewire.adapter
         ///            for long lines
         /// <li>     2 (SPEED_OVERDRIVE) set to normal communciation speed to
         ///            overdrive
+        /// <li>     3 (SPEED_HYPERDRIVE) set to normal communciation speed to
+        ///            hyperdrive
+        /// <li>    >3 future speeds
         /// </ul>
-        ///  </param>
+        /// </param>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
+        /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter
+        ///         or the adapter does not support this operation </exception>
         public override int Speed
-	   {
-		   set
-		   {
-			   sp = value;
-		   }
-		   get
-		   {
-			  return sp;
-		   }
-	   }
+        {
+            set
+            {
+                try
+                {
+                    // acquire exclusive use of the port
+                    beginLocalExclusive();
 
-	   private int sp = 0;
+                    // check for valid value
+                    if ((value == SPEED_REGULAR) || (value == SPEED_OVERDRIVE) || (value == SPEED_FLEX))
+                    {
+
+                        // change 1-Wire value
+                        owState.oneWireSpeed = (byte)value;
+
+                        // set adapter to communicate at this new value (regular == flex for now)
+                        if (value == SPEED_OVERDRIVE)
+                        {
+                            UsbState.ReqBusCommSpeed = (sbyte)UsbAdapterState.BUSCOMSPEED_OVERDRIVE;
+                        }
+                        else
+                        {
+                            UsbState.ReqBusCommSpeed = (sbyte)UsbAdapterState.BUSCOMSPEED_FLEX;
+                        }
+                    }
+                    else
+                    {
+                        throw new OneWireException("Requested speed is not supported by this adapter");
+                    }
+                }
+                finally
+                {
+                    // release local exclusive use of port
+                    endLocalExclusive();
+                }
+            }
+            get
+            {
+                return owState.oneWireSpeed;
+            }
+        }
 
 
-	   //--------
-	   //-------- Misc
-	   //--------
+        //--------
+        //-------- Misc
+        //--------
 
-	   /// <summary>
-	   /// Gets the container from this adapter whose address matches the address of a container
-	   /// in the <code>DumbAdapter</code>'s internal <code>java.util.Vector</code>.
-	   /// </summary>
-	   /// <param name="address">  device address with which to find a container
-	   /// </param>
-	   /// <returns>  The <code>OneWireContainer</code> object, or <code>null</code> if no match could be found. </returns>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	  // public override OneWireContainer getDeviceContainer(byte[] address)
-	  // {
-			//long addr = Address.toLong(address);
-			//lock (containers)
-			//{
-			//	for (int i = 0;i < containers.Count;i++)
-			//	{
-			//		if (((OneWireContainer)containers[i]).AddressAsLong == addr)
-			//		{
-			//			return (OneWireContainer)containers[i];
-			//		}
-			//	}
-			//}
-			//return null;
+        /// <summary>
+        /// Gets the container from this adapter whose address matches the address of a container
+        /// in the <code>DumbAdapter</code>'s internal <code>java.util.Vector</code>.
+        /// </summary>
+        /// <param name="address">  device address with which to find a container
+        /// </param>
+        /// <returns>  The <code>OneWireContainer</code> object, or <code>null</code> if no match could be found. </returns>
+        /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
+        // public override OneWireContainer getDeviceContainer(byte[] address)
+        // {
+        //long addr = Address.toLong(address);
+        //lock (containers)
+        //{
+        //	for (int i = 0;i < containers.Count;i++)
+        //	{
+        //		if (((OneWireContainer)containers[i]).AddressAsLong == addr)
+        //		{
+        //			return (OneWireContainer)containers[i];
+        //		}
+        //	}
+        //}
+        //return null;
 
-	  // }
+        // }
 
-	   /// <summary>
-	   /// Gets the container from this adapter whose address matches the address of a container
-	   /// in the <code>DumbAdapter</code>'s internal <code>java.util.Vector</code>.
-	   /// </summary>
-	   /// <param name="address">  device address with which to find a container
-	   /// </param>
-	   /// <returns>  The <code>OneWireContainer</code> object, or <code>null</code> if no match could be found. </returns>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   //public override OneWireContainer getDeviceContainer(long address)
-	   //{
-		  //return getDeviceContainer(Address.toByteArray(address));
-	   //}
+        /// <summary>
+        /// Gets the container from this adapter whose address matches the address of a container
+        /// in the <code>DumbAdapter</code>'s internal <code>java.util.Vector</code>.
+        /// </summary>
+        /// <param name="address">  device address with which to find a container
+        /// </param>
+        /// <returns>  The <code>OneWireContainer</code> object, or <code>null</code> if no match could be found. </returns>
+        /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
+        //public override OneWireContainer getDeviceContainer(long address)
+        //{
+        //return getDeviceContainer(Address.toByteArray(address));
+        //}
 
-	   /// <summary>
-	   /// Gets the container from this adapter whose address matches the address of a container
-	   /// in the <code>DumbAdapter</code>'s internal <code>java.util.Vector</code>.
-	   /// </summary>
-	   /// <param name="address">  device address with which to find a container
-	   /// </param>
-	   /// <returns>  The <code>OneWireContainer</code> object, or <code>null</code> if no match could be found. </returns>
-	   /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
-	   //public override OneWireContainer getDeviceContainer(string address)
-	   //{
-		  //return getDeviceContainer(Address.toByteArray(address));
-	   //}
+        /// <summary>
+        /// Gets the container from this adapter whose address matches the address of a container
+        /// in the <code>DumbAdapter</code>'s internal <code>java.util.Vector</code>.
+        /// </summary>
+        /// <param name="address">  device address with which to find a container
+        /// </param>
+        /// <returns>  The <code>OneWireContainer</code> object, or <code>null</code> if no match could be found. </returns>
+        /// <seealso cref=   com.dalsemi.onewire.utils.Address </seealso>
+        //public override OneWireContainer getDeviceContainer(string address)
+        //{
+        //return getDeviceContainer(Address.toByteArray(address));
+        //}
 
-	   /// <summary>
-	   /// Returns a <code>OneWireContainer</code> object using the current 1-Wire network address.
-	   /// The internal state of the port adapter keeps track of the last
-	   /// address found and is able to create container objects from this
-	   /// state.
-	   /// </summary>
-	   /// <returns>  the <code>OneWireContainer</code> object </returns>
-	   public override OneWireContainer DeviceContainer
+        /// <summary>
+        /// Returns a <code>OneWireContainer</code> object using the current 1-Wire network address.
+        /// The internal state of the port adapter keeps track of the last
+        /// address found and is able to create container objects from this
+        /// state.
+        /// </summary>
+        /// <returns>  the <code>OneWireContainer</code> object </returns>
+        public override OneWireContainer DeviceContainer
 	   {
 		   get
 		   {

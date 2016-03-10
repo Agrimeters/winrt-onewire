@@ -308,7 +308,7 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
 		  // append the reset command at the current speed
-		  packet.writer.Write((byte)(FUNCTION_RESET | uState.uSpeedMode)); //TODO .Append
+		  packet.writer.WriteByte((byte)(FUNCTION_RESET | uState.uSpeedMode));
 
 		  // count this as a return
 		  totalReturnLength++;
@@ -373,8 +373,7 @@ namespace com.dalsemi.onewire.adapter
 			 else
 			 {
 				// append the data
-                packet.writer.Write(dataBytesValue[i]);
-				//TODO packet.buffer.Append(dataBytesValue [i]);
+                packet.writer.WriteByte(dataBytesValue[i]);
 
 				// provide debug output
 				if (doDebugMessages)
@@ -386,7 +385,7 @@ namespace com.dalsemi.onewire.adapter
 				if (((byte)(dataBytesValue [i] & 0x00FF) == UAdapterState.MODE_COMMAND) || (((byte)(dataBytesValue [i] & 0x00FF) == UAdapterState.MODE_SPECIAL) && (uState.revision == UAdapterState.CHIP_VERSION1)))
 				{
 				   // duplicate this data byte
-                   packet.writer.Write(dataBytesValue[i]);
+                   packet.writer.WriteByte(dataBytesValue[i]);
 				   //TODO packet.buffer.Append(dataBytesValue [i]);
 				}
 
@@ -500,8 +499,7 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
 		  // append the bit with polarity and strong5V options
-          packet.writer.Write((byte)(FUNCTION_BIT | uState.uSpeedMode | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
-          //TODOpacket.buffer.Append((FUNCTION_BIT | uState.uSpeedMode | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
+          packet.writer.WriteByte((byte)(FUNCTION_BIT | uState.uSpeedMode | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
 
           // add to the return number of bytes
           totalReturnLength++;
@@ -532,7 +530,7 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
           // search mode on
-          packet.writer.Write((byte)(FUNCTION_SEARCHON | uState.uSpeedMode));
+          packet.writer.WriteByte((byte)(FUNCTION_SEARCHON | uState.uSpeedMode));
 		  //TODO packet.buffer.Append((FUNCTION_SEARCHON | uState.uSpeedMode));
 
 		  // set to data mode
@@ -589,14 +587,14 @@ namespace com.dalsemi.onewire.adapter
 		  int return_position = totalReturnLength;
 
           // add this sequence
-          packet.writer.Write(search_sequence);
+          packet.writer.WriteBytes(search_sequence);
 		  //TODO packet.buffer.Append(search_sequence);
 
 		  // set to command mode
 		  setToCommandMode();
 
           // search mode off
-          packet.writer.Write((byte)(FUNCTION_SEARCHOFF | uState.uSpeedMode));
+          packet.writer.WriteByte((byte)(FUNCTION_SEARCHOFF | uState.uSpeedMode));
 		  //TODO packet.buffer.Append((FUNCTION_SEARCHOFF | uState.uSpeedMode));
 
 		  // add to the return number of bytes
@@ -616,8 +614,7 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
 		  // search mode off and change speed
-          packet.writer.Write((byte)(FUNCTION_SEARCHOFF | uState.uSpeedMode));
-		  //TODO packet.buffer.Append((FUNCTION_SEARCHOFF | uState.uSpeedMode));
+          packet.writer.WriteByte((byte)(FUNCTION_SEARCHOFF | uState.uSpeedMode));
 
 		  // no return byte
 	   }
@@ -635,7 +632,7 @@ namespace com.dalsemi.onewire.adapter
 		  {
 
 			 // append the command to switch
-             packet.writer.Write(UAdapterState.MODE_COMMAND);
+             packet.writer.WriteByte(UAdapterState.MODE_COMMAND);
 			 //TODO packet.buffer.Append(UAdapterState.MODE_COMMAND);
 
 			 // switch the state
@@ -652,7 +649,7 @@ namespace com.dalsemi.onewire.adapter
 		  {
 
 			 // append the command to switch
-             packet.writer.Write(UAdapterState.MODE_DATA);
+             packet.writer.WriteByte(UAdapterState.MODE_DATA);
 			 //TODO packet.buffer.Append(UAdapterState.MODE_DATA);
 
 			 // switch the state
@@ -674,7 +671,7 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
 		  // append paramter get
-          packet.writer.Write((byte)(CONFIG_MASK | parameter >> 3));
+          packet.writer.WriteByte((byte)(CONFIG_MASK | parameter >> 3));
 		  //TODO packet.buffer.Append((CONFIG_MASK | parameter >> 3));
 
 		  // add to the return number of bytes
@@ -705,7 +702,7 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
 		  // append the paramter set with value
-          packet.writer.Write((byte)((CONFIG_MASK | parameter) | parameterValue));
+          packet.writer.WriteByte((byte)((CONFIG_MASK | parameter) | parameterValue));
 		  //TODO packet.buffer.Append(((CONFIG_MASK | parameter) | parameterValue));
 
 		  // add to the return number of bytes
@@ -737,7 +734,7 @@ namespace com.dalsemi.onewire.adapter
 		  setToCommandMode();
 
 		  // append the paramter set with value
-          packet.writer.Write(command);
+          packet.writer.WriteByte(command);
 		  //TODO packet.buffer.Append(command);
 
 		  // check for response

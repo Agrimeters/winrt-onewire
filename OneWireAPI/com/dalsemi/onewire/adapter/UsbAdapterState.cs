@@ -124,7 +124,7 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Parameter settings for the three logical modes
         /// </summary>
-        public UParameterSettings[] uParameters;
+//TODO        public UParameterSettings[] uParameters;
 
  	    /// <summary>
 	    /// The OneWire State object reference
@@ -156,6 +156,19 @@ namespace com.dalsemi.onewire.adapter
         /// </para>
         /// </summary>
         public byte BusCommSpeed;
+
+        /// <summary>
+        /// This is the requested speed for the OneWire to operate at.
+        /// <para>
+        /// The valid values for this are:
+        ///  <ul>
+        ///  <li> BUSCOMMSPEED_REGULAR
+        ///  <li> BUSCOMMSPEED_FLEX
+        ///  <li> BUSCOMMSPEED_OVERDRIVE
+        ///  </ul>
+        /// </para>
+        /// </summary>
+        public sbyte ReqBusCommSpeed;
 
         /// <summary>
         /// 5V Strong Pullup Duration
@@ -238,55 +251,6 @@ namespace com.dalsemi.onewire.adapter
             /// condition exists. 
             /// </summary>
             EP0F = 0x80
-        }
-
-        [Flags]
-        public enum CommCmdErrorResult
-        {
-            /// <summary>
-            /// A value of 1 indicates an error with one of the following: 1-WIRE RESET
-            /// did not reveal a Presence Pulse. SET PATH command did not get a Presence
-            /// Pulse from the branch that was to be connected. No response from one or
-            /// more ROM ID bits during a SEARCH ACCESS command.
-            /// </summary>
-            NRS = 0x01,
-            /// <summary>
-            /// A value of 1 indicates that a 1-WIRE RESET revealed a short to the 1-Wire
-            /// bus or the SET PATH command could not successfully connect a branch due
-            /// to a short.
-            /// </summary>
-            SH = 0x02,
-            /// <summary>
-            /// A value of 1 indicates that a 1-WIRE RESET revealed an Alarming Presence Pulse.
-            /// </summary>
-            APP = 0x04,
-            /// <summary>
-            /// During a PULSE with TYPE=1 or WRITE EPROM command the 12V programming pulse
-            /// not seen on 1-Wire bus
-            /// </summary>
-            VPP = 0x08,
-            /// <summary>
-            /// A value of 1 indicates an error with one of the following: Error when reading
-            /// the confirmation byte with a SET PATH command. There was a difference between
-            /// the byte written and then read back with a BYTE I/O command
-            /// </summary>
-            CMP = 0x10,
-            /// <summary>
-            /// A value of 1 indicates that a CRC error occurred when executing one of the 
-            /// following commands: WRITE SRAM PAGE, READ CRC PROT PAGE, or READ REDIRECT PAGE W/CRC. 
-            /// </summary>
-            CRC = 0x20,
-            /// <summary>
-            /// A value of 1 indicates that a READ REDIRECT PAGE WITH/CRC encountered 
-            /// a page that is redirected.
-            /// </summary>
-            RDP = 0x40,
-            /// <summary>
-            /// A value of 1 indicates that a SEARCH ACCESS with SM = 1 ended sooner than 
-            /// expected reporting less ROM ID’s than specified in the “number of devices”
-            /// parameter.
-            /// </summary>
-            EOS = 0x80
         }
 
         /// <summary>
@@ -410,23 +374,24 @@ namespace com.dalsemi.onewire.adapter
             StrongPullup = false;
             DynamicSpeedChange = false;
 		    BusCommSpeed = BUSCOMSPEED_REGULAR;
+            ReqBusCommSpeed = -1;
             StrongPullupDuration = GetPullUpDurationByte(.512);
             PulldownSlewRateControl = SLEWRATE_0p83Vus;
             Write1LowTime = FLEXWRITE1LOWTIME_8us;
             DSOW0RecoveryTime = DSOW0RECOVERYTIME_18us;
-          
 
-		    //// create the three speed logical parameter settings
-		    //uParameters = new UParameterSettings [3];
-		    //uParameters [0] = new UParameterSettings();
-		    //uParameters [1] = new UParameterSettings();
-		    //uParameters [2] = new UParameterSettings();
 
-		    //// adjust flex time 
-		    //uParameters [DSPortAdapter.SPEED_FLEX].pullDownSlewRate = UParameterSettings.SLEWRATE_0p83Vus;
-		    //uParameters [DSPortAdapter.SPEED_FLEX].write1LowTime = UParameterSettings.WRITE1TIME_12us;
-		    //uParameters [DSPortAdapter.SPEED_FLEX].sampleOffsetTime = UParameterSettings.SAMPLEOFFSET_TIME_10us;
-	    }
+            //// create the three speed logical parameter settings
+            //uParameters = new UParameterSettings [3];
+            //uParameters [0] = new UParameterSettings();
+            //uParameters [1] = new UParameterSettings();
+            //uParameters [2] = new UParameterSettings();
+
+            //// adjust flex time 
+            //uParameters [DSPortAdapter.SPEED_FLEX].pullDownSlewRate = UParameterSettings.SLEWRATE_0p83Vus;
+            //uParameters [DSPortAdapter.SPEED_FLEX].write1LowTime = UParameterSettings.WRITE1TIME_12us;
+            //uParameters [DSPortAdapter.SPEED_FLEX].sampleOffsetTime = UParameterSettings.SAMPLEOFFSET_TIME_10us;
+        }
 
         /// <summary>
         /// Interrupt Handler
@@ -444,6 +409,7 @@ namespace com.dalsemi.onewire.adapter
                     DSPortAdapter.LEVEL_POWER_DELIVERY : DSPortAdapter.LEVEL_NORMAL);
                 DynamicSpeedChange = ((enableflags & EnableFlags.SPCE) == EnableFlags.SPCE) ? true : false;
                 BusCommSpeed = m.ReadByte();
+                ReqBusCommSpeed = -1;
                 oneWireState.oneWireSpeed = BusCommSpeed;
                 StrongPullupDuration = m.ReadByte();
                 ProgPullupDuration = m.ReadByte();
@@ -485,54 +451,6 @@ namespace com.dalsemi.onewire.adapter
                 }
 
                 Updated = true;
-            }
-        }
-
-        /// <summary>
-        /// Decode the Error Result
-        /// </summary>
-        /// <param name="value"></param>
-        public void PrintErrorResult(byte value)
-        {
-            if (value == Ds2490.ONEWIREDEVICEDETECT)
-            {
-                Debug.WriteLine("1-Wire Device Detect Byte");
-                return;
-            }
-
-            CommCmdErrorResult result = (CommCmdErrorResult)value;
-
-            if ((result & CommCmdErrorResult.NRS) == CommCmdErrorResult.NRS)
-            {
-                Debug.WriteLine("Error Result: A 1-WIRE RESET did not reveal a Presence Pulse. SET PATH command did not get a Presence Pulse from the branch that was to be connected. No response from one or more ROM ID bits during a SEARCH ACCESS command.");
-            }
-            if ((result & CommCmdErrorResult.SH) == CommCmdErrorResult.SH)
-            {
-                Debug.WriteLine("Error Result: A 1-WIRE RESET revealed a short to the 1-Wire bus or the SET PATH command could not successfully connect a branch due to a short.");
-            }
-            if ((result & CommCmdErrorResult.APP) == CommCmdErrorResult.APP)
-            {
-                Debug.WriteLine("Error Result: A 1-WIRE RESET revealed an Alarming Presence Pulse.");
-            }
-            if ((result & CommCmdErrorResult.VPP) == CommCmdErrorResult.VPP)
-            {
-                Debug.WriteLine("Error Result: During a PULSE with TYPE=1 or WRITE EPROM command the 12V programming pulse not seen on 1-Wire bus.");
-            }
-            if ((result & CommCmdErrorResult.CMP) == CommCmdErrorResult.CMP)
-            {
-                Debug.WriteLine("Error Result: Error when reading the confirmation byte with a SET PATH command. There was a difference between the byte written and then read back with a BYTE I/O command,");
-            }
-            if ((result & CommCmdErrorResult.CRC) == CommCmdErrorResult.CRC)
-            {
-                Debug.WriteLine("Error Result: A CRC error occurred when executing one of the following commands: WRITE SRAM PAGE, READ CRC PROT PAGE, or READ REDIRECT PAGE W/CRC.");
-            }
-            if ((result & CommCmdErrorResult.RDP) == CommCmdErrorResult.RDP)
-            {
-                Debug.WriteLine("Error Result: A READ REDIRECT PAGE WITH/CRC encountered a page that is redirected.");
-            }
-            if ((result & CommCmdErrorResult.EOS) == CommCmdErrorResult.EOS)
-            {
-                Debug.WriteLine("Error Result: A SEARCH ACCESS with SM = 1 ended sooner than expected reporting less ROM ID’s than specified in the “number of devices” parameter.");
             }
         }
 

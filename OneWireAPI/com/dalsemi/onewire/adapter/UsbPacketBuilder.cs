@@ -200,7 +200,7 @@ namespace com.dalsemi.onewire.adapter
 	   public UsbPacketBuilder(UsbAdapterState startUState)
 	   {
 
-		  // get a reference to the U state
+		  // get a reference to the USB adapter state
 		  UsbState = startUState;
 
 		  // create the buffer for the data
@@ -286,13 +286,10 @@ namespace com.dalsemi.onewire.adapter
 		  byte byte_value;
 		  int i, j;
 
-		  // set to data mode
-          setToDataMode();
-
 		  // provide debug output
 		  if (doDebugMessages)
 		  {
-			 Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[] length " + dataBytesValue.Length);
+			 Debug.WriteLine("DEBUG: UsbPacketbuilder-dataBytes[] length " + dataBytesValue.Length);
 		  }
 
 		  // record the current count location
@@ -303,16 +300,15 @@ namespace com.dalsemi.onewire.adapter
 		  {
 			 // convert the rest to OneWireIOExceptions
 			// append the data
-            packet.writer.Write(dataBytesValue[i]);
-			//TODO packet.buffer.Append(dataBytesValue [i]);
+            packet.writer.WriteByte(dataBytesValue[i]);
 
 			// provide debug output
 			if (doDebugMessages)
 			{
-				Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[] byte[" + ((int) dataBytesValue [i] & 0x00FF).ToString("x") + "]");
+				Debug.WriteLine("DEBUG: UsbPacketbuilder-dataBytes[] byte[" + ((int) dataBytesValue [i] & 0x00FF).ToString("x") + "]");
 			}
 
-			// check for duplicates needed for special characters
+			// Escape special characters
             //TODO
 			//if (((byte)(dataBytesValue [i] & 0x00FF) == UsbAdapterState.MODE_COMMAND) || (((byte)(dataBytesValue [i] & 0x00FF) == UsbAdapterState.MODE_SPECIAL) && (uState.revision == UsbAdapterState.CHIP_VERSION1)))
 			//{
@@ -328,14 +324,15 @@ namespace com.dalsemi.onewire.adapter
 			// provide debug output
 			if (doDebugMessages)
 			{
-				Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[] returnlength " + packet.returnLength + " bufferLength " + packet.buffer.Length);
+				Debug.WriteLine("DEBUG: UsbPacketbuilder-dataBytes[] returnlength " + packet.returnLength + " bufferLength " + packet.buffer.Length);
 			}
 
 			// check for packet too large or not streaming bytes
-//TODO			if ((packet.buffer.Length > MAX_BYTES_STREAMED) || !UsbState.streamBytes)
-			{
-				newPacket();
-			}
+//TODO
+			//if ((packet.buffer.Length > MAX_BYTES_STREAMED) || !UsbState.streamBytes)
+			//{
+			//	newPacket();
+			//}
 		  }
 
 		  return ret_value;
@@ -381,7 +378,7 @@ namespace com.dalsemi.onewire.adapter
 		  // provide debug output
 		  if (doDebugMessages)
 		  {
-			 Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes [" + ((int) dataByteValue & 0x00FF).ToString("x") + "]");
+			 Debug.WriteLine("DEBUG: UsbPacketbuilder-dataBytes [" + ((int) dataByteValue & 0x00FF).ToString("x") + "]");
 		  }
 
 		  return dataBytes(temp_byte_array);
@@ -426,22 +423,19 @@ namespace com.dalsemi.onewire.adapter
 	   public virtual int dataBit(bool dataBit, bool strong5V)
 	   {
 
-		  // set to command mode
-		  setToCommandMode();
-
 		  // append the bit with polarity and strong5V options
-          packet.writer.Write((byte)(FUNCTION_BIT | UsbState.BusCommSpeed | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
-          //TODOpacket.buffer.Append((FUNCTION_BIT | uState.uSpeedMode | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
+          packet.writer.WriteByte((byte)(FUNCTION_BIT | UsbState.BusCommSpeed | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
 
           // add to the return number of bytes
           totalReturnLength++;
 		  packet.returnLength++;
 
 		  // check for packet too large or not streaming bits
-//TODO		  if ((packet.buffer.Length > MAX_BYTES_STREAMED) || !UsbState.streamBits)
-		  {
-			 newPacket();
-		  }
+//TODO
+		  //if ((packet.buffer.Length > MAX_BYTES_STREAMED) || !UsbState.streamBits)
+		  //{
+			 //newPacket();
+		  //}
 
 		  return (totalReturnLength - 1);
 	   }
@@ -457,17 +451,6 @@ namespace com.dalsemi.onewire.adapter
 	   ///          result of this operation </returns>
 	   public virtual int search(OneWireState mState)
 	   {
-
-		  // set to command mode
-		  setToCommandMode();
-
-          // search mode on
-          packet.writer.Write((byte)(FUNCTION_SEARCHON | UsbState.BusCommSpeed));
-		  //TODO packet.buffer.Append((FUNCTION_SEARCHON | uState.uSpeedMode));
-
-		  // set to data mode
-		  setToDataMode();
-
 		  // create the search sequence character array
 		  byte[] search_sequence = new byte [16];
 
@@ -488,7 +471,7 @@ namespace com.dalsemi.onewire.adapter
 		  // provide debug output
 		  if (doDebugMessages)
 		  {
-			 Debug.WriteLine("DEBUG: UPacketbuilder-search [" + ((int) id.Length).ToString("x") + "]");
+			 Debug.WriteLine("DEBUG: UsbPacketbuilder-search [" + ((int) id.Length).ToString("x") + "]");
 		  }
 
 		  // only modify bits if not the first search
@@ -519,19 +502,7 @@ namespace com.dalsemi.onewire.adapter
 		  int return_position = totalReturnLength;
 
           // add this sequence
-          packet.writer.Write(search_sequence);
-		  //TODO packet.buffer.Append(search_sequence);
-
-		  // set to command mode
-		  setToCommandMode();
-
-          // search mode off
-          packet.writer.Write((byte)(FUNCTION_SEARCHOFF | UsbState.BusCommSpeed));
-		  //TODO packet.buffer.Append((FUNCTION_SEARCHOFF | uState.uSpeedMode));
-
-		  // add to the return number of bytes
-		  totalReturnLength += 16;
-		  packet.returnLength += 16;
+          packet.writer.WriteBytes(search_sequence);
 
 		  return return_position;
 	   }
@@ -542,12 +513,8 @@ namespace com.dalsemi.onewire.adapter
 	   public virtual void setSpeed()
 	   {
 
-		  // set to command mode
-		  setToCommandMode();
-
 		  // search mode off and change speed
-          packet.writer.Write((byte)(FUNCTION_SEARCHOFF | UsbState.BusCommSpeed));
-		  //TODO packet.buffer.Append((FUNCTION_SEARCHOFF | uState.uSpeedMode));
+          packet.writer.WriteByte((byte)(FUNCTION_SEARCHOFF | UsbState.BusCommSpeed));
 
 		  // no return byte
 	   }
@@ -555,42 +522,6 @@ namespace com.dalsemi.onewire.adapter
 	   //--------
 	   //-------- U mode commands
 	   //--------
-
-	   /// <summary>
-	   /// Set the U state to command mode.
-	   /// </summary>
-	   public virtual void setToCommandMode()
-	   {
-          //TODO
-		  //if (!UsbState.inCommandMode)
-		  //{
-
-			 //// append the command to switch
-    //         packet.writer.Write(UsbAdapterState.MODE_COMMAND);
-			 ////TODO packet.buffer.Append(UsbAdapterState.MODE_COMMAND);
-
-			 //// switch the state
-			 //UsbState.inCommandMode = true;
-		  //}
-	   }
-
-	   /// <summary>
-	   /// Set the U state to data mode.
-	   /// </summary>
-	   public virtual void setToDataMode()
-	   {
-          //TODO
-		  //if (UsbState.inCommandMode)
-		  //{
-
-			 //// append the command to switch
-    //         packet.writer.Write(UsbAdapterState.MODE_DATA);
-			 ////TODO packet.buffer.Append(UsbAdapterState.MODE_DATA);
-
-			 //// switch the state
-			 //UsbState.inCommandMode = false;
-		  //}
-	   }
 
 	   /// <summary>
 	   /// Append a get parameter to the packet.
@@ -601,12 +532,9 @@ namespace com.dalsemi.onewire.adapter
 	   ///          result of this operation </returns>
 	   public virtual int getParameter(int parameter)
 	   {
-		  // set to command mode
-		  setToCommandMode();
 
 		  // append paramter get
-          packet.writer.Write((byte)(CONFIG_MASK | parameter >> 3));
-		  //TODO packet.buffer.Append((CONFIG_MASK | parameter >> 3));
+          packet.writer.WriteByte((byte)(CONFIG_MASK | parameter >> 3));
 
 		  // add to the return number of bytes
 		  totalReturnLength++;
@@ -632,12 +560,8 @@ namespace com.dalsemi.onewire.adapter
 	   public virtual int setParameter(byte parameter, byte parameterValue)
 	   {
 
-		  // set to command mode
-		  setToCommandMode();
-
 		  // append the paramter set with value
-          packet.writer.Write((byte)((CONFIG_MASK | parameter) | parameterValue));
-		  //TODO packet.buffer.Append(((CONFIG_MASK | parameter) | parameterValue));
+          packet.writer.WriteByte((byte)((CONFIG_MASK | parameter) | parameterValue));
 
 		  // add to the return number of bytes
 		  totalReturnLength++;
@@ -664,12 +588,8 @@ namespace com.dalsemi.onewire.adapter
 	   public virtual int sendCommand(byte command, bool expectResponse)
 	   {
 
-		  // set to command mode
-		  setToCommandMode();
-
 		  // append the paramter set with value
-          packet.writer.Write(command);
-		  //TODO packet.buffer.Append(command);
+          packet.writer.WriteByte(command);
 
 		  // check for response
 		  if (expectResponse)
@@ -733,7 +653,7 @@ namespace com.dalsemi.onewire.adapter
 			 // provide debug output
 			 if (doDebugMessages)
 			 {
-				Debug.WriteLine("DEBUG: UPacketbuilder-reset response " + ((int) resetResponse & 0x00FF).ToString("x"));
+				Debug.WriteLine("DEBUG: UsbPacketbuilder-reset response " + ((int) resetResponse & 0x00FF).ToString("x"));
 			 }
 
 			 // convert the response byte to the OneWire reset result

@@ -10,7 +10,7 @@ using Windows.Storage.Streams;
 using System.Threading;
 
 namespace com.dalsemi.onewire.adapter
-{
+{ 
     /// <summary>
     /// UsbAdapterIo class handles low level IO with USB device
     /// </summary>
@@ -19,12 +19,19 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Result code
         /// </summary>
-        private const byte RESULT_SUCCESS = 0;
+        private const ErrorResult RESULT_SUCCESS = 0;
 
         /// <summary>
         /// Flag to enable debug messages
         /// </summary>
         private bool doDebugMessages = true;
+        /// <summary>
+        /// Normal Search, all devices participate </summary>
+        private const byte NORMAL_SEARCH_CMD = 0xF0;
+
+        /// <summary>
+        /// Conditional Search, only 'alarming' devices participate </summary>
+        private const byte ALARM_SEARCH_CMD = 0xEC;
         /// <summary>
         /// Object used for lock
         /// </summary>
@@ -62,7 +69,7 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         private TypedEventHandler<UsbInterruptInPipe, UsbInterruptInEventArgs> interruptEventHandler = null;
 
-        public byte LastError { get; private set; }
+        public ErrorResult LastError { get; private set; }
 
         /// <summary>
         /// UsbAdapterIo Constructor called by UsbAdapter class
@@ -92,8 +99,9 @@ namespace com.dalsemi.onewire.adapter
                 0,
                 "USB Communication: RESET_DEVICE");
 
-            if (RESULT_SUCCESS != ReadStatus(true))
-                usbState.PrintErrorResult(LastError);
+            bool DeviceDetected;
+            if (RESULT_SUCCESS != ReadStatus(out DeviceDetected))
+                PrintErrorResult();
 
 //TODO            usbState.PrintState();
         }
@@ -101,7 +109,7 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Halt execution when DONE
         /// </summary>
-        public void Control_HalExecWhenDone()
+        public ErrorResult Control_HalExecWhenDone(out bool DeviceDetected)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.CONTROL,
@@ -109,16 +117,17 @@ namespace com.dalsemi.onewire.adapter
                 0,
                 "USB Communication: HALT_EXE_DONE");
 
-            if (RESULT_SUCCESS != ReadStatus(true))
-                usbState.PrintErrorResult(LastError);
+            if (RESULT_SUCCESS != ReadStatus(out DeviceDetected))
+                PrintErrorResult();
 
 //TODO            usbState.PrintState();
+            return LastError;
         }
 
         /// <summary>
         /// Halt execution when IDLE
         /// </summary>
-        public void Control_HalExecWhenIdle()
+        public ErrorResult Control_HalExecWhenIdle(out bool DeviceDetected)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.CONTROL,
@@ -126,16 +135,17 @@ namespace com.dalsemi.onewire.adapter
                 0,
                 "USB Communication: HALT_EXE_IDLE");
 
-            if (RESULT_SUCCESS != ReadStatus(true))
-                usbState.PrintErrorResult(LastError);
+            if (RESULT_SUCCESS != ReadStatus(out DeviceDetected))
+                PrintErrorResult();
 
 //TODO            usbState.PrintState();
+            return LastError;
         }
 
         /// <summary>
         /// Halt execution when IDLE
         /// </summary>
-        public void Control_ResumeExec()
+        public ErrorResult Control_ResumeExec(out bool DeviceDetected)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.CONTROL,
@@ -143,10 +153,11 @@ namespace com.dalsemi.onewire.adapter
                 0,
                 "USB Communication: RESUME_EXE");
 
-            if (RESULT_SUCCESS != ReadStatus(true))
-                usbState.PrintErrorResult(LastError);
+            if (RESULT_SUCCESS != ReadStatus(out DeviceDetected))
+                PrintErrorResult();
 
 //TODO            usbState.PrintState();
+            return LastError;
         }
 
         /// <summary>
@@ -155,7 +166,7 @@ namespace com.dalsemi.onewire.adapter
         /// <param name="type">0 = 5V, 1 = 12V</param>
         /// <param name="duration"></param>
         /// <param name="description"></param>
-        public byte Comm_SetDuration(ushort type, byte duration, string description)
+        public ErrorResult Comm_SetDuration(ushort type, byte duration, string description, out bool DeviceDetected)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.COMM,
@@ -163,8 +174,8 @@ namespace com.dalsemi.onewire.adapter
                 (uint)duration,
                 "USB Communication: SetDuration - " + description);
 
-            if (RESULT_SUCCESS != ReadResult(true))
-                usbState.PrintErrorResult(LastError);
+            if (RESULT_SUCCESS != ReadResult(out DeviceDetected))
+                PrintErrorResult();
 
 //TODO            usbState.PrintState();
 
@@ -174,18 +185,20 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Issue Communication 1-Wire RESET to USB device
         /// </summary>
-        public byte Comm_OneWireReset(bool ignoreDevice)
+        /// <param name="DeviceDetect"></param>
+        /// <returns>Error Result</returns>
+        public ErrorResult Comm_OneWireReset(out bool DeviceDetected)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.COMM,
                 Ds2490.COMM.ONEWIRE_RESET | Ds2490.COMM.F | Ds2490.COMM.IM | Ds2490.COMM.SE | Ds2490.COMM.NTF,
-                usbState.BusCommSpeed,
+                (usbState.ReqBusCommSpeed != -1) ? (byte)usbState.ReqBusCommSpeed : usbState.BusCommSpeed,
                 "USB Communication: One-Wire Reset");
 
-            if (RESULT_SUCCESS != ReadResult(ignoreDevice))
-                usbState.PrintErrorResult(LastError);
+            if (RESULT_SUCCESS != ReadResult(out DeviceDetected))
+                PrintErrorResult();
 
-//TODO            usbState.PrintState();
+            //TODO            usbState.PrintState();
 
             return LastError;
         }
@@ -201,16 +214,16 @@ namespace com.dalsemi.onewire.adapter
         /// The HALT EXECUTION WHEN DONE or HALT EXECUTION WHEN IDLE control 
         /// commands are used to terminate an infinite duration pulse.
         /// </summary>
-        public byte Comm_Pulse(string description)
+        public ErrorResult Comm_Pulse(string description, out bool DeviceDetected)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.COMM,
                 Ds2490.COMM.PULSE | Ds2490.COMM.IM | Ds2490.COMM.NTF,
-                usbState.BusCommSpeed,
+                (usbState.ReqBusCommSpeed != -1) ? (byte)usbState.ReqBusCommSpeed : usbState.BusCommSpeed,
                 "USB Communication: Pulse - " + description);
 
-            if (RESULT_SUCCESS != ReadResult(true))
-                usbState.PrintErrorResult(LastError);
+            if (RESULT_SUCCESS != ReadResult(out DeviceDetected))
+                PrintErrorResult();
 
             //TODO            usbState.PrintState();
 
@@ -218,18 +231,64 @@ namespace com.dalsemi.onewire.adapter
         }
 
         /// <summary>
-        /// Enable Pulse
+        /// Pulse
         /// 
-        /// This command is used to enable or disable a 1-Wire strong pullup pulse to 5V.
-        /// One bit position in the parameter byte is used to control the enabled/disabled
-        /// state for the pulse. The pulse is enabled when the respective bit is set to a 1
-        /// and disabled when set to a 0. The DS2490 power-up default state for strong 
-        /// pullup is disabled
+        /// This command is used to generate a strong pullup to 5V in 
+        /// order to provide extra power for an attached iButton device, 
+        /// e.g., temperature sensor, EEPROM, SHA-1, or crypto iButton. 
+        /// The pulse duration is determined by the value in the mode register.
+        /// 
+        /// The HALT EXECUTION WHEN DONE or HALT EXECUTION WHEN IDLE control 
+        /// commands are used to terminate an infinite duration pulse.
         /// </summary>
-        /// <param name="rail">Pass in Ds2490.ENABLEPULSE_PRGE, or Ds2490.ENABLEPULSE_SPUE</param>
-        /// <param name="description"></param>
-        /// <returns></returns>
-        public byte Mode_EnablePulse(byte rail, string description)
+        public ErrorResult Comm_SearchAccess(string description, bool alarm_only, ushort num_devices, out bool DeviceDetected)
+        {
+            SendCommand(
+                Ds2490.CMD_TYPE.COMM,
+                Ds2490.COMM.SEARCH_ACCESS |
+                Ds2490.COMM.IM |  // Execute Immediate
+                Ds2490.COMM.SM |  // searches for and reports ROM Ids without really 
+                                  //accessing a particular device.
+                Ds2490.COMM.F |   // clears the buffers in case an error occurred 
+                                  // during the execution of the previous command; 
+                                  // requires that ICP = 0 in the previous command.
+                Ds2490.COMM.RTS | // returns the discrepancy information to the host
+                                  // if SM = 1 and there are more devices than could 
+                                  // be discovered in the current pass.
+                Ds2490.COMM.NTF,  // return ErrorResult
+
+                (ushort)
+                ((num_devices << 8) |  // the maximum number of devices 
+                                       // to be discovered in a single
+                                       // command call.  A value of 0x00 
+                                       // indicates that all devices on the 1-Wire
+                                       // Network are to be discovered.
+                ((alarm_only) ? ALARM_SEARCH_CMD : NORMAL_SEARCH_CMD)),
+                                       // 1-Wire command (Search ROM or 
+                                       // Conditional Search ROM)
+            "USB Communication: Pulse - " + description);
+
+            if (RESULT_SUCCESS != ReadResult(out DeviceDetected))
+                PrintErrorResult();
+
+//TODO            usbState.PrintState();
+
+            return LastError;
+        }
+
+    /// <summary>
+    /// Enable Pulse
+    /// 
+    /// This command is used to enable or disable a 1-Wire strong pullup pulse to 5V.
+    /// One bit position in the parameter byte is used to control the enabled/disabled
+    /// state for the pulse. The pulse is enabled when the respective bit is set to a 1
+    /// and disabled when set to a 0. The DS2490 power-up default state for strong 
+    /// pullup is disabled
+    /// </summary>
+    /// <param name="rail">Pass in Ds2490.ENABLEPULSE_PRGE, or Ds2490.ENABLEPULSE_SPUE</param>
+    /// <param name="description"></param>
+    /// <returns></returns>
+    public ErrorResult Mode_EnablePulse(byte rail, string description, out bool DeviceDetected)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.MODE,
@@ -237,9 +296,9 @@ namespace com.dalsemi.onewire.adapter
                 rail,
                 "USB Mode: ENABLE_PULSE - " + description);
 
-            byte Status = ReadStatus(true);
+            ErrorResult Status = ReadStatus(out DeviceDetected);
             if (RESULT_SUCCESS != Status)
-                usbState.PrintErrorResult(Status);
+                PrintErrorResult();
 
 //TODO            usbState.PrintState();
 
@@ -309,6 +368,45 @@ namespace com.dalsemi.onewire.adapter
         }
 
         /// <summary>
+        /// General function to issue command to DS2490 USB device
+        /// </summary>
+        /// <param name="req"></param>
+        /// <param name="value"></param>
+        /// <param name="index"></param>
+        /// <param name="description"></param>
+        /// <returns></returns>
+        public async Task<uint> BulkEp_Write(int index, byte[] data, string description)
+        {
+            if (doDebugMessages)
+            {
+                Debug.WriteLine("DEBUG: " + description);
+            }
+
+            try
+            {
+                if (usbDevice == null)
+                {
+                    throw new System.IO.IOException("Port Not Open");
+                }
+
+                var stream = usbDevice.DefaultInterface.BulkOutPipes[index].OutputStream;
+                var writer = new DataWriter(stream);
+                writer.WriteBytes(data);
+
+                return await writer.StoreAsync();
+            }
+            catch (System.IO.IOException e)
+            {
+                if (doDebugMessages)
+                {
+                    Debug.WriteLine("BulkEp_Write: " + description + ": " + e);
+                }
+            }
+
+            return 0;
+        }
+
+        /// <summary>
         /// Main Interrupt Handler
         /// </summary>
         /// <param name="sender"></param>
@@ -351,7 +449,7 @@ namespace com.dalsemi.onewire.adapter
         /// Read Status data
         /// </summary>
         /// <param name="nResultRegisters"></param>
-        public byte ReadStatus(bool ignoreDevice)
+        public ErrorResult ReadStatus(out bool DeviceDetected)
         {
             lock(syncObject)
             {
@@ -367,7 +465,7 @@ namespace com.dalsemi.onewire.adapter
 
                 UnregisterFromInterruptEvent();
 
-                LastError = GetErrorResult(ignoreDevice);
+                LastError = GetErrorResult(out DeviceDetected);
                 return LastError;
             }
         }
@@ -376,7 +474,7 @@ namespace com.dalsemi.onewire.adapter
         /// Read Result data
         /// </summary>
         /// <param name="nResultRegisters"></param>
-        public byte ReadResult(bool ignoreDevice)
+        public ErrorResult ReadResult(out bool DeviceDetected)
         {
             lock (syncObject)
             {
@@ -392,31 +490,30 @@ namespace com.dalsemi.onewire.adapter
 
                 UnregisterFromInterruptEvent();
 
-                LastError = GetErrorResult(ignoreDevice);
+                LastError = GetErrorResult(out DeviceDetected);
                 return LastError;
             }
         }
 
-        public byte GetErrorResult(bool ignoreDevice)
+        public ErrorResult GetErrorResult(out bool DeviceDetected)
         {
-            if(usbState.CommResultCodes != null)
+            DeviceDetected = false;
+
+            if (usbState.CommResultCodes != null)
             {
-                foreach(byte item in usbState.CommResultCodes)
+                foreach (ErrorResult item in usbState.CommResultCodes)
                 {
-                    if (!ignoreDevice && item == Ds2490.ONEWIREDEVICEDETECT)
+                    if ((byte)item == Ds2490.ONEWIREDEVICEDETECT)
                     {
-                        return Ds2490.ONEWIREDEVICEDETECT;
-                    }
-                    else if(ignoreDevice && item == Ds2490.ONEWIREDEVICEDETECT)
-                    {
+                        DeviceDetected = true;
                         continue;
                     }
-
                     return item;
                 }
             }
             return 0;
         }
+
         /// <summary>
         /// Register for the interrupt that is triggered when the device sends an interrupt to us
         /// 
@@ -462,6 +559,97 @@ namespace com.dalsemi.onewire.adapter
 
                 registeredInterrupt = false;
             }
+        }
+
+        /// <summary>
+        /// Decode the Error Result
+        /// </summary>
+        /// <param name="value"></param>
+        public void PrintErrorResult()
+        {
+            ErrorResult result = LastError;
+
+            if ((result & ErrorResult.NRS) == ErrorResult.NRS)
+            {
+                Debug.WriteLine("Error Result: A 1-WIRE RESET did not reveal a Presence Pulse. SET PATH command did not get a Presence Pulse from the branch that was to be connected. No response from one or more ROM ID bits during a SEARCH ACCESS command.");
+            }
+            if ((result & ErrorResult.SH) == ErrorResult.SH)
+            {
+                Debug.WriteLine("Error Result: A 1-WIRE RESET revealed a short to the 1-Wire bus or the SET PATH command could not successfully connect a branch due to a short.");
+            }
+            if ((result & ErrorResult.APP) == ErrorResult.APP)
+            {
+                Debug.WriteLine("Error Result: A 1-WIRE RESET revealed an Alarming Presence Pulse.");
+            }
+            if ((result & ErrorResult.VPP) == ErrorResult.VPP)
+            {
+                Debug.WriteLine("Error Result: During a PULSE with TYPE=1 or WRITE EPROM command the 12V programming pulse not seen on 1-Wire bus.");
+            }
+            if ((result & ErrorResult.CMP) == ErrorResult.CMP)
+            {
+                Debug.WriteLine("Error Result: Error when reading the confirmation byte with a SET PATH command. There was a difference between the byte written and then read back with a BYTE I/O command,");
+            }
+            if ((result & ErrorResult.CRC) == ErrorResult.CRC)
+            {
+                Debug.WriteLine("Error Result: A CRC error occurred when executing one of the following commands: WRITE SRAM PAGE, READ CRC PROT PAGE, or READ REDIRECT PAGE W/CRC.");
+            }
+            if ((result & ErrorResult.RDP) == ErrorResult.RDP)
+            {
+                Debug.WriteLine("Error Result: A READ REDIRECT PAGE WITH/CRC encountered a page that is redirected.");
+            }
+            if ((result & ErrorResult.EOS) == ErrorResult.EOS)
+            {
+                Debug.WriteLine("Error Result: A SEARCH ACCESS with SM = 1 ended sooner than expected reporting less ROM ID’s than specified in the “number of devices” parameter.");
+            }
+        }
+
+        [Flags]
+        public enum ErrorResult
+        {
+            /// <summary>
+            /// A value of 1 indicates an error with one of the following: 1-WIRE RESET
+            /// did not reveal a Presence Pulse. SET PATH command did not get a Presence
+            /// Pulse from the branch that was to be connected. No response from one or
+            /// more ROM ID bits during a SEARCH ACCESS command.
+            /// </summary>
+            NRS = 0x01,
+            /// <summary>
+            /// A value of 1 indicates that a 1-WIRE RESET revealed a short to the 1-Wire
+            /// bus or the SET PATH command could not successfully connect a branch due
+            /// to a short.
+            /// </summary>
+            SH = 0x02,
+            /// <summary>
+            /// A value of 1 indicates that a 1-WIRE RESET revealed an Alarming Presence Pulse.
+            /// </summary>
+            APP = 0x04,
+            /// <summary>
+            /// During a PULSE with TYPE=1 or WRITE EPROM command the 12V programming pulse
+            /// not seen on 1-Wire bus
+            /// </summary>
+            VPP = 0x08,
+            /// <summary>
+            /// A value of 1 indicates an error with one of the following: Error when reading
+            /// the confirmation byte with a SET PATH command. There was a difference between
+            /// the byte written and then read back with a BYTE I/O command
+            /// </summary>
+            CMP = 0x10,
+            /// <summary>
+            /// A value of 1 indicates that a CRC error occurred when executing one of the 
+            /// following commands: WRITE SRAM PAGE, READ CRC PROT PAGE, or READ REDIRECT PAGE W/CRC. 
+            /// </summary>
+            CRC = 0x20,
+            /// <summary>
+            /// A value of 1 indicates that a READ REDIRECT PAGE WITH/CRC encountered 
+            /// a page that is redirected.
+            /// </summary>
+            RDP = 0x40,
+            /// <summary>
+            /// A value of 1 indicates that a SEARCH ACCESS with SM = 1 ended sooner than 
+            /// expected reporting less ROM ID’s than specified in the “number of devices”
+            /// parameter.
+            /// </summary>
+            EOS = 0x80
         }
 
     }
