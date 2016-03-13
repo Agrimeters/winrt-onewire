@@ -52,8 +52,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// StringBuffer of bytes to send
 	   /// </summary>
        public MemoryStream buffer;
-//       public BinaryWriter writer;
-        public DataWriter writer;
+       public BinaryWriter writer;
 
 	   /// <summary>
 	   /// Expected length of return packet
@@ -70,8 +69,7 @@ namespace com.dalsemi.onewire.adapter
 	   public RawSendPacket()
 	   {
           buffer = new MemoryStream();
-          writer = new DataWriter(buffer.AsOutputStream());
-//          writer = new BinaryWriter(buffer);
+          writer = new BinaryWriter(buffer);
 		  returnLength = 0;
 	   }
 	}

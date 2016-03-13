@@ -2486,12 +2486,7 @@ namespace com.dalsemi.onewire.adapter
 
                     uBuild.Packets.MoveNext();
                     RawSendPacket pkt = (RawSendPacket)uBuild.Packets.Current; //TODO .nextElement();
-                    var t = Task.Run(async () =>
-                    {
-                        await pkt.writer.StoreAsync();
-                        await pkt.writer.FlushAsync();
-                    });
-                    
+                    pkt.writer.Flush();
                     serial.write(pkt.buffer.ToArray());
 
                     // delay to let things settle
@@ -2571,98 +2566,6 @@ namespace com.dalsemi.onewire.adapter
             }
         }
 
-        // Track Read Operation
-        private CancellationTokenSource ReadCancellationTokenSource;
-        private Object ReadCancelLock = new Object();
-
-//TODO        private Boolean IsReadTaskPending;
-//TODO        private uint ReadBytesCounter = 0;
-        DataReader DataReaderObject = null;
-
-        // Track Write Operation
-        private CancellationTokenSource WriteCancellationTokenSource;
-        private Object WriteCancelLock = new Object();
-
-        private Boolean IsWriteTaskPending;
-        private uint WriteBytesCounter = 0;
-        DataWriter DataWriteObject = null;
-
-        bool WriteBytesAvailable = false;
-
-        private void ResetReadCancellationTokenSource()
-        {
-            // Create a new cancellation token source so that can cancel all the tokens again
-            ReadCancellationTokenSource = new CancellationTokenSource();
-
-            // Hook the cancellation callback (called whenever Task.cancel is called)
-            ReadCancellationTokenSource.Token.Register(() => NotifyReadCancelingTask());
-        }
-
-        private void ResetWriteCancellationTokenSource()
-        {
-            // Create a new cancellation token source so that can cancel all the tokens again
-            WriteCancellationTokenSource = new CancellationTokenSource();
-
-            // Hook the cancellation callback (called whenever Task.cancel is called)
-            WriteCancellationTokenSource.Token.Register(() => NotifyWriteCancelingTask());
-        }
-
-        /// <summary>
-        /// Print a status message saying we are canceling a task and disable all buttons to prevent multiple cancel requests.
-        /// <summary>
-        private async void NotifyReadCancelingTask()
-        {
-            Debug.WriteLine("Canceling Read... Please wait...");
-        }
-
-        private async void NotifyWriteCancelingTask()
-        {
-            Debug.WriteLine("Canceling Write... Please wait...");
-        }
-
-        private async Task ReadAsyncEx(CancellationToken cancellationToken)
-        {
-
-            Task<UInt32> loadAsyncTask;
-
-            uint ReadBufferLength = 1024;
-
-            // Don't start any IO if we canceled the task
-            lock (ReadCancelLock)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                // Cancellation Token will be used so we can stop the task operation explicitly
-                // The completion function should still be called so that we can properly handle a canceled task
-                DataReaderObject.InputStreamOptions = InputStreamOptions.Partial;
-                loadAsyncTask = DataReaderObject.LoadAsync(ReadBufferLength).AsTask(cancellationToken);
-            }
-
-            UInt32 bytesRead = await loadAsyncTask;
-            Debug.WriteLine("Read completed - " + bytesRead.ToString() + " bytes were read");
-        }
-
-        private async Task WriteAsync(byte[] buffer, CancellationToken cancellationToken)
-        {
-
-            Task<UInt32> storeAsyncTask;
-
-            DataWriteObject.WriteBytes(buffer);
-
-            // Don't start any IO if we canceled the task
-            lock (WriteCancelLock)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                // Cancellation Token will be used so we can stop the task operation explicitly
-                // The completion function should still be called so that we can properly handle a canceled task
-                storeAsyncTask = DataWriteObject.StoreAsync().AsTask(cancellationToken);
-            }
-
-            UInt32 bytesWritten = await storeAsyncTask;
-            Debug.WriteLine("Write completed - " + bytesWritten.ToString() + " bytes written");
-        }
-
         /// <summary>
         /// Verify that the DS2480 based adapter is present on the open port.
         /// </summary>
@@ -2676,64 +2579,6 @@ namespace com.dalsemi.onewire.adapter
             // check if adapter has already be verified to be present
             if (!adapterPresent)
             {
-                ResetReadCancellationTokenSource();
-                ResetWriteCancellationTokenSource();
-
-                var t = Task.Run(async () =>
-                {
-                    serial.port.IsDataTerminalReadyEnabled = false;
-                    serial.port.IsRequestToSendEnabled = false;
-                    new System.Threading.ManualResetEvent(false).WaitOne(1000);
-
-                    serial.port.IsDataTerminalReadyEnabled = true;
-                    serial.port.IsRequestToSendEnabled = true;
-                    new System.Threading.ManualResetEvent(false).WaitOne(1000);
-
-                    serial.port.BreakSignalState = true;
-                    new System.Threading.ManualResetEvent(false).WaitOne(100);
-                    serial.port.BreakSignalState = false;
-                    new System.Threading.ManualResetEvent(false).WaitOne(10);
-
-                    DataWriteObject = new DataWriter(serial.port.OutputStream);
-                    await WriteAsync(new byte[] { 0xC1 }, WriteCancellationTokenSource.Token);
-                    DataWriteObject.DetachStream();
-                    DataWriteObject = null;
-                    new System.Threading.ManualResetEvent(false).WaitOne(10);
-
-                    DataWriteObject = new DataWriter(serial.port.OutputStream);
-                    await WriteAsync(new byte[] { 0x17, 0x45, 0x59, 0x3F, 0x0F, 0x95 }, WriteCancellationTokenSource.Token);
-                    DataWriteObject.DetachStream();
-                    DataWriteObject = null;
-
-                    DataReaderObject = new DataReader(serial.port.InputStream);
-                    await ReadAsyncEx(ReadCancellationTokenSource.Token);
-                    DataReaderObject.DetachStream();
-                    DataReaderObject = null;
-                });
-
-                t.Wait();
-
-                serial.RTS = false;
-                serial.DTR = false;
-                serial.write(0x00);
-                Thread.Sleep(1000);
-                serial.RTS = true;
-                serial.DTR = true;
-                Thread.Sleep(1000);
-                serial.sendBreak(100);
-                Thread.Sleep(10);
-                serial.write(0xC1);
-                Thread.Sleep(10);
-                byte[] data = new byte[] { 0x17, 0x45, 0x59, 0x3F, 0x0F, 0x95 };
-                serial.write(data);
-                serial.write(data);
-                serial.write(data);
-                serial.write(data);
-                serial.write(data);
-                Thread.Sleep(10);
-                byte[] x = serial.readWithTimeout(6);
-
-
                 // do a master reset
                 uMasterReset();
 
@@ -2952,12 +2797,7 @@ namespace com.dalsemi.onewire.adapter
                         offset = (int)inBuffer.Length;
 
                         // send the packet
-                        var t = Task.Run(async () =>
-                        {
-                            await pkt.writer.StoreAsync();
-                            await pkt.writer.FlushAsync();
-                        });
-
+                        pkt.writer.Flush();
                         serial.write(pkt.buffer.ToArray());
 
                         // wait on returnLength bytes in inBound

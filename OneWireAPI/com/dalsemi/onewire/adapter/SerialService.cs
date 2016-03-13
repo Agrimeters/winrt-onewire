@@ -21,6 +21,18 @@ namespace com.dalsemi.onewire.adapter
         /// The serial port object for setting serial port parameters </summary>
         private SerialDevice serialPort = null;
         /// <summary>
+        /// Device Info for open port
+        /// </summary>
+        private DeviceInformation devInfo = null;
+        /// <summary>
+        /// Reader
+        /// </summary>
+        private DataReader reader = null;
+        /// <summary>
+        /// Writer
+        /// </summary>
+        private DataWriter writer = null;
+        /// <summary>
         /// The DeviceInformation device id used to open the serial port</summary>
         private string deviceId;
         /// <summary>
@@ -243,7 +255,7 @@ namespace com.dalsemi.onewire.adapter
         }
 
 
-        public virtual void flush()
+        public virtual async void flush()
         {
             //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
             if (DEBUG)
@@ -259,21 +271,23 @@ namespace com.dalsemi.onewire.adapter
 
             // thows: "Exception thrown: 'System.NotImplementedException' in OneWireAPI.dll"
             //var x = await serialPort.OutputStream.FlushAsync();
+            //var t = Task.Run(async () =>
+            //{
+            //    var timeout = serialPort.ReadTimeout;
+            //    serialPort.ReadTimeout = new TimeSpan(0, 0, 0, 0, 1);
+            //    await reader.LoadAsync(1024);
+            //    serialPort.ReadTimeout = timeout;
+            //});
+            //t.Wait();
         }
 
         public virtual void write(byte data)
         {
             var t = Task.Run(async () =>
             {
-                using (DataWriter writer = new DataWriter(serialPort.OutputStream))
-                {
-                    System.Diagnostics.Debug.WriteLine("WriteTimeout: " + serialPort.WriteTimeout.Milliseconds);
-
-                    writer.WriteByte(data);
-                    var count = await writer.StoreAsync();
-                    debug.Debug.debug(serialPort.PortName + " Transmit", new byte[] { data });
-                    writer.DetachStream();
-                }
+                writer.WriteByte(data);
+                var count = await writer.StoreAsync();
+                debug.Debug.debug(serialPort.PortName + " Transmit", new byte[] { data });
             });
             t.Wait();
             if(t.Status != TaskStatus.RanToCompletion)
@@ -286,15 +300,9 @@ namespace com.dalsemi.onewire.adapter
         {
             var t = Task.Run(async() =>
             {
-                using (DataWriter writer = new DataWriter(serialPort.OutputStream))
-                {
-                    System.Diagnostics.Debug.WriteLine("WriteTimeout: " + serialPort.WriteTimeout.Milliseconds);
-
-                    writer.WriteBytes(data);
-                    var count = await writer.StoreAsync();
-                    debug.Debug.debug(serialPort.PortName + " Transmit", data);
-                    writer.DetachStream();
-                }
+                writer.WriteBytes(data);
+                var count = await writer.StoreAsync();
+                debug.Debug.debug(serialPort.PortName + " Transmit", data);
             });
             t.Wait();
             if(t.Status != TaskStatus.RanToCompletion)
@@ -308,31 +316,21 @@ namespace com.dalsemi.onewire.adapter
             var t = Task<byte[]>.Run(async () => 
             {
                 byte[] result = null;
-
                 uint bytesRead = 0;
+
                 try
                 {
-                    using (DataReader reader = new DataReader(serialPort.InputStream))
+                    bytesRead = await reader.LoadAsync((uint)length);
+
+                    if (bytesRead != 0)
                     {
-                        Debug.WriteLine("ReadTimeout: " + serialPort.ReadTimeout);
-
-                        reader.InputStreamOptions = InputStreamOptions.Partial;
-                        bytesRead = await reader.LoadAsync((uint)length);
-
-                        if (bytesRead == 0)
+                        result = new byte[bytesRead];
+                        reader.ReadBytes(result);
+                        if (reader.UnconsumedBufferLength > 0)
                         {
-                            result = null;
+                            throw new Exception();
                         }
-                        else
-                        {
-                            result = new byte[bytesRead];
-                            reader.ReadBytes(result);
-                            if (reader.UnconsumedBufferLength > 0)
-                            {
-                                throw new Exception();
-                            }
-                        }
-                        reader.DetachStream();
+                        debug.Debug.debug(serialPort.PortName + " Receive", result);
                     }
                 }
                 catch (Exception)
@@ -418,6 +416,18 @@ namespace com.dalsemi.onewire.adapter
             }
         }
 
+        public async Task<DeviceInformation> GetDeviceInformation(string PortName)
+        {
+            string aqs = SerialDevice.GetDeviceSelector(PortName);
+            DeviceInformationCollection devList =
+                await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(aqs, null);
+
+            if (devList.Count == 0)
+                throw new System.IO.IOException("Failed to open (" + PortName + ")");
+
+            return devList[0];
+        }
+
         public virtual void openPort()
         {
             //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
@@ -446,15 +456,19 @@ namespace com.dalsemi.onewire.adapter
             {
                 var t = Task<SerialDevice>.Run(async() =>
                 {
-                    string aqs = SerialDevice.GetDeviceSelector(comPortName);
-                    DeviceInformationCollection myDevices = 
-                        await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(aqs, null);
+                    devInfo = await GetDeviceInformation(comPortName);
 
-                    if (myDevices.Count == 0)
+                    if(devInfo == null)
                         throw new System.IO.IOException("Failed to open (" + comPortName + ")");
 
-                    deviceId = myDevices[0].Id;
-                    return await SerialDevice.FromIdAsync(deviceId);
+                    var device = await SerialDevice.FromIdAsync(devInfo.Id);
+
+                    writer = new DataWriter(device.OutputStream);
+                    reader = new DataReader(device.InputStream);
+                    reader.InputStreamOptions = InputStreamOptions.Partial;
+                    //await reader.LoadAsync(0);
+
+                    return device;
                 });
 
                 t.Wait();
@@ -465,10 +479,11 @@ namespace com.dalsemi.onewire.adapter
 
                 serialPort = t.Result;
 
-                Debug.WriteLine(serialPort.PortName + " Opened");
+                Debug.WriteLine("Opened " + serialPort.PortName);
+
 
                 // flow i/o
-                serialPort.Handshake = SerialHandshake.None;
+//TODO                serialPort.Handshake = SerialHandshake.None;
 
                 // bug workaround
                 write((byte)0);

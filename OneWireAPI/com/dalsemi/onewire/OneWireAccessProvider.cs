@@ -41,85 +41,87 @@ namespace com.dalsemi.onewire
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
-    using Windows.Storage.Streams;    /// <summary>
-                                      /// The OneWireAccessProvider class manages the Dallas Semiconductor
-                                      /// adapter class derivatives of <code>DSPortAdapter</code>.  An enumeration of all
-                                      /// available adapters can be accessed through the
-                                      /// member function <code>EnumerateAllAdapters</code>.  This enables an
-                                      /// application to be adapter independent. There are also facilities to get a system
-                                      /// appropriate default adapter/port combination.<para>
-                                      /// 
-                                      /// <H3> Usage </H3>
-                                      /// 
-                                      /// <DL>
-                                      /// <DD> <H4> Example 1</H4>
-                                      /// Get an instance of the default 1-Wire adapter.  The adapter will be ready
-                                      /// to use if no exceptions are thrown.
-                                      /// <PRE> <CODE>
-                                      ///  try
-                                      ///  {
-                                      ///     DSPortAdapter adapter = OneWireAccessProvider.getDefaultAdapter();
-                                      /// 
-                                      ///     System.out.println("Adapter: " + adapter.getAdapterName() + " Port: " + adapter.getPortName());
-                                      /// 
-                                      ///     // use the adapter ...
-                                      /// 
-                                      ///  }
-                                      ///  catch(Exception e)
-                                      ///  {
-                                      ///     System.out.println("Default adapter not present: " + e);
-                                      ///  }
-                                      /// </CODE> </PRE>
-                                      /// </DL>
-                                      /// 
-                                      /// <DL>
-                                      /// <DD> <H4> Example 2</H4>
-                                      /// Enumerate through the available adapters and ports.
-                                      /// <PRE> <CODE>
-                                      ///  DSPortAdapter adapter;
-                                      ///  String        port;
-                                      /// 
-                                      ///  // get the adapters
-                                      ///  for (Enumeration adapter_enum = OneWireAccessProvider.enumerateAllAdapters();
-                                      ///                                  adapter_enum.hasMoreElements(); )
-                                      ///  {
-                                      ///     // cast the enum as a DSPortAdapter
-                                      ///     adapter = ( DSPortAdapter ) adapter_enum.nextElement();
-                                      /// 
-                                      ///     System.out.print("Adapter: " + adapter.getAdapterName() + " with ports: ");
-                                      /// 
-                                      ///     // get the ports
-                                      ///     for (Enumeration port_enum = adapter.getPortNames();
-                                      ///             port_enum.hasMoreElements(); )
-                                      ///     {
-                                      ///        // cast the enum as a String
-                                      ///        port = ( String ) port_enum.nextElement();
-                                      /// 
-                                      ///        System.out.print(port + " ");
-                                      ///     }
-                                      /// 
-                                      ///     System.out.println();
-                                      ///  }
-                                      /// </CODE> </PRE>
-                                      /// </DL>
-                                      /// 
-                                      /// <DL>
-                                      /// <DD> <H4> Example 3</H4>
-                                      /// Display the default adapter name and port without getting an instance of the adapter.
-                                      /// <PRE> <CODE>
-                                      ///  System.out.println("Default Adapter: " +
-                                      ///                      OneWireAccessProvider.getProperty("onewire.adapter.default"));
-                                      ///  System.out.println("Default Port: " +
-                                      ///                      OneWireAccessProvider.getProperty("onewire.port.default"));
-                                      /// </CODE> </PRE>
-                                      /// </DL>
-                                      /// 
-                                      /// </para>
-                                      /// </summary>
-                                      /// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter
-                                      /// 
-                                      /// @version    0.00, 30 August 2000
-                                      /// @author     DS </seealso>
+    using Windows.Devices.SerialCommunication;
+    using Windows.Storage.Streams;
+    /// <summary>
+    /// The OneWireAccessProvider class manages the Dallas Semiconductor
+    /// adapter class derivatives of <code>DSPortAdapter</code>.  An enumeration of all
+    /// available adapters can be accessed through the
+    /// member function <code>EnumerateAllAdapters</code>.  This enables an
+    /// application to be adapter independent. There are also facilities to get a system
+    /// appropriate default adapter/port combination.<para>
+    /// 
+    /// <H3> Usage </H3>
+    /// 
+    /// <DL>
+    /// <DD> <H4> Example 1</H4>
+    /// Get an instance of the default 1-Wire adapter.  The adapter will be ready
+    /// to use if no exceptions are thrown.
+    /// <PRE> <CODE>
+    ///  try
+    ///  {
+    ///     DSPortAdapter adapter = OneWireAccessProvider.getDefaultAdapter();
+    /// 
+    ///     System.out.println("Adapter: " + adapter.getAdapterName() + " Port: " + adapter.getPortName());
+    /// 
+    ///     // use the adapter ...
+    /// 
+    ///  }
+    ///  catch(Exception e)
+    ///  {
+    ///     System.out.println("Default adapter not present: " + e);
+    ///  }
+    /// </CODE> </PRE>
+    /// </DL>
+    /// 
+    /// <DL>
+    /// <DD> <H4> Example 2</H4>
+    /// Enumerate through the available adapters and ports.
+    /// <PRE> <CODE>
+    ///  DSPortAdapter adapter;
+    ///  String        port;
+    /// 
+    ///  // get the adapters
+    ///  for (Enumeration adapter_enum = OneWireAccessProvider.enumerateAllAdapters();
+    ///                                  adapter_enum.hasMoreElements(); )
+    ///  {
+    ///     // cast the enum as a DSPortAdapter
+    ///     adapter = ( DSPortAdapter ) adapter_enum.nextElement();
+    /// 
+    ///     System.out.print("Adapter: " + adapter.getAdapterName() + " with ports: ");
+    /// 
+    ///     // get the ports
+    ///     for (Enumeration port_enum = adapter.getPortNames();
+    ///             port_enum.hasMoreElements(); )
+    ///     {
+    ///        // cast the enum as a String
+    ///        port = ( String ) port_enum.nextElement();
+    /// 
+    ///        System.out.print(port + " ");
+    ///     }
+    /// 
+    ///     System.out.println();
+    ///  }
+    /// </CODE> </PRE>
+    /// </DL>
+    /// 
+    /// <DL>
+    /// <DD> <H4> Example 3</H4>
+    /// Display the default adapter name and port without getting an instance of the adapter.
+    /// <PRE> <CODE>
+    ///  System.out.println("Default Adapter: " +
+    ///                      OneWireAccessProvider.getProperty("onewire.adapter.default"));
+    ///  System.out.println("Default Port: " +
+    ///                      OneWireAccessProvider.getProperty("onewire.port.default"));
+    /// </CODE> </PRE>
+    /// </DL>
+    /// 
+    /// </para>
+    /// </summary>
+    /// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter
+    /// 
+    /// @version    0.00, 30 August 2000
+    /// @author     DS </seealso>
     public class OneWireAccessProvider
 	{
 
@@ -356,33 +358,79 @@ namespace com.dalsemi.onewire
 		  throw new OneWireException("Specified adapter name \"" + adapterName + "\" is not known");
 	   }
 
-	   /// <summary>
-	   /// Finds, opens, and verifies the default adapter and
-	   /// port.  Looks for the default adapter/port in the following locations:
-	   /// <para>
-	   /// <ul>
-	   /// <li> Use adapter/port in System.properties for onewire.adapter.default,
-	   ///      and onewire.port.default properties tags.</li>
-	   /// <li> Use adapter/port from onewire.properties file in current directory
-	   ///      or < java.home >/lib/ (Desktop) or /etc/ (TINI)</li>
-	   /// <li> Use smart default
-	   ///      <ul>
-	   ///      <li> Desktop
-	   ///           <ul>
-	   ///           <li> First, TMEX default (Win32 only)
-	   ///           <li> Second, if TMEX not present, then DS9097U/(first serial port)
-	   ///           </ul>
-	   ///      <li> TINI, TINIExternalAdapter on port serial1
-	   ///      </ul>
-	   /// </ul>
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <returns>  <code>DSPortAdapter</code> if default adapter present
-	   /// </returns>
-	   /// <exception cref="OneWireIOException"> when communcation with the adapter fails </exception>
-	   /// <exception cref="OneWireException"> when the port or adapter not present </exception>
-	   public static DSPortAdapter DefaultAdapter
+        /// <summary>
+        /// Finds, opens, and verifies the specified adapter on the
+        /// indicated port.
+        /// </summary>
+        /// <param name="adapterName"> string name of the adapter (match to result
+        ///             of call to getAdapterName() method in DSPortAdapter) </param>
+        /// <param name="serialDevice"> handle of the SerialCommunication port used
+        ///             in the method selectPort() in DSPortAdapter
+        /// </param>
+        /// <returns>  <code>DSPortAdapter</code> if adapter present
+        /// </returns>
+        /// <exception cref="OneWireIOException"> when communcation with the adapter fails </exception>
+        /// <exception cref="OneWireException"> when the port or adapter not present </exception>
+        public static DSPortAdapter getAdapter(string adapterName, SerialDevice serialDevice)
+        {
+            return null;
+            //USerialAdapter SerialAdapter = new USerialAdapter();
+
+            //// attempt to open and verify the adapter
+            //if (SerialAdapter.selectPort(serialDevice))
+            //{
+            //    SerialAdapter.beginExclusive(true);
+
+            //    try
+            //    {
+            //        // check for the adapter
+            //        if (SerialAdapter.adapterDetected())
+            //        {
+            //            return SerialAdapter;
+            //        }
+            //        else
+            //        {
+            //            throw new OneWireException("Port found \"" + serialDevice.PortName + "\" but Adapter \"" + adapterName + "\" not detected");
+            //        }
+            //    }
+            //    finally
+            //    {
+            //        SerialAdapter.endExclusive();
+            //    }
+            //}
+            //else
+            //{
+            //    throw new OneWireException("Specified port \"" + serialDevice.PortName + "\" could not be selected for adapter \"" + adapterName + "\"");
+            //}
+        }
+
+        /// <summary>
+        /// Finds, opens, and verifies the default adapter and
+        /// port.  Looks for the default adapter/port in the following locations:
+        /// <para>
+        /// <ul>
+        /// <li> Use adapter/port in System.properties for onewire.adapter.default,
+        ///      and onewire.port.default properties tags.</li>
+        /// <li> Use adapter/port from onewire.properties file in current directory
+        ///      or < java.home >/lib/ (Desktop) or /etc/ (TINI)</li>
+        /// <li> Use smart default
+        ///      <ul>
+        ///      <li> Desktop
+        ///           <ul>
+        ///           <li> First, TMEX default (Win32 only)
+        ///           <li> Second, if TMEX not present, then DS9097U/(first serial port)
+        ///           </ul>
+        ///      <li> TINI, TINIExternalAdapter on port serial1
+        ///      </ul>
+        /// </ul>
+        /// 
+        /// </para>
+        /// </summary>
+        /// <returns>  <code>DSPortAdapter</code> if default adapter present
+        /// </returns>
+        /// <exception cref="OneWireIOException"> when communcation with the adapter fails </exception>
+        /// <exception cref="OneWireException"> when the port or adapter not present </exception>
+        public static DSPortAdapter DefaultAdapter
 	   {
 		   get
 		   {

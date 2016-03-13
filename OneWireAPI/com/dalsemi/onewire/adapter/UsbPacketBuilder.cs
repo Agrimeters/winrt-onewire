@@ -300,7 +300,7 @@ namespace com.dalsemi.onewire.adapter
 		  {
 			 // convert the rest to OneWireIOExceptions
 			// append the data
-            packet.writer.WriteByte(dataBytesValue[i]);
+            packet.writer.Write(dataBytesValue[i]);
 
 			// provide debug output
 			if (doDebugMessages)
@@ -424,7 +424,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 
 		  // append the bit with polarity and strong5V options
-          packet.writer.WriteByte((byte)(FUNCTION_BIT | UsbState.BusCommSpeed | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
+          packet.writer.Write((byte)(FUNCTION_BIT | UsbState.BusCommSpeed | ((dataBit) ? BIT_ONE : BIT_ZERO) | ((strong5V) ? PRIME5V_TRUE : PRIME5V_FALSE)));
 
           // add to the return number of bytes
           totalReturnLength++;
@@ -502,7 +502,7 @@ namespace com.dalsemi.onewire.adapter
 		  int return_position = totalReturnLength;
 
           // add this sequence
-          packet.writer.WriteBytes(search_sequence);
+          packet.writer.Write(search_sequence);
 
 		  return return_position;
 	   }
@@ -514,7 +514,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 
 		  // search mode off and change speed
-          packet.writer.WriteByte((byte)(FUNCTION_SEARCHOFF | UsbState.BusCommSpeed));
+          packet.writer.Write((byte)(FUNCTION_SEARCHOFF | UsbState.BusCommSpeed));
 
 		  // no return byte
 	   }
@@ -534,7 +534,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 
 		  // append paramter get
-          packet.writer.WriteByte((byte)(CONFIG_MASK | parameter >> 3));
+          packet.writer.Write((byte)(CONFIG_MASK | parameter >> 3));
 
 		  // add to the return number of bytes
 		  totalReturnLength++;
@@ -561,7 +561,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 
 		  // append the paramter set with value
-          packet.writer.WriteByte((byte)((CONFIG_MASK | parameter) | parameterValue));
+          packet.writer.Write((byte)((CONFIG_MASK | parameter) | parameterValue));
 
 		  // add to the return number of bytes
 		  totalReturnLength++;
@@ -589,7 +589,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 
 		  // append the paramter set with value
-          packet.writer.WriteByte(command);
+          packet.writer.Write(command);
 
 		  // check for response
 		  if (expectResponse)

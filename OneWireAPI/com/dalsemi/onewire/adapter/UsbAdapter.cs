@@ -503,8 +503,7 @@ namespace com.dalsemi.onewire.adapter
                         // send the packet
                         var t = Task.Run(async () =>
                         {
-                            await pkt.writer.StoreAsync();
-                            await pkt.writer.FlushAsync();
+                            pkt.writer.Flush();
                             await UsbIo.BulkEp_Write(0, pkt.buffer.ToArray(),
                                 "Write EP2, count=" + pkt.buffer.Length);
                         });
