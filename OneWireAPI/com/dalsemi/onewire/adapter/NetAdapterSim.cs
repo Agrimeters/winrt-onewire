@@ -414,7 +414,7 @@ namespace com.dalsemi.onewire.adapter
                 // this byte array is 5 because length is used to determine different
                 // packet types by client
                 byte[] listenPortBytes = new byte[5];
-                Convert.toByteArray(serverSocket.Information.LocalPort, listenPortBytes, 0, 4);
+                Encoding.UTF8.GetBytes(port.ToString()).CopyTo(listenPortBytes, 0);
                 listenPortBytes[4] = 0x0FF;
 
                 multicastListener = new MulticastListener(port, group, versionBytes, listenPortBytes);

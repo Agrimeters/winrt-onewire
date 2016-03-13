@@ -347,8 +347,9 @@ namespace com.dalsemi.onewire.adapter
                 // this byte array is 5 because length is used to determine different
                 // packet types by client
                 byte[] listenPortBytes = new byte[5];
-                Convert.toByteArray(serverSocket.Information.LocalPort, listenPortBytes, 0, 4);
-                listenPortBytes[4] = unchecked((byte)0x0FF);
+                //TODO Convert.toByteArray(port).CopyTo(listenPortBytes, 0);
+                Encoding.UTF8.GetBytes(port.ToString()).CopyTo(listenPortBytes, 0);
+                listenPortBytes[4] = 0x0FF;
 
                 multicastListener = new MulticastListener(port, group, versionBytes, listenPortBytes);
             }
@@ -440,7 +441,7 @@ namespace com.dalsemi.onewire.adapter
         // adapter.endExclusive();
         // }
 
-        private async void StartServer()
+        public async void StartServer()
         {
             // create the server socket
             this.serverSocket = new StreamSocketListener();
@@ -1332,6 +1333,8 @@ namespace com.dalsemi.onewire.adapter
 
             Debug.WriteLine("Starting NetAdapter Host");
             host.StartServer();
+
+            while (true) { ; }
 
             //if(System.in!=null)
             //{

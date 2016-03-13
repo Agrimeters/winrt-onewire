@@ -206,7 +206,7 @@ namespace com.dalsemi.onewire.utils
 		  for (int i = (len - 1); i >= 0; i--)
 		  {
 			 val <<= 8;
-			 val |= (byteArray [offset + i] & 0x00FF);
+			 val |= byteArray [offset + i];
 		  }
 
 		  return val;

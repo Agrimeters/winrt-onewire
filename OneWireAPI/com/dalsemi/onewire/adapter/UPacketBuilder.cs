@@ -378,11 +378,13 @@ namespace com.dalsemi.onewire.adapter
 				// provide debug output
 				if (doDebugMessages)
 				{
-				   Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[] byte[" + ((int) dataBytesValue [i] & 0x00FF).ToString("x") + "]");
+				   Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[] byte[{0:X02}]", dataBytesValue);
 				}
 
 				// check for duplicates needed for special characters
-				if (((byte)(dataBytesValue [i] & 0x00FF) == UAdapterState.MODE_COMMAND) || (((byte)(dataBytesValue [i] & 0x00FF) == UAdapterState.MODE_SPECIAL) && (uState.revision == UAdapterState.CHIP_VERSION1)))
+				if ((dataBytesValue [i] == UAdapterState.MODE_COMMAND) || 
+                   ((dataBytesValue [i] == UAdapterState.MODE_SPECIAL) && 
+                   (uState.revision == UAdapterState.CHIP_VERSION1)))
 				{
 				   // duplicate this data byte
                    packet.writer.Write(dataBytesValue[i]);
@@ -449,7 +451,7 @@ namespace com.dalsemi.onewire.adapter
 		  // provide debug output
 		  if (doDebugMessages)
 		  {
-			 Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes [" + ((int) dataByteValue & 0x00FF).ToString("x") + "]");
+			 Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes [{0:X02}]", dataByteValue);
 		  }
 
 		  return dataBytes(temp_byte_array);

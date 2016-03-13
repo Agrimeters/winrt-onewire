@@ -445,6 +445,9 @@ namespace com.dalsemi.onewire.adapter
 
                     var device = await SerialDevice.FromIdAsync(devInfo.Id);
 
+                    if (device == null)
+                        Debugger.Break();
+
                     writer = new DataWriter(device.OutputStream);
                     reader = new DataReader(device.InputStream);
                     reader.InputStreamOptions = InputStreamOptions.Partial;
