@@ -63,7 +63,7 @@ namespace com.dalsemi.onewire.application.sha
 	{
 	   /// <summary>
 	   /// Turns on extra debugging for all SHATransactions </summary>
-	   internal const bool DEBUG = false;
+	   internal const bool DEBUG = true;
 
 	   internal const int MAX_RETRY_CNT = 65536;
 

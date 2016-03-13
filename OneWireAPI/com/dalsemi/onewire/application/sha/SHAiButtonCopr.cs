@@ -91,7 +91,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <summary>
 	   /// Turns on extra debugging output
 	   /// </summary>
-	   internal const bool DEBUG = false;
+	   internal const bool DEBUG = true;
 
 	   // ***********************************************************************
 	   // Constants for Error codes

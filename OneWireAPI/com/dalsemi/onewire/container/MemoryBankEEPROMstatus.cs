@@ -169,12 +169,12 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   ///  page length in memory bank
 	   /// </summary>
-	   protected internal int pageLength;
+	   protected internal int pageLength = 0;
 
 	   /// <summary>
 	   /// Max data length in page packet in memory bank
 	   /// </summary>
-	   protected internal int maxPacketDataLength;
+	   protected internal int maxPacketDataLength = 0;
 
 	   /// <summary>
 	   /// Flag if memory bank has page auto-CRC generation

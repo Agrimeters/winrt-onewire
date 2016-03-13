@@ -283,8 +283,8 @@ namespace com.dalsemi.onewire.adapter
 	   ///          result of this operation </returns>
 	   public virtual int dataBytes(byte[] dataBytesValue)
 	   {
-		  byte byte_value;
-		  int i, j;
+            //TODO		  byte byte_value;
+            int i; //TODO, j;
 
 		  // provide debug output
 		  if (doDebugMessages)
@@ -623,10 +623,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <param name="len"> </param>
 	   public virtual void interpretDataBytes(byte[] dataByteResponse, int responseOffset, byte[] result, int offset, int len)
 	   {
-		  byte result_byte;
-		  int temp_offset, i, j;
-
-		  for (i = 0; i < len; i++)
+		  for (var i = 0; i < len; i++)
 		  {
 			 // convert the rest to OneWireIOExceptions
              result[offset + i] = (byte)dataByteResponse[responseOffset + i];

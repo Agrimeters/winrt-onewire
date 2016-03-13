@@ -105,7 +105,7 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// DS9097U chip revision 1 </summary>
-	   public const byte CHIP_VERSION1 = 0x04;
+	   public const byte CHIP_VERSION1 = 0x01;
 
 	   /// <summary>
 	   /// DS9097U chip revision mask </summary>

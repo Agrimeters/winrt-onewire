@@ -666,30 +666,30 @@ namespace com.dalsemi.onewire.adapter
 
             byte val = (byte)((parameter << 1) | CONFIG_MASK);
 
-            switch (parameter)
-            {
-                case 0x01:
-                    Debug.WriteLine("<< [PDSRC]        | {0:X02}", val);
-                    break;
-                case 0x02:
-                    Debug.WriteLine("<< [PPD]          | {0:X02}", val);
-                    break;
-                case 0x03:
-                    Debug.WriteLine("<< [SPUD]         | {0:X02}", val);
-                    break;
-                case 0x04:
-                    Debug.WriteLine("<< [W1LT]         | {0:X02}", val);
-                    break;
-                case 0x05:
-                    Debug.WriteLine("<< [DSO/W0RT]     | {0:X02}", val);
-                    break;
-                case 0x06:
-                    Debug.WriteLine("<< [LOAD]         | {0:X02}", val);
-                    break;
-                case 0x07:
-                    Debug.WriteLine("<< [RBR]          | {0:X02}", val);
-                    break;
-            }
+            //switch (parameter)
+            //{
+            //    case 0x01:
+            //        Debug.WriteLine("<< [PDSRC]        | {0:X02}", val);
+            //        break;
+            //    case 0x02:
+            //        Debug.WriteLine("<< [PPD]          | {0:X02}", val);
+            //        break;
+            //    case 0x03:
+            //        Debug.WriteLine("<< [SPUD]         | {0:X02}", val);
+            //        break;
+            //    case 0x04:
+            //        Debug.WriteLine("<< [W1LT]         | {0:X02}", val);
+            //        break;
+            //    case 0x05:
+            //        Debug.WriteLine("<< [DSO/W0RT]     | {0:X02}", val);
+            //        break;
+            //    case 0x06:
+            //        Debug.WriteLine("<< [LOAD]         | {0:X02}", val);
+            //        break;
+            //    case 0x07:
+            //        Debug.WriteLine("<< [RBR]          | {0:X02}", val);
+            //        break;
+            //}
 
 		  // append paramter get
           packet.writer.Write(val);
@@ -723,30 +723,30 @@ namespace com.dalsemi.onewire.adapter
 
           byte val = (byte)(((parameter << 4) | parameterValue) | CONFIG_MASK);
 
-          switch (parameter)
-            {
-                case 0x01:
-                    Debug.WriteLine(">> [PDSRC]    = {0:X02} | {1:X02}", parameterValue, val);
-                    break;
-                case 0x02:
-                    Debug.WriteLine(">> [PPD]      = {0:X02} | {1:X02}", parameterValue, val);
-                    break;
-                case 0x03:
-                    Debug.WriteLine(">> [SPUD]     = {0:X02} | {1:X02}", parameterValue, val);
-                    break;
-                case 0x04:
-                    Debug.WriteLine(">> [W1LT]     = {0:X02} | {1:X02}", parameterValue, val);
-                    break;
-                case 0x05:
-                    Debug.WriteLine(">> [DSO/W0RT] = {0:X02} | {1:X02}", parameterValue, val);
-                    break;
-                case 0x06:
-                    Debug.WriteLine(">> [LOAD]     = {0:X02} | {1:X02}", parameterValue, val);
-                    break;
-                case 0x07:
-                    Debug.WriteLine(">> [RBR]      = {0:X02} | {1:X02}", parameterValue, val);
-                    break;
-            }
+          //switch (parameter)
+          //  {
+          //      case 0x01:
+          //          Debug.WriteLine(">> [PDSRC]    = {0:X02} | {1:X02}", parameterValue, val);
+          //          break;
+          //      case 0x02:
+          //          Debug.WriteLine(">> [PPD]      = {0:X02} | {1:X02}", parameterValue, val);
+          //          break;
+          //      case 0x03:
+          //          Debug.WriteLine(">> [SPUD]     = {0:X02} | {1:X02}", parameterValue, val);
+          //          break;
+          //      case 0x04:
+          //          Debug.WriteLine(">> [W1LT]     = {0:X02} | {1:X02}", parameterValue, val);
+          //          break;
+          //      case 0x05:
+          //          Debug.WriteLine(">> [DSO/W0RT] = {0:X02} | {1:X02}", parameterValue, val);
+          //          break;
+          //      case 0x06:
+          //          Debug.WriteLine(">> [LOAD]     = {0:X02} | {1:X02}", parameterValue, val);
+          //          break;
+          //      case 0x07:
+          //          Debug.WriteLine(">> [RBR]      = {0:X02} | {1:X02}", parameterValue, val);
+          //          break;
+          //  }
 
 		  // append the paramter set with value
           packet.writer.Write(val);
@@ -865,13 +865,13 @@ namespace com.dalsemi.onewire.adapter
 		  {
 
 			 // retrieve the chip version and program voltage state
-			 uState.revision = (byte)(UAdapterState.CHIP_VERSION_MASK & resetResponse);
+			 uState.revision = (byte)((UAdapterState.CHIP_VERSION_MASK & resetResponse) >> 2);
 			 uState.programVoltageAvailable = ((UAdapterState.PROGRAM_VOLTAGE_MASK & resetResponse) != 0);
 
 			 // provide debug output
 			 if (doDebugMessages)
 			 {
-				Debug.WriteLine("DEBUG: UPacketbuilder-reset response " + ((int) resetResponse & 0x00FF).ToString("x"));
+				Debug.WriteLine("DEBUG: UPacketbuilder-reset response 0x{0:X02}", resetResponse & 0xFF);
 			 }
 
 			 // convert the response byte to the OneWire reset result

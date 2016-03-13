@@ -70,7 +70,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <summary>
 	   /// Turns on extra debugging output
 	   /// </summary>
-	   internal const bool DEBUG = false;
+	   internal const bool DEBUG = true;
 
 	   /// <summary>
 	   /// Cache of 1-Wire Address

@@ -1778,10 +1778,10 @@ namespace com.dalsemi.onewire.adapter
 	   /// <summary>
 	   /// Returns a hashcode for this object </summary>
 	   /// <returns> a hascode for this object </returns>
-	   /*public int hashCode()
+	   public override int GetHashCode()
 	   {
-	      return this.toString().hashCode();
-	   }*/
+            return base.GetHashCode();
+	   }
 
 	   /// <summary>
 	   /// Returns true if the given object is the same or equivalent

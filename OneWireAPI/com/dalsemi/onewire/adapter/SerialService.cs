@@ -33,18 +33,11 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         private DataWriter writer = null;
         /// <summary>
-        /// The DeviceInformation device id used to open the serial port</summary>
-        private string deviceId;
-        /// <summary>
         /// The hash code of the thread that currently owns this serial port </summary>
         //private int currentThreadHash = 0;
         /// <summary>
         /// temporary array, used for converting characters to bytes </summary>
         private byte[] tempArray = new byte[128];
-        /// <summary>
-        /// used to end the Object.wait loop in readWithTimeout method </summary>
-        //private bool dataAvailable = false;
-
         /// <summary>
         /// Vector of thread hash codes that have done an open but no close </summary>
         private readonly ArrayList users = new ArrayList(4);
@@ -255,7 +248,7 @@ namespace com.dalsemi.onewire.adapter
         }
 
 
-        public virtual async void flush()
+        public virtual void flush()
         {
             //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
             if (DEBUG)
@@ -269,16 +262,8 @@ namespace com.dalsemi.onewire.adapter
                 throw new System.IO.IOException("Port Not Open");
             }
 
+            //await serialPort.OutputStream.FlushAsync();
             // thows: "Exception thrown: 'System.NotImplementedException' in OneWireAPI.dll"
-            //var x = await serialPort.OutputStream.FlushAsync();
-            //var t = Task.Run(async () =>
-            //{
-            //    var timeout = serialPort.ReadTimeout;
-            //    serialPort.ReadTimeout = new TimeSpan(0, 0, 0, 0, 1);
-            //    await reader.LoadAsync(1024);
-            //    serialPort.ReadTimeout = timeout;
-            //});
-            //t.Wait();
         }
 
         public virtual void write(byte data)
@@ -422,9 +407,6 @@ namespace com.dalsemi.onewire.adapter
             DeviceInformationCollection devList =
                 await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(aqs, null);
 
-            if (devList.Count == 0)
-                throw new System.IO.IOException("Failed to open (" + PortName + ")");
-
             return devList[0];
         }
 
@@ -459,7 +441,7 @@ namespace com.dalsemi.onewire.adapter
                     devInfo = await GetDeviceInformation(comPortName);
 
                     if(devInfo == null)
-                        throw new System.IO.IOException("Failed to open (" + comPortName + ")");
+                        throw new System.IO.IOException("Failed to open PortName: " + comPortName);
 
                     var device = await SerialDevice.FromIdAsync(devInfo.Id);
 

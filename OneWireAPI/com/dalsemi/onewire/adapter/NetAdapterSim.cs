@@ -1361,14 +1361,14 @@ namespace com.dalsemi.onewire.adapter
 	   /// Private inner class for servicing new connections.
 	   /// Can be run in it's own thread or in the same thread.
 	   /// </summary>
-	   private class SocketHandler //TODO : Runnable
+	   private class SocketHandler
 	   {
 		   private readonly NetAdapterSim outerInstance;
 
 		  /// <summary>
 		  /// The connection that is being serviced.
 		  /// </summary>
-		  internal NetAdapterConstants_Connection conn;
+		  internal NetAdapterConstants_Connection conn = null;
 
 		  /// <summary>
 		  /// indicates whether or not the handler is currently running
@@ -1410,7 +1410,11 @@ namespace com.dalsemi.onewire.adapter
 			 byte[] chlg = new byte[8];
 			 rand.NextBytes(chlg);
 			 conn.output.WriteBytes(chlg);
-			 conn.output.StoreAsync();
+             var t = Task.Run(async () =>
+             {
+                 await conn.output.StoreAsync();
+             });
+             t.Wait();
 
 			 // compute the crc of the secret and the challenge
 			 int crc = CRC16.compute(outerInstance.netAdapterSecret, 0);
@@ -1420,13 +1424,21 @@ namespace com.dalsemi.onewire.adapter
 			 {
 				conn.output.WriteByte(NetAdapterConstants_Fields.RET_FAILURE);
 				conn.output.WriteString("Client Authentication Failed");
-				conn.output.StoreAsync();
+                t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 				throw new System.IO.IOException("authentication failed");
 			 }
 			 else
 			 {
 				conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
-				conn.output.StoreAsync();
+                t = Task.Run(async () =>
+                {
+                    await conn.output.StoreAsync();
+                });
+                t.Wait();
 			 }
 		  }
 

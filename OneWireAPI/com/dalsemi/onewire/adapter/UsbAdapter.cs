@@ -166,12 +166,12 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Byte array of families to include in search
         /// </summary>
-        private byte[] include;
+        private byte[] include = null;
 
         /// <summary>
         /// Byte array of families to exclude from search
         /// </summary>
-        private byte[] exclude;
+        private byte[] exclude = null;
 
         //--------
         //-------- Methods

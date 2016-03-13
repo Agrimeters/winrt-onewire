@@ -536,7 +536,7 @@ namespace com.dalsemi.onewire.adapter
                             reset();
                         }
 
-                        version_string = version_string + ", version " + (uState.revision >> 2);
+                        version_string = version_string + ", version " + uState.revision;
 
                         return version_string;
                     }
