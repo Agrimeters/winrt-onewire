@@ -45,27 +45,31 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// Parameter selection, pull-down slew rate </summary>
-	   public const byte PARAMETER_SLEW = 0x10;
+	   public const byte PARAMETER_SLEW = 0x01;
 
 	   /// <summary>
 	   /// Parameter selection, 12 volt pulse time </summary>
-	   public const byte PARAMETER_12VPULSE = 0x20;
+	   public const byte PARAMETER_12VPULSE = 0x02;
 
 	   /// <summary>
 	   /// Parameter selection, 5 volt pulse time </summary>
-	   public const byte PARAMETER_5VPULSE = 0x30;
+	   public const byte PARAMETER_5VPULSE = 0x03;
 
 	   /// <summary>
 	   /// Parameter selection, write 1 low time </summary>
-	   public const byte PARAMETER_WRITE1LOW = 0x40;
+	   public const byte PARAMETER_WRITE1LOW = 0x04;
 
 	   /// <summary>
 	   /// Parameter selection, sample offset </summary>
-	   public const byte PARAMETER_SAMPLEOFFSET = 0x50;
+	   public const byte PARAMETER_SAMPLEOFFSET = 0x05;
 
-	   /// <summary>
-	   /// Parameter selection, baud rate </summary>
-	   public const byte PARAMETER_BAUDRATE = 0x70;
+        /// <summary>
+        /// Parameter selection, load </summary>
+        public const byte PARAMETER_LOAD = 0x06;
+
+        /// <summary>
+        /// Parameter selection, baud rate </summary>
+        public const byte PARAMETER_BAUDRATE = 0x07;
 
 	   // Pull down slew rate times 
 

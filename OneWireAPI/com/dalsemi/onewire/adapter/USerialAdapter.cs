@@ -2644,6 +2644,7 @@ namespace com.dalsemi.onewire.adapter
                 // send the timing byte
                 serial.flush();
                 serial.write(UPacketBuilder.FUNCTION_RESET);
+                serial.readWithTimeout(1);
                 serial.flush();
             }
             catch (IOException e)
@@ -2691,6 +2692,7 @@ namespace com.dalsemi.onewire.adapter
                 // send the timing byte
                 serial.flush();
                 serial.write(UPacketBuilder.FUNCTION_RESET);
+                serial.readWithTimeout(1);
                 serial.flush();
             }
             catch (IOException e)

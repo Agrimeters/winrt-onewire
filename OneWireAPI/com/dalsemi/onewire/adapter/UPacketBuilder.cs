@@ -664,8 +664,35 @@ namespace com.dalsemi.onewire.adapter
 		  // set to command mode
 		  setToCommandMode();
 
+            byte val = (byte)((parameter << 1) | CONFIG_MASK);
+
+            switch (parameter)
+            {
+                case 0x01:
+                    Debug.WriteLine("<< [PDSRC]        | {0:X02}", val);
+                    break;
+                case 0x02:
+                    Debug.WriteLine("<< [PPD]          | {0:X02}", val);
+                    break;
+                case 0x03:
+                    Debug.WriteLine("<< [SPUD]         | {0:X02}", val);
+                    break;
+                case 0x04:
+                    Debug.WriteLine("<< [W1LT]         | {0:X02}", val);
+                    break;
+                case 0x05:
+                    Debug.WriteLine("<< [DSO/W0RT]     | {0:X02}", val);
+                    break;
+                case 0x06:
+                    Debug.WriteLine("<< [LOAD]         | {0:X02}", val);
+                    break;
+                case 0x07:
+                    Debug.WriteLine("<< [RBR]          | {0:X02}", val);
+                    break;
+            }
+
 		  // append paramter get
-          packet.writer.Write((byte)(CONFIG_MASK | parameter >> 3));
+          packet.writer.Write(val);
 
 		  // add to the return number of bytes
 		  totalReturnLength++;
@@ -694,8 +721,35 @@ namespace com.dalsemi.onewire.adapter
 		  // set to command mode
 		  setToCommandMode();
 
+          byte val = (byte)(((parameter << 4) | parameterValue) | CONFIG_MASK);
+
+          switch (parameter)
+            {
+                case 0x01:
+                    Debug.WriteLine(">> [PDSRC]    = {0:X02} | {1:X02}", parameterValue, val);
+                    break;
+                case 0x02:
+                    Debug.WriteLine(">> [PPD]      = {0:X02} | {1:X02}", parameterValue, val);
+                    break;
+                case 0x03:
+                    Debug.WriteLine(">> [SPUD]     = {0:X02} | {1:X02}", parameterValue, val);
+                    break;
+                case 0x04:
+                    Debug.WriteLine(">> [W1LT]     = {0:X02} | {1:X02}", parameterValue, val);
+                    break;
+                case 0x05:
+                    Debug.WriteLine(">> [DSO/W0RT] = {0:X02} | {1:X02}", parameterValue, val);
+                    break;
+                case 0x06:
+                    Debug.WriteLine(">> [LOAD]     = {0:X02} | {1:X02}", parameterValue, val);
+                    break;
+                case 0x07:
+                    Debug.WriteLine(">> [RBR]      = {0:X02} | {1:X02}", parameterValue, val);
+                    break;
+            }
+
 		  // append the paramter set with value
-          packet.writer.Write((byte)((CONFIG_MASK | parameter) | parameterValue));
+          packet.writer.Write(val);
 
 		  // add to the return number of bytes
 		  totalReturnLength++;
