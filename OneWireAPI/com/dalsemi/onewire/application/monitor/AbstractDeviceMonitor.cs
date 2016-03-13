@@ -73,7 +73,7 @@ namespace com.dalsemi.onewire.application.monitor
 	/// 
 	/// @author SH
 	/// @version 1.00 </seealso>
-	public abstract class AbstractDeviceMonitor //TODO : Runnable
+	public abstract class AbstractDeviceMonitor
 	{
 	   //--------
 	   //-------- Constants

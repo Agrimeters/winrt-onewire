@@ -161,7 +161,7 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// Enable/disable debug messages </summary>
-	   public static bool doDebugMessages = true;
+	   public static bool doDebugMessages = false;
 
 	   //--------
 	   //-------- Variables
@@ -350,7 +350,7 @@ namespace com.dalsemi.onewire.adapter
 		  // provide debug output
 		  if (doDebugMessages)
 		  {
-			 Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[] length " + dataBytesValue.Length);
+			 Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[], Length = " + dataBytesValue.Length);
 		  }
 
 		  // record the current count location
@@ -378,7 +378,7 @@ namespace com.dalsemi.onewire.adapter
 				// provide debug output
 				if (doDebugMessages)
 				{
-				   Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[] byte[{0:X02}]", dataBytesValue);
+				   Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[], byte[{0:X02}]", dataBytesValue[i]);
 				}
 
 				// check for duplicates needed for special characters
@@ -397,7 +397,7 @@ namespace com.dalsemi.onewire.adapter
 				// provide debug output
 				if (doDebugMessages)
 				{
-				   Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[] returnlength " + packet.returnLength + " bufferLength " + packet.buffer.Length);
+				   Debug.WriteLine("DEBUG: UPacketbuilder-dataBytes[], returnlength = " + packet.returnLength + ", bufferLength = " + packet.buffer.Length);
 				}
 
 				// check for packet too large or not streaming bytes
@@ -426,7 +426,7 @@ namespace com.dalsemi.onewire.adapter
 
 		  for (int i = 0; i < len; i++)
 		  {
-			 temp_ch [i] = (byte) dataBytesValue [off + i];
+			 temp_ch [i] = dataBytesValue [off + i];
 		  }
 
 		  return dataBytes(temp_ch);
@@ -544,19 +544,19 @@ namespace com.dalsemi.onewire.adapter
 
 		  for (int i = 0; i < 8; i++)
 		  {
-			 id [i] = (byte)(mState.ID [i] & 0xFF);
+			 id [i] = mState.ID [i];
 		  }
 
 		  // clear the string
 		  for (int i = 0; i < 16; i++)
 		  {
-			 search_sequence [i] = (byte)0;
+			 search_sequence [i] = 0;
 		  }
 
 		  // provide debug output
 		  if (doDebugMessages)
 		  {
-			 Debug.WriteLine("DEBUG: UPacketbuilder-search [" + ((int) id.Length).ToString("x") + "]");
+			 Debug.WriteLine("DEBUG: UPacketbuilder-search, [{0:X02}]", id.Length);
 		  }
 
 		  // only modify bits if not the first search
@@ -666,35 +666,10 @@ namespace com.dalsemi.onewire.adapter
 		  // set to command mode
 		  setToCommandMode();
 
-            byte val = (byte)((parameter << 1) | CONFIG_MASK);
-
-            //switch (parameter)
-            //{
-            //    case 0x01:
-            //        Debug.WriteLine("<< [PDSRC]        | {0:X02}", val);
-            //        break;
-            //    case 0x02:
-            //        Debug.WriteLine("<< [PPD]          | {0:X02}", val);
-            //        break;
-            //    case 0x03:
-            //        Debug.WriteLine("<< [SPUD]         | {0:X02}", val);
-            //        break;
-            //    case 0x04:
-            //        Debug.WriteLine("<< [W1LT]         | {0:X02}", val);
-            //        break;
-            //    case 0x05:
-            //        Debug.WriteLine("<< [DSO/W0RT]     | {0:X02}", val);
-            //        break;
-            //    case 0x06:
-            //        Debug.WriteLine("<< [LOAD]         | {0:X02}", val);
-            //        break;
-            //    case 0x07:
-            //        Debug.WriteLine("<< [RBR]          | {0:X02}", val);
-            //        break;
-            //}
+          byte encoded = (byte)((parameter << 1) | CONFIG_MASK);
 
 		  // append paramter get
-          packet.writer.Write(val);
+          packet.writer.Write(encoded);
 
 		  // add to the return number of bytes
 		  totalReturnLength++;
@@ -723,35 +698,10 @@ namespace com.dalsemi.onewire.adapter
 		  // set to command mode
 		  setToCommandMode();
 
-          byte val = (byte)(((parameter << 4) | parameterValue) | CONFIG_MASK);
-
-          //switch (parameter)
-          //  {
-          //      case 0x01:
-          //          Debug.WriteLine(">> [PDSRC]    = {0:X02} | {1:X02}", parameterValue, val);
-          //          break;
-          //      case 0x02:
-          //          Debug.WriteLine(">> [PPD]      = {0:X02} | {1:X02}", parameterValue, val);
-          //          break;
-          //      case 0x03:
-          //          Debug.WriteLine(">> [SPUD]     = {0:X02} | {1:X02}", parameterValue, val);
-          //          break;
-          //      case 0x04:
-          //          Debug.WriteLine(">> [W1LT]     = {0:X02} | {1:X02}", parameterValue, val);
-          //          break;
-          //      case 0x05:
-          //          Debug.WriteLine(">> [DSO/W0RT] = {0:X02} | {1:X02}", parameterValue, val);
-          //          break;
-          //      case 0x06:
-          //          Debug.WriteLine(">> [LOAD]     = {0:X02} | {1:X02}", parameterValue, val);
-          //          break;
-          //      case 0x07:
-          //          Debug.WriteLine(">> [RBR]      = {0:X02} | {1:X02}", parameterValue, val);
-          //          break;
-          //  }
+          byte encoded = (byte)(((parameter << 4) | parameterValue) | CONFIG_MASK);
 
 		  // append the paramter set with value
-          packet.writer.Write(val);
+          packet.writer.Write(encoded);
 
 		  // add to the return number of bytes
 		  totalReturnLength++;
@@ -840,15 +790,15 @@ namespace com.dalsemi.onewire.adapter
 
 				   if (interpretOneWireBit(dataByteResponse [temp_offset + j]))
 				   {
-					  result_byte |= (byte)0x80;
+					  result_byte |= 0x80;
 				   }
 				}
 
-				result[offset + i] = (byte)(result_byte & 0xFF);
+				result[offset + i] = result_byte;
 			 }
 			 else
 			 {
-				result[offset + i] = (byte)dataByteResponse[responseOffset + i];
+				result[offset + i] = dataByteResponse[responseOffset + i];
 			 }
 		  }
 	   }
@@ -1036,7 +986,7 @@ namespace com.dalsemi.onewire.adapter
 			 }
 		  }
 
-		  return (byte)(result_byte & 0xFF);
+		  return result_byte;
 	   }
 
 	   //--------

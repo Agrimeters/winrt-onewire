@@ -43,7 +43,7 @@ namespace com.dalsemi.onewire.adapter
 	/// @author SH
 	/// @version 1.00
 	/// </summary>
-	public class MulticastListener //TODO: Runnable
+	public class MulticastListener
 	{
 	   /// <summary>
 	   /// boolean flag to turn on debug messages </summary>

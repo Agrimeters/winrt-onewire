@@ -42,7 +42,6 @@ namespace com.dalsemi.onewire
     using System.IO;
     using System.Threading.Tasks;
     using Windows.Devices.SerialCommunication;
-    using Windows.Storage.Streams;
     /// <summary>
     /// The OneWireAccessProvider class manages the Dallas Semiconductor
     /// adapter class derivatives of <code>DSPortAdapter</code>.  An enumeration of all
@@ -174,7 +173,6 @@ namespace com.dalsemi.onewire
 	   {
 		  Debug.WriteLine("1-Wire API for C# (WinRT), v" + owapi_version);
 		  Debug.WriteLine("Copyright (C) 1999-2006 Dallas Semiconductor Corporation, All Rights Reserved.");
-          Debug.WriteLine("Copyright (C) 2016 Joel Winarske, All Rights Reserved.");
           Debug.WriteLine("");
 		  Debug.WriteLine("Default Adapter: " + getProperty("onewire.adapter.default"));
 		  Debug.WriteLine("   Default Port: " + getProperty("onewire.port.default"));
@@ -456,7 +454,7 @@ namespace com.dalsemi.onewire
                 {
                     if (st[0].StartsWith("#"))
                     {
-                        Debug.WriteLine("Commented out property >> " + st[0] + "=" + st[1]);
+                        //Debug.WriteLine("Commented out property >> " + st[0] + "=" + st[1]);
                         continue;
                     }
 
@@ -527,7 +525,7 @@ namespace com.dalsemi.onewire
                             try
                             {
                                 var localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-                                Debug.WriteLine(Windows.Storage.ApplicationData.Current.LocalFolder.Path);
+                                //Debug.WriteLine(Windows.Storage.ApplicationData.Current.LocalFolder.Path);
 
                                 if(File.Exists(localFolder.Path + "\\onewire.properties"))
                                 {
@@ -560,7 +558,7 @@ namespace com.dalsemi.onewire
                 {
                     if(propertyTable == null)
                     {
-                        Debug.WriteLine("Loading -> OneWireAPI.Resources.onewire_properties");
+                        //Debug.WriteLine("Loading -> OneWireAPI.Resources.onewire_properties");
 
                         propertyTable = new Dictionary<string, string>();
 
@@ -571,21 +569,21 @@ namespace com.dalsemi.onewire
                             loadTable(propertyTable, reader);
                         }
 
-                        Debug.WriteLine("Property Table loaded!");
-                        foreach(var key in propertyTable.Keys)
-                        {
-                            Debug.WriteLine("\t" + key + "=" + propertyTable[key]);
-                        }
+                        //Debug.WriteLine("Property Table loaded!");
+                        //foreach(var key in propertyTable.Keys)
+                        //{
+                        //    Debug.WriteLine("\t" + key + "=" + propertyTable[key]);
+                        //}
                     }
                 }
 
                 if (propertyTable != null)
                 {
                     propertyTable.TryGetValue(propName, out ret_str);
-                    if (ret_str != null)
-                    {
-                        Debug.WriteLine("Found: " + propName + "=" + ret_str);
-                    }
+                    //if (ret_str != null)
+                    //{
+                    //    Debug.WriteLine("Found: " + propName + "=" + ret_str);
+                    //}
                 }
 
                 // if STILL not found then just pick DS9097U on 'smartDefaultPort'

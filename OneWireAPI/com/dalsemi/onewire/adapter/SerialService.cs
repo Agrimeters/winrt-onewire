@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
 using Windows.Devices.SerialCommunication;
 using Windows.Storage.Streams;
-using Windows.Devices.Enumeration;
-using System.Text;
 
 namespace com.dalsemi.onewire.adapter
 {
     internal partial class SerialService
     {
-        private const bool DEBUG = true;
+        private const bool DEBUG = false;
         /// <summary>
         /// The serial port name of this object (e.g. COM1, /dev/ttyS0) </summary>
         private readonly string comPortName;
@@ -446,12 +444,20 @@ namespace com.dalsemi.onewire.adapter
                     var device = await SerialDevice.FromIdAsync(devInfo.Id);
 
                     if (device == null)
-                        Debugger.Break();
+                    {
+                        Debug.WriteLine("Your Package.appxmanifest Capabilities section is missing:");
+                        Debug.WriteLine("<DeviceCapability Name = \"serialcommunication\">");
+                        Debug.WriteLine("  <Device Id = \"any\">");
+                        Debug.WriteLine("    <Function Type = \"name:serialPort\"/>");
+                        Debug.WriteLine("  </Device>");
+                        Debug.WriteLine("</DeviceCapability>");
+
+                        throw new System.IO.IOException("Failed to open (" + comPortName + ") due to Package.appxmanifest problem!");
+                    }
 
                     writer = new DataWriter(device.OutputStream);
                     reader = new DataReader(device.InputStream);
                     reader.InputStreamOptions = InputStreamOptions.Partial;
-                    //await reader.LoadAsync(0);
 
                     return device;
                 });
@@ -468,18 +474,15 @@ namespace com.dalsemi.onewire.adapter
 
 
                 // flow i/o
-//TODO                serialPort.Handshake = SerialHandshake.None;
+                // This generates an exception on Keyspan USA-19HS
+//TODO                    serialPort.Handshake = SerialHandshake.None;
 
                 // bug workaround
                 write((byte)0);
 
                 // settings
-                System.Diagnostics.Debug.WriteLine("ReadTimeout: " + serialPort.ReadTimeout.Milliseconds);
-                System.Diagnostics.Debug.WriteLine("WriteTimeout: " + serialPort.WriteTimeout.Milliseconds);
                 serialPort.ReadTimeout = new System.TimeSpan(0,0,0,0,100);
                 serialPort.WriteTimeout = new System.TimeSpan(0,0,0,0,100);
-                System.Diagnostics.Debug.WriteLine("ReadTimeout: " + serialPort.ReadTimeout.Milliseconds);
-                System.Diagnostics.Debug.WriteLine("WriteTimeout: " + serialPort.WriteTimeout.Milliseconds);
 
                 // set baud rate
                 serialPort.BaudRate = 9600;
@@ -487,6 +490,7 @@ namespace com.dalsemi.onewire.adapter
                 serialPort.StopBits = SerialStopBitCount.One;
                 serialPort.Parity = SerialParity.None;
 
+                // power adapter
                 serialPort.IsDataTerminalReadyEnabled = true;
                 serialPort.IsRequestToSendEnabled = true;
 

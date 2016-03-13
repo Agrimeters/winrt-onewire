@@ -76,7 +76,7 @@ namespace com.dalsemi.onewire.adapter
     /// 
     /// @author SH
     /// @version    1.00, 9 Jan 2002 </seealso>
-    public class NetAdapterHost : NetAdapterConstants //Runnable, 
+    public class NetAdapterHost : NetAdapterConstants
     {
         /// <summary>
         /// random number generator, used to issue challenges to client </summary>
@@ -347,7 +347,6 @@ namespace com.dalsemi.onewire.adapter
                 // this byte array is 5 because length is used to determine different
                 // packet types by client
                 byte[] listenPortBytes = new byte[5];
-                //TODO Convert.toByteArray(port).CopyTo(listenPortBytes, 0);
                 Encoding.UTF8.GetBytes(port.ToString()).CopyTo(listenPortBytes, 0);
                 listenPortBytes[4] = 0x0FF;
 
