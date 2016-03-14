@@ -4,6 +4,7 @@ using System.Collections;
 using System.Threading;
 using System.Text;
 using System.Net.Sockets;
+using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -127,6 +128,11 @@ namespace com.dalsemi.onewire.adapter
 	   /// <summary>
 	   /// timeout for socket receive, in seconds </summary>
 	   protected internal int timeoutInSeconds = 30;
+
+       /// <summary>
+       /// Timer used to get millisecond count
+       /// </summary>
+       private static Stopwatch stopWatch = null;
 
 	   /// <summary>
 	   /// <P>Creates an instance of a NetAdapterSim which wraps the provided
@@ -421,12 +427,6 @@ namespace com.dalsemi.onewire.adapter
             }
         }
 
-        private static readonly System.DateTime Jan1st1970 = new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
-        internal static long CurrentUnixTimeMillis()
-        {
-            return (long)(System.DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
-        }
-
         /// <summary>
         /// Run method for threaded NetAdapterSim.  Maintains server socket which
         /// waits for incoming connections.  Whenever a connection is received
@@ -444,7 +444,7 @@ namespace com.dalsemi.onewire.adapter
 				//TODO sock = serverSocket.accept();
 				// reset time of last command, so we don't simulate a bunch of
 				// unneccessary time
-				timeOfLastCommand = CurrentUnixTimeMillis();
+				timeOfLastCommand = stopWatch.ElapsedMilliseconds;
 				handleConnection(sock);
 			 }
 			 catch (System.IO.IOException)
@@ -600,7 +600,7 @@ namespace com.dalsemi.onewire.adapter
 		  }
 		  else
 		  {
-			 long timeDelta = CurrentUnixTimeMillis() - timeOfLastCommand;
+			 long timeDelta = stopWatch.ElapsedMilliseconds - timeOfLastCommand;
 			 if (SIM_DEBUG && logFile != null)
 			 {
 				logFile.WriteLine("general: timeDelta=" + timeDelta);
@@ -743,7 +743,7 @@ namespace com.dalsemi.onewire.adapter
 				conn.output.WriteString(owe.ToString());
 				await conn.output.StoreAsync();
 			 }
-			 timeOfLastCommand = CurrentUnixTimeMillis();
+			 timeOfLastCommand = stopWatch.ElapsedMilliseconds;
 		  }
 	   }
 
@@ -1859,8 +1859,13 @@ namespace com.dalsemi.onewire.adapter
 			 System.Diagnostics.Debug.WriteLine("   Simulation Debugging is: " + (NetAdapterSim.SIM_DEBUG?"enabled":"disabled"));
 		  }
 
+          // start incrementing the timer
+          stopWatch = new Stopwatch();
+          stopWatch.Start();
+
           var t = Task.Run(() =>
           {
+
               NetAdapterSim host = new NetAdapterSim(execCmd, logFilename);
               System.Diagnostics.Debug.WriteLine("Device Address=" + Address.ToString(host.fakeAddress));
 

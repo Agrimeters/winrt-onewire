@@ -437,8 +437,8 @@ namespace com.dalsemi.onewire.container
 	   {
 		   get
 		   {
-			  return Convert.ToInt64(address); //TODO Address.toLong(address);
-		   }
+			  return BitConverter.ToInt64(address, 0); //TODO  Address.toLong(address);
+            }
 	   }
 
 	   /// <summary>

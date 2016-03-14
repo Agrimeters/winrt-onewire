@@ -2,9 +2,9 @@
 
 namespace com.dalsemi.onewire
 {
-    internal class Character
+    public class Character
     {
-        internal static int digit(char ch, int radix)
+        public static int digit(char ch, int radix)
         {
             //Returns the numeric value of the character ch in the specified radix.
 
