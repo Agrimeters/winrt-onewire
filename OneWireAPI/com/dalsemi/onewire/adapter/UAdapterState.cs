@@ -55,21 +55,25 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// DS9097U brick baud rate expressed for the DS2480 ichip, 19200 baud </summary>
-	   public const byte BAUD_19200 = 0x02;
+	   public const byte BAUD_19200 = 0x01;
 
 	   /// <summary>
 	   /// DS9097U brick baud rate expressed for the DS2480 ichip, 57600 baud </summary>
-	   public const byte BAUD_57600 = 0x04;
+	   public const byte BAUD_57600 = 0x02;
 
 	   /// <summary>
 	   /// DS9097U brick baud rate expressed for the DS2480 ichip, 115200 baud </summary>
-	   public const byte BAUD_115200 = 0x06;
+	   public const byte BAUD_115200 = 0x03;
 
-	   //------- DS9097U speed modes
+        /// <summary>
+        /// DS9097U brick baud rate value mask</summary>
+        public const byte BAUD_VALUE_MASK = (0x07 << 1);
 
-	   /// <summary>
-	   /// DS9097U speed mode, regular speed </summary>
-	   public const byte USPEED_REGULAR = 0x00;
+        //------- DS9097U speed modes
+
+        /// <summary>
+        /// DS9097U speed mode, regular speed </summary>
+        public const byte USPEED_REGULAR = 0x00;
 
 	   /// <summary>
 	   /// DS9097U speed mode, flexible speed for long lines </summary>

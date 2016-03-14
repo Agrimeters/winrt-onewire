@@ -11,17 +11,13 @@ namespace com.dalsemi.onewire.adapter
 {
     internal partial class SerialService
     {
-        private const bool DEBUG = false;
+        private const bool DEBUG = true;
         /// <summary>
         /// The serial port name of this object (e.g. COM1, /dev/ttyS0) </summary>
         private readonly string comPortName;
         /// <summary>
         /// The serial port object for setting serial port parameters </summary>
         private SerialDevice serialPort = null;
-        /// <summary>
-        /// Device Info for open port
-        /// </summary>
-        private DeviceInformation devInfo = null;
         /// <summary>
         /// Reader
         /// </summary>
@@ -451,15 +447,10 @@ namespace com.dalsemi.onewire.adapter
 
                         if (device == null)
                             throw new System.IO.IOException("Failed to open PortName: " + comPortName);
-
-                        devInfo = await GetDeviceInformation(device.PortName);
-
-                        if (devInfo == null)
-                            throw new System.IO.IOException("Failed to GetDeviceInformation: " + comPortName);
                     }
                     else
                     {
-                        devInfo = await GetDeviceInformation(comPortName);
+                        var devInfo = await GetDeviceInformation(comPortName);
 
                         if (devInfo == null)
                             throw new System.IO.IOException("Failed to open PortName: " + comPortName);
@@ -493,9 +484,6 @@ namespace com.dalsemi.onewire.adapter
                 }
 
                 serialPort = t.Result;
-
-                Debug.WriteLine("Opened " + serialPort.PortName);
-
 
                 // flow i/o
                 // This generates an exception on Keyspan USA-19HS

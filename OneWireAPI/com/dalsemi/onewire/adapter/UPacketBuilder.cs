@@ -161,7 +161,7 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// Enable/disable debug messages </summary>
-	   public static bool doDebugMessages = false;
+	   public static bool doDebugMessages = true;
 
 	   //--------
 	   //-------- Variables
@@ -250,7 +250,7 @@ namespace com.dalsemi.onewire.adapter
 		  packetsVector.Clear();
 
 		  // truncate the packet to 0 length
-		  packet.buffer.Flush(); //TODO .buffer.Length = 0;
+//TODO		  //packet.buffer.Flush(); //TODO .buffer.Length = 0;
 
 		  packet.returnLength = 0;
 
@@ -768,6 +768,11 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		  byte result_byte;
 		  int temp_offset, i, j;
+
+          if (dataByteResponse.Length != len)
+          {
+              throw new OneWireException("Data response is not expected length");
+          }
 
 		  for (i = 0; i < len; i++)
 		  {

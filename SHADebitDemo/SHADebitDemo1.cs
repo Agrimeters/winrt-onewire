@@ -101,7 +101,7 @@ public class SHADebitDemo1
 			try
 			{
                sha_properties = new Properties();
-               sha_properties.load("sha.properties");
+               sha_properties.loadLocalFile("sha.properties");
 			}
 			catch (Exception)
 			{

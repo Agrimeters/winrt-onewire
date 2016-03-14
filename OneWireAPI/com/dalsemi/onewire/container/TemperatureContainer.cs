@@ -149,31 +149,30 @@ namespace com.dalsemi.onewire.container
 	/// @author     DS </seealso>
 	public interface TemperatureContainer : OneWireSensor
 	{
+        //--------
+        //-------- Static Final Variables
+        //--------
 
-	   //--------
-	   //-------- Static Final Variables
-	   //--------
+        /// <summary>
+        /// high temperature alarm </summary>
 
-	   /// <summary>
-	   /// high temperature alarm </summary>
+        /// <summary>
+        /// low temperature alarm </summary>
 
-	   /// <summary>
-	   /// low temperature alarm </summary>
+        //--------
+        //-------- Temperature Feature methods
+        //--------
 
-	   //--------
-	   //-------- Temperature Feature methods
-	   //--------
-
-	   /// <summary>
-	   /// Checks to see if this temperature measuring device has high/low
-	   /// trip alarms.
-	   /// </summary>
-	   /// <returns> <code>true</code> if this <code>TemperatureContainer</code>
-	   ///         has high/low trip alarms
-	   /// </returns>
-	   /// <seealso cref=    #getTemperatureAlarm </seealso>
-	   /// <seealso cref=    #setTemperatureAlarm </seealso>
-	   bool hasTemperatureAlarms();
+        /// <summary>
+        /// Checks to see if this temperature measuring device has high/low
+        /// trip alarms.
+        /// </summary>
+        /// <returns> <code>true</code> if this <code>TemperatureContainer</code>
+        ///         has high/low trip alarms
+        /// </returns>
+        /// <seealso cref=    #getTemperatureAlarm </seealso>
+        /// <seealso cref=    #setTemperatureAlarm </seealso>
+        bool hasTemperatureAlarms();
 
 	   /// <summary>
 	   /// Checks to see if this device has selectable temperature resolution.

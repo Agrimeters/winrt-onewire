@@ -30,32 +30,33 @@ using System.Diagnostics;
  */
 namespace com.dalsemi.onewire.debug
 {
-	using Convert = utils.Convert;
+    using Windows.Storage;
+    using Convert = utils.Convert;
 
-	/// <summary>
-	/// <para>This class is intended to help both developers of the 1-Wire API for
-	/// Java and developers using the 1-Wire API for Java to have a standard
-	/// method for printing debug messages.  Applications that want to see debug messages
-	/// should call  the <code>setDebugMode(bool)</code> method.
-	/// Classes that want to print information under debugging
-	/// circumstances should call the <code>debug(String)</code>
-	/// method.</para>
-	/// 
-	/// <para>Debug printing is turned off by default.</para>
-	/// 
-	/// @version    1.00, 1 Sep 2003
-	/// @author     KA, SH
-	/// </summary>
-	public class Debug
+    /// <summary>
+    /// <para>This class is intended to help both developers of the 1-Wire API for
+    /// Java and developers using the 1-Wire API for Java to have a standard
+    /// method for printing debug messages.  Applications that want to see debug messages
+    /// should call  the <code>setDebugMode(bool)</code> method.
+    /// Classes that want to print information under debugging
+    /// circumstances should call the <code>debug(String)</code>
+    /// method.</para>
+    /// 
+    /// <para>Debug printing is turned off by default.</para>
+    /// 
+    /// @version    1.00, 1 Sep 2003
+    /// @author     KA, SH
+    /// </summary>
+    public class Debug
 	{
 		private static bool DEBUG = false;
 		private static StreamWriter @out = null;
 
-	   /// <summary>
-	   /// Static constructor.  Checks system properties to see if debugging
-	   /// is enabled by default.  Also, will redirect debug output to a log
-	   /// file if specified.
-	   /// </summary>
+	    /// <summary>
+	    /// Static constructor.  Checks system properties to see if debugging
+	    /// is enabled by default.  Also, will redirect debug output to a log
+	    /// file if specified.
+	    /// </summary>
 		static Debug()
 		{
 		   string enable = OneWireAccessProvider.getProperty("onewire.debug");
@@ -73,26 +74,31 @@ namespace com.dalsemi.onewire.debug
 			  string logFile = OneWireAccessProvider.getProperty("onewire.debug.logfile");
 			  if (!string.ReferenceEquals(logFile, null))
 			  {
-				 try
-				 {
-                    @out = new StreamWriter(new FileStream(logFile, FileMode.Create, FileAccess.Write));
-                    @out.AutoFlush = true;
-				 }
-				 catch (System.Exception e)
-				 {
-					@out = null;
-                    DEBUG = false;
-					debug("Error opening log file in Debug Static Constructor", e);
-                 }
-              }
-		   }
+                  // ignore any absolute path provided, only use filename
+                  string[] strtok = logFile.Split(new char[] { '\\' });
+                  StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+                  string logFilePath = localFolder.Path + "\\" + strtok[strtok.Length - 1].Trim();
+
+                  try
+                  {
+                      @out = new StreamWriter(new FileStream(logFilePath, FileMode.Create, FileAccess.Write));
+                      @out.AutoFlush = true;
+				  }
+				  catch (System.Exception e)
+				  {
+				      @out = null;
+                      DEBUG = false;
+					  debug("Error opening log file in Debug Static Constructor", e);
+                  }
+               }
+		    }
 		}
 
-	   /// <summary>
-	   /// Sets the debug printing mode for this application.
-	   /// </summary>
-	   /// @param <code>true</code> to see debug messages, <code>false</code>
-	   ///        to suppress them </param>
+	    /// <summary>
+	    /// Sets the debug printing mode for this application.
+	    /// </summary>
+	    /// @param <code>true</code> to see debug messages, <code>false</code>
+	    ///        to suppress them </param>
 		public static bool DebugMode
 		{
 			set

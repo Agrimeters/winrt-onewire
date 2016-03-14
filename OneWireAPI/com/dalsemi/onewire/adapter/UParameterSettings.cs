@@ -71,11 +71,16 @@ namespace com.dalsemi.onewire.adapter
         /// Parameter selection, baud rate </summary>
         public const byte PARAMETER_BAUDRATE = 0x07;
 
-	   // Pull down slew rate times 
+        /// <summary>
+        /// Parameter selection, baud rate read mask
+        /// </summary>
+        public const byte PARAMETER_BAUDRATE_READ_MASK = 0x70;
 
-	   /// <summary>
-	   /// Pull down slew rate, 15V/us </summary>
-	   public const byte SLEWRATE_15Vus = 0x00;
+        // Pull down slew rate times 
+
+        /// <summary>
+        /// Pull down slew rate, 15V/us </summary>
+        public const byte SLEWRATE_15Vus = 0x00;
 
 	   /// <summary>
 	   /// Pull down slew rate, 2.2V/us </summary>

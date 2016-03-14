@@ -242,7 +242,7 @@ namespace com.dalsemi.onewire.adapter
 
         /// <summary>
         /// Enable/disable debug messages </summary>
-        private static bool doDebugMessages = false;
+        private static bool doDebugMessages = true;
 
         //--------
         //-------- Constructor
@@ -518,7 +518,6 @@ namespace com.dalsemi.onewire.adapter
             get
             {
                 string version_string = "DS2480 based adapter";
-                //TODO bool rt;
 
                 try
                 {
@@ -2484,8 +2483,8 @@ namespace com.dalsemi.onewire.adapter
                     // send command, no response at this baud rate
                     serial.flush();
 
-                    uBuild.Packets.MoveNext();
-                    RawSendPacket pkt = (RawSendPacket)uBuild.Packets.Current; //TODO .nextElement();
+                    IEnumerator packet_enum = uBuild.Packets; packet_enum.MoveNext();
+                    RawSendPacket pkt = (RawSendPacket)packet_enum.Current;
                     pkt.writer.Flush();
                     serial.write(pkt.buffer.ToArray());
 
@@ -2496,6 +2495,8 @@ namespace com.dalsemi.onewire.adapter
                     // set the baud rate
                     sleep(5); //solaris hack!!!
                     serial.BaudRate = baud;
+                    sleep(100);
+                    serial.readWithTimeout(3); //remove garbage byte
                 }
                 catch (IOException ioe)
                 {
@@ -2526,7 +2527,11 @@ namespace com.dalsemi.onewire.adapter
                     // check the result
                     if (result_array.Length == 1)
                     {
-                        if (((result_array[baud_offset] & 0xF1) == 0) && ((result_array[baud_offset] & 0x0E) == uState.ubaud))
+                        int param_code = result_array[baud_offset];
+                        param_code &= ~UAdapterState.BAUD_VALUE_MASK; // ignore parameter value bits
+                        int rbr = result_array[baud_offset] & UAdapterState.BAUD_VALUE_MASK;
+                        if (((param_code & UParameterSettings.PARAMETER_BAUDRATE_READ_MASK) == UParameterSettings.PARAMETER_BAUDRATE_READ_MASK) &&
+                            (rbr == uState.ubaud))
                         {
                             if (doDebugMessages)
                             {
@@ -2780,7 +2785,7 @@ namespace com.dalsemi.onewire.adapter
                 using (MemoryStream inBuffer = new MemoryStream())
                 {
                     // loop to send all of the packets
-                    for (System.Collections.IEnumerator packet_enum = tempBuild.Packets; packet_enum.MoveNext();)
+                    for (IEnumerator packet_enum = tempBuild.Packets; packet_enum.MoveNext();)
                     {
 
                         // get the next packet

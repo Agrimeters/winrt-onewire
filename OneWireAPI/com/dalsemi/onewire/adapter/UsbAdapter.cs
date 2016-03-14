@@ -483,7 +483,7 @@ namespace com.dalsemi.onewire.adapter
                 using (MemoryStream inBuffer = new MemoryStream())
                 {
                     // loop to send all of the packets
-                    for (System.Collections.IEnumerator packet_enum = tempBuild.Packets; packet_enum.MoveNext();)
+                    for (IEnumerator packet_enum = tempBuild.Packets; packet_enum.MoveNext();)
                     {
 
                         // get the next packet
