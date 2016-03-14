@@ -298,11 +298,11 @@ namespace com.dalsemi.onewire.application.sha
 			 int offset = 47 * j;
 			 for (int i = 32; i < 36 && this.DS1961Scompatible_Renamed; i++)
 			 {
-				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == unchecked((byte)0x0FF));
+				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == 0x0FF);
 			 }
 			 for (int i = 44; i < 47 && this.DS1961Scompatible_Renamed; i++)
 			 {
-				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == unchecked((byte)0x0FF));
+				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == 0x0FF);
 			 }
 		  }
 

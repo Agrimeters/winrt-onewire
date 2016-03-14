@@ -141,9 +141,23 @@ namespace com.dalsemi.onewire
 	   private const string owapi_version = "1.10";
 
         /// <summary>
-        /// holds property table
+        /// Local filesystem property file
         /// </summary>
-        private static Dictionary<string, string> propertyTable = null;
+        private static Properties onewire_properties = null;
+        /// <summary>
+        /// Flag used to check for onewire.properties file once
+        /// </summary>
+        private static bool onewire_properties_present = true;
+
+        /// <summary>
+        /// Local resource property table
+        /// </summary>
+        private static Properties onewire_defaults = null;
+        /// <summary>
+        /// Flag used to check for onewire_properties resource fule once
+        /// </summary>
+        private static bool onewire_defaults_present = true;
+
 
         /// <summary>
         /// Don't allow anyone to instantiate.
@@ -518,72 +532,48 @@ namespace com.dalsemi.onewire
                 // Check local filesystem
                 if (string.ReferenceEquals(ret_str, null))
                 {
-                    if (propertyTable == null)
+                    if (onewire_properties == null && onewire_properties_present)
                     {
-                        var t = Task.Run(async () =>
+                        try
                         {
-                            try
-                            {
-                                var localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-                                //Debug.WriteLine(Windows.Storage.ApplicationData.Current.LocalFolder.Path);
-
-                                if(File.Exists(localFolder.Path + "\\onewire.properties"))
-                                {
-                                    Debug.WriteLine("Loading onewire.properties from " + localFolder.Path);
-
-                                    StorageFile localFile = await localFolder.GetFileAsync("onewire.properties");
-                                    Debug.WriteLine(localFile.Path);
-                                    Stream stream = await localFile.OpenStreamForReadAsync();
-
-                                    propertyTable = new Dictionary<string, string>();
-
-                                    using (var reader = new StreamReader(stream))
-                                    {
-                                        loadTable(propertyTable, reader);
-                                    }
-                                }
-                            }
-                            catch (Exception)
-                            {
-                                Debugger.Break();
-                            }
-                        });
-                        t.Wait();
-                    }
-                }
-
-                // Use built in defaults OneWireAPI.Resources.onewire_properties
-                // check to see if we now have the value
-                if (string.ReferenceEquals(ret_str, null))
-                {
-                    if(propertyTable == null)
-                    {
-                        //Debug.WriteLine("Loading -> OneWireAPI.Resources.onewire_properties");
-
-                        propertyTable = new Dictionary<string, string>();
-
-                        Assembly asm = typeof(OneWireAccessProvider).GetTypeInfo().Assembly;
-                        using (Stream stream = asm.GetManifestResourceStream("OneWireAPI.Resources.onewire_properties"))
-                        using (StreamReader reader = new StreamReader(stream))
+                            onewire_properties = new Properties();
+                            onewire_properties.loadLocalFile("onewire.properties");
+                        }
+                        catch (Exception)
                         {
-                            loadTable(propertyTable, reader);
+                            onewire_properties = null;
+                            onewire_properties_present = false;
                         }
 
-                        //Debug.WriteLine("Property Table loaded!");
-                        //foreach(var key in propertyTable.Keys)
-                        //{
-                        //    Debug.WriteLine("\t" + key + "=" + propertyTable[key]);
-                        //}
+                        ret_str = onewire_properties.getProperty(propName);
+                    }
+
+                    if (onewire_properties != null && onewire_properties_present)
+                    {
+                        ret_str = onewire_properties.getProperty(propName);
                     }
                 }
 
-                if (propertyTable != null)
+                // Check local resource file
+                if (string.ReferenceEquals(ret_str, null))
                 {
-                    propertyTable.TryGetValue(propName, out ret_str);
-                    //if (ret_str != null)
-                    //{
-                    //    Debug.WriteLine("Found: " + propName + "=" + ret_str);
-                    //}
+                    if (onewire_defaults == null && onewire_defaults_present)
+                    {
+                        try
+                        {
+                            onewire_defaults = new Properties();
+                            onewire_defaults.loadResourceFile("OneWireAPI.Resources.onewire_properties");
+                        }
+                        catch (Exception)
+                        {
+                            onewire_defaults = null;
+                            onewire_defaults_present = false;
+                        }
+                    }
+                    if (onewire_defaults != null && onewire_defaults_present)
+                    {
+                        ret_str = onewire_defaults.getProperty(propName);
+                    }
                 }
 
                 // if STILL not found then just pick DS9097U on 'smartDefaultPort'

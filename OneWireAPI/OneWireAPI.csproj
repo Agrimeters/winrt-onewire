@@ -244,6 +244,7 @@
     <Compile Include="com\dalsemi\onewire\utils\OWPath.cs" />
     <Compile Include="com\dalsemi\onewire\utils\OWPathElement.cs" />
     <Compile Include="com\dalsemi\onewire\utils\SHA.cs" />
+    <Compile Include="Properties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\OneWireAPI.rd.xml" />
   </ItemGroup>

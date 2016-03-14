@@ -2,14 +2,14 @@
 
 namespace com.dalsemi.onewire
 {
-    internal class Thread
+    public class Thread
     {
-        internal static void Sleep (long ms)
+        public static void Sleep (long ms)
         {
             new System.Threading.ManualResetEvent(false).WaitOne((int)ms);
         }
 
-        internal static void yield()
+        public static void yield()
         {
             new System.Threading.ManualResetEvent(false).WaitOne(0);
         }

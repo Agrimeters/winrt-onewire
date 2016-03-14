@@ -184,7 +184,7 @@ namespace com.dalsemi.onewire.utils
 			barr[index++] = (byte)ch;
 		  }
 
-		  return System.Text.Encoding.Unicode.GetString(barr);
+		  return System.Text.Encoding.UTF8.GetString(barr);
 	   }
 
 	   /// <summary>

@@ -222,14 +222,21 @@ namespace com.dalsemi.onewire.adapter
                     string aqs = SerialDevice.GetDeviceSelector();
                     var myDevices = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(aqs, null);
                     DeviceInformationCollection DeviceList = myDevices;
-                    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                    if (DEBUG)
+
+                    List<string> list = new List<string>();
+                    foreach (var item in DeviceList)
                     {
-                        foreach (var item in DeviceList)
+                        list.Add(item.Id);
+                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                        if (DEBUG)
+                        {
                             Debug.WriteLine("\t" + item.Id);
+                        }
+                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+
                     }
-                    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                    return ((IEnumerable<DeviceInformation>)DeviceList).GetEnumerator();
+
+                    return (list.GetEnumerator());
                 });
 
                 t.Wait();
@@ -436,12 +443,29 @@ namespace com.dalsemi.onewire.adapter
             {
                 var t = Task<SerialDevice>.Run(async() =>
                 {
-                    devInfo = await GetDeviceInformation(comPortName);
+                    SerialDevice device;
 
-                    if(devInfo == null)
-                        throw new System.IO.IOException("Failed to open PortName: " + comPortName);
+                    if (comPortName.Contains("\\"))
+                    {
+                        device = await SerialDevice.FromIdAsync(comPortName);
 
-                    var device = await SerialDevice.FromIdAsync(devInfo.Id);
+                        if (device == null)
+                            throw new System.IO.IOException("Failed to open PortName: " + comPortName);
+
+                        devInfo = await GetDeviceInformation(device.PortName);
+
+                        if (devInfo == null)
+                            throw new System.IO.IOException("Failed to GetDeviceInformation: " + comPortName);
+                    }
+                    else
+                    {
+                        devInfo = await GetDeviceInformation(comPortName);
+
+                        if (devInfo == null)
+                            throw new System.IO.IOException("Failed to open PortName: " + comPortName);
+
+                        device = await SerialDevice.FromIdAsync(devInfo.Id);
+                    }
 
                     if (device == null)
                     {

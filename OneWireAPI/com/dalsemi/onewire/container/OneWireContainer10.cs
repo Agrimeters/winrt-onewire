@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -31,50 +30,50 @@ using System.Threading;
 namespace com.dalsemi.onewire.container
 {
 
-	// imports
-	using com.dalsemi.onewire;
-	using com.dalsemi.onewire.utils;
-	using com.dalsemi.onewire.adapter;
+    // imports
+    using com.dalsemi.onewire;
+    using com.dalsemi.onewire.utils;
+    using com.dalsemi.onewire.adapter;
 
 
-	/// <summary>
-	/// <P> 1-Wire container for temperature iButton which measures temperatures
-	/// from -55&#176C to +100&#176C, DS1920 or DS18S20.  This container encapsulates the
-	/// functionality of the iButton family type <B>10</B> (hex)</P>
-	/// 
-	/// <H3> Features </H3>
-	/// <UL>
-	///   <LI> Measures temperatures from -55&#176C to +100&#176C in typically 0.2 seconds
-	///   <LI> Zero standby power
-	///   <LI> 0.5&#176C resolution, digital temperature reading in two�s complement
-	///   <LI> Increased resolution through interpolation in internal counters
-	///   <LI> 8-bit device-generated CRC for data integrity
-	///   <LI> Special command set allows user to skip ROM section and do temperature
-	///        measurements simultaneously for all devices on the bus
-	///   <LI> 2 bytes of EEPROM to be used either as alarm triggers or user memory
-	///   <LI> Alarm search directly indicates which device senses alarming temperatures
-	/// </UL>
-	/// 
-	/// <H3> Usage </H3>
-	/// 
-	/// <DL>
-	/// <DD> See the usage example in
-	/// <seealso cref="com.dalsemi.onewire.container.TemperatureContainer TemperatureContainer"/>
-	/// for temperature specific operations.
-	/// </DL>
-	/// 
-	/// <H3> DataSheet </H3>
-	/// <DL>
-	/// <DD><A HREF="http://pdfserv.maxim-ic.com/arpdf/DS1920.pdf"> http://pdfserv.maxim-ic.com/arpdf/DS1920.pdf</A>
-	/// <DD><A HREF="http://pdfserv.maxim-ic.com/arpdf/DS18S20.pdf"> http://pdfserv.maxim-ic.com/arpdf/DS18S20.pdf</A>
-	/// </DL>
-	/// </summary>
-	/// <seealso cref= com.dalsemi.onewire.container.TemperatureContainer
-	/// 
-	/// @version    1.00, 1 Sep 2000
-	/// @author     DS,JK
-	/// Converted to use TemperatureContainer interface 9-1-2000 KLA </seealso>
-	public class OneWireContainer10 : OneWireContainer, TemperatureContainer
+    /// <summary>
+    /// <P> 1-Wire container for temperature iButton which measures temperatures
+    /// from -55&#176C to +100&#176C, DS1920 or DS18S20.  This container encapsulates the
+    /// functionality of the iButton family type <B>10</B> (hex)</P>
+    /// 
+    /// <H3> Features </H3>
+    /// <UL>
+    ///   <LI> Measures temperatures from -55&#176C to +100&#176C in typically 0.2 seconds
+    ///   <LI> Zero standby power
+    ///   <LI> 0.5&#176C resolution, digital temperature reading in two�s complement
+    ///   <LI> Increased resolution through interpolation in internal counters
+    ///   <LI> 8-bit device-generated CRC for data integrity
+    ///   <LI> Special command set allows user to skip ROM section and do temperature
+    ///        measurements simultaneously for all devices on the bus
+    ///   <LI> 2 bytes of EEPROM to be used either as alarm triggers or user memory
+    ///   <LI> Alarm search directly indicates which device senses alarming temperatures
+    /// </UL>
+    /// 
+    /// <H3> Usage </H3>
+    /// 
+    /// <DL>
+    /// <DD> See the usage example in
+    /// <seealso cref="com.dalsemi.onewire.container.TemperatureContainer TemperatureContainer"/>
+    /// for temperature specific operations.
+    /// </DL>
+    /// 
+    /// <H3> DataSheet </H3>
+    /// <DL>
+    /// <DD><A HREF="http://pdfserv.maxim-ic.com/arpdf/DS1920.pdf"> http://pdfserv.maxim-ic.com/arpdf/DS1920.pdf</A>
+    /// <DD><A HREF="http://pdfserv.maxim-ic.com/arpdf/DS18S20.pdf"> http://pdfserv.maxim-ic.com/arpdf/DS18S20.pdf</A>
+    /// </DL>
+    /// </summary>
+    /// <seealso cref= com.dalsemi.onewire.container.TemperatureContainer
+    /// 
+    /// @version    1.00, 1 Sep 2000
+    /// @author     DS,JK
+    /// Converted to use TemperatureContainer interface 9-1-2000 KLA </seealso>
+    public class OneWireContainer10 : OneWireContainer, TemperatureContainer
 	{
 	   private bool normalResolution = true;
 
@@ -101,11 +100,11 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// DS1920 read data from scratchpad command </summary>
-	   private static readonly byte READ_SCRATCHPAD_COMMAND = unchecked((byte) 0xBE);
+	   private static readonly byte READ_SCRATCHPAD_COMMAND = 0xBE;
 
 	   /// <summary>
 	   /// DS1920 write data to scratchpad command </summary>
-	   private static readonly byte WRITE_SCRATCHPAD_COMMAND = (byte) 0x4E;
+	   private static readonly byte WRITE_SCRATCHPAD_COMMAND = 0x4E;
 
 	   /// <summary>
 	   /// DS1920 copy data from scratchpad to EEPROM command </summary>
@@ -113,7 +112,7 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// DS1920 recall EEPROM command </summary>
-	   //TODO private static readonly byte RECALL_EEPROM_COMMAND = unchecked((byte) 0xB8);
+	   //TODO private static readonly byte RECALL_EEPROM_COMMAND = 0xB8;
 
 
 	   /// <summary>
@@ -626,7 +625,7 @@ namespace com.dalsemi.onewire.container
 			 // now add the read bytes for data bytes and crc8
 			 for (int i = 1; i < 10; i++)
 			 {
-				buffer [i] = unchecked((byte) 0x0FF);
+				buffer [i] = 0x0FF;
 			 }
 
 			 // send the block
@@ -748,7 +747,7 @@ namespace com.dalsemi.onewire.container
 			 // now add the read bytes for data bytes and crc8
 			 for (int i = 1; i < 10; i++)
 			 {
-				buffer [i] = unchecked((byte) 0x0FF);
+				buffer [i] = 0x0FF;
 			 }
 
 			 // send the block

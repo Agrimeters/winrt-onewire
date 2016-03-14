@@ -196,7 +196,7 @@ namespace Test
                     tc = (TemperatureContainer)owc;
                     isTempContainer = true;
                 }
-                catch (Exception)
+                catch (System.InvalidCastException)
                 {
                     tc = null;
                     isTempContainer = false; //just to reiterate
