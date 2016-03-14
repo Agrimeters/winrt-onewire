@@ -242,7 +242,7 @@ namespace com.dalsemi.onewire.adapter
 
         /// <summary>
         /// Enable/disable debug messages </summary>
-        private static bool doDebugMessages = true;
+        private static bool doDebugMessages = false;
 
         //--------
         //-------- Constructor

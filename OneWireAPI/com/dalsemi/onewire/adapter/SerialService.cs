@@ -11,7 +11,7 @@ namespace com.dalsemi.onewire.adapter
 {
     internal partial class SerialService
     {
-        private const bool DEBUG = true;
+        private const bool DEBUG = false;
         /// <summary>
         /// The serial port name of this object (e.g. COM1, /dev/ttyS0) </summary>
         private readonly string comPortName;

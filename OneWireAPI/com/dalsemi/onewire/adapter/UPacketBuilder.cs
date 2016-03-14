@@ -161,7 +161,7 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// Enable/disable debug messages </summary>
-	   public static bool doDebugMessages = true;
+	   public static bool doDebugMessages = false;
 
 	   //--------
 	   //-------- Variables

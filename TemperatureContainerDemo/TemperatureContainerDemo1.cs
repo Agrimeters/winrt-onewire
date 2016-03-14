@@ -35,6 +35,8 @@ using com.dalsemi.onewire.container;
 using com.dalsemi.onewire.utils;
 
 using TemperatureContainer = com.dalsemi.onewire.container.TemperatureContainer;
+using System.IO;
+using System.Reflection;
 
 /// <summary>
 ///   menu driven program to test OneWireContainer with
@@ -57,7 +59,7 @@ public class TemperatureContainerDemo1
    // temperature unit
    internal static string tempUnit = " C";
    internal static DSPortAdapter adapter = null;
-//TODO   internal static System.IO.StreamReader dis = new System.IO.StreamReader(System.in);
+   internal static System.IO.StreamReader dis = null;
 
    /// <summary>
    /// Method main
@@ -73,6 +75,9 @@ public class TemperatureContainerDemo1
 	  bool alarming;
 	  OneWireContainer owc = null;
 	  TemperatureContainer tc = null;
+
+      Stream stream = loadResourceFile("TemperatureContainerDemo.input.txt");
+      dis = new StreamReader(stream);
 
 	  // find and initialize the first OneWireContainer with
 	  // TemperatureContainerDemo interface
@@ -297,7 +302,7 @@ public class TemperatureContainerDemo1
 			   Debug.WriteLine("* 1-Wire Device Description: " + owc.Description);
 			   Debug.WriteLine("*************************************************************************");
 			   Debug.WriteLine("  Hit ENTER to continue...");
-			   //TODO dis.ReadLine();
+			   dis.ReadLine();
 
 			   break;
 			}
@@ -405,7 +410,7 @@ public class TemperatureContainerDemo1
 		  {
 			 try
 			 {
-                input = "0.0"; //TODO dis.ReadLine();
+                input = dis.ReadLine();
 				value = System.Convert.ToDouble(input);
 				break;
 			 }
@@ -449,6 +454,20 @@ public class TemperatureContainerDemo1
 	  Debug.WriteLine("***** EXCEPTION *****");
 	  Debug.WriteLine(e.ToString());
 	  Debug.Write(e.StackTrace);
+   }
+
+   public static Stream loadResourceFile(string file)
+   {
+       try
+       {
+           Assembly asm = typeof(TemperatureContainerDemo.MainPage).GetTypeInfo().Assembly;
+           return asm.GetManifestResourceStream(file);
+       }
+       catch (Exception)
+       {
+           Debug.WriteLine("Can't find resource: " + file);
+       }
+       return null;
    }
 
    /// <summary>
