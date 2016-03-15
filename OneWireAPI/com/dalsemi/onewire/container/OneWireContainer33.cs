@@ -944,7 +944,7 @@ namespace com.dalsemi.onewire.container
 		  MT[63] = 0xB8;
 
 		  int[] AtoE = new int [5];
-		  com.dalsemi.onewire.utils.SHA.ComputeSHA(MT,AtoE);
+		  utils.SHA.ComputeSHA(MT,AtoE);
 
 		  int cnt = 0;
 		  for (int i = 0; i < 5; i++)

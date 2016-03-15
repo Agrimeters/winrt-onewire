@@ -258,7 +258,7 @@ public class SwitchDemo
 
 	  if (select == i)
 	  {
-		 throw new System.InvalidOperationException("Quit in device selection");
+		 throw new OperationCanceledException("Quit in device selection");
 	  }
 
 	  return (OneWireContainer)owd_vect[select];

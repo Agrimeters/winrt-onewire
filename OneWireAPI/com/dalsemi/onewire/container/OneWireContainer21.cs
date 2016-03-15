@@ -2,6 +2,19 @@
 using System.Collections;
 using System.Threading;
 
+// C#
+// Month     -> value between 1 - 12
+// Day       -> value between 1 - 31
+// Year      -> value between 1 - 9999
+// Hour      -> value between 0 - 23
+// Minute    -> value between 0 - 59
+// Second    -> value between 0 - 59
+// DayOfWeek -> if cast to an integer, value ranges between 0 - 6
+
+// Java
+// months are 0 offset
+// years are from 1900
+
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999 - 2001 Dallas Semiconductor Corporation, All Rights Reserved.
  *
@@ -271,18 +284,18 @@ namespace com.dalsemi.onewire.container
 	///  </seealso>
 	public class OneWireContainer21 : OneWireContainer, TemperatureContainer, ClockContainer
 	{
-	   private static readonly sbyte FAMILY_CODE = (sbyte)0x21;
+	   private static readonly byte FAMILY_CODE = 0x21;
 	   private bool doSpeedEnable = true;
 
 	   /* privates!
 	    * Memory commands.
 	    */
-	   private static readonly sbyte WRITE_SCRATCHPAD_COMMAND = (sbyte)0x0F;
-	   private static readonly sbyte READ_SCRATCHPAD_COMMAND = unchecked((sbyte)0xAA);
-	   private static readonly sbyte COPY_SCRATCHPAD_COMMAND = (sbyte)0x55;
-	   private static readonly sbyte READ_MEMORY_CRC_COMMAND = unchecked((sbyte)0xA5);
-	   private static readonly sbyte CLEAR_MEMORY_COMMAND = (sbyte)0x3C;
-	   private static readonly sbyte CONVERT_TEMPERATURE_COMMAND = (sbyte) 0x44;
+	   private static readonly byte WRITE_SCRATCHPAD_COMMAND = 0x0F;
+	   private static readonly byte READ_SCRATCHPAD_COMMAND = 0xAA;
+	   private static readonly byte COPY_SCRATCHPAD_COMMAND = 0x55;
+	   private static readonly byte READ_MEMORY_CRC_COMMAND = 0xA5;
+	   private static readonly byte CLEAR_MEMORY_COMMAND = 0x3C;
+	   private static readonly byte CONVERT_TEMPERATURE_COMMAND = 0x44;
 
 	   // Scratchpad access memory bank
 	   private MemoryBankScratchCRC scratch;
@@ -300,7 +313,7 @@ namespace com.dalsemi.onewire.container
 	   private MemoryBankNVCRC log;
 
 	   // Buffer to hold the temperature log in
-	   private sbyte[] read_log_buffer = new sbyte [64 * 32]; //64 pages X 32 bytes per page
+	   private byte[] read_log_buffer = new byte [64 * 32]; //64 pages X 32 bytes per page
 
 	   // should we update the Real time clock?
 	   private bool updatertc = false;
@@ -363,7 +376,7 @@ namespace com.dalsemi.onewire.container
 	   /// it will alarm on the next Real-Time Clock second.
 	   /// </summary>
 	   /// <seealso cref= #setClockAlarm(int,int,int,int,int,byte[]) </seealso>
-	   public const sbyte ONCE_PER_SECOND = (sbyte) 0x1F;
+	   public const byte ONCE_PER_SECOND = (byte) 0x1F;
 
 	   /// <summary>
 	   /// Alarm frequency setting for the <code>setClockAlarm()</code> method.
@@ -372,7 +385,7 @@ namespace com.dalsemi.onewire.container
 	   /// equal to the Alarm Clock's 'second' value.
 	   /// </summary>
 	   /// <seealso cref= #setClockAlarm(int,int,int,int,int,byte[]) </seealso>
-	   public const sbyte ONCE_PER_MINUTE = (sbyte) 0x17;
+	   public const byte ONCE_PER_MINUTE = (byte) 0x17;
 
 	   /// <summary>
 	   /// Alarm frequency setting for the <code>setClockAlarm()</code> method.
@@ -381,7 +394,7 @@ namespace com.dalsemi.onewire.container
 	   /// equal to the Alarm Clock's 'second' and 'minute' values.
 	   /// </summary>
 	   /// <seealso cref= #setClockAlarm(int,int,int,int,int,byte[]) </seealso>
-	   public const sbyte ONCE_PER_HOUR = (sbyte) 0x13;
+	   public const byte ONCE_PER_HOUR = (byte) 0x13;
 
 	   /// <summary>
 	   /// Alarm frequency setting for the <code>setClockAlarm()</code> method.
@@ -390,7 +403,7 @@ namespace com.dalsemi.onewire.container
 	   /// equal to the Alarm Clock's 'second', 'minute', and 'hour' values.
 	   /// </summary>
 	   /// <seealso cref= #setClockAlarm(int,int,int,int,int,byte[]) </seealso>
-	   public const sbyte ONCE_PER_DAY = (sbyte) 0x11;
+	   public const byte ONCE_PER_DAY = (byte) 0x11;
 
 	   /// <summary>
 	   /// Alarm frequency setting for the <code>setClockAlarm()</code> method.
@@ -399,7 +412,7 @@ namespace com.dalsemi.onewire.container
 	   /// equal to the Alarm Clock's 'second', 'minute', 'hour', and 'day of week' values
 	   /// </summary>
 	   /// <seealso cref= #setClockAlarm(int,int,int,int,int,byte[]) </seealso>
-	   public const sbyte ONCE_PER_WEEK = (sbyte) 0x10;
+	   public const byte ONCE_PER_WEEK = (byte) 0x10;
 
 	   /// <summary>
 	   /// Low temperature alarm value for the methods <code>getAlarmStatus()</code>,
@@ -408,7 +421,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getAlarmStatus(byte,byte[]) </seealso>
 	   /// <seealso cref= #getAlarmHistory(byte) </seealso>
 	   /// <seealso cref= #setTemperatureAlarm(int,double,byte[]) </seealso>
-	   public const sbyte TEMPERATURE_LOW_ALARM = 4;
+	   public const byte TEMPERATURE_LOW_ALARM = 4;
 
 	   /// <summary>
 	   /// High temperature alarm value for the methods <code>getAlarmStatus()</code>,
@@ -417,7 +430,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getAlarmStatus(byte,byte[]) </seealso>
 	   /// <seealso cref= #getAlarmHistory(byte) </seealso>
 	   /// <seealso cref= #setTemperatureAlarm(int,double,byte[]) </seealso>
-	   public const sbyte TEMPERATURE_HIGH_ALARM = 2;
+	   public const byte TEMPERATURE_HIGH_ALARM = 2;
 
 	   /// <summary>
 	   /// Clock alarm value for the methods <code>getAlarmStatus()</code>
@@ -425,7 +438,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <seealso cref= #getAlarmStatus(byte,byte[]) </seealso>
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
-	   public const sbyte TIMER_ALARM = 1;
+	   public const byte TIMER_ALARM = 1;
 
 	   /// <summary>
 	   /// CONTROL REGISTER FLAG: When enabled, the device will respond to conditional
@@ -435,7 +448,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool,byte[]) </seealso>
-	   public const sbyte TIMER_ALARM_SEARCH_FLAG = 1;
+	   public const byte TIMER_ALARM_SEARCH_FLAG = 1;
 
 	   /// <summary>
 	   /// CONTROL REGISTER FLAG: When enabled, the device will respond to conditional
@@ -445,7 +458,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool,byte[]) </seealso>
-	   public const sbyte TEMP_HIGH_SEARCH_FLAG = 2;
+	   public const byte TEMP_HIGH_SEARCH_FLAG = 2;
 
 	   /// <summary>
 	   /// CONTROL REGISTER FLAG: When enabled, the device will respond to conditional
@@ -455,7 +468,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool,byte[]) </seealso>
-	   public const sbyte TEMP_LOW_SEARCH_FLAG = 4;
+	   public const byte TEMP_LOW_SEARCH_FLAG = 4;
 
 	   /// <summary>
 	   /// CONTROL REGISTER FLAG: When enabled, the device will begin overwriting the earlier
@@ -465,7 +478,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool,byte[]) </seealso>
-	   public const sbyte ROLLOVER_ENABLE_FLAG = 8;
+	   public const byte ROLLOVER_ENABLE_FLAG = 8;
 
 	   /// <summary>
 	   /// CONTROL REGISTER FLAG: When DISABLED, the mission will start as soon as the
@@ -475,7 +488,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool,byte[]) </seealso>
-	   public const sbyte MISSION_ENABLE_FLAG = 16;
+	   public const byte MISSION_ENABLE_FLAG = 16;
 
 	   /// <summary>
 	   /// CONTROL REGISTER FLAG: Must be enabled to allow a clear memory
@@ -486,7 +499,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool,byte[]) </seealso>
-	   public const sbyte MEMORY_CLEAR_ENABLE_FLAG = 64;
+	   public const byte MEMORY_CLEAR_ENABLE_FLAG = 64;
 
 	   /// <summary>
 	   /// CONTROL REGISTER FLAG: When DISABLED, the real time clock will start
@@ -496,14 +509,14 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool,byte[]) </seealso>
-	   public static readonly sbyte OSCILLATOR_ENABLE_FLAG = unchecked((sbyte) 128);
+	   public static readonly byte OSCILLATOR_ENABLE_FLAG =  128;
 
 	   /// <summary>
 	   /// STATUS REGISTER FLAG: Will read back true when a clock alarm has occurred.
 	   /// </summary>
 	   /// <seealso cref= #getFlag(int,byte,byte[]) </seealso>
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
-	   public const sbyte TIMER_ALARM_FLAG = 1;
+	   public const byte TIMER_ALARM_FLAG = 1;
 
 	   /// <summary>
 	   /// STATUS REGISTER FLAG:  Will read back true when the temperature during a mission
@@ -511,7 +524,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <seealso cref= #getFlag(int,byte,byte[]) </seealso>
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
-	   public const sbyte TEMPERATURE_HIGH_FLAG = 2;
+	   public const byte TEMPERATURE_HIGH_FLAG = 2;
 
 	   /// <summary>
 	   /// STATUS REGISTER FLAG: Will read back true when a temperature equal to or below
@@ -519,7 +532,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <seealso cref= #getFlag(int,byte,byte[]) </seealso>
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
-	   public const sbyte TEMPERATURE_LOW_FLAG = 4;
+	   public const byte TEMPERATURE_LOW_FLAG = 4;
 
 	   /// <summary>
 	   /// STATUS REGISTER FLAG: Will read back true when a mission temperature conversion
@@ -527,21 +540,21 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <seealso cref= #getFlag(int,byte,byte[]) </seealso>
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
-	   public const sbyte SAMPLE_IN_PROGRESS_FLAG = 16;
+	   public const byte SAMPLE_IN_PROGRESS_FLAG = 16;
 
 	   /// <summary>
 	   /// STATUS REGISTER FLAG: Will read back true when a mission is in progress.
 	   /// </summary>
 	   /// <seealso cref= #getFlag(int,byte,byte[]) </seealso>
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
-	   public const sbyte MISSION_IN_PROGRESS_FLAG = 32;
+	   public const byte MISSION_IN_PROGRESS_FLAG = 32;
 
 	   /// <summary>
 	   /// STATUS REGISTER FLAG: Will read back true if the memory has been cleared.
 	   /// </summary>
 	   /// <seealso cref= #getFlag(int,byte,byte[]) </seealso>
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
-	   public const sbyte MEMORY_CLEARED_FLAG = 64;
+	   public const byte MEMORY_CLEARED_FLAG = 64;
 
 	   /// <summary>
 	   /// STATUS REGISTER FLAG: Will read back true if a temperature conversion
@@ -549,7 +562,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <seealso cref= #getFlag(int,byte,byte[]) </seealso>
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
-	   public const sbyte TEMP_CORE_BUSY_FLAG = unchecked((sbyte) 128);
+	   public const byte TEMP_CORE_BUSY_FLAG =  128;
 
 	   /// <summary>
 	   /// Creates a new <code>OneWireContainer</code> for communication with a DS1921 Thermocron iButton.
@@ -577,7 +590,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #OneWireContainer21() </seealso>
 	   /// <seealso cref= #OneWireContainer21(com.dalsemi.onewire.adapter.DSPortAdapter,long)   OneWireContainer21(DSPortAdapter,long) </seealso>
 	   /// <seealso cref= #OneWireContainer21(com.dalsemi.onewire.adapter.DSPortAdapter,java.lang.String) OneWireContainer21(DSPortAdapter,String) </seealso>
-	   public OneWireContainer21(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer21(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 
 		  // initialize the memory banks
@@ -626,7 +639,7 @@ namespace com.dalsemi.onewire.container
 	   ///                           this iButton </param>
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address </seealso>
-	   public override void setupContainer(DSPortAdapter sourceAdapter, sbyte[] newAddress)
+	   public override void setupContainer(DSPortAdapter sourceAdapter, byte[] newAddress)
 	   {
 		  base.setupContainer(sourceAdapter, newAddress);
 		  setThermochronVariables();
@@ -776,7 +789,7 @@ namespace com.dalsemi.onewire.container
 	   {
 		  // Get Temperature Range code, which is the first 12 (MSB) bits of the
 		  // unique serial number (after the CRC).
-		  sbyte[] address = Address; // retrieve 1-Wire net address to look at range code.
+		  byte[] address = Address; // retrieve 1-Wire net address to look at range code.
 		  int rangeCode = (((address[6] & 0x0FF) << 4) | ((address[5] & 0x0FF)>>4));
 
 		  switch (rangeCode)
@@ -954,35 +967,35 @@ namespace com.dalsemi.onewire.container
 	   /// Grab the date from one of the time registers.
 	   /// returns int[] = {year, month, date}
 	   /// </summary>
-	   private int[] getDate(int timeReg, sbyte[] state)
+	   private int[] getDate(int timeReg, byte[] state)
 	   {
-		  sbyte upper, lower;
+		  byte upper, lower;
 		  int[] result = new int [3];
 
 		  timeReg = timeReg & 31;
 
 		  /* extract the day of the month */
 		  lower = state [timeReg++];
-		  upper = (sbyte)(((int)((uint)lower >> 4)) & 0x0f);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(((int)((uint)lower >> 4)) & 0x0f);
+		  lower = (byte)(lower & 0x0f);
 		  result [2] = 10 * upper + lower;
 
 		  /* extract the month */
 		  lower = state [timeReg++];
-		  upper = (sbyte)(((int)((uint)lower >> 4)) & 0x0f);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(((int)((uint)lower >> 4)) & 0x0f);
+		  lower = (byte)(lower & 0x0f);
 
 		  // the upper bit contains the century, so subdivide upper
-		  sbyte century = (sbyte)(((int)((uint)upper >> 3)) & 0x01);
+		  byte century = (byte)(((int)((uint)upper >> 3)) & 0x01);
 
-		  upper = (sbyte)(upper & 0x01);
+		  upper = (byte)(upper & 0x01);
 		  result [1] = lower + upper * 10;
 
 		  /* grab the year */
 		  result [0] = 1900 + century * 100;
 		  lower = state [timeReg++];
-		  upper = (sbyte)(((int)((uint)lower >> 4)) & 0x0f);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(((int)((uint)lower >> 4)) & 0x0f);
+		  lower = (byte)(lower & 0x0f);
 		  result [0] += upper * 10 + lower;
 
 		  return result;
@@ -992,9 +1005,9 @@ namespace com.dalsemi.onewire.container
 	   /// Gets the time of day fields in 24-hour time from button
 	   /// returns int[] = {seconds, minutes, hours}
 	   /// </summary>
-	   private int[] getTime(int timeReg, sbyte[] state)
+	   private int[] getTime(int timeReg, byte[] state)
 	   {
-		  sbyte upper, lower;
+		  byte upper, lower;
 		  int[] result = new int [3];
 
 		  timeReg = timeReg & 31;
@@ -1004,22 +1017,22 @@ namespace com.dalsemi.onewire.container
 
 		  /* First grab the seconds. Upper half holds the 10's of seconds       */
 		  lower = state [timeReg++];
-		  upper = (sbyte)(((int)((uint)lower >> 4)) & 0x07);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(((int)((uint)lower >> 4)) & 0x07);
+		  lower = (byte)(lower & 0x0f);
 		  result [0] = (int) lower + (int) upper * 10;
 
 		  /* now grab minutes. The upper half holds the 10s of minutes          */
 		  lower = state [timeReg++];
-		  upper = (sbyte)(((int)((uint)lower >> 4)) & 0x07);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(((int)((uint)lower >> 4)) & 0x07);
+		  lower = (byte)(lower & 0x0f);
 		  result [1] = (int) lower + (int) upper * 10;
 
 		  /* now grab the hours. The lower half is single hours again, but the
 		     upper half of the byte is determined by the 2nd bit - specifying
 		     12/24 hour time. */
 		  lower = state [timeReg++];
-		  upper = (sbyte)(((int)((uint)lower >> 4)) & 0x07);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(((int)((uint)lower >> 4)) & 0x07);
+		  lower = (byte)(lower & 0x0f);
 
 		  int hours;
 
@@ -1028,10 +1041,10 @@ namespace com.dalsemi.onewire.container
 		  {
 
 			 // extract the AM/PM byte (PM is indicated by a 1)
-			 sbyte PM = (sbyte)(((int)((uint)(upper << 6) >> 7)) & 0x01);
+			 byte PM = (byte)(((int)((uint)(upper << 6) >> 7)) & 0x01);
 
 			 // isolate the 10s place
-			 upper = (sbyte)(upper & 0x01);
+			 upper = (byte)(upper & 0x01);
 			 hours = upper * 10 + PM * 12;
 		  }
 		  else
@@ -1048,42 +1061,42 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Set the time in the DS1921 time register format.
 	   /// </summary>
-	   private void setTime(int timeReg, int hours, int minutes, int seconds, bool AMPM, sbyte[] state)
+	   private void setTime(int timeReg, int hours, int minutes, int seconds, bool AMPM, byte[] state)
 	   {
-		  sbyte upper, lower;
+		  byte upper, lower;
 
 		  /* format in bytes and write seconds */
-		  upper = (sbyte)(seconds / 10);
-		  upper = unchecked((sbyte)((upper << 4) & 0xf0));
-		  lower = (sbyte)(seconds % 10);
-		  lower = (sbyte)(lower & 0x0f);
-		  state [timeReg & 31] = (sbyte)(upper | lower);
+		  upper = (byte)(seconds / 10);
+		  upper = (byte)((upper << 4) & 0xf0);
+		  lower = (byte)(seconds % 10);
+		  lower = (byte)(lower & 0x0f);
+		  state [timeReg & 31] = (byte)(upper | lower);
 
 		  timeReg++;
 
 		  /* format in bytes and write minutes */
-		  upper = (sbyte)(minutes / 10);
-		  upper = unchecked((sbyte)((upper << 4) & 0xf0));
-		  lower = (sbyte)(minutes % 10);
-		  lower = (sbyte)(lower & 0x0f);
-		  state [timeReg & 31] = (sbyte)(upper | lower);
+		  upper = (byte)(minutes / 10);
+		  upper = (byte)((upper << 4) & 0xf0);
+		  lower = (byte)(minutes % 10);
+		  lower = (byte)(lower & 0x0f);
+		  state [timeReg & 31] = (byte)(upper | lower);
 
 		  timeReg++;
 
 		  /* format in bytes and write hours/(12/24) bit */
 		  if (AMPM)
 		  {
-			 upper = (sbyte) 0x04;
+			 upper = (byte) 0x04;
 
 			 if (hours > 11)
 			 {
-				upper = (sbyte)(upper | 0x02);
+				upper = (byte)(upper | 0x02);
 			 }
 
 			 // this next function simply checks for a decade hour
 			 if (((hours % 12) == 0) || ((hours % 12) > 9))
 			 {
-				upper = (sbyte)(upper | 0x01);
+				upper = (byte)(upper | 0x01);
 			 }
 
 			 if (hours > 12)
@@ -1093,22 +1106,22 @@ namespace com.dalsemi.onewire.container
 
 			 if (hours == 0)
 			 {
-				lower = (sbyte) 0x02;
+				lower = 0x02;
 			 }
 			 else
 			 {
-				lower = (sbyte)((hours % 10) & 0x0f);
+				lower = (byte)((hours % 10) & 0x0f);
 			 }
 		  }
 		  else
 		  {
-			 upper = (sbyte)(hours / 10);
-			 lower = (sbyte)(hours % 10);
+			 upper = (byte)(hours / 10);
+			 lower = (byte)(hours % 10);
 		  }
 
-		  upper = unchecked((sbyte)((upper << 4) & 0xf0));
-		  lower = (sbyte)(lower & 0x0f);
-		  state [timeReg & 31] = (sbyte)(upper | lower);
+		  upper = (byte)((upper << 4) & 0xf0);
+		  lower = (byte)(lower & 0x0f);
+		  state [timeReg & 31] = (byte)(upper | lower);
 
 		  timeReg++;
 	   }
@@ -1120,27 +1133,27 @@ namespace com.dalsemi.onewire.container
 	   /// month - The month to set to, i.e. 1 for January, 12 for December.
 	   /// day - The day of month to set to, i.e. 1 to 31 in January, 1 to 30 in April.
 	   /// </summary>
-	   private void setDate(int year, int month, int day, sbyte[] state)
+	   private void setDate(int year, int month, int day, byte[] state)
 	   {
-		  sbyte upper, lower;
+		  byte upper, lower;
 
 		  /* write the day byte (the upper holds 10s of days, lower holds single days) */
-		  upper = (sbyte)(day / 10);
-		  upper = unchecked((sbyte)((upper << 4) & 0xf0));
-		  lower = (sbyte)(day % 10);
-		  lower = (sbyte)(lower & 0x0f);
-		  state [0x04] = (sbyte)(upper | lower);
+		  upper = (byte)(day / 10);
+		  upper = (byte)((upper << 4) & 0xf0);
+		  lower = (byte)(day % 10);
+		  lower = (byte)(lower & 0x0f);
+		  state [0x04] = (byte)(upper | lower);
 
 		  /* write the month bit in the same manner, with the MSBit indicating
 		     the century (1 for 2000, 0 for 1900) */
-		  upper = (sbyte)(month / 10);
-		  upper = unchecked((sbyte)((upper << 4) & 0xf0));
-		  lower = (sbyte)(month % 10);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(month / 10);
+		  upper = (byte)((upper << 4) & 0xf0);
+		  lower = (byte)(month % 10);
+		  lower = (byte)(lower & 0x0f);
 
 		  if (year > 1999)
 		  {
-			 upper = unchecked((sbyte)(upper | 128));
+			 upper = (byte)(upper | 128);
 
 			 //go ahead and fix up the year too while i'm at it
 			 year = year - 2000;
@@ -1150,14 +1163,14 @@ namespace com.dalsemi.onewire.container
 			 year = year - 1900;
 		  }
 
-		  state [0x05] = (sbyte)(upper | lower);
+		  state [0x05] = (byte)(upper | lower);
 
 		  // now write the year
-		  upper = (sbyte)(year / 10);
-		  upper = unchecked((sbyte)((upper << 4) & 0xf0));
-		  lower = (sbyte)(year % 10);
-		  lower = (sbyte)(lower & 0x0f);
-		  state [0x06] = (sbyte)(upper | lower);
+		  upper = (byte)(year / 10);
+		  upper = (byte)((upper << 4) & 0xf0);
+		  lower = (byte)(year % 10);
+		  lower = (byte)(lower & 0x0f);
+		  state [0x06] = (byte)(upper | lower);
 	   }
 
 	   //////////////////////////////////////////////////////////////
@@ -1414,7 +1427,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> temperature in degrees Celsius
 	   /// </returns>
 	   /// <seealso cref= #encodeTemperature(double) </seealso>
-	   public virtual double decodeTemperature(sbyte tempByte)
+	   public virtual double decodeTemperature(byte tempByte)
 	   {
 		  // the formula for DS1921H/Z:
 		  // C = Tbyte * Tres + (Tlow - (4 * Tres))
@@ -1445,7 +1458,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> the temperature in raw DS1921 format
 	   /// </returns>
 	   /// <seealso cref= #decodeTemperature(byte) </seealso>
-	   public virtual sbyte encodeTemperature(double temperature)
+	   public virtual byte encodeTemperature(double temperature)
 	   {
 		  // the formula for DS1921H/Z:
 		  // Tbyte = ((C - Tlow) / Tres) + 4;
@@ -1454,15 +1467,15 @@ namespace com.dalsemi.onewire.container
 		  // and Tlow is the low temperature of temperature range
 		  // and Tres is the resolution of the DS1921
 
-		  sbyte encodedTemperature = 0x00;
+		  byte encodedTemperature = 0x00;
 		  if (isDS1921HZ)
 		  {
 			 double result = ((temperature - temperatureRangeLow) / temperatureResolution) + 4;
-			 encodedTemperature = unchecked((sbyte)((int) result & 0x000000ff));
+			 encodedTemperature = (byte)((int) result & 0x000000ff);
 		  }
 		  else
 		  {
-			 encodedTemperature = unchecked((sbyte)(((int)(2 * temperature) + 80) & 0x000000ff));
+			 encodedTemperature = (byte)(((int)(2 * temperature) + 80) & 0x000000ff);
 		  }
 		  return encodedTemperature;
 	   }
@@ -1486,15 +1499,15 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= #readByte(int) </seealso>
 	   /// <seealso cref= #getMemoryBanks() </seealso>
-	   public virtual void writeByte(int memAddr, sbyte source)
+	   public virtual void writeByte(int memAddr, byte source)
 	   {
 
 		  // User should only need to write to the 32 byte register page
-		  sbyte[] buffer = new sbyte [5];
+		  byte[] buffer = new byte [5];
 
 		  // break the address into its bytes
-		  sbyte msbAddress = unchecked((sbyte)(((int)((uint)memAddr >> 8)) & 0x0ff));
-		  sbyte lsbAddress = unchecked((sbyte)(memAddr & 0x0ff));
+		  byte msbAddress = (byte)(((int)((uint)memAddr >> 8)) & 0x0ff);
+		  byte lsbAddress = (byte)(memAddr & 0x0ff);
 
 		  /* check for valid parameters */
 		  if ((msbAddress > 0x1F) || (msbAddress < 0))
@@ -1526,7 +1539,7 @@ namespace com.dalsemi.onewire.container
 
 			 for (int i = 1; i < 5; i++)
 			 {
-				buffer [i] = unchecked((sbyte) 0x0ff);
+				buffer [i] = 0x0ff;
 			 }
 
 			 adapter.dataBlock(buffer, 0, 5);
@@ -1543,12 +1556,12 @@ namespace com.dalsemi.onewire.container
 			 buffer [0] = COPY_SCRATCHPAD_COMMAND;
 
 			 // keep buffer[1]-buffer[3] because they contain the verification bytes
-			 buffer [4] = unchecked((sbyte) 0xff);
+			 buffer [4] = 0xff;
 
 			 adapter.dataBlock(buffer, 0, 5);
 
 			 /* now check to see that the part sent a 01010101 indicating a success */
-			 if ((buffer [4] != unchecked((sbyte) 0xAA)) && (buffer [4] != (sbyte) 0x55))
+			 if ((buffer [4] != 0xAA) && (buffer [4] != (byte) 0x55))
 			 {
 				throw new OneWireIOException("OneWireContainer21-Error writing data byte.");
 			 }
@@ -1579,13 +1592,13 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #writeByte(int,byte) </seealso>
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #getMemoryBanks() </seealso>
-	   public virtual sbyte readByte(int memAddr)
+	   public virtual byte readByte(int memAddr)
 	   {
-		  sbyte[] buffer = new sbyte [4];
+		  byte[] buffer = new byte [4];
 
 		  // break the address up into bytes
-		  sbyte msbAddress = unchecked((sbyte)((memAddr >> 8) & 0x000000ff));
-		  sbyte lsbAddress = unchecked((sbyte)(memAddr & 0x000000ff));
+		  byte msbAddress = (byte)((memAddr >> 8) & 0x000000ff);
+		  byte lsbAddress = (byte)(memAddr & 0x000000ff);
 
 		  /* check the validity of the address */
 		  if ((msbAddress > 0x1F) || (msbAddress < 0))
@@ -1604,7 +1617,7 @@ namespace com.dalsemi.onewire.container
 			 buffer [0] = READ_MEMORY_CRC_COMMAND;
 			 buffer [1] = lsbAddress;
 			 buffer [2] = msbAddress;
-			 buffer [3] = unchecked((sbyte) 0x0ff);
+			 buffer [3] = 0x0ff;
 
 			 adapter.dataBlock(buffer, 0, 4);
 
@@ -1680,7 +1693,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #TEMP_CORE_BUSY_FLAG
 	   /// 
 	   ///  </seealso>
-	   public virtual bool getFlag(int register, sbyte bitMask)
+	   public virtual bool getFlag(int register, byte bitMask)
 	   {
 		  return ((readByte(register) & bitMask) != 0);
 	   }
@@ -1705,7 +1718,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool,byte[]) </seealso>
-	   public virtual bool getFlag(int register, sbyte bitMask, sbyte[] state)
+	   public virtual bool getFlag(int register, byte bitMask, byte[] state)
 	   {
 		  return ((state [register & 31] & bitMask) != 0);
 	   }
@@ -1741,7 +1754,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getFlag(int,byte,byte[]) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool,byte[]) </seealso>
 	   /// <seealso cref= #readDevice() </seealso>
-	   public virtual void setFlag(int register, sbyte bitMask, bool flagValue)
+	   public virtual void setFlag(int register, byte bitMask, bool flagValue)
 	   {
 
 		  // check for Mission in Progress flag
@@ -1751,15 +1764,15 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // read the current flag settings
-		  sbyte flags = readByte(register);
+		  byte flags = readByte(register);
 
 		  if (flagValue)
 		  {
-			 flags = (sbyte)(flags | bitMask);
+			 flags = (byte)(flags | bitMask);
 		  }
 		  else
 		  {
-			 flags = (sbyte)(flags & ~(bitMask));
+			 flags = (byte)(flags & ~(bitMask));
 		  }
 
 		  // write the regs back
@@ -1790,19 +1803,19 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #setFlag(int,byte,bool) </seealso>
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #writeDevice(byte[]) </seealso>
-	   public virtual void setFlag(int register, sbyte bitMask, bool flagValue, sbyte[] state)
+	   public virtual void setFlag(int register, byte bitMask, bool flagValue, byte[] state)
 	   {
 		  register = register & 31;
 
-		  sbyte flags = state [register];
+		  byte flags = state [register];
 
 		  if (flagValue)
 		  {
-			 flags = (sbyte)(flags | bitMask);
+			 flags = (byte)(flags | bitMask);
 		  }
 		  else
 		  {
-			 flags = (sbyte)(flags & ~(bitMask));
+			 flags = (byte)(flags & ~(bitMask));
 		  }
 
 		  // write the regs back
@@ -1852,15 +1865,15 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // read the current register status
-		  sbyte controlReg = readByte(CONTROL_REGISTER);
+		  byte controlReg = readByte(CONTROL_REGISTER);
 
 		  // Set the enable mission byte to 0
-		  controlReg = unchecked((sbyte)(controlReg & 0xEF));
+		  controlReg = (byte)(controlReg & 0xEF);
 
 		  writeByte(CONTROL_REGISTER, controlReg);
 
 		  // set the sample rate and let her rip
-		  writeByte(0x20D, unchecked((sbyte)(sampleRate & 0x000000ff)));
+		  writeByte(0x20D, (byte)(sampleRate & 0x000000ff));
 	   }
 
 	   /// <summary>
@@ -1880,10 +1893,10 @@ namespace com.dalsemi.onewire.container
 	   {
 
 		  // first read the current register
-		  sbyte statusReg = readByte(STATUS_REGISTER);
+		  byte statusReg = readByte(STATUS_REGISTER);
 
 		  // Set the MIP bit to 0, regardless of whether a mission is commencing
-		  statusReg = unchecked((sbyte)(statusReg & 0xDF)); // set the MIP bit to 0;
+		  statusReg = (byte)(statusReg & 0xDF); // set the MIP bit to 0;
 
 		  writeByte(STATUS_REGISTER, statusReg);
 	   }
@@ -1905,10 +1918,10 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #enableMission(int) </seealso>
-	   public virtual void setMissionStartDelay(int missionStartDelay, sbyte[] state)
+	   public virtual void setMissionStartDelay(int missionStartDelay, byte[] state)
 	   {
-		  state [0x12] = (sbyte)(missionStartDelay);
-		  state [0x13] = (sbyte)(missionStartDelay >> 8);
+		  state [0x12] = (byte)(missionStartDelay);
+		  state [0x13] = (byte)(missionStartDelay >> 8);
 	   }
 
 	   /// <summary>
@@ -1940,7 +1953,7 @@ namespace com.dalsemi.onewire.container
 		  // added 8/29/2001 by SH - delay necessary so that clock is
 		  // running before mission is enabled.
 		  // check to see if the Oscillator is enabled.
-		  sbyte[] state = readDevice();
+		  byte[] state = readDevice();
 		  if (isClockRunning(state))
 		  {
 			 // if the osciallator is not enabled, start it
@@ -2008,28 +2021,17 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #setClockAlarm(int,int,int,int,int,byte[]) </seealso>
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
-	   public virtual DateTime getAlarmTime(sbyte[] state)
+	   public virtual DateTime getAlarmTime(byte[] state)
 	   {
 
 		  // first get the time
 		  int[] time = getTime(0x207, state);
           DateTime result = new DateTime(0, 0, 0, time[2], time[1], time[0]);
-          //DateTime result = new DateTime();
-		  //result.set(DateTime.YEAR, 0);
-		  //result.set(DateTime.MONTH, 0);
-		  //result.set(DateTime.DATE, 0);
-		  //result.set(DateTime.HOUR_OF_DAY, time[2]);
-		  //result.set(DateTime.MINUTE, time[1]);
-		  //result.set(DateTime.SECOND, time[0]);
-
-		  // Removed by SH - Not J2ME-compatible
-		  //Calendar result = new GregorianCalendar(0, 0, 0, time [2], time [1],
-		  //                                        time [0]);
 
 		  // now put the day of the week in there
-		  sbyte dayOfWeek = (sbyte)(state [0x0A] & 0x07);
+		  //byte dayOfWeek = (byte)(state [0x0A] & 0x07);
 
-		  result.set(DateTime.DAY_OF_MONTH, dayOfWeek);
+		  //result.set(DateTime.DAY_OF_MONTH, dayOfWeek);
 
 		  return result;
 	   }
@@ -2067,11 +2069,11 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #ONCE_PER_HOUR </seealso>
 	   /// <seealso cref= #ONCE_PER_DAY </seealso>
 	   /// <seealso cref= #ONCE_PER_WEEK </seealso>
-	   public virtual void setClockAlarm(int hours, int minutes, int seconds, int day, int alarmFrequency, sbyte[] state)
+	   public virtual void setClockAlarm(int hours, int minutes, int seconds, int day, int alarmFrequency, byte[] state)
 	   {
 		  setTime(0x207, hours, minutes, seconds, false, state);
 
-		  state [0x0a] = (sbyte) day;
+		  state [0x0a] = (byte) day;
 
 		  int number_0_msb = 0; //how many of the MS, MM, MH, MD bytes have
 
@@ -2103,11 +2105,11 @@ namespace com.dalsemi.onewire.container
 			 {
 				number_0_msb--;
 
-				state [i] = (sbyte)(state [i] & 0x7f); //make the leading bit 0
+				state [i] = (byte)(state [i] & 0x7f); //make the leading bit 0
 			 }
 			 else
 			 {
-				state [i] = unchecked((sbyte)(state [i] | 0x80)); //make the laeding bit 1
+				state [i] = (byte)(state [i] | 0x80); //make the laeding bit 1
 			 }
 		  }
 	   }
@@ -2123,7 +2125,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= #enableMission(int) </seealso>
 	   /// <seealso cref= #readDevice() </seealso>
-	   public virtual int getSampleRate(sbyte[] state)
+	   public virtual int getSampleRate(byte[] state)
 	   {
 		  return (int)(0x0FF & state [0x0D]);
 	   }
@@ -2140,11 +2142,11 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #getDeviceSamplesCounter(byte[]) </seealso>
-	   public virtual int getMissionSamplesCounter(sbyte[] state)
+	   public virtual int getMissionSamplesCounter(byte[] state)
 	   {
-		  sbyte low = state [0x1A];
-		  sbyte medium = state [0x1B];
-		  sbyte high = state [0x1C];
+		  byte low = state [0x1A];
+		  byte medium = state [0x1B];
+		  byte high = state [0x1C];
 
 		  return (((high << 16) & 0x00ff0000) | ((medium << 8) & 0x0000ff00) | (low & 0x000000ff));
 	   }
@@ -2165,11 +2167,11 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #getMissionSamplesCounter(byte[]) </seealso>
-	   public virtual int getDeviceSamplesCounter(sbyte[] state)
+	   public virtual int getDeviceSamplesCounter(byte[] state)
 	   {
-		  sbyte low = state [0x1D];
-		  sbyte medium = state [0x1E];
-		  sbyte high = state [0x1F];
+		  byte low = state [0x1D];
+		  byte medium = state [0x1E];
+		  byte high = state [0x1F];
 
 		  return (((high << 16) & 0x00ff0000) | ((medium << 8) & 0x0000ff00) | (low & 0x000000ff));
 	   }
@@ -2186,7 +2188,7 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> the date and time that the last mission was started
 	   /// </returns>
 	   /// <seealso cref= #readDevice() </seealso>
-	   public virtual DateTime getMissionTimeStamp(sbyte[] state)
+	   public virtual DateTime getMissionTimeStamp(byte[] state)
 	   {
 		  /* i know here that the mission time stamp does not start at address 214,
 		   * however--the mission time stamp starts with minutes, and i have
@@ -2225,20 +2227,15 @@ namespace com.dalsemi.onewire.container
 			 year -= 100;
 		  }
 
-		  DateTime result = new DateTime();
-		  result.set(DateTime.YEAR, year);
-		  result.set(DateTime.MONTH, date_result[1] - 1);
-		  result.set(DateTime.DATE, date_result[2]);
-		  result.set(DateTime.HOUR_OF_DAY, time_result[2]);
-		  result.set(DateTime.MINUTE, time_result[1]);
-		  // SH - zeroed out the seconds (previously random)
-		  result.set(DateTime.SECOND, 0);
+		  DateTime result = new DateTime(
+              year, 
+              date_result[1], 
+              date_result[2],
+              time_result[2],
+              time_result[1],
+              0);
 
 		  return result;
-		  //removed by SH - not J2ME-compliant
-		  //new GregorianCalendar(year, date_result [1] - 1,
-		  //                             date_result [2], time_result [2],
-		  //                             time_result [1]);
 	   }
 
 	   /// <summary>
@@ -2272,7 +2269,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #getMissionTimeStamp(byte[]) </seealso>
 	   /// <seealso cref= #getTemperatureLog(byte[]) </seealso>
-	   public virtual long getFirstLogOffset(sbyte[] state)
+	   public virtual long getFirstLogOffset(byte[] state)
 	   {
 		  long counter = getMissionSamplesCounter(state);
 
@@ -2325,11 +2322,11 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #getFirstLogOffset(byte[]) </seealso>
 	   /// <seealso cref= #getMissionTimeStamp(byte[]) </seealso>
-	   public virtual sbyte[] getTemperatureLog(sbyte[] state)
+	   public virtual byte[] getTemperatureLog(byte[] state)
 	   {
 		   lock (this)
 		   {
-			  sbyte[] result;
+			  byte[] result;
         
 			  /* get the number of samples and the rate at which they were taken */
 			  int numberOfReadings = getMissionSamplesCounter(state);
@@ -2351,7 +2348,7 @@ namespace com.dalsemi.onewire.container
 				 numberOfReadings = 2048;
 			  }
         
-			  result = new sbyte [numberOfReadings];
+			  result = new byte [numberOfReadings];
         
 			  int offset = 0;
         
@@ -2406,7 +2403,7 @@ namespace com.dalsemi.onewire.container
 			  {
 				 result = new int [63];
 			  }
-			  sbyte[] buffer = new sbyte [128];
+			  byte[] buffer = new byte [128];
     
 			  /* read the data first */
 			  int offset = 0;
@@ -2454,7 +2451,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #TIMER_ALARM </seealso>
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #getAlarmHistory(byte) </seealso>
-	   public virtual bool getAlarmStatus(sbyte alarmBit, sbyte[] state)
+	   public virtual bool getAlarmStatus(byte alarmBit, byte[] state)
 	   {
 		  return ((state [STATUS_REGISTER & 31] & alarmBit) != 0);
 	   }
@@ -2514,10 +2511,10 @@ namespace com.dalsemi.onewire.container
 	   ///         adapter
 	   /// </exception>
 	   /// <seealso cref= #getAlarmStatus(byte,byte[]) </seealso>
-	   public virtual sbyte[] getAlarmHistory(sbyte alarmBit)
+	   public virtual byte[] getAlarmHistory(byte alarmBit)
 	   {
 		  int counter = 0;
-		  sbyte[] temp_data = new sbyte [96];
+		  byte[] temp_data = new byte [96];
 		  int offset = 0;
 
 		  while (offset < 96)
@@ -2544,7 +2541,7 @@ namespace com.dalsemi.onewire.container
 			 counter++;
 		  }
 
-		  sbyte[] data = new sbyte [counter << 2];
+		  byte[] data = new byte [counter << 2];
 
 		  Array.Copy(temp_data, offset, data, 0, counter << 2);
 
@@ -2565,9 +2562,9 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
-		  sbyte[] buffer = new sbyte [32];
+		  byte[] buffer = new byte [32];
 
 		  //going to return the register page, 32 bytes
 		  register.readPageCRC(0, false, buffer, 0);
@@ -2589,7 +2586,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
 		  if (getFlag(STATUS_REGISTER, MISSION_IN_PROGRESS_FLAG))
 		  {
@@ -2725,7 +2722,7 @@ namespace com.dalsemi.onewire.container
 	   ///         currently running mission. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void doTemperatureConvert(sbyte[] state)
+	   public virtual void doTemperatureConvert(byte[] state)
 	   {
 
 		  /* check for mission in progress */
@@ -2777,7 +2774,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <returns> temperature in Celsius from the last
 	   ///                     <code>doTemperatureConvert()</code> </returns>
-	   public virtual double getTemperature(sbyte[] state)
+	   public virtual double getTemperature(byte[] state)
 	   {
 		  return decodeTemperature(state [0x11]);
 	   }
@@ -2795,7 +2792,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref=    #hasTemperatureAlarms </seealso>
 	   /// <seealso cref=    #setTemperatureAlarm </seealso>
-	   public virtual double getTemperatureAlarm(int alarmType, sbyte[] state)
+	   public virtual double getTemperatureAlarm(int alarmType, byte[] state)
 	   {
 		  if ((alarmType == TEMPERATURE_HIGH_ALARM) || (alarmType == TemperatureContainer_Fields.ALARM_HIGH))
 		  {
@@ -2819,7 +2816,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolutions </seealso>
 	   /// <seealso cref=    #setTemperatureResolution </seealso>
-	   public virtual double getTemperatureResolution(sbyte[] state)
+	   public virtual double getTemperatureResolution(byte[] state)
 	   {
 		  return temperatureResolution;
 	   }
@@ -2841,11 +2838,11 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref=    #hasTemperatureAlarms </seealso>
 	   /// <seealso cref=    #getTemperatureAlarm </seealso>
-	   public virtual void setTemperatureAlarm(int alarmType, double alarmValue, sbyte[] state)
+	   public virtual void setTemperatureAlarm(int alarmType, double alarmValue, byte[] state)
 	   {
 		  double histogramLow = HistogramLowTemperature;
 		  double histogramHigh = PhysicalRangeHighTemperature + (HistogramBinWidth - TemperatureResolution);
-		  sbyte alarm = encodeTemperature(alarmValue);
+		  byte alarm = encodeTemperature(alarmValue);
 
 		  // take special care of top and bottom of temperature ranges for the different
 		  // types of thermochrons.
@@ -2858,7 +2855,7 @@ namespace com.dalsemi.onewire.container
 
 			 if (alarmValue > histogramHigh)
 			 {
-				alarm = unchecked((sbyte) 0xFF); // maximum value stand for the histogram high temperature
+				alarm = 0xFF; // maximum value stand for the histogram high temperature
 			 }
 		  }
 		  else
@@ -2870,7 +2867,7 @@ namespace com.dalsemi.onewire.container
 
 			 if (alarmValue > 85.0)
 			 {
-				alarm = unchecked((sbyte) 0xfa); // maximum value stands for 85.0 C
+				alarm = 0xfa; // maximum value stands for 85.0 C
 			 }
 		  }
 
@@ -2898,7 +2895,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolutions </seealso>
-	   public virtual void setTemperatureResolution(double resolution, sbyte[] state)
+	   public virtual void setTemperatureResolution(double resolution, byte[] state)
 	   {
 		  throw new OneWireException("Selectable Temperature Resolution Not Supported");
 	   }
@@ -2961,7 +2958,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #setClock(long,byte[]) </seealso>
-	   public virtual long getClock(sbyte[] state)
+	   public virtual long getClock(byte[] state)
 	   {
 
 		  /* grab the time (at location 200, date at 204) */
@@ -2979,11 +2976,8 @@ namespace com.dalsemi.onewire.container
 		  //result.set(DateTime.MINUTE, time[1]);
 		  //result.set(DateTime.SECOND, time[0]);
 
-		  //removed by SH - not J2ME-compliant
-		  //Calendar d = new GregorianCalendar(date [0], date [1] - 1, date [2],
-		  //                                   time [2], time [1], time [0]);
-
-		  return result.Time;
+          TimeSpan t = new TimeSpan(result.Ticks);
+		  return (long)t.TotalMilliseconds;
 	   }
 
 	   /// <summary>
@@ -3001,11 +2995,12 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual long getClockAlarm(sbyte[] state)
+	   public virtual long getClockAlarm(byte[] state)
 	   {
+          TimeSpan t;
 
-		  //first get the normal real time clock
-		  int[] time = getTime(0x200, state);
+          //first get the normal real time clock
+          int[] time = getTime(0x200, state);
 		  int[] date = getDate(0x204, state);
 
 		  //date[0] = year
@@ -3014,18 +3009,7 @@ namespace com.dalsemi.onewire.container
 		  //time[2] = hour
 		  //time[1] = minute
 		  //time[0] = second
-		  //date[1] - 1 because Java does funky months from offset 0
-		  DateTime c = new DateTime();
-		  c.set(DateTime.YEAR, date[0]);
-		  c.set(DateTime.MONTH, date[1] - 1);
-		  c.set(DateTime.DATE, date[2]);
-		  c.set(DateTime.HOUR_OF_DAY, time[2]);
-		  c.set(DateTime.MINUTE, time[1]);
-		  c.set(DateTime.SECOND, time[0]);
-
-		  //removed by SH - not J2ME-compliant
-		  //Calendar c = new GregorianCalendar(date [0], date [1] - 1, date [2],
-		  //                                   time [2], time [1], time [0]);
+		  DateTime c = new DateTime(date[0], date[1], date[2], time[2], time[1], time[0]);
 
 		  //get the seconds into the day we are at
 		  int time_into_day = time [0] + 60 * time [1] + 60 * 60 * time [2];
@@ -3037,17 +3021,17 @@ namespace com.dalsemi.onewire.container
 		  int a_time_into_day = a_time [0] + 60 * a_time [1] + 60 * 60 * a_time [2];
 
 		  // now put the day of the week in there
-		  sbyte dayOfWeek = (sbyte)(state [0x0A] & 0x07);
+		  byte dayOfWeek = (byte)(state [0x0A] & 0x07);
 
 		  if (dayOfWeek == 0)
 		  {
 			 dayOfWeek++;
 		  }
 
-		  sbyte MS = (sbyte)(((int)((uint)state [0x07] >> 7)) & 0x01);
-		  sbyte MM = (sbyte)(((int)((uint)state [0x08] >> 7)) & 0x01);
-		  sbyte MH = (sbyte)(((int)((uint)state [0x09] >> 7)) & 0x01);
-		  sbyte MD = (sbyte)(((int)((uint)state [0x0A] >> 7)) & 0x01);
+		  byte MS = (byte)(((int)((uint)state [0x07] >> 7)) & 0x01);
+		  byte MM = (byte)(((int)((uint)state [0x08] >> 7)) & 0x01);
+		  byte MH = (byte)(((int)((uint)state [0x09] >> 7)) & 0x01);
+		  byte MD = (byte)(((int)((uint)state [0x0A] >> 7)) & 0x01);
 
 		  long temp_time = 0;
 		  int MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -3062,8 +3046,8 @@ namespace com.dalsemi.onewire.container
 				{
 				   c.AddMinutes(1);
 				}
-
-				c.set(DateTime.SECOND, a_time [0]);
+                DateTime ts = new DateTime(c.Year,c.Month,c.Day,c.Hour,c.Minute, a_time[0]);
+                c = ts;
 				break;
 			 case 2: //ONCE_PER_HOUR
 				if (!(a_time_into_day < time_into_day)) //alarm has occurred
@@ -3071,13 +3055,12 @@ namespace com.dalsemi.onewire.container
 				   c.AddHours(1); //will occur again next hour
 				}
 
-				c.set(DateTime.SECOND, a_time [0]);
-				c.set(DateTime.MINUTE, a_time [1]);
-				break;
+                DateTime th = new DateTime(c.Year,c.Month,c.Day,c.Hour, a_time[1], a_time[0]);
+                c = th;
+                break;
 			 case 1: //ONCE_PER_DAY
-				c.set(DateTime.SECOND, a_time [0]);
-				c.set(DateTime.MINUTE, a_time [1]);
-				c.set(DateTime.HOUR_OF_DAY, a_time [2]);
+                DateTime td = new DateTime(c.Year, c.Month, c.Day, a_time[2], a_time[1], a_time[0]);
+                c = td;
 
 				if ((a_time_into_day < time_into_day)) //alarm has occurred
 				{
@@ -3087,32 +3070,15 @@ namespace com.dalsemi.onewire.container
 			 default:
 				 goto case 0;
 			 case 0: //ONCE_PER_WEEK
-				c.set(DateTime.SECOND, a_time [0]);
-				c.set(DateTime.MINUTE, a_time [1]);
+                DateTime tw = new DateTime(c.Year, c.Month, c.Day, a_time[2], a_time[1], a_time[0]);
+                c = tw;
 
 				// c.set(c.AM_PM, (a_time[2] > 11) ? c.PM : c.AM);
-				c.set(DateTime.HOUR_OF_DAY, a_time [2]);
 
-				/* oh no!!! TINI doesn't like calls to Calendar.roll() and Calendar.add()!
-				   we could be stuck here forever!
-	
-				if (dayOfWeek == c.get(c.DAY_OF_WEEK))
-				{
-	
-				   //has alarm already occurred today?
-				   if ((a_time_into_day < time_into_day))   //alarm has occurred
-				      c.add(c.DATE, 7);                     //will occur again next week
-				}
-				else
-				{
-	
-				   //roll the day of the week until it matches
-				   while (dayOfWeek != c.get(c.DAY_OF_WEEK))
-				      c.roll(c.DATE, true);
-				}*/
-				temp_time = c.Time;
+                t = new TimeSpan(c.Ticks);
+				temp_time = (long)t.TotalMilliseconds;
 
-				if (dayOfWeek == c.DayOfWeek)
+				if (dayOfWeek == (byte)c.DayOfWeek)
 				{
 
 				   //has alarm already occurred today?
@@ -3125,7 +3091,7 @@ namespace com.dalsemi.onewire.container
 				{
 
 				   //roll the day of the week until it matches
-				   int cdayofweek = c.DayOfWeek;
+				   int cdayofweek = (int)c.DayOfWeek;
 
 				   while ((dayOfWeek % 7) != (cdayofweek++ % 7))
 				   {
@@ -3137,7 +3103,8 @@ namespace com.dalsemi.onewire.container
 				return temp_time;
 		  }
 
-		  return c.Time; //c->getTime returns Date, Date->getTime returns long
+          t = new TimeSpan(c.Ticks);
+		  return (long)t.TotalMilliseconds; //c->getTime returns Date, Date->getTime returns long
 	   }
 
 	   /// <summary>
@@ -3155,7 +3122,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual bool isClockAlarming(sbyte[] state)
+	   public virtual bool isClockAlarming(byte[] state)
 	   {
 		  return ((state [STATUS_REGISTER & 31] & TIMER_ALARM) != 0);
 	   }
@@ -3173,7 +3140,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual bool isClockAlarmEnabled(sbyte[] state)
+	   public virtual bool isClockAlarmEnabled(byte[] state)
 	   {
 		  return ((state [CONTROL_REGISTER & 31] & TIMER_ALARM_SEARCH_FLAG) != 0);
 	   }
@@ -3189,7 +3156,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #canDisableClock() </seealso>
 	   /// <seealso cref= #setClockRunEnable(bool,byte[]) </seealso>
-	   public virtual bool isClockRunning(sbyte[] state)
+	   public virtual bool isClockRunning(byte[] state)
 	   {
 
 		  //checks for equal to 0 since active low means clock is running
@@ -3212,17 +3179,12 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #getClock(byte[]) </seealso>
-	   public virtual void setClock(long time, sbyte[] state)
+	   public virtual void setClock(long time, byte[] state)
 	   {
-		  DateTime x = new DateTime(time);
-		  DateTime d = new DateTime();
+		  DateTime d = new DateTime(TimeSpan.TicksPerMillisecond * time);
 
-		  //removed by SH - not J2ME-compliant
-		  //Calendar d = new GregorianCalendar();
-
-		  d = new DateTime(x);
 		  setTime(0x200, d.Hour, d.Minute, d.Second, false, state);
-		  setDate(d.Year, d.Month + 1, d.Day, state);
+		  setDate(d.Year, d.Month, d.Day, state);
 
 		  lock (this)
 		  {
@@ -3250,7 +3212,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual void setClockAlarm(long time, sbyte[] state)
+	   public virtual void setClockAlarm(long time, byte[] state)
 	   {
 
 		  //can't do this because we need more info on the alarm
@@ -3271,7 +3233,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #canDisableClock() </seealso>
 	   /// <seealso cref= #isClockRunning(byte[]) </seealso>
-	   public virtual void setClockRunEnable(bool runEnable, sbyte[] state)
+	   public virtual void setClockRunEnable(bool runEnable, byte[] state)
 	   {
 
 		  // the oscillator enable is active low
@@ -3295,7 +3257,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
-	   public virtual void setClockAlarmEnable(bool alarmEnable, sbyte[] state)
+	   public virtual void setClockAlarmEnable(bool alarmEnable, byte[] state)
 	   {
 		  setFlag(CONTROL_REGISTER, TIMER_ALARM_SEARCH_FLAG, alarmEnable, state);
 	   }

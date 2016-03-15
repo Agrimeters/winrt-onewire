@@ -164,6 +164,7 @@
     <Compile Include="com\dalsemi\onewire\container\ClockContainer.cs" />
     <Compile Include="com\dalsemi\onewire\container\CommandAPDU.cs" />
     <Compile Include="com\dalsemi\onewire\container\HumidityContainer.cs" />
+    <Compile Include="com\dalsemi\onewire\container\OneWireContainer21.cs" />
     <Compile Include="com\dalsemi\onewire\InterruptedException.cs" />
     <Compile Include="com\dalsemi\onewire\container\MemoryBank.cs" />
     <Compile Include="com\dalsemi\onewire\container\MemoryBankAD.cs" />
