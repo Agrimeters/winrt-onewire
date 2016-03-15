@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Diagnostics;
+using System.Text;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -644,7 +645,7 @@ public class DS2408Demo1
 		 {
 			string tstr = getString(1);
 
-			data = System.Text.Encoding.UTF8.GetBytes(tstr);
+			data = Encoding.UTF8.GetBytes(tstr);
 		 }
 		 else
 		 {
@@ -652,7 +653,7 @@ public class DS2408Demo1
 			{
 			   string tstr = getString(1);
 
-			   data = System.Text.Encoding.UTF8.GetBytes(tstr);
+			   data = Encoding.UTF8.GetBytes(tstr);
 
 			   if (data.Length > 8)
 			   {

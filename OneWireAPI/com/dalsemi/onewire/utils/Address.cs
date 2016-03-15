@@ -1,4 +1,6 @@
-﻿/*---------------------------------------------------------------------------
+﻿using System.Text;
+
+/*---------------------------------------------------------------------------
  * Copyright (C) 1999,2004 Dallas Semiconductor Corporation, All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -184,7 +186,7 @@ namespace com.dalsemi.onewire.utils
 			barr[index++] = (byte)ch;
 		  }
 
-		  return System.Text.Encoding.UTF8.GetString(barr);
+		  return Encoding.UTF8.GetString(barr);
 	   }
 
 	   /// <summary>

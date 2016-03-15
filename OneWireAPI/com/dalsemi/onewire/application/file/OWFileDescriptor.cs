@@ -2,7 +2,6 @@
 using System.Collections;
 using System.IO;
 using System.Text;
-using System.Threading;
 using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
@@ -3694,7 +3693,7 @@ namespace com.dalsemi.onewire.application.file
 				   }
 
 				   // is name only
-				   Array.Copy(System.Text.Encoding.ASCII.GetBytes(field), 0, name, 0, field.Length);
+				   Array.Copy(Encoding.ASCII.GetBytes(field), 0, name, 0, field.Length);
 				   name_len = field.Length;
 
 				   // check if last field
@@ -3730,7 +3729,7 @@ namespace com.dalsemi.onewire.application.file
 						 return false;
 					  }
 
-					  Array.Copy(System.Text.Encoding.ASCII.GetBytes(field), 0, name, 0, field.Length);
+					  Array.Copy(Encoding.ASCII.GetBytes(field), 0, name, 0, field.Length);
 					  name [4] = EXT_DIRECTORY;
 					  name_len = field.Length;
 
@@ -3748,7 +3747,7 @@ namespace com.dalsemi.onewire.application.file
 					  name_len = period_index;
 
 					  // get name part
-					  Array.Copy(System.Text.Encoding.ASCII.GetBytes(field), 0, name, 0, period_index);
+					  Array.Copy(Encoding.ASCII.GetBytes(field), 0, name, 0, period_index);
 
 					  // get the name part
 					  try
@@ -3857,11 +3856,11 @@ namespace com.dalsemi.onewire.application.file
 			  {
 				 int i , j , hash = 0;
 				 string this_path = owd[0].AddressAsString + Path;
-				 byte[] path_bytes = System.Text.Encoding.ASCII.GetBytes(this_path);
+				 byte[] path_bytes = Encoding.ASCII.GetBytes(this_path);
     
 				 for (i = 0; i < (path_bytes.Length / 4); i++)
 				 {
-					hash ^= com.dalsemi.onewire.utils.Convert.toInt(path_bytes, i * 4, 4);
+					hash ^= utils.Convert.toInt(path_bytes, i * 4, 4);
 				 }
     
 				 for (j = 0; j < (path_bytes.Length % 4); j++)

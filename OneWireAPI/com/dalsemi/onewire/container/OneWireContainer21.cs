@@ -284,7 +284,6 @@ namespace com.dalsemi.onewire.container
 	///  </seealso>
 	public class OneWireContainer21 : OneWireContainer, TemperatureContainer, ClockContainer
 	{
-	   private static readonly byte FAMILY_CODE = 0x21;
 	   private bool doSpeedEnable = true;
 
 	   /* privates!

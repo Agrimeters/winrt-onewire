@@ -75,7 +75,7 @@ namespace com.dalsemi.onewire
             }
             else
             {
-                Debug.WriteLine("Did not find " + localFolder.Path + "\\" + file);
+                throw new IOException("Did not find " + localFolder.Path + "\\" + file);
             }
         }
 
@@ -83,11 +83,10 @@ namespace com.dalsemi.onewire
         /// Load property file from the OneWireAPI assembly
         /// </summary>
         /// <param name="resource_file"></param>
-        public void loadResourceFile(string file)
+        public void loadResourceFile(Assembly asm, string file)
         {
             try
             {
-                Assembly asm = typeof(OneWireAccessProvider).GetTypeInfo().Assembly;
                 using (Stream stream = asm.GetManifestResourceStream(file))
                 using (StreamReader reader = new StreamReader(stream))
                 {
@@ -98,7 +97,7 @@ namespace com.dalsemi.onewire
             }
             catch(Exception)
             {
-                IOHelper.writeLine("Can't find resource: " + file);
+                throw new IOException("Can't find resource: " + file);
             }
         }
 

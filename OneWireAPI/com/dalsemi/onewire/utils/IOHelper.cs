@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Diagnostics;
+using System.Text;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -186,12 +187,12 @@ namespace com.dalsemi.onewire.utils
         
 				 if (count == 0)
 				 {
-					Array.Copy(System.Text.Encoding.UTF8.GetBytes(s), 0, ret, 0, s.Length);
+					Array.Copy(Encoding.UTF8.GetBytes(s), 0, ret, 0, s.Length);
         
 					return ret;
 				 }
         
-				 Array.Copy(System.Text.Encoding.UTF8.GetBytes(s), 0, ret, 0, len);
+				 Array.Copy(Encoding.UTF8.GetBytes(s), 0, ret, 0, len);
         
 				 for (; len < count; len++)
 				 {

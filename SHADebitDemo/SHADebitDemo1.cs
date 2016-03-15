@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
@@ -34,8 +33,6 @@ using com.dalsemi.onewire.application.sha;
 using com.dalsemi.onewire.container;
 using com.dalsemi.onewire.utils;
 using com.dalsemi.onewire;
-using Windows.Storage;
-using System.Threading.Tasks;
 
 /// <summary>
 /// Title:        SHA Debit Demo
@@ -61,7 +58,7 @@ public class SHADebitDemo1
     /// </summary>
     public static void printUsageString()
    {
-	  IOHelper.writeLine("SHA iButton C# Demo Transaction Program.\r\n");
+	  IOHelper.writeLine("SHA iButton Java Demo Transaction Program.\r\n");
 	  IOHelper.writeLine("Usage: ");
 	  IOHelper.writeLine("   java SHADebitDemo [-pSHA_PROPERTIES_PATH]\r\n");
 	  IOHelper.writeLine();
@@ -74,15 +71,17 @@ public class SHADebitDemo1
 	  IOHelper.writeLine("   java SHADebitDemo -p\\java\\lib\\sha.properties");
    }
 
-   public static void Main(string[] args)
+   public static void Main0(string[] args)
    {
 	  //coprocessor
 	  long coprID = 0;
+      long lookupID = 0;
+      bool next;
 
-	  // ------------------------------------------------------------
-	  // Check for valid path to sha.properties file on the cmd line.
-	  // ------------------------------------------------------------
-	  for (int i = 0; i < args.Length; i++)
+      // ------------------------------------------------------------
+      // Check for valid path to sha.properties file on the cmd line.
+      // ------------------------------------------------------------
+        for (int i = 0; i < args.Length; i++)
 	  {
 		 string arg = args[i].ToUpper();
 		 if (arg.IndexOf("-P", StringComparison.Ordinal) == 0)
@@ -194,7 +193,7 @@ public class SHADebitDemo1
 		 // Check for hardcoded coprocessor address
 		 // ---------------------------------------------------------
 		 byte[] coprAddress = sha_properties.getPropertyBytes("copr.address", null);
-		 long lookupID = 0;
+		 lookupID = 0;
 		 if (coprAddress != null)
 		 {
 			lookupID = Address.toLong(coprAddress);
@@ -208,7 +207,7 @@ public class SHADebitDemo1
 		 // ---------------------------------------------------------
 		 try
 		 {
-			bool next = coprAdapter.findFirstDevice();
+			next = coprAdapter.findFirstDevice();
 			while (copr == null && next)
 			{
 			   try
@@ -354,7 +353,7 @@ public class SHADebitDemo1
 	  // Check for hardcoded write-authorizaton coprocessor address
 	  // -----------------------------------------------------------
 	  byte[] authCoprAddress = sha_properties.getPropertyBytes("ds1961s.copr.address",null);
-	  long lookupID = 0;
+	  lookupID = 0;
 	  if (authCoprAddress != null)
 	  {
 		 lookupID = Address.toLong(authCoprAddress);
@@ -380,7 +379,7 @@ public class SHADebitDemo1
 			auth18.setSpeed(DSPortAdapter.SPEED_OVERDRIVE, false);
 			auth18.SpeedCheck = false;
 
-			bool next = authAdapter.findFirstDevice();
+			next = authAdapter.findFirstDevice();
 			while (authCopr == null && next)
 			{
 			   try
@@ -511,7 +510,7 @@ public class SHADebitDemo1
 	  byte[] address = new byte[8];
 
 	  //result of findNextDevice/findFirstDevice
-	  bool next = false;
+	  next = false;
 
 	  //holds list of known buttons
 	  long[] buttons = new long[16];
@@ -576,7 +575,7 @@ public class SHADebitDemo1
 		 while (buttonSearch && !applicationFinished)
 		 {
 			wholeList = false;
-			t0 = DateTimeHelperClass.CurrentUnixTimeMillis();
+            t0 = Stopwatch.GetTimestamp() * TimeSpan.TicksPerMillisecond;
 			try
 			{
 			   //Go into overdrive
@@ -663,7 +662,7 @@ public class SHADebitDemo1
 		 // ---------------------------------------------------------
 		 try
 		 {
-			t1 = DateTimeHelperClass.CurrentUnixTimeMillis();
+            t1 = Stopwatch.GetTimestamp() * TimeSpan.TicksPerMillisecond;
 
 			//de-ref the user
 			user = null;
@@ -694,18 +693,18 @@ public class SHADebitDemo1
 			{
 			   Debug.WriteLine("");
 			   Debug.WriteLine(user.ToString());
-			   t2 = DateTimeHelperClass.CurrentUnixTimeMillis();
+               t2 = Stopwatch.GetTimestamp() * TimeSpan.TicksPerMillisecond;
 			   if (trans.verifyUser(user))
 			   {
-				  t3 = DateTimeHelperClass.CurrentUnixTimeMillis();
+                  t3 = Stopwatch.GetTimestamp() * TimeSpan.TicksPerMillisecond;
 				  if (trans.verifyTransactionData(user))
 				  {
-					 t4 = DateTimeHelperClass.CurrentUnixTimeMillis();
+                     t4 = Stopwatch.GetTimestamp() * TimeSpan.TicksPerMillisecond;
 					 if (!trans.executeTransaction(user, true))
 					 {
 						Debug.WriteLine("Execute Transaction Failed");
 					 }
-					 t5 = DateTimeHelperClass.CurrentUnixTimeMillis();
+                     t5 = Stopwatch.GetTimestamp() * TimeSpan.TicksPerMillisecond;
 
 					 Debug.WriteLine("  Debit Amount: $00.50");
 					 Debug.Write("User's balance: $");

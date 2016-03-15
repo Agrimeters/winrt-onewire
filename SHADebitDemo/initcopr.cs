@@ -1,6 +1,7 @@
 ﻿using System;
-using System.IO;
+using System.Text;
 using System.Diagnostics;
+using System.Reflection;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -29,13 +30,11 @@ using System.Diagnostics;
  *---------------------------------------------------------------------------
  */
 
-using IOHelper = com.dalsemi.onewire.utils.IOHelper;
 using com.dalsemi.onewire;
 using com.dalsemi.onewire.adapter;
 using com.dalsemi.onewire.container;
 using com.dalsemi.onewire.application.sha;
 using com.dalsemi.onewire.utils;
-
 
 public class initcopr
 {
@@ -77,41 +76,21 @@ public class initcopr
    ///  </exception>
    public static void Main1(string[] args)
    {
-	  // ------------------------------------------------------------
-	  // Check for valid path to sha.properties file on the cmd line.
-	  // ------------------------------------------------------------
-	  for (int i = 0; i < args.Length; i++)
-	  {
-		 string arg = args[i].ToUpper();
-		 if (arg.IndexOf("-p", StringComparison.Ordinal) == 0)
-		 {
-			string sha_props_path;
-			if (arg.Length == 2)
-			{
-			   sha_props_path = args[++i];
-			}
-			else
-			{
-			   sha_props_path = arg.Substring(2);
-			}
+      byte[] sign_secret = null;
+      byte[] auth_secret = null;
 
-			// attempt to open the sha.properties file
-			try
-			{
-			   sha_properties = new Properties();
-			   sha_properties.loadLocalFile("sha.properties");
-			}
-			catch (Exception)
-			{
-			   sha_properties = null;
-			}
-		 }
-		 else
-		 {
-			printUsageString();
-            return;
-		 }
-	  }
+      // attempt to open the sha.properties file
+      try
+      {
+          sha_properties = new Properties();
+          sha_properties.loadLocalFile("sha.properties");
+      }
+      catch (Exception)
+      {
+          Debug.WriteLine("loading default sha.properties!");
+          Assembly asm = typeof(SHADebitDemo.MainPage).GetTypeInfo().Assembly;
+          sha_properties.loadResourceFile(asm, "SHADebitDemo.sha.properties");
+      }
 
 	  // ------------------------------------------------------------
 	  // Instantiate coprocessor containers
@@ -220,12 +199,12 @@ public class initcopr
 
 			//now that we got all that, we need a signing secret and an authentication secret
 			Debug.WriteLine("How would you like to enter the signing secret (unlimited bytes)? ");
-			byte[] sign_secret = new byte[] { 0, 0, 0, 0 }; //TODO
+			sign_secret = new byte[] { 0, 0, 0, 0 }; //TODO
 			IOHelper.writeBytes(sign_secret);
 
 			Debug.WriteLine("");
 			Debug.WriteLine("How would you like to enter the authentication secret (unlimited bytes)? ");
-			byte[] auth_secret = new byte[] { 0, 0, 0, 0 }; //TODO
+			auth_secret = new byte[] { 0, 0, 0, 0 }; //TODO
 			IOHelper.writeBytes(auth_secret);
 
 			Debug.WriteLine("");
@@ -358,7 +337,7 @@ public class initcopr
 	  //java.util.Random random = new java.util.Random();
 	  //random.nextBytes(chlg);
 	  //  Need to know what the challenge is so that I can reproduce it!
-	  byte[] chlg = new byte []{0x00,0x00,0x00};
+	  byte[] chlg = new byte [] { 0x00,0x00,0x00 };
 
 	  Debug.WriteLine("Enter a human-readable provider name: ");
 	  string provider_name = IOHelper.readLine();
@@ -374,12 +353,12 @@ public class initcopr
 
 	  //now that we got all that, we need a signing secret and an authentication secret
 	  Debug.WriteLine("How would you like to enter the signing secret (unlimited bytes)? ");
-      byte[] sign_secret = new byte[] { 0, 0, 0, 0 }; //TODO
+      sign_secret = new byte[] { 0, 0, 0, 0 }; //TODO
 	  IOHelper.writeBytes(sign_secret);
 
 	  Debug.WriteLine("");
 	  Debug.WriteLine("How would you like to enter the authentication secret (unlimited bytes)? ");
-	  byte[] auth_secret = new byte[] { 0, 0, 0, 0 }; //TODO
+	  auth_secret = new byte[] { 0, 0, 0, 0 }; //TODO
 	  IOHelper.writeBytes(auth_secret);
 
 	  Debug.WriteLine("");
@@ -399,17 +378,17 @@ public class initcopr
 
 	  if (!string.ReferenceEquals(coprVMfilename, null))
 	  {
-		 byte[] RomID = new byte[] {(byte)0x18,(byte)0x20,unchecked((byte)0xAF),(byte)0x02, (byte)0x00,(byte)0x00,(byte)0x00,unchecked((byte)0xE7)};
+		 byte[] RomID = new byte[] { 0x18,0x20,0xAF,0x02, 0x00,0x00,0x00,0xE7 };
 		 RomID = sha_properties.getPropertyBytes("copr.simulated.address",RomID);
 
-		 copr = new SHAiButtonCoprVM(RomID, sign_page, auth_page, work_page, version, enc_code, ext, name, provider_name.GetBytes(), bind_data, bind_code, aux_data.GetBytes(), sig_ini, chlg, sign_secret, auth_secret);
+		 copr = new SHAiButtonCoprVM(RomID, sign_page, auth_page, work_page, version, enc_code, ext, name, Encoding.UTF8.GetBytes(provider_name), bind_data, bind_code, Encoding.UTF8.GetBytes(aux_data), sig_ini, chlg, sign_secret, auth_secret);
 		 ((SHAiButtonCoprVM)copr).save(coprVMfilename, vmSaveSecrets);
 	  }
 	  else
 	  {
 		 string coprFilename = coprname.ToString() + "." + coprext;
 		 // initialize this OneWireContainer18 as a valid coprocessor
-		 copr = new SHAiButtonCopr(copr18, coprFilename, true, sign_page, auth_page, work_page, version, enc_code, ext, name, provider_name.GetBytes(), bind_data, bind_code, aux_data.GetBytes(), sig_ini, chlg, sign_secret, auth_secret);
+		 copr = new SHAiButtonCopr(copr18, coprFilename, true, sign_page, auth_page, work_page, version, enc_code, ext, name, Encoding.UTF8.GetBytes(provider_name), bind_data, bind_code, Encoding.UTF8.GetBytes(aux_data), sig_ini, chlg, sign_secret, auth_secret);
 	  }
 	  Debug.WriteLine("Initialized Coprocessor");
 	  Debug.WriteLine(copr.ToString());

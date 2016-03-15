@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -28,14 +29,11 @@ using System.Diagnostics;
  *---------------------------------------------------------------------------
  */
 
-using IOHelper = com.dalsemi.onewire.utils.IOHelper;
 using com.dalsemi.onewire;
 using com.dalsemi.onewire.adapter;
 using com.dalsemi.onewire.application.sha;
-using OneWireContainer18 = com.dalsemi.onewire.container.OneWireContainer18;
-using OneWireContainer33 = com.dalsemi.onewire.container.OneWireContainer33;
+using com.dalsemi.onewire.container;
 using com.dalsemi.onewire.utils;
-
 
 public class initrov33
 {
@@ -48,7 +46,7 @@ public class initrov33
    /// </summary>
    public static void printUsageString()
    {
-	  IOHelper.writeLine("SHA iButton C# Demo Transaction Program - 1961S User Initialization.\r\n");
+	  IOHelper.writeLine("SHA iButton java Demo Transaction Program - 1961S User Initialization.\r\n");
 	  IOHelper.writeLine("Usage: ");
 	  IOHelper.writeLine("   java initrov [-pSHA_PROPERTIES_PATH]\r\n");
 	  IOHelper.writeLine();
@@ -70,48 +68,23 @@ public class initrov33
    /// <exception cref="OneWireException"> </exception>
    /// <exception cref="OneWireIOException">
    ///  </exception>
-   public static void Main(string[] args)
+   public static void Main3(string[] args)
    {
 	  //coprocessor
 	  long coprID = 0;
 
-	  // ------------------------------------------------------------
-	  // Check for valid path to sha.properties file on the cmd line.
-	  // ------------------------------------------------------------
-	  for (int i = 0; i < args.Length; i++)
-	  {
-		 string arg = args[i].ToUpper();
-		 if (arg.IndexOf("-P", StringComparison.Ordinal) == 0)
-		 {
-			string sha_props_path;
-			if (arg.Length == 2)
-			{
-			   sha_props_path = args[++i];
-			}
-			else
-			{
-			   sha_props_path = arg.Substring(2);
-			}
-
-			// attempt to open the sha.properties file
-			try
-			{
-			   System.IO.FileStream prop_file = new System.IO.FileStream(sha_props_path + "sha.properties", System.IO.FileMode.Open, System.IO.FileAccess.Read);
-			   sha_properties = new Properties();
-			   sha_properties.load(prop_file);
-			}
-			catch (Exception)
-			{
-			   sha_properties = null;
-			}
-		 }
-		 else
-		 {
-			printUsageString();
-			return;
-		 }
-	  }
-
+      // attempt to open the sha.properties file
+      try
+      {
+          sha_properties = new Properties();
+          sha_properties.loadLocalFile("sha.properties");
+      }
+      catch (Exception)
+      {
+          Debug.WriteLine("loading default sha.properties!");
+          Assembly asm = typeof(SHADebitDemo.MainPage).GetTypeInfo().Assembly;
+          sha_properties.loadResourceFile(asm, "SHADebitDemo.sha.properties");
+      }
 
 	  // ------------------------------------------------------------
 	  // Instantiate coprocessor containers
@@ -128,8 +101,8 @@ public class initrov33
 	  string coprAdapterName = null, coprPort = null;
 	  try
 	  {
-		 coprAdapterName = getProperty("copr.adapter", "{DS9097U}");
-		 coprPort = getProperty("copr.port", "COM1");
+		 coprAdapterName = sha_properties.getProperty("copr.adapter", "{DS9097U}");
+		 coprPort = sha_properties.getProperty("copr.port", "COM1");
 
 		 if (string.ReferenceEquals(coprPort, null) || string.ReferenceEquals(coprAdapterName, null))
 		 {
@@ -159,9 +132,9 @@ public class initrov33
 	  // ------------------------------------------------------------
 	  // Find the coprocessor
 	  // ------------------------------------------------------------
-	  if (getPropertyBoolean("copr.simulated.isSimulated", false))
+	  if (sha_properties.getPropertyBoolean("copr.simulated.isSimulated", false))
 	  {
-		 string coprVMfilename = getProperty("copr.simulated.filename");
+		 string coprVMfilename = sha_properties.getProperty("copr.simulated.filename");
 		 // ---------------------------------------------------------
 		 // Load emulated coprocessor
 		 // ---------------------------------------------------------
@@ -182,12 +155,12 @@ public class initrov33
 		 // ---------------------------------------------------------
 		 // Get the name of the coprocessor service file
 		 // ---------------------------------------------------------
-		 string filename = getProperty("copr.filename","COPR.0");
+		 string filename = sha_properties.getProperty("copr.filename","COPR.0");
 
 		 // ---------------------------------------------------------
 		 // Check for hardcoded coprocessor address
 		 // ---------------------------------------------------------
-		 byte[] coprAddress = getPropertyBytes("copr.address",null);
+		 byte[] coprAddress = sha_properties.getPropertyBytes("copr.address",null);
 		 long lookupID = 0;
 		 if (coprAddress != null)
 		 {
@@ -250,7 +223,7 @@ public class initrov33
 	  // ------------------------------------------------------------
 	  //stores DS1963S transaction data
 	  SHATransaction trans = null;
-	  string transType = getProperty("ds1961s.transaction.type","Signed");
+	  string transType = sha_properties.getProperty("ds1961s.transaction.type","Signed");
 	  if (transType.ToLower().IndexOf("unsigned", StringComparison.Ordinal) >= 0)
 	  {
 		 trans = new SHADebitUnsigned(copr,10000,50);
@@ -275,8 +248,8 @@ public class initrov33
 	  string userAdapterName = null, userPort = null;
 	  try
 	  {
-		 userAdapterName = getProperty("user.adapter","{DS9097U}");
-		 userPort = getProperty("user.port","COM2");
+		 userAdapterName = sha_properties.getProperty("user.adapter", "{DS9097U}");
+		 userPort = sha_properties.getProperty("user.port", "COM9");
 
 		 if (string.ReferenceEquals(userPort, null) || string.ReferenceEquals(userAdapterName, null))
 		 {
@@ -357,7 +330,7 @@ public class initrov33
 	  IOHelper.writeBytes(auth_secret);
 	  IOHelper.writeLine();
 
-	  auth_secret = copr.reformatFor1961S(auth_secret);
+	  auth_secret = SHAiButtonCopr.reformatFor1961S(auth_secret);
 	  IOHelper.writeLine("Reformatted for compatibility with 1961S buttons");
 	  IOHelper.writeBytes(auth_secret);
 	  IOHelper.writeLine("");
@@ -397,177 +370,4 @@ public class initrov33
    }
 
    internal static Properties sha_properties = null;
-   /// <summary>
-   /// Gets the specfied onewire property.
-   /// Looks for the property in the following locations:
-   /// <para>
-   /// <ul>
-   /// <li> In System.properties
-   /// <li> In onewire.properties file in current directory
-   ///      or < java.home >/lib/ (Desktop) or /etc/ (TINI)
-   /// <li> 'smart' default if property is 'onewire.adapter.default'
-   ///      or 'onewire.port.default'
-   /// </ul>
-   /// 
-   /// </para>
-   /// </summary>
-   /// <param name="propName"> string name of the property to read
-   /// </param>
-   /// <returns>  <code>String</code> representing the property value or <code>null</code> if
-   ///          it could not be found (<code>onewire.adapter.default</code> and
-   ///          <code>onewire.port.default</code> may
-   ///          return a 'smart' default even if property not present) </returns>
-   public static string getProperty(string propName)
-   {
-	  // first, try system properties
-	  try
-	  {
-		 string ret_str = System.getProperty(propName, null);
-		 if (!string.ReferenceEquals(ret_str, null))
-		 {
-			return ret_str;
-		 }
-	  }
-	  catch (Exception)
-	  {
-		  ;
-	  }
-
-	  // if defaults not found then try sha.properties file
-	  if (sha_properties == null)
-	  {
-		 //try to load sha_propreties file
-		 System.IO.FileStream prop_file = null;
-
-		 // loop to attempt to open the sha.properties file in two locations
-		 // .\sha.properties or <java.home>\lib\sha.properties
-		 string path = "";
-
-		 for (int i = 0; i <= 1; i++)
-		 {
-
-			// attempt to open the sha.properties file
-			try
-			{
-			   prop_file = new System.IO.FileStream(path + "sha.properties", System.IO.FileMode.Open, System.IO.FileAccess.Read);
-			   // attempt to read the onewire.properties
-			   try
-			   {
-				  sha_properties = new Properties();
-				  sha_properties.load(prop_file);
-			   }
-			   catch (Exception)
-			   {
-				  //so we remember that it failed
-				  sha_properties = null;
-			   }
-			}
-			catch (IOException)
-			{
-			   prop_file = null;
-			}
-
-			// check to see if we now have the properties loaded
-			if (sha_properties != null)
-			{
-			   break;
-			}
-
-			// try the second path
-			path = System.getProperty("java.home") + File.separator + "lib" + File.separator;
-		 }
-	  }
-
-	  if (sha_properties == null)
-	  {
-		 IOHelper.writeLine("Can't find sha.properties file");
-		 return null;
-	  }
-	  else
-	  {
-		 object ret = sha_properties.get(propName);
-		 if (ret == null)
-		 {
-			return null;
-		 }
-		 else
-		 {
-			return ret.ToString();
-		 }
-	  }
-   }
-
-   public static string getProperty(string propName, string defValue)
-   {
-	  string ret = getProperty(propName);
-	  return (string.ReferenceEquals(ret, null)) ? defValue : ret;
-   }
-
-   public static bool getPropertyBoolean(string propName, bool defValue)
-   {
-	  string strValue = getProperty(propName);
-	  if (!string.ReferenceEquals(strValue, null))
-	  {
-		 defValue = Convert.ToBoolean(strValue);
-	  }
-	  return defValue;
-   }
-
-
-   public static byte[] getPropertyBytes(string propName, byte[] defValue)
-   {
-	  string strValue = getProperty(propName);
-	  if (!string.ReferenceEquals(strValue, null))
-	  {
-		 //only supports up to 128 bytes of data
-		 byte[] tmp = new byte[128];
-
-		 //split the string on commas and spaces
-		 StringTokenizer strtok = new StringTokenizer(strValue,", ");
-
-		 //how many bytes we got
-		 int i = 0;
-		 while (strtok.hasMoreElements())
-		 {
-			//this string could have more than one byte in it
-			string multiByteStr = strtok.nextToken();
-			int strLen = multiByteStr.Length;
-
-			for (int j = 0; j < strLen; j += 2)
-			{
-			   //get just two nibbles at a time
-			   string byteStr = multiByteStr.Substring(j, Math.Min(2, strLen));
-
-			   long lng = 0;
-			   try
-			   {
-				  //parse the two nibbles into a byte
-				  lng = long.Parse(byteStr, 16);
-			   }
-			   catch (System.FormatException nfe)
-			   {
-				  Debug.WriteLine(nfe.ToString());
-				  Debug.Write(nfe.StackTrace);
-
-				  //no mercy!
-				  return defValue;
-			   }
-
-			   //store the byte and increment the counter
-			   if (i < tmp.Length)
-			   {
-				  tmp[i++] = unchecked((byte)(lng & 0x0FF));
-			   }
-			}
-		 }
-		 if (i > 0)
-		 {
-			byte[] retVal = new byte[i];
-			Array.Copy(tmp, 0, retVal, 0, i);
-			return retVal;
-		 }
-	  }
-	  return defValue;
-   }
-
 }

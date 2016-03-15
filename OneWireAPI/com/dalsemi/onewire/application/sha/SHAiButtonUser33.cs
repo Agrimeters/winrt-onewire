@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -207,7 +208,7 @@ namespace com.dalsemi.onewire.application.sha
 	   public SHAiButtonUser33(byte[] coprBindCode, byte[] fileName, int fileNameExt, OneWireContainer33 owc, bool formatDevice, byte[] authSecret)
 	   {
 		  //create string representation of service filename
-		  this.strServiceFilename = System.Text.Encoding.Unicode.GetString(fileName) + "." + (int)fileNameExt;
+		  this.strServiceFilename = Encoding.Unicode.GetString(fileName) + "." + (int)fileNameExt;
 
 		  //hold container reference
 		  this.ibc33 = owc;
@@ -335,7 +336,7 @@ namespace com.dalsemi.onewire.application.sha
 
 		  //create string representation of service filename
 		  copr.getFilename(this.serviceFile,0);
-		  this.strServiceFilename = System.Text.Encoding.Unicode.GetString(fileName) + "." + (int)fileNameExt;
+		  this.strServiceFilename = Encoding.Unicode.GetString(fileName) + "." + (int)fileNameExt;
 
 		  //hold container reference and address
 		  if (!setiButton33(owc))
@@ -380,7 +381,7 @@ namespace com.dalsemi.onewire.application.sha
 
 		  //create string representation of service filename
 		  copr.getFilename(this.serviceFile,0);
-		  this.strServiceFilename = System.Text.Encoding.Unicode.GetString(this.serviceFile) + "." + (int)copr.FilenameExt;
+		  this.strServiceFilename = Encoding.Unicode.GetString(this.serviceFile) + "." + (int)copr.FilenameExt;
 	   }
 
 	   /// <summary>

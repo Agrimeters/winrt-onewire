@@ -281,7 +281,7 @@ namespace com.dalsemi.onewire.container
 	    *
 	    * @see #readAuthenticatedPage(int,byte[],int)
 	    */
-	   public static readonly byte READ_AUTHENTICATED_PAGE = unchecked((byte) 0xA5);
+	   public const byte READ_AUTHENTICATED_PAGE = 0xA5;
 
 	   /* 1-Wire Protocol command to copy the DS1963S scratchpad
 	    * to a memory location.  See the datasheet for more information.
@@ -308,7 +308,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte)
 	    * @see #installMasterSecret(int,byte[],int)
 	    */
-	   public static readonly byte COMPUTE_FIRST_SECRET = (byte) 0x0F;
+	   public const byte COMPUTE_FIRST_SECRET = 0x0F;
 
 	   /* 1-Wire Protocol command to compute a master secret
 	    * on the DS1963S.  See the datasheet for more information.
@@ -319,7 +319,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte)
 	    * @see #installMasterSecret(int,byte[],int)
 	    */
-	   public static readonly byte COMPUTE_NEXT_SECRET = unchecked((byte) 0xF0);
+	   public const byte COMPUTE_NEXT_SECRET = 0xF0;
 
 	   /* 1-Wire Protocol command to verify signatures
 	    * on the DS1963S.  See the datasheet for more information.
@@ -329,7 +329,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte,int)
 	    * @see #SHAFunction(byte)
 	    */
-	   public static readonly byte VALIDATE_DATA_PAGE = (byte) 0x3C;
+	   public const byte VALIDATE_DATA_PAGE = 0x3C;
 
 	   /* 1-Wire Protocol command to create a signature of a
 	    * selected data page on the DS1963S.  See the datasheet for more information.
@@ -337,7 +337,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte,int)
 	    * @see #SHAFunction(byte)
 	    */
-	   public static readonly byte SIGN_DATA_PAGE = unchecked((byte) 0xC3);
+	   public const byte SIGN_DATA_PAGE = 0xC3;
 
 	   /* 1-Wire Protocol command to create a random challenge
 	    * using the DS1963S's pseudo random number generator.
@@ -347,7 +347,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte)
 	    * @see #SHAiButton#generateChallenge(int,int,byte[])
 	    */
-	   public static readonly byte COMPUTE_CHALLENGE = unchecked((byte) 0xCC);
+	   public const byte COMPUTE_CHALLENGE = 0xCC;
 
 	   /* 1-Wire Protocol command to authenticate a host
 	    * on the DS1963S.  See the datasheet for more information.
@@ -355,7 +355,7 @@ namespace com.dalsemi.onewire.container
 	    * @see #SHAFunction(byte,int)
 	    * @see #SHAFunction(byte)
 	    */
-	   public static readonly byte AUTH_HOST = unchecked((byte) 0xAA);
+	   public const byte AUTH_HOST = 0xAA;
 
 	   /* 1-Wire Protocol command that allows quick reselection
 	    * of the DS1963S.  Normally, selection involved a nine byte sequence:

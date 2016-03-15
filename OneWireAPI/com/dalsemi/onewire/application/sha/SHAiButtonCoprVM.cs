@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
@@ -28,52 +29,48 @@ using System.Diagnostics;
  *---------------------------------------------------------------------------
  */
 
+using com.dalsemi.onewire.adapter;
+using com.dalsemi.onewire.application.file;
+using com.dalsemi.onewire.container;
+using com.dalsemi.onewire.utils;
+
 namespace com.dalsemi.onewire.application.sha
 {
 
-	using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
-	using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-	using OneWireContainer18 = com.dalsemi.onewire.container.OneWireContainer18;
-	using Address = com.dalsemi.onewire.utils.Address;
-	using IOHelper = com.dalsemi.onewire.utils.IOHelper;
-	using SHA = com.dalsemi.onewire.utils.SHA;
-	using OWFileOutputStream = com.dalsemi.onewire.application.file.OWFileOutputStream;
-	using OWFileInputStream = com.dalsemi.onewire.application.file.OWFileInputStream;
-
-	/// <summary>
-	/// <P>Class for simulating an instance of a SHA iButton Coprocessor involved
-	/// in SHA Transactions.  The Coprocessor is used for digitally signing transaction
-	/// data as well as generating random challenges for users and verifying
-	/// their response.</P>
-	/// 
-	/// <para>With this class, no DS1963S SHA iButton is necessary for the coprocessor in
-	/// SHA Transactions.  The simulated Coprocessor iButton verifies signatures
-	/// and signs data for User iButtons.</P>
-	/// 
-	/// </para>
-	/// <para>This class makes use of several performance enhancements for TINI.
-	/// For instance, most methods are <code>synchronized</code> to access instance variable
-	/// byte arrays rather than creating new byte arrays every time a transaction
-	/// is performed.  This could hurt performance in multi-threaded
-	/// applications, but the usefulness of having several threads contending
-	/// to talk to a single iButton is questionable since the methods in
-	/// <code>com.dalsemi.onewire.adapter.DSPortAdapter</code>
-	/// <code>beginExclusive(bool)</code> and <code>endExclusive()</code> should be used.</para>
-	/// </summary>
-	/// <seealso cref= SHATransaction </seealso>
-	/// <seealso cref= SHAiButtonUser </seealso>
-	/// <seealso cref= SHAiButtonCopr
-	/// 
-	/// @version 1.00
-	/// @author  SKH </seealso>
-	public class SHAiButtonCoprVM : SHAiButtonCopr
-	{
-	   /// <summary>
-	   /// 8 8-byte Secrets for this simulated SHAiButton
-	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: protected internal sbyte[][] secretPage = new sbyte[8][8];
-	   protected internal byte[][] secretPage = RectangularArrays.ReturnRectangularByteArray(8, 8);
+    /// <summary>
+    /// <P>Class for simulating an instance of a SHA iButton Coprocessor involved
+    /// in SHA Transactions.  The Coprocessor is used for digitally signing transaction
+    /// data as well as generating random challenges for users and verifying
+    /// their response.</P>
+    /// 
+    /// <para>With this class, no DS1963S SHA iButton is necessary for the coprocessor in
+    /// SHA Transactions.  The simulated Coprocessor iButton verifies signatures
+    /// and signs data for User iButtons.</P>
+    /// 
+    /// </para>
+    /// <para>This class makes use of several performance enhancements for TINI.
+    /// For instance, most methods are <code>synchronized</code> to access instance variable
+    /// byte arrays rather than creating new byte arrays every time a transaction
+    /// is performed.  This could hurt performance in multi-threaded
+    /// applications, but the usefulness of having several threads contending
+    /// to talk to a single iButton is questionable since the methods in
+    /// <code>com.dalsemi.onewire.adapter.DSPortAdapter</code>
+    /// <code>beginExclusive(bool)</code> and <code>endExclusive()</code> should be used.</para>
+    /// </summary>
+    /// <seealso cref= SHATransaction </seealso>
+    /// <seealso cref= SHAiButtonUser </seealso>
+    /// <seealso cref= SHAiButtonCopr
+    /// 
+    /// @version 1.00
+    /// @author  SKH </seealso>
+    public class SHAiButtonCoprVM : SHAiButtonCopr
+    {
+       /// <summary>
+       /// 8 8-byte Secrets for this simulated SHAiButton
+       /// </summary>
+       //ORIGINAL LINE: protected internal byte[][] secretPage = new byte[8][8];
+       protected internal byte[][] secretPage;
+         //= RectangularArrays.ReturnRectangularByteArray(8, 8);
 
 	   /// <summary>
 	   /// 1-Wire Address for this simulated device
@@ -85,7 +82,7 @@ namespace com.dalsemi.onewire.application.sha
 	   // ***********************************************************************
 
 	   //Temporary 512-bit buffer used for digest computation
-	   private static readonly sbyte[] digestBuff = new sbyte[64];
+	   private static readonly byte[] digestBuff = new byte[64];
 
 	   //used for compute first secret
 	   private static readonly byte[] NullSecret = new byte[]{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
@@ -149,7 +146,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <seealso cref= #SHAiButtonCoprVM(OneWireContainer,String) </seealso>
 	   /// <seealso cref= #SHAiButtonCoprVM(OneWireContainer,String,byte[],byte[]) </seealso>
 	   /// <seealso cref= #SHAiButtonCoprVM(OneWireContainer18,String,byte[],byte[]) </seealso>
-	   public SHAiButtonCoprVM(sbyte[] RomID, int l_signPageNumber, int l_authPageNumber, int l_wspcPageNumber, int l_version, int l_encCode, sbyte l_serviceFileExt, sbyte[] l_serviceFilename, sbyte[] l_providerName, sbyte[] l_bindData, sbyte[] l_bindCode, sbyte[] l_auxData, sbyte[] l_initialSignature, sbyte[] l_signingChlg, sbyte[] l_signingSecret, sbyte[] l_authSecret)
+	   public SHAiButtonCoprVM(byte[] RomID, int l_signPageNumber, int l_authPageNumber, int l_wspcPageNumber, int l_version, int l_encCode, byte l_serviceFileExt, byte[] l_serviceFilename, byte[] l_providerName, byte[] l_bindData, byte[] l_bindCode, byte[] l_auxData, byte[] l_initialSignature, byte[] l_signingChlg, byte[] l_signingSecret, byte[] l_authSecret)
 	   {
 		  //clear any errors
 		  this.lastError = SHAiButtonCopr.NO_ERROR;
@@ -163,27 +160,34 @@ namespace com.dalsemi.onewire.application.sha
 		  this.encCode = l_encCode;
 		  Array.Copy(l_serviceFilename,0,this.filename,0,4);
 		  this.filename[4] = l_serviceFileExt;
-		  this.providerName = StringHelperClass.NewString(l_providerName);
+		  this.providerName = Encoding.UTF8.GetString(l_providerName);
 		  Array.Copy(l_bindData,0,this.bindData,0,32);
 		  Array.Copy(l_bindCode,0,this.bindCode,0,7);
-		  this.auxData = StringHelperClass.NewString(l_auxData);
+		  this.auxData = Encoding.UTF8.GetString(l_auxData);
 		  Array.Copy(l_initialSignature,0,this.initialSignature,0,20);
 		  Array.Copy(l_signingChlg,0,this.signingChallenge,0,3);
 
-		  //Check to see if this coprocessor's authentication secret
-		  //is appropriately padded to be used with a DS1961S
-		  this.DS1961Scompatible_Renamed = ((l_authSecret.Length % 47) == 0);
+          secretPage = new byte[8][]
+          {
+              new byte[8], new byte[8], new byte[8], new byte[8],
+              new byte[8], new byte[8], new byte[8], new byte[8]
+          };
+
+
+          //Check to see if this coprocessor's authentication secret
+          //is appropriately padded to be used with a DS1961S
+            this.DS1961Scompatible_Renamed = ((l_authSecret.Length % 47) == 0);
 		  int secretDiv = l_authSecret.Length / 47;
 		  for (int j = 0; j < secretDiv && DS1961Scompatible_Renamed; j++)
 		  {
 			 int offset = 47 * j;
 			 for (int i = 32; i < 36 && this.DS1961Scompatible_Renamed; i++)
 			 {
-				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == unchecked((sbyte)0x0FF));
+				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == 0x0FF);
 			 }
 			 for (int i = 44; i < 47 && this.DS1961Scompatible_Renamed; i++)
 			 {
-				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == unchecked((sbyte)0x0FF));
+				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == 0x0FF);
 			 }
 		  }
 
@@ -250,7 +254,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <seealso cref= #SHAiButtonCoprVM(OneWireContainer,String,byte[],byte[]) </seealso>
 	   /// <seealso cref= #SHAiButtonCoprVM(OneWireContainer18,String,byte[],byte[]) </seealso>
 	   /// <seealso cref= #SHAiButtonCoprVM(byte[],int,int,int,int,int,byte,byte[],byte[],byte[],byte[],byte[],byte[],byte[],byte[],byte[]) </seealso>
-	   public SHAiButtonCoprVM(string filename, sbyte[] sign_secret, sbyte[] auth_secret)
+	   public SHAiButtonCoprVM(string filename, byte[] sign_secret, byte[] auth_secret)
 	   {
 		  if (!load(filename))
 		  {
@@ -318,7 +322,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <seealso cref= #SHAiButtonCoprVM(OneWireContainer,String) </seealso>
 	   /// <seealso cref= #SHAiButtonCoprVM(OneWireContainer18,String,byte[],byte[]) </seealso>
 	   /// <seealso cref= #SHAiButtonCoprVM(byte[],int,int,int,int,int,byte,byte[],byte[],byte[],byte[],byte[],byte[],byte[],byte[],byte[]) </seealso>
-	   public SHAiButtonCoprVM(OneWireContainer owc, string filename, sbyte[] sign_secret, sbyte[] auth_secret)
+	   public SHAiButtonCoprVM(OneWireContainer owc, string filename, byte[] sign_secret, byte[] auth_secret)
 	   {
 		  if (!load(owc,filename))
 		  {
@@ -358,7 +362,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <seealso cref= #SHAiButtonCoprVM(OneWireContainer,String) </seealso>
 	   /// <seealso cref= #SHAiButtonCoprVM(OneWireContainer,String,byte[],byte[]) </seealso>
 	   /// <seealso cref= #SHAiButtonCoprVM(byte[],int,int,int,int,int,byte,byte[],byte[],byte[],byte[],byte[],byte[],byte[],byte[],byte[]) </seealso>
-	   public SHAiButtonCoprVM(OneWireContainer18 owc, string filename, sbyte[] sign_secret, sbyte[] auth_secret)
+	   public SHAiButtonCoprVM(OneWireContainer18 owc, string filename, byte[] sign_secret, byte[] auth_secret)
 	   {
 		  if (!load(owc,filename))
 		  {
@@ -415,7 +419,7 @@ namespace com.dalsemi.onewire.application.sha
 			 {
 				if (saveSecretData)
 				{
-				   fos.WriteByte(secretPage[i]);
+				   fos.Write(secretPage[i], 0, 8);  //TODO
 				}
 				else
 				{
@@ -655,7 +659,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </exception>
 	   /// <seealso cref= OneWireContainer18#SHAFunction(byte,int) </seealso>
 	   /// <seealso cref= #getLastError() </seealso>
-	   public override bool createDataSignature(sbyte[] accountData, sbyte[] signScratchpad, sbyte[] mac_buffer, int macStart)
+	   public override bool createDataSignature(byte[] accountData, byte[] signScratchpad, byte[] mac_buffer, int macStart)
 	   {
 		  //clear any errors
 		  this.lastError = SHAiButtonCopr.NO_ERROR;
@@ -671,7 +675,7 @@ namespace com.dalsemi.onewire.application.sha
 	   }
 
 	   //prevent malloc'ing in the critical path
-	   private sbyte[] generateChallenge_chlg = new sbyte[20];
+	   private byte[] generateChallenge_chlg = new byte[20];
 
 	   /// <summary>
 	   /// <para>Generates a 3 byte random challenge in the iButton, sufficient to be used
@@ -706,7 +710,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </exception>
 	   /// <seealso cref= SHAiButtonUser#readAccountData(byte[],int,byte[],int,byte[],int) </seealso>
 	   /// <seealso cref= #getLastError() </seealso>
-	   public override bool generateChallenge(int offset, sbyte[] ch, int start)
+	   public override bool generateChallenge(int offset, byte[] ch, int start)
 	   {
 		   lock (this)
 		   {
@@ -772,7 +776,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <seealso cref= OneWireContainer18#SHAFunction(byte,int) </seealso>
 	   /// <seealso cref= OneWireContainer18#matchScratchPad(byte[]) </seealso>
 	   /// <seealso cref= #getLastError() </seealso>
-	   public override bool verifyAuthentication(sbyte[] fullBindCode, sbyte[] pageData, sbyte[] scratchpad, sbyte[] verify_mac, sbyte authCmd)
+	   public override bool verifyAuthentication(byte[] fullBindCode, byte[] pageData, byte[] scratchpad, byte[] verify_mac, byte authCmd)
 	   {
 		  //clear any errors
 		  this.lastError = SHAiButtonCopr.NO_ERROR;
@@ -834,7 +838,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <seealso cref= OneWireContainer18#SHAFunction(byte,int) </seealso>
 	   /// <seealso cref= #createDataSignature(byte[],byte[],byte[],int) </seealso>
 	   /// <seealso cref= #getLastError() </seealso>
-	   public override bool createDataSignatureAuth(sbyte[] accountData, sbyte[] signScratchpad, sbyte[] mac_buffer, int macStart, sbyte[] fullBindCode)
+	   public override bool createDataSignatureAuth(byte[] accountData, byte[] signScratchpad, byte[] mac_buffer, int macStart, byte[] fullBindCode)
 	   {
 		  //clear any errors
 		  this.lastError = SHAiButtonCopr.NO_ERROR;
@@ -878,7 +882,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// </exception>
 	   /// <seealso cref= #verifyAuthentication(byte[],byte[],byte[],byte[],byte) </seealso>
 	   /// <seealso cref= #getLastError() </seealso>
-	   public override bool verifySignature(sbyte[] pageData, sbyte[] scratchpad, sbyte[] verify_mac)
+	   public override bool verifySignature(byte[] pageData, byte[] scratchpad, byte[] verify_mac)
 	   {
 		  //clear any errors
 		  this.lastError = SHAiButtonCopr.NO_ERROR;
@@ -899,7 +903,7 @@ namespace com.dalsemi.onewire.application.sha
 		  return false;
 	   }
 
-	   private sbyte[] bindSecretToiButton_scratchpad = new sbyte[32];
+	   private byte[] bindSecretToiButton_scratchpad = new byte[32];
 	   /// <summary>
 	   /// <para>Binds an installed secret to this virtual DS1963S by using
 	   /// well-known binding data and this DS1963S's (unique?)
@@ -932,18 +936,18 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <returns> <code>true</code> if successful
 	   /// </returns>
 	   /// <seealso cref= #installMasterSecret(int,byte[],int) </seealso>
-	   public virtual bool bindSecretToiButton(int pageNum, sbyte[] bindData, sbyte[] bindCode, int secretNum)
+	   public virtual bool bindSecretToiButton(int pageNum, byte[] bindData, byte[] bindCode, int secretNum)
 	   {
 		   lock (this)
 		   {
 			  //local vars
-			  sbyte[] scratchpad = this.bindSecretToiButton_scratchpad;
+			  byte[] scratchpad = this.bindSecretToiButton_scratchpad;
         
 			  //write the bind_code to the scratchpad
 			  if (bindCode.Length == 7)
 			  {
 				 Array.Copy(bindCode,0,scratchpad,8,4);
-				 scratchpad[12] = (sbyte)pageNum;
+				 scratchpad[12] = (byte)pageNum;
 				 Array.Copy(this.address,0,scratchpad,13,7);
 				 Array.Copy(bindCode,4,scratchpad,20,3);
 			  }
@@ -990,7 +994,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <returns> <code>true</code> if successful
 	   /// </returns>
 	   /// <seealso cref= #bindSecretToiButton(int,byte[],byte[],int) </seealso>
-	   public virtual bool installMasterSecret(int pageNum, sbyte[] secret, int secretNum)
+	   public virtual bool installMasterSecret(int pageNum, byte[] secret, int secretNum)
 	   {
 		  //47 is a magic number here because every time a partial secret
 		  //is to be computed, 32 bytes goes in the page and 15 goes in
@@ -1001,7 +1005,7 @@ namespace com.dalsemi.onewire.application.sha
 			 return false;
 		  }
 
-		  sbyte[] input_secret = null;
+		  byte[] input_secret = null;
 		  int secret_mod_length = secret.Length % 47;
 
 		  if (secret_mod_length == 0) //if the length of the secret is divisible by 47
@@ -1015,7 +1019,7 @@ namespace com.dalsemi.onewire.application.sha
 			    it will be quicker to just create a new array once and
 			    copy the data in, rather than on every partial secret
 			    calculation do bounds checking */
-			 input_secret = new sbyte [secret.Length + (47 - secret_mod_length)];
+			 input_secret = new byte [secret.Length + (47 - secret_mod_length)];
 
 			 Array.Copy(secret, 0, input_secret, 0, secret.Length);
 		  }
@@ -1023,14 +1027,14 @@ namespace com.dalsemi.onewire.application.sha
 		  //the current offset into the input_secret buffer
 		  secretNum = secretNum & 7;
 		  int offset = 0;
-		  sbyte cmd = OneWireContainer18.COMPUTE_FIRST_SECRET;
-		  sbyte[] scratchpad = new sbyte[32];
-		  sbyte[] dataPage = new sbyte[32];
+		  byte cmd = OneWireContainer18.COMPUTE_FIRST_SECRET;
+		  byte[] scratchpad = new byte[32];
+		  byte[] dataPage = new byte[32];
 		  while (offset < input_secret.Length)
 		  {
 			 for (int i = 0; i < 32; i++)
 			 {
-				scratchpad[i] = unchecked((sbyte)0x0FF);
+				scratchpad[i] = 0xFF;
 			 }
 
 			 Array.Copy(input_secret,offset,dataPage,0,32);
@@ -1084,7 +1088,7 @@ namespace com.dalsemi.onewire.application.sha
 	   ///         <code>false</code> if the operation failed or if invalid
 	   ///          command.
 	   ///  </returns>
-	   private bool SHAFunction(sbyte function, sbyte[] shaSecret, sbyte[] shaPage, sbyte[] scratchpad, sbyte[] romID, int pageNum, int writeCycleCounter)
+	   private bool SHAFunction(byte function, byte[] shaSecret, byte[] shaPage, byte[] scratchpad, byte[] romID, int pageNum, int writeCycleCounter)
 	   {
 		   lock (this)
 		   {
@@ -1095,7 +1099,7 @@ namespace com.dalsemi.onewire.application.sha
 			  //Since never matching, I assume M bit is never set...
 			  //but I'm not confident that won't change if more functionality
 			  //is added to this class.
-			  sbyte shaMX = 0x00;
+			  byte shaMX = 0x00;
         
 			  switch (function)
 			  {
@@ -1112,7 +1116,7 @@ namespace com.dalsemi.onewire.application.sha
 			  case OneWireContainer18.VALIDATE_DATA_PAGE:
 			  case OneWireContainer18.SIGN_DATA_PAGE:
 				 //M-X-P byte
-				 scratchpad[12] = unchecked((sbyte)((scratchpad[12] & 0x3F) | (shaMX & 0xC0)));
+				 scratchpad[12] = (byte)((scratchpad[12] & 0x3F) | (shaMX & 0xC0));
 				 break;
         
 			  //Authenticate host
@@ -1120,23 +1124,23 @@ namespace com.dalsemi.onewire.application.sha
 				 //for authenticate host, X bit is set.
 				 shaMX |= 0x40;
 				 //M-X-P byte
-				 scratchpad[12] = unchecked((sbyte)((scratchpad[12] & 0x3F) | (shaMX & 0xC0)));
+				 scratchpad[12] = (byte)((scratchpad[12] & 0x3F) | (shaMX & 0xC0));
 				 break;
         
 			  //compute challenge and read authenticated page
 			  case OneWireContainer18.COMPUTE_CHALLENGE:
 				 //for Compute_Challenge, X bit is set.
 				 shaMX |= 0x40;
-				  goto case com.dalsemi.onewire.container.OneWireContainer18.READ_AUTHENTICATED_PAGE;
+				  goto case OneWireContainer18.READ_AUTHENTICATED_PAGE;
 			  case OneWireContainer18.READ_AUTHENTICATED_PAGE:
 				 //place the write cycle counter into the scratchpad
-				 scratchpad[8] = unchecked((sbyte)(writeCycleCounter & 0x0FF));
-				 scratchpad[9] = unchecked((sbyte)(((int)((uint)writeCycleCounter >> 8)) & 0x0FF));
-				 scratchpad[10] = unchecked((sbyte)(((int)((uint)writeCycleCounter >> 16)) & 0x0FF));
-				 scratchpad[11] = unchecked((sbyte)(((int)((uint)writeCycleCounter >> 24)) & 0x0FF));
+				 scratchpad[8] = (byte)(writeCycleCounter & 0x0FF);
+				 scratchpad[9] = (byte)(((int)((uint)writeCycleCounter >> 8)) & 0x0FF);
+				 scratchpad[10] = (byte)(((int)((uint)writeCycleCounter >> 16)) & 0x0FF);
+				 scratchpad[11] = (byte)(((int)((uint)writeCycleCounter >> 24)) & 0x0FF);
         
 				 //M-X-P byte
-				 scratchpad[12] = unchecked((sbyte)((pageNum & 0x0F) | (shaMX & 0xC0)));
+				 scratchpad[12] = (byte)((pageNum & 0x0F) | (shaMX & 0xC0));
         
 				 //place the RomID into the scratchpad
 				 Array.Copy(romID,0,scratchpad,13,7);
@@ -1156,13 +1160,13 @@ namespace com.dalsemi.onewire.application.sha
 			  Array.Copy(scratchpad,20,digestBuff,52,3);
         
 			  //init. digest buffer padding
-			  digestBuff[55] = unchecked((sbyte)0x80);
+			  digestBuff[55] = 0x80;
 			  for (int i = 56; i < 62; i++)
 			  {
-				 digestBuff[i] = (sbyte)0x00;
+				 digestBuff[i] = 0x00;
 			  }
-			  digestBuff[62] = (sbyte)0x01;
-			  digestBuff[63] = unchecked((sbyte)0xB8);
+			  digestBuff[62] = 0x01;
+			  digestBuff[63] = 0xB8;
         
 			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 			  if (DEBUG)
@@ -1236,7 +1240,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// <returns> a string containing the 8-byte address of this 1-Wire device. </returns>
 	   public override string ToString()
 	   {
-		  return "COPRVM: " + Address.ToString(this.address) + ", provider: " + this.providerName + ", version: " + this.version;
+		  return "COPRVM: " + Encoding.UTF8.GetString(this.address) + ", provider: " + this.providerName + ", version: " + this.version;
 	   }
 	}
 

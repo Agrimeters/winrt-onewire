@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Threading;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002-2003 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -253,7 +252,7 @@ namespace com.dalsemi.onewire.container
 	   private string partNumber = null;
 
 	   // Device Configuration Byte
-	   private sbyte deviceConfigByte = unchecked((sbyte)0xFF);
+	   private byte deviceConfigByte = unchecked((byte)0xFF);
 
 	   // Temperature range low temperaturein degrees Celsius
 	   private double temperatureRangeLow = -40.0;
@@ -262,7 +261,7 @@ namespace com.dalsemi.onewire.container
 	   private double temperatureRangeWidth = 125.0;
 
 	   // Temperature resolution in degrees Celsius
-	   private double temperatureResolution = 0.5;
+//	   private double temperatureResolution = 0.5;
 
 	   // A-D Reference voltage
 	   private double adReferenceVoltage = 5.02d;
@@ -279,13 +278,13 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// The current password for readingfrom this device. </summary>
-	   private readonly sbyte[] readPassword = new sbyte[8];
+	   private readonly byte[] readPassword = new byte[8];
 	   private bool readPasswordSet = false;
 	   private bool readOnlyPasswordEnabled = false;
 
 	   /// <summary>
 	   /// The current password for reading/writing from/to this device. </summary>
-	   private readonly sbyte[] readWritePassword = new sbyte[8];
+	   private readonly byte[] readWritePassword = new byte[8];
 	   private bool readWritePasswordSet = false;
 	   private bool readWritePasswordEnabled = false;
 
@@ -294,10 +293,10 @@ namespace com.dalsemi.onewire.container
 	   private bool isMissionLoaded = false;
 	   /// <summary>
 	   /// holds the missionRegister, which details the status of the current mission </summary>
-	   private sbyte[] missionRegister = null;
+	   private byte[] missionRegister = null;
 	   /// <summary>
 	   /// The mission logs </summary>
-	   private sbyte[] dataLog = null, temperatureLog = null;
+	   private byte[] dataLog = null, temperatureLog = null;
 	   /// <summary>
 	   /// Number of bytes used to store temperature values (0, 1, or 2) </summary>
 	   private int temperatureBytes = 0;
@@ -334,7 +333,7 @@ namespace com.dalsemi.onewire.container
 	   // indicates whether or not to use calibration for the temperature values
 	   private bool useTempCalibrationRegisters = false;
 	   // reference temperatures that the calibration was calculated over
-	   private double Tref1 = 0, Tref2 = 0, Tref3 = 0;
+	   private double Tref2 = 0, Tref3 = 0; 
 	   // the average value for each reference point
 	   private double Tread1 = 0, Tread2 = 0, Tread3 = 0;
 	   // the average error for each reference point
@@ -365,9 +364,9 @@ namespace com.dalsemi.onewire.container
 	   private const int FIRST_YEAR_EVER = 2000;
 
 	   // used to 'enable' passwords
-	   private static readonly sbyte ENABLE_BYTE = unchecked((sbyte)0xAA);
+	   private static readonly byte ENABLE_BYTE = unchecked((byte)0xAA);
 	   // used to 'disable' passwords
-	   private const sbyte DISABLE_BYTE = 0x00;
+	   private const byte DISABLE_BYTE = 0x00;
 
 	// *****************************************************************************
 	//  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -384,28 +383,28 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// 1-Wire command for Write Scratchpad </summary>
-	   public static readonly sbyte WRITE_SCRATCHPAD_COMMAND = (sbyte)0x0F;
+	   public static readonly byte WRITE_SCRATCHPAD_COMMAND = (byte)0x0F;
 	   /// <summary>
 	   /// 1-Wire command for Read Scratchpad </summary>
-	   public static readonly sbyte READ_SCRATCHPAD_COMMAND = unchecked((sbyte)0xAA);
+	   public static readonly byte READ_SCRATCHPAD_COMMAND = unchecked((byte)0xAA);
 	   /// <summary>
 	   /// 1-Wire command for Copy Scratchpad With Password </summary>
-	   public static readonly sbyte COPY_SCRATCHPAD_PW_COMMAND = unchecked((sbyte)0x99);
+	   public static readonly byte COPY_SCRATCHPAD_PW_COMMAND = unchecked((byte)0x99);
 	   /// <summary>
 	   /// 1-Wire command for Read Memory CRC With Password </summary>
-	   public static readonly sbyte READ_MEMORY_CRC_PW_COMMAND = (sbyte)0x69;
+	   public static readonly byte READ_MEMORY_CRC_PW_COMMAND = (byte)0x69;
 	   /// <summary>
 	   /// 1-Wire command for Clear Memory With Password </summary>
-	   public static readonly sbyte CLEAR_MEMORY_PW_COMMAND = unchecked((sbyte)0x96);
+	   public static readonly byte CLEAR_MEMORY_PW_COMMAND = unchecked((byte)0x96);
 	   /// <summary>
 	   /// 1-Wire command for Start Mission With Password </summary>
-	   public static readonly sbyte START_MISSION_PW_COMMAND = unchecked((sbyte)0xCC);
+	   public static readonly byte START_MISSION_PW_COMMAND = unchecked((byte)0xCC);
 	   /// <summary>
 	   /// 1-Wire command for Stop Mission With Password </summary>
-	   public static readonly sbyte STOP_MISSION_PW_COMMAND = (sbyte)0x33;
+	   public static readonly byte STOP_MISSION_PW_COMMAND = (byte)0x33;
 	   /// <summary>
 	   /// 1-Wire command for Forced Conversion </summary>
-	   public static readonly sbyte FORCED_CONVERSION = (sbyte)0x55;
+	   public static readonly byte FORCED_CONVERSION = (byte)0x55;
 
 	// *****************************************************************************
 	//  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -457,93 +456,93 @@ namespace com.dalsemi.onewire.container
 	   public const int TEMPERATURE_CONTROL_REGISTER = 0x210;
 	   /// <summary>
 	   /// Temperature Control Register Bit: Enable Data Low Alarm </summary>
-	   public static readonly sbyte TCR_BIT_ENABLE_TEMPERATURE_LOW_ALARM = (sbyte)0x01;
+	   public static readonly byte TCR_BIT_ENABLE_TEMPERATURE_LOW_ALARM = (byte)0x01;
 	   /// <summary>
 	   /// Temperature Control Register Bit: Enable Data Low Alarm </summary>
-	   public static readonly sbyte TCR_BIT_ENABLE_TEMPERATURE_HIGH_ALARM = (sbyte)0x02;
+	   public static readonly byte TCR_BIT_ENABLE_TEMPERATURE_HIGH_ALARM = (byte)0x02;
 
 	   /// <summary>
 	   /// Address of Data Control Register </summary>
 	   public const int DATA_CONTROL_REGISTER = 0x211;
 	   /// <summary>
 	   /// Data Control Register Bit: Enable Data Low Alarm </summary>
-	   public static readonly sbyte DCR_BIT_ENABLE_DATA_LOW_ALARM = (sbyte)0x01;
+	   public static readonly byte DCR_BIT_ENABLE_DATA_LOW_ALARM = (byte)0x01;
 	   /// <summary>
 	   /// Data Control Register Bit: Enable Data High Alarm </summary>
-	   public static readonly sbyte DCR_BIT_ENABLE_DATA_HIGH_ALARM = (sbyte)0x02;
+	   public static readonly byte DCR_BIT_ENABLE_DATA_HIGH_ALARM = (byte)0x02;
 
 	   /// <summary>
 	   /// Address of Real-Time Clock Control Register </summary>
 	   public const int RTC_CONTROL_REGISTER = 0x212;
 	   /// <summary>
 	   /// Real-Time Clock Control Register Bit: Enable Oscillator </summary>
-	   public static readonly sbyte RCR_BIT_ENABLE_OSCILLATOR = (sbyte)0x01;
+	   public static readonly byte RCR_BIT_ENABLE_OSCILLATOR = (byte)0x01;
 	   /// <summary>
 	   /// Real-Time Clock Control Register Bit: Enable High Speed Sample </summary>
-	   public static readonly sbyte RCR_BIT_ENABLE_HIGH_SPEED_SAMPLE = (sbyte)0x02;
+	   public static readonly byte RCR_BIT_ENABLE_HIGH_SPEED_SAMPLE = (byte)0x02;
 
 	   /// <summary>
 	   /// Address of Mission Control Register </summary>
-	   public static readonly int MISSION_CONTROL_REGISTER = unchecked((sbyte)0x213);
+	   public static readonly int MISSION_CONTROL_REGISTER = unchecked((byte)0x213);
 	   /// <summary>
 	   /// Mission Control Register Bit: Enable Temperature Logging </summary>
-	   public static readonly sbyte MCR_BIT_ENABLE_TEMPERATURE_LOGGING = (sbyte)0x01;
+	   public static readonly byte MCR_BIT_ENABLE_TEMPERATURE_LOGGING = (byte)0x01;
 	   /// <summary>
 	   /// Mission Control Register Bit: Enable Data Logging </summary>
-	   public static readonly sbyte MCR_BIT_ENABLE_DATA_LOGGING = (sbyte)0x02;
+	   public static readonly byte MCR_BIT_ENABLE_DATA_LOGGING = (byte)0x02;
 	   /// <summary>
 	   /// Mission Control Register Bit: Set Temperature Resolution </summary>
-	   public static readonly sbyte MCR_BIT_TEMPERATURE_RESOLUTION = (sbyte)0x04;
+	   public static readonly byte MCR_BIT_TEMPERATURE_RESOLUTION = (byte)0x04;
 	   /// <summary>
 	   /// Mission Control Register Bit: Set Data Resolution </summary>
-	   public static readonly sbyte MCR_BIT_DATA_RESOLUTION = (sbyte)0x08;
+	   public static readonly byte MCR_BIT_DATA_RESOLUTION = (byte)0x08;
 	   /// <summary>
 	   /// Mission Control Register Bit: Enable Rollover </summary>
-	   public static readonly sbyte MCR_BIT_ENABLE_ROLLOVER = (sbyte)0x10;
+	   public static readonly byte MCR_BIT_ENABLE_ROLLOVER = (byte)0x10;
 	   /// <summary>
 	   /// Mission Control Register Bit: Start Mission on Temperature Alarm </summary>
-	   public static readonly sbyte MCR_BIT_START_MISSION_ON_TEMPERATURE_ALARM = (sbyte)0x20;
+	   public static readonly byte MCR_BIT_START_MISSION_ON_TEMPERATURE_ALARM = (byte)0x20;
 
 	   /// <summary>
 	   /// Address of Alarm Status Register </summary>
 	   public const int ALARM_STATUS_REGISTER = 0x214;
 	   /// <summary>
 	   /// Alarm Status Register Bit: Temperature Low Alarm </summary>
-	   public static readonly sbyte ASR_BIT_TEMPERATURE_LOW_ALARM = (sbyte)0x01;
+	   public static readonly byte ASR_BIT_TEMPERATURE_LOW_ALARM = (byte)0x01;
 	   /// <summary>
 	   /// Alarm Status Register Bit: Temperature High Alarm </summary>
-	   public static readonly sbyte ASR_BIT_TEMPERATURE_HIGH_ALARM = (sbyte)0x02;
+	   public static readonly byte ASR_BIT_TEMPERATURE_HIGH_ALARM = (byte)0x02;
 	   /// <summary>
 	   /// Alarm Status Register Bit: Data Low Alarm </summary>
-	   public static readonly sbyte ASR_BIT_DATA_LOW_ALARM = (sbyte)0x04;
+	   public static readonly byte ASR_BIT_DATA_LOW_ALARM = (byte)0x04;
 	   /// <summary>
 	   /// Alarm Status Register Bit: Data High Alarm </summary>
-	   public static readonly sbyte ASR_BIT_DATA_HIGH_ALARM = (sbyte)0x08;
+	   public static readonly byte ASR_BIT_DATA_HIGH_ALARM = (byte)0x08;
 	   /// <summary>
 	   /// Alarm Status Register Bit: Battery On Reset </summary>
-	   public static readonly sbyte ASR_BIT_BATTERY_ON_RESET = unchecked((sbyte)0x80);
+	   public static readonly byte ASR_BIT_BATTERY_ON_RESET = unchecked((byte)0x80);
 
 	   /// <summary>
 	   /// Address of General Status Register </summary>
 	   public const int GENERAL_STATUS_REGISTER = 0x215;
 	   /// <summary>
 	   /// General Status Register Bit: Sample In Progress </summary>
-	   public static readonly sbyte GSR_BIT_SAMPLE_IN_PROGRESS = (sbyte)0x01;
+	   public static readonly byte GSR_BIT_SAMPLE_IN_PROGRESS = (byte)0x01;
 	   /// <summary>
 	   /// General Status Register Bit: Mission In Progress </summary>
-	   public static readonly sbyte GSR_BIT_MISSION_IN_PROGRESS = (sbyte)0x02;
+	   public static readonly byte GSR_BIT_MISSION_IN_PROGRESS = (byte)0x02;
 	   /// <summary>
 	   /// General Status Register Bit: Conversion In Progress </summary>
-	   public static readonly sbyte GSR_BIT_CONVERSION_IN_PROGRESS = (sbyte)0x04;
+	   public static readonly byte GSR_BIT_CONVERSION_IN_PROGRESS = (byte)0x04;
 	   /// <summary>
 	   /// General Status Register Bit: Memory Cleared </summary>
-	   public static readonly sbyte GSR_BIT_MEMORY_CLEARED = (sbyte)0x08;
+	   public static readonly byte GSR_BIT_MEMORY_CLEARED = (byte)0x08;
 	   /// <summary>
 	   /// General Status Register Bit: Waiting for Temperature Alarm </summary>
-	   public static readonly sbyte GSR_BIT_WAITING_FOR_TEMPERATURE_ALARM = (sbyte)0x10;
+	   public static readonly byte GSR_BIT_WAITING_FOR_TEMPERATURE_ALARM = (byte)0x10;
 	   /// <summary>
 	   /// General Status Register Bit: Forced Conversion In Progress </summary>
-	   public static readonly sbyte GSR_BIT_FORCED_CONVERSION_IN_PROGRESS = (sbyte)0x20;
+	   public static readonly byte GSR_BIT_FORCED_CONVERSION_IN_PROGRESS = (byte)0x20;
 
 	   /// <summary>
 	   /// Address of the Mission Start Delay </summary>
@@ -561,16 +560,16 @@ namespace com.dalsemi.onewire.container
 	   public const int DEVICE_CONFIGURATION_BYTE = 0x226;
 	   /// <summary>
 	   /// Value of Device Configuration Register for DS1922S </summary>
-	   public const sbyte DCB_DS2422 = 0x00;
+	   public const byte DCB_DS2422 = 0x00;
 	   /// <summary>
 	   /// Value of Device Configuration Register for DS1923 </summary>
-	   public const sbyte DCB_DS1923 = 0x20;
+	   public const byte DCB_DS1923 = 0x20;
 	   /// <summary>
 	   /// Value of Device Configuration Register for DS1922L </summary>
-	   public const sbyte DCB_DS1922L = 0x40;
+	   public const byte DCB_DS1922L = 0x40;
 	   /// <summary>
 	   /// Value of Device Configuration Register for DS1922T </summary>
-	   public const sbyte DCB_DS1922T = 0x60;
+	   public const byte DCB_DS1922T = 0x60;
 
 	   // 1 byte, alternating ones and zeroes indicates passwords are enabled
 	   /// <summary>
@@ -656,7 +655,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #OneWireContainer41() </seealso>
 	   /// <seealso cref= #OneWireContainer41(com.dalsemi.onewire.adapter.DSPortAdapter,long)   OneWireContainer41(DSPortAdapter,long) </seealso>
 	   /// <seealso cref= #OneWireContainer41(com.dalsemi.onewire.adapter.DSPortAdapter,java.lang.String) OneWireContainer41(DSPortAdapter,String) </seealso>
-	   public OneWireContainer41(DSPortAdapter sourceAdapter, sbyte[] newAddress) : base(sourceAdapter, newAddress)
+	   public OneWireContainer41(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
 	   {
 
 		  // initialize the memory banks
@@ -710,7 +709,7 @@ namespace com.dalsemi.onewire.container
 	   ///                           this iButton </param>
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address </seealso>
-	   public override void setupContainer(DSPortAdapter sourceAdapter, sbyte[] newAddress)
+	   public override void setupContainer(DSPortAdapter sourceAdapter, byte[] newAddress)
 	   {
 		  base.setupContainer(sourceAdapter, newAddress);
 
@@ -773,9 +772,9 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual sbyte[] readDevice()
+	   public virtual byte[] readDevice()
 	   {
-		  sbyte[] buffer = new sbyte [96];
+		  byte[] buffer = new byte [96];
 
 		  int retryCnt = MAX_READ_RETRY_CNT;
 		  int page = 0;
@@ -865,7 +864,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void writeDevice(sbyte[] state)
+	   public virtual void writeDevice(byte[] state)
 	   {
 		  int start = updatertc ? 0 : 6;
 
@@ -896,11 +895,11 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #getMemoryBanks() </seealso>
-	   public virtual sbyte readByte(int memAddr)
+	   public virtual byte readByte(int memAddr)
 	   {
 		  // break the address up into bytes
-		  sbyte msbAddress = unchecked((sbyte)((memAddr >> 8) & 0x0ff));
-		  sbyte lsbAddress = unchecked((sbyte)(memAddr & 0x0ff));
+		  byte msbAddress = unchecked((byte)((memAddr >> 8) & 0x0ff));
+		  byte lsbAddress = unchecked((byte)(memAddr & 0x0ff));
 
 		  /* check the validity of the address */
 		  if ((msbAddress > 0x2F) || (msbAddress < 0))
@@ -909,7 +908,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  int numBytesToEndOfPage = 32 - (lsbAddress & 0x1F);
-		  sbyte[] buffer = new sbyte [11 + numBytesToEndOfPage + 2];
+		  byte[] buffer = new byte [11 + numBytesToEndOfPage + 2];
 
 		  if (doSpeedEnable)
 		  {
@@ -933,7 +932,7 @@ namespace com.dalsemi.onewire.container
 
 			 for (int i = 11; i < buffer.Length; i++)
 			 {
-				buffer [i] = unchecked((sbyte)0x0ff);
+				buffer [i] = unchecked((byte)0x0ff);
 			 }
 
 			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
@@ -1042,7 +1041,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getFlag(int,byte,byte[]) </seealso>
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool) </seealso>
-	   public virtual bool getFlag(int register, sbyte bitMask)
+	   public virtual bool getFlag(int register, byte bitMask)
 	   {
 		  int retryCnt = MAX_READ_RETRY_CNT;
 		  while (true)
@@ -1081,7 +1080,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getFlag(int,byte) </seealso>
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool,byte[]) </seealso>
-	   public virtual bool getFlag(int register, sbyte bitMask, sbyte[] state)
+	   public virtual bool getFlag(int register, byte bitMask, byte[] state)
 	   {
 		  return ((state[register & 0x3F] & bitMask) != 0);
 	   }
@@ -1117,9 +1116,9 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getFlag(int,byte,byte[]) </seealso>
 	   /// <seealso cref= #setFlag(int,byte,bool,byte[]) </seealso>
 	   /// <seealso cref= #readDevice() </seealso>
-	   public virtual void setFlag(int register, sbyte bitMask, bool flagValue)
+	   public virtual void setFlag(int register, byte bitMask, bool flagValue)
 	   {
-		  sbyte[] state = readDevice();
+		  byte[] state = readDevice();
 
 		  setFlag(register, bitMask, flagValue, state);
 
@@ -1151,19 +1150,19 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #setFlag(int,byte,bool) </seealso>
 	   /// <seealso cref= #readDevice() </seealso>
 	   /// <seealso cref= #writeDevice(byte[]) </seealso>
-	   public virtual void setFlag(int register, sbyte bitMask, bool flagValue, sbyte[] state)
+	   public virtual void setFlag(int register, byte bitMask, bool flagValue, byte[] state)
 	   {
 		  register = register & 0x3F;
 
-		  sbyte flags = state [register];
+		  byte flags = state [register];
 
 		  if (flagValue)
 		  {
-			 flags = (sbyte)(flags | bitMask);
+			 flags = (byte)(flags | bitMask);
 		  }
 		  else
 		  {
-			 flags = (sbyte)(flags & ~(bitMask));
+			 flags = (byte)(flags & ~(bitMask));
 		  }
 
 		  // write the regs back
@@ -1203,7 +1202,7 @@ namespace com.dalsemi.onewire.container
 	   /// scratchpad.
 	   /// </summary>
 	   /// <returns> scratchpad memory bank </returns>
-	   public virtual MemoryBankScratchCRCPW ScratchpadMemoryBank
+	   internal virtual MemoryBankScratchCRCPW ScratchpadMemoryBank
 	   {
 		   get
 		   {
@@ -1216,7 +1215,7 @@ namespace com.dalsemi.onewire.container
 	   /// general-purpose user data memory.
 	   /// </summary>
 	   /// <returns> user data memory bank </returns>
-	   public virtual MemoryBankNVCRCPW UserDataMemoryBank
+	   internal virtual MemoryBankNVCRCPW UserDataMemoryBank
 	   {
 		   get
 		   {
@@ -1229,7 +1228,7 @@ namespace com.dalsemi.onewire.container
 	   /// data log.
 	   /// </summary>
 	   /// <returns> data log memory bank </returns>
-	   public virtual MemoryBankNVCRCPW DataLogMemoryBank
+	   internal virtual MemoryBankNVCRCPW DataLogMemoryBank
 	   {
 		   get
 		   {
@@ -1242,7 +1241,7 @@ namespace com.dalsemi.onewire.container
 	   /// special function registers.
 	   /// </summary>
 	   /// <returns> register memory bank </returns>
-	   public virtual MemoryBankNVCRCPW RegisterMemoryBank
+	   internal virtual MemoryBankNVCRCPW RegisterMemoryBank
 	   {
 		   get
 		   {
@@ -1317,14 +1316,14 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> the Device Configuration Byte </returns>
 	   /// <exception cref="OneWireIOException"> </exception>
 	   /// <exception cref="OneWireException"> </exception>
-	   public virtual sbyte DeviceConfigByte
+	   public virtual byte DeviceConfigByte
 	   {
 		   get
 		   {
-			  if (deviceConfigByte == unchecked((sbyte)0xFF))
+			  if (deviceConfigByte == unchecked((byte)0xFF))
 			  {
-				 sbyte[] state = readDevice();
-				 if (deviceConfigByte == unchecked((sbyte)0xFF))
+				 byte[] state = readDevice();
+				 if (deviceConfigByte == unchecked((byte)0xFF))
 				 {
 					deviceConfigByte = state[DEVICE_CONFIGURATION_BYTE & 0x3F];
 				 }
@@ -1381,10 +1380,10 @@ namespace com.dalsemi.onewire.container
 			 throw new OneWireException("OneWireContainer41-Device not present.");
 		  }
 
-		  sbyte[] buffer = new sbyte [10];
+		  byte[] buffer = new byte [10];
 		  buffer [0] = STOP_MISSION_PW_COMMAND;
 		  getContainerReadWritePassword(buffer, 1);
-		  buffer[9] = unchecked((sbyte)0xFF);
+		  buffer[9] = unchecked((byte)0xFF);
 
 		  adapter.dataBlock(buffer, 0, 10);
 
@@ -1421,10 +1420,10 @@ namespace com.dalsemi.onewire.container
 			 throw new OneWireException("OneWireContainer41-Device not present.");
 		  }
 
-		  sbyte[] buffer = new sbyte [10];
+		  byte[] buffer = new byte [10];
 		  buffer [0] = START_MISSION_PW_COMMAND;
 		  getContainerReadWritePassword(buffer, 1);
-		  buffer[9] = unchecked((sbyte)0xFF);
+		  buffer[9] = unchecked((byte)0xFF);
 
 		  adapter.dataBlock(buffer, 0, 10);
 	   }
@@ -1449,10 +1448,10 @@ namespace com.dalsemi.onewire.container
 			 throw new OneWireException("OneWireContainer41-Device not present.");
 		  }
 
-		  sbyte[] buffer = new sbyte [10];
+		  byte[] buffer = new byte [10];
 		  buffer [0] = CLEAR_MEMORY_PW_COMMAND;
 		  getContainerReadWritePassword(buffer, 1);
-		  buffer [9] = unchecked((sbyte) 0xFF);
+		  buffer [9] = unchecked((byte) 0xFF);
 
 		  adapter.dataBlock(buffer, 0, 10);
 
@@ -1675,7 +1674,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // must write both passwords for this to work
-		  sbyte[] bothPasswordsEnable = new sbyte[17];
+		  byte[] bothPasswordsEnable = new byte[17];
 		  bothPasswordsEnable[0] = (enableReadOnly?ENABLE_BYTE:DISABLE_BYTE);
 		  getContainerReadOnlyPassword(bothPasswordsEnable, 1);
 		  getContainerReadWritePassword(bothPasswordsEnable, 9);
@@ -1746,7 +1745,7 @@ namespace com.dalsemi.onewire.container
 	   ///        password register.  Length must be
 	   ///        <code>(offset + getReadOnlyPasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying from the given password array </param>
-	   public virtual void setDeviceReadOnlyPassword(sbyte[] password, int offset)
+	   public virtual void setDeviceReadOnlyPassword(byte[] password, int offset)
 	   {
 		  if (getFlag(GENERAL_STATUS_REGISTER, GSR_BIT_MISSION_IN_PROGRESS))
 		  {
@@ -1759,7 +1758,7 @@ namespace com.dalsemi.onewire.container
 		  }
 
 		  // must write both passwords for this to work
-		  sbyte[] bothPasswords = new sbyte[16];
+		  byte[] bothPasswords = new byte[16];
 		  Array.Copy(password, offset, bothPasswords, 0, 8);
 		  getContainerReadWritePassword(bothPasswords, 8);
 
@@ -1780,7 +1779,7 @@ namespace com.dalsemi.onewire.container
 	   ///        password register.  Length must be
 	   ///        <code>(offset + getReadWritePasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying from the given password array </param>
-	   public virtual void setDeviceReadWritePassword(sbyte[] password, int offset)
+	   public virtual void setDeviceReadWritePassword(byte[] password, int offset)
 	   {
 		  if (getFlag(GENERAL_STATUS_REGISTER, GSR_BIT_MISSION_IN_PROGRESS))
 		  {
@@ -1804,7 +1803,7 @@ namespace com.dalsemi.onewire.container
 	   ///        password register.  Length must be
 	   ///        <code>(offset + getWriteOnlyPasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying from the given password array </param>
-	   public virtual void setDeviceWriteOnlyPassword(sbyte[] password, int offset)
+	   public virtual void setDeviceWriteOnlyPassword(byte[] password, int offset)
 	   {
 		  throw new OneWireException("The DS1922 does not have a write only password.");
 	   }
@@ -1819,7 +1818,7 @@ namespace com.dalsemi.onewire.container
 	   ///        reading from the device's memory.  Length must be
 	   ///        <code>(offset + getReadOnlyPasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying from the given password array </param>
-	   public virtual void setContainerReadOnlyPassword(sbyte[] password, int offset)
+	   public virtual void setContainerReadOnlyPassword(byte[] password, int offset)
 	   {
 		  Array.Copy(password, offset, readPassword, 0, PASSWORD_LENGTH);
 		  readPasswordSet = true;
@@ -1835,7 +1834,7 @@ namespace com.dalsemi.onewire.container
 	   ///        reading from or writing to the device's memory.  Length must be
 	   ///        <code>(offset + getReadWritePasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying from the given password array </param>
-	   public virtual void setContainerReadWritePassword(sbyte[] password, int offset)
+	   public virtual void setContainerReadWritePassword(byte[] password, int offset)
 	   {
 		  Array.Copy(password, offset, readWritePassword, 0, 8);
 		  readWritePasswordSet = true;
@@ -1851,7 +1850,7 @@ namespace com.dalsemi.onewire.container
 	   ///        writing to the device's memory.  Length must be
 	   ///        <code>(offset + getWriteOnlyPasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying from the given password array </param>
-	   public virtual void setContainerWriteOnlyPassword(sbyte[] password, int offset)
+	   public virtual void setContainerWriteOnlyPassword(byte[] password, int offset)
 	   {
 		  throw new OneWireException("The DS1922 does not have a write only password.");
 	   }
@@ -1916,7 +1915,7 @@ namespace com.dalsemi.onewire.container
 	   ///        API when reading from the device's memory.  Length must be
 	   ///        <code>(offset + getWriteOnlyPasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying into the given password array </param>
-	   public virtual void getContainerReadOnlyPassword(sbyte[] password, int offset)
+	   public virtual void getContainerReadOnlyPassword(byte[] password, int offset)
 	   {
 		  Array.Copy(readPassword, 0, password, offset, PASSWORD_LENGTH);
 	   }
@@ -1932,7 +1931,7 @@ namespace com.dalsemi.onewire.container
 	   ///        API when reading from or writing to the device's memory.  Length must be
 	   ///        <code>(offset + getReadWritePasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying into the given password array </param>
-	   public virtual void getContainerReadWritePassword(sbyte[] password, int offset)
+	   public virtual void getContainerReadWritePassword(byte[] password, int offset)
 	   {
 		  Array.Copy(readWritePassword, 0, password, offset, PASSWORD_LENGTH);
 	   }
@@ -1948,7 +1947,7 @@ namespace com.dalsemi.onewire.container
 	   ///        API when writing to the device's memory.  Length must be
 	   ///        <code>(offset + getWriteOnlyPasswordLength)</code> </param>
 	   /// <param name="offset"> the starting point for copying into the given password array </param>
-	   public virtual void getContainerWriteOnlyPassword(sbyte[] password, int offset)
+	   public virtual void getContainerWriteOnlyPassword(byte[] password, int offset)
 	   {
 		  throw new OneWireException("The DS1922 does not have a write only password");
 	   }
@@ -2011,7 +2010,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="enable"> sets/clears the SUTA bit in the Mission Control register. </param>
 	   /// <param name="state"> current state of the device returned from <code>readDevice()</code> </param>
-	   public virtual void setStartUponTemperatureAlarmEnable(bool enable, sbyte[] state)
+	   public virtual void setStartUponTemperatureAlarmEnable(bool enable, byte[] state)
 	   {
 		  setFlag(MISSION_CONTROL_REGISTER, MCR_BIT_START_MISSION_ON_TEMPERATURE_ALARM, enable, state);
 	   }
@@ -2038,7 +2037,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="state"> current state of the device returned from <code>readDevice()</code> </param>
 	   /// <returns> <code>true</code> if the SUTA bit in the Mission Control register is set. </returns>
-	   public virtual bool isStartUponTemperatureAlarmEnabled(sbyte[] state)
+	   public virtual bool isStartUponTemperatureAlarmEnabled(byte[] state)
 	   {
 		  return getFlag(MISSION_CONTROL_REGISTER, MCR_BIT_START_MISSION_ON_TEMPERATURE_ALARM, state);
 	   }
@@ -2111,7 +2110,7 @@ namespace com.dalsemi.onewire.container
 	   ///        according to this <code>java.util.Date</code>. </param>
 	   public virtual void startNewMission(int sampleRate, int missionStartDelay, bool rolloverEnabled, bool syncClock, bool[] channelEnabled)
 	   {
-		  sbyte[] state = readDevice();
+		  byte[] state = readDevice();
 		  //if(isMissionLoaded)
 		  //   state = missionRegister;
 		  //else
@@ -2184,10 +2183,9 @@ namespace com.dalsemi.onewire.container
 			  //grab the date
 			  int[] date = getDate(MISSION_TIMESTAMP_DATE & 0x3F, missionRegister);
         
-			  //date[1] - 1 because Java months are 0 offset
-			  DateTime d = new GregorianCalendar(date[0], date[1] - 1, date[2], time[2], time[1], time[0]);
+			  DateTime d = new DateTime(date[0], date[1], date[2], time[2], time[1], time[0]);
         
-			  missionTimeStamp = d.Time;
+			  missionTimeStamp = d.Ticks / TimeSpan.TicksPerMillisecond;
         
 			  // figure out how many bytes for each temperature sample
 			  temperatureBytes = 0;
@@ -2267,12 +2265,12 @@ namespace com.dalsemi.onewire.container
 			  timeOffset = ((wrapCount * maxSamples) + offsetDepth);
         
 			  // temperature log
-			  temperatureLog = new sbyte[sampleCount * temperatureBytes];
+			  temperatureLog = new byte[sampleCount * temperatureBytes];
 			  // data log
-			  dataLog = new sbyte[sampleCount * dataBytes];
+			  dataLog = new byte[sampleCount * dataBytes];
 			  // cache for entire log
-			  sbyte[] missionLogBuffer = new sbyte[Math.Max(temperatureLog.Length, dataLog.Length)];
-			  sbyte[] pagebuffer = new sbyte[32];
+			  byte[] missionLogBuffer = new byte[Math.Max(temperatureLog.Length, dataLog.Length)];
+			  byte[] pagebuffer = new byte[32];
         
 			  if (temperatureLog.Length > 0)
 			  {
@@ -2406,7 +2404,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="channel"> the channel to enable/disable </param>
 	   /// <param name="enable"> if true, the channel is enabled </param>
 	   /// <param name="state"> the state as returned from readDevice, for cached writes </param>
-	   public virtual void setMissionChannelEnable(int channel, bool enable, sbyte[] state)
+	   public virtual void setMissionChannelEnable(int channel, bool enable, byte[] state)
 	   {
 		  if (channel == TEMPERATURE_CHANNEL)
 		  {
@@ -2444,7 +2442,7 @@ namespace com.dalsemi.onewire.container
 	   /// </summary>
 	   /// <param name="channel"> the channel to enable/disable </param>
 	   /// <param name="enable"> if true, the channel is enabled </param>
-	   public virtual bool getMissionChannelEnable(int channel, sbyte[] state)
+	   public virtual bool getMissionChannelEnable(int channel, byte[] state)
 	   {
 		  if (channel == TEMPERATURE_CHANNEL)
 		  {
@@ -2520,7 +2518,7 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="state"> The current state of the device as return from <code>readDevice()</code> </param>
 	   /// <returns> the total number of samples logged since the first power-on
 	   /// of this device. </returns>
-	   public virtual int getDeviceSampleCount(sbyte[] state)
+	   public virtual int getDeviceSampleCount(byte[] state)
 	   {
 		  return Convert.toInt(state, DEVICE_SAMPLE_COUNT & 0x3F, 3);
 	   }
@@ -3269,7 +3267,7 @@ namespace com.dalsemi.onewire.container
 				}
 				else
 				{
-				   missionRegister[DATA_HIGH_ALARM_THRESHOLD & 0x3F] = (sbyte)threshold;
+				   missionRegister[DATA_HIGH_ALARM_THRESHOLD & 0x3F] = (byte)threshold;
 				}
 			 }
 			 else
@@ -3284,7 +3282,7 @@ namespace com.dalsemi.onewire.container
 				}
 				else
 				{
-				   missionRegister[DATA_LOW_ALARM_THRESHOLD & 0x3F] = (sbyte)threshold;
+				   missionRegister[DATA_LOW_ALARM_THRESHOLD & 0x3F] = (byte)threshold;
 				}
 			 }
 		  }
@@ -3411,7 +3409,7 @@ namespace com.dalsemi.onewire.container
 	   ///         currently running mission. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void doTemperatureConvert(sbyte[] state)
+	   public virtual void doTemperatureConvert(byte[] state)
 	   {
 		  /* check for mission in progress */
 		  if (getFlag(GENERAL_STATUS_REGISTER, GSR_BIT_MISSION_IN_PROGRESS, state))
@@ -3435,7 +3433,7 @@ namespace com.dalsemi.onewire.container
 		  if (adapter.select(address))
 		  {
 			 // perform the temperature conversion
-			 sbyte[] buffer = new sbyte[]{FORCED_CONVERSION, unchecked((sbyte)0xFF)};
+			 byte[] buffer = new byte[]{FORCED_CONVERSION, unchecked((byte)0xFF)};
 			 adapter.dataBlock(buffer, 0, 2);
 
 			 msWait(750);
@@ -3458,7 +3456,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <returns> temperature in Celsius from the last
 	   ///                     <code>doTemperatureConvert()</code> </returns>
-	   public virtual double getTemperature(sbyte[] state)
+	   public virtual double getTemperature(byte[] state)
 	   {
 		  double val = decodeTemperature(state, LAST_TEMPERATURE_CONVERSION_LSB & 0x3F, 2, false);
 		  if (useTempCalibrationRegisters)
@@ -3483,7 +3481,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref=    #hasTemperatureAlarms </seealso>
 	   /// <seealso cref=    #setTemperatureAlarm </seealso>
-	   public virtual double getTemperatureAlarm(int alarmType, sbyte[] state)
+	   public virtual double getTemperatureAlarm(int alarmType, byte[] state)
 	   {
 		  double th = 0;
 		  if (alarmType == TemperatureContainer_Fields.ALARM_HIGH)
@@ -3515,7 +3513,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolutions </seealso>
 	   /// <seealso cref=    #setTemperatureResolution </seealso>
-	   public virtual double getTemperatureResolution(sbyte[] state)
+	   public virtual double getTemperatureResolution(byte[] state)
 	   {
 		  return temperatureResolutions[1];
 	   }
@@ -3533,7 +3531,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref=    #hasTemperatureAlarms </seealso>
 	   /// <seealso cref=    #getTemperatureAlarm </seealso>
-	   public virtual void setTemperatureAlarm(int alarmType, double alarmValue, sbyte[] state)
+	   public virtual void setTemperatureAlarm(int alarmType, double alarmValue, byte[] state)
 	   {
 		  if (useTempCalibrationRegisters)
 		  {
@@ -3565,7 +3563,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolution </seealso>
 	   /// <seealso cref=    #getTemperatureResolutions </seealso>
-	   public virtual void setTemperatureResolution(double resolution, sbyte[] state)
+	   public virtual void setTemperatureResolution(double resolution, byte[] state)
 	   {
 		  throw new OneWireException("Selectable Temperature Resolution Not Supported");
 	   }
@@ -3678,7 +3676,7 @@ namespace com.dalsemi.onewire.container
 	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
 	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
 	   ///         adapter </exception>
-	   public virtual void doHumidityConvert(sbyte[] state)
+	   public virtual void doHumidityConvert(byte[] state)
 	   {
 		  /* check for mission in progress */
 		  if (getFlag(GENERAL_STATUS_REGISTER, GSR_BIT_MISSION_IN_PROGRESS, state))
@@ -3703,7 +3701,7 @@ namespace com.dalsemi.onewire.container
 		  if (adapter.select(address))
 		  {
 			 // perform the temperature conversion
-			 sbyte[] buffer = new sbyte[]{FORCED_CONVERSION, unchecked((sbyte)0xFF)};
+			 byte[] buffer = new byte[]{FORCED_CONVERSION, unchecked((byte)0xFF)};
 			 adapter.dataBlock(buffer, 0, 2);
 
 			 msWait(750);
@@ -3732,7 +3730,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableHumidityResolution </seealso>
 	   /// <seealso cref=    #getHumidityResolution </seealso>
 	   /// <seealso cref=    #setHumidityResolution </seealso>
-	   public virtual double getHumidity(sbyte[] state)
+	   public virtual double getHumidity(byte[] state)
 	   {
 		  double val = decodeHumidity(state, LAST_DATA_CONVERSION_LSB & 0x3F, 2, false);
 		  if (useTemperatureCompensation)
@@ -3757,7 +3755,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableHumidityResolution </seealso>
 	   /// <seealso cref=    #getHumidityResolutions </seealso>
 	   /// <seealso cref=    #setHumidityResolution </seealso>
-	   public virtual double getHumidityResolution(sbyte[] state)
+	   public virtual double getHumidityResolution(byte[] state)
 	   {
 		  return humidityResolutions[1];
 	   }
@@ -3778,7 +3776,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref=    #hasHumidityAlarms </seealso>
 	   /// <seealso cref=    #setHumidityAlarm </seealso>
-	   public virtual double getHumidityAlarm(int alarmType, sbyte[] state)
+	   public virtual double getHumidityAlarm(int alarmType, byte[] state)
 	   {
 		  double th;
 		  if (alarmType == HumidityContainer_Fields.ALARM_HIGH)
@@ -3812,7 +3810,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref=    #hasHumidityAlarms </seealso>
 	   /// <seealso cref=    #getHumidityAlarm </seealso>
-	   public virtual void setHumidityAlarm(int alarmType, double alarmValue, sbyte[] state)
+	   public virtual void setHumidityAlarm(int alarmType, double alarmValue, byte[] state)
 	   {
 		  if (alarmType == HumidityContainer_Fields.ALARM_HIGH)
 		  {
@@ -3838,7 +3836,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref=    #hasSelectableHumidityResolution </seealso>
 	   /// <seealso cref=    #getHumidityResolution </seealso>
 	   /// <seealso cref=    #getHumidityResolutions </seealso>
-	   public virtual void setHumidityResolution(double resolution, sbyte[] state)
+	   public virtual void setHumidityResolution(double resolution, byte[] state)
 	   {
 		  throw new OneWireException("Selectable Humidity Resolution Not Supported");
 	   }
@@ -3935,7 +3933,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #getADVoltage(int,byte[]) </seealso>
-	   public virtual void doADConvert(int channel, sbyte[] state)
+	   public virtual void doADConvert(int channel, byte[] state)
 	   {
 		  /* check for mission in progress */
 		  if (getFlag(GENERAL_STATUS_REGISTER, GSR_BIT_MISSION_IN_PROGRESS, state))
@@ -3960,7 +3958,7 @@ namespace com.dalsemi.onewire.container
 		  if (adapter.select(address))
 		  {
 			 // perform the conversion
-			 sbyte[] buffer = new sbyte[]{FORCED_CONVERSION, unchecked((sbyte)0xFF)};
+			 byte[] buffer = new byte[]{FORCED_CONVERSION, unchecked((byte)0xFF)};
 			 adapter.dataBlock(buffer, 0, 2);
 
 			 msWait(750);
@@ -3996,7 +3994,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #getADVoltage(byte[]) </seealso>
 	   /// <seealso cref= #canADMultiChannelRead() </seealso>
-	   public virtual void doADConvert(bool[] doConvert, sbyte[] state)
+	   public virtual void doADConvert(bool[] doConvert, byte[] state)
 	   {
 		  doADConvert(DATA_CHANNEL, state);
 	   }
@@ -4020,7 +4018,7 @@ namespace com.dalsemi.onewire.container
 	   ///         1-Wire adapter.  This is usually a non-recoverable error.
 	   /// </exception>
 	   /// <seealso cref= #doADConvert(bool[],byte[]) </seealso>
-	   public virtual double[] getADVoltage(sbyte[] state)
+	   public virtual double[] getADVoltage(byte[] state)
 	   {
 		  return new double[]{getADVoltage(DATA_CHANNEL, state)};
 	   }
@@ -4046,7 +4044,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= #doADConvert(int,byte[]) </seealso>
 	   /// <seealso cref= #getADVoltage(byte[]) </seealso>
-	   public virtual double getADVoltage(int channel, sbyte[] state)
+	   public virtual double getADVoltage(int channel, byte[] state)
 	   {
 		  return getADVoltage(state, LAST_DATA_CONVERSION_LSB & 0x3F, 2, false);
 	   }
@@ -4066,7 +4064,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #hasADAlarms() </seealso>
-	   public virtual double getADAlarm(int channel, int alarmType, sbyte[] state)
+	   public virtual double getADAlarm(int channel, int alarmType, byte[] state)
 	   {
 		  double th = 0;
 		  if (alarmType == ADContainer_Fields.ALARM_HIGH)
@@ -4095,7 +4093,7 @@ namespace com.dalsemi.onewire.container
 	   /// </exception>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #hasADAlarms() </seealso>
-	   public virtual bool getADAlarmEnable(int channel, int alarmType, sbyte[] state)
+	   public virtual bool getADAlarmEnable(int channel, int alarmType, byte[] state)
 	   {
 		  bool b = false;
 		  if (alarmType == ADContainer_Fields.ALARM_HIGH)
@@ -4126,7 +4124,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #hasADAlarms() </seealso>
 	   /// <seealso cref= #getADAlarmEnable(int,int,byte[]) </seealso>
 	   /// <seealso cref= #setADAlarmEnable(int,int,bool,byte[]) </seealso>
-	   public virtual bool hasADAlarmed(int channel, int alarmType, sbyte[] state)
+	   public virtual bool hasADAlarmed(int channel, int alarmType, byte[] state)
 	   {
 		  bool b = false;
 		  if (alarmType == ADContainer_Fields.ALARM_HIGH)
@@ -4152,7 +4150,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= #getADResolutions(int,double) </seealso>
 	   /// <seealso cref= #setADResolution(int,double,byte[]) </seealso>
-	   public virtual double getADResolution(int channel, sbyte[] state)
+	   public virtual double getADResolution(int channel, byte[] state)
 	   {
 		  return dataResolutions[1];
 	   }
@@ -4169,7 +4167,7 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= #getADRanges(int) </seealso>
 	   /// <seealso cref= #setADRange(int,double,byte[]) </seealso>
-	   public virtual double getADRange(int channel, sbyte[] state)
+	   public virtual double getADRange(int channel, byte[] state)
 	   {
 		  return 127;
 	   }
@@ -4195,7 +4193,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getADAlarmEnable(int,int,byte[]) </seealso>
 	   /// <seealso cref= #setADAlarmEnable(int,int,bool,byte[]) </seealso>
 	   /// <seealso cref= #hasADAlarmed(int,int,byte[]) </seealso>
-	   public virtual void setADAlarm(int channel, int alarmType, double alarm, sbyte[] state)
+	   public virtual void setADAlarm(int channel, int alarmType, double alarm, byte[] state)
 	   {
 		  if (alarmType == ADContainer_Fields.ALARM_HIGH)
 		  {
@@ -4228,7 +4226,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #setADAlarm(int,int,double,byte[]) </seealso>
 	   /// <seealso cref= #getADAlarmEnable(int,int,byte[]) </seealso>
 	   /// <seealso cref= #hasADAlarmed(int,int,byte[]) </seealso>
-	   public virtual void setADAlarmEnable(int channel, int alarmType, bool alarmEnable, sbyte[] state)
+	   public virtual void setADAlarmEnable(int channel, int alarmType, bool alarmEnable, byte[] state)
 	   {
 		  if (alarmType == ADContainer_Fields.ALARM_HIGH)
 		  {
@@ -4255,7 +4253,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getADResolutions(int,double) </seealso>
 	   /// <seealso cref= #getADResolution(int,byte[])
 	   ///  </seealso>
-	   public virtual void setADResolution(int channel, double resolution, sbyte[] state)
+	   public virtual void setADResolution(int channel, double resolution, byte[] state)
 	   {
 		  //throw new OneWireException("Selectable A-D Resolution Not Supported");
 	   }
@@ -4274,7 +4272,7 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= #getADRanges(int) </seealso>
 	   /// <seealso cref= #getADRange(int,byte[]) </seealso>
-	   public virtual void setADRange(int channel, double range, sbyte[] state)
+	   public virtual void setADRange(int channel, double range, byte[] state)
 	   {
 		  //throw new OneWireException("Selectable A-D Range Not Supported");
 	   }
@@ -4385,17 +4383,16 @@ namespace com.dalsemi.onewire.container
 	   /// </returns>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #setClock(long,byte[]) </seealso>
-	   public virtual long getClock(sbyte[] state)
+	   public virtual long getClock(byte[] state)
 	   {
 		  //grab the time
 		  int[] time = getTime(RTC_TIME & 0x3F, state);
 		  //grab the date
 		  int[] date = getDate(RTC_DATE & 0x3F, state);
 
-		  //date[1] - 1 because Java months are 0 offset
-		  DateTime d = new GregorianCalendar(date[0], date[1] - 1, date[2], time[2], time[1], time[0]);
+		  DateTime d = new DateTime(date[0], date[1], date[2], time[2], time[1], time[0]);
 
-		  return d.Time;
+		  return d.Ticks / TimeSpan.TicksPerMillisecond;
 	   }
 
 	   /// <summary>
@@ -4411,7 +4408,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual long getClockAlarm(sbyte[] state)
+	   public virtual long getClockAlarm(byte[] state)
 	   {
 		  throw new OneWireException("Device does not support clock alarms");
 	   }
@@ -4431,7 +4428,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual bool isClockAlarming(sbyte[] state)
+	   public virtual bool isClockAlarming(byte[] state)
 	   {
 		  return false;
 	   }
@@ -4449,7 +4446,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual bool isClockAlarmEnabled(sbyte[] state)
+	   public virtual bool isClockAlarmEnabled(byte[] state)
 	   {
 		  return false;
 	   }
@@ -4465,7 +4462,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#readDevice() </seealso>
 	   /// <seealso cref= #canDisableClock() </seealso>
 	   /// <seealso cref= #setClockRunEnable(bool,byte[]) </seealso>
-	   public virtual bool isClockRunning(sbyte[] state)
+	   public virtual bool isClockRunning(byte[] state)
 	   {
 		  return getFlag(RTC_CONTROL_REGISTER, RCR_BIT_ENABLE_OSCILLATOR, state);
 	   }
@@ -4486,14 +4483,11 @@ namespace com.dalsemi.onewire.container
 	   /// </param>
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #getClock(byte[]) </seealso>
-	   public virtual void setClock(long time, sbyte[] state)
+	   public virtual void setClock(long time, byte[] state)
 	   {
-		  DateTime x = new DateTime(time);
-		  DateTime d = new GregorianCalendar();
-
-		  d = new DateTime(x);
+		  DateTime d = new DateTime(time * TimeSpan.TicksPerMillisecond);
 		  setTime(RTC_TIME & 0x3F, d.Hour, d.Minute, d.Second, false, state);
-		  setDate(RTC_DATE & 0x3F, d.Year, d.Month + 1, d.Day, state);
+		  setDate(RTC_DATE & 0x3F, d.Year, d.Month, d.Day, state);
 
 		  if (!getFlag(RTC_CONTROL_REGISTER, RCR_BIT_ENABLE_OSCILLATOR, state))
 		  {
@@ -4526,7 +4520,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarmEnable(bool,byte[]) </seealso>
-	   public virtual void setClockAlarm(long time, sbyte[] state)
+	   public virtual void setClockAlarm(long time, byte[] state)
 	   {
 		  throw new OneWireException("Device does not support clock alarms");
 	   }
@@ -4545,7 +4539,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[]) </seealso>
 	   /// <seealso cref= #canDisableClock() </seealso>
 	   /// <seealso cref= #isClockRunning(byte[]) </seealso>
-	   public virtual void setClockRunEnable(bool runEnable, sbyte[] state)
+	   public virtual void setClockRunEnable(bool runEnable, byte[] state)
 	   {
 		  setFlag(RTC_CONTROL_REGISTER, RCR_BIT_ENABLE_OSCILLATOR, runEnable, state);
 	   }
@@ -4567,7 +4561,7 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref= #getClockAlarm(byte[]) </seealso>
 	   /// <seealso cref= #setClockAlarm(long,byte[]) </seealso>
 	   /// <seealso cref= #isClockAlarming(byte[]) </seealso>
-	   public virtual void setClockAlarmEnable(bool alarmEnable, sbyte[] state)
+	   public virtual void setClockAlarmEnable(bool alarmEnable, byte[] state)
 	   {
 		  throw new OneWireException("Device does not support clock alarms");
 	   }
@@ -4579,31 +4573,31 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="timeReg"> which register offset to pull the time from </param>
 	   /// <param name="state"> acquired from call to readDevice </param>
 	   /// <returns> array representing {seconds, minutes, hours} </returns>
-	   private int[] getTime(int timeReg, sbyte[] state)
+	   private int[] getTime(int timeReg, byte[] state)
 	   {
-		  sbyte upper, lower;
+		  byte upper, lower;
 		  int[] result = new int [3];
 
 		  // First grab the seconds. Upper half holds the 10's of seconds
 		  lower = state [timeReg++];
-		  upper = (sbyte)(((int)((uint)lower >> 4)) & 0x07);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(((int)((uint)lower >> 4)) & 0x07);
+		  lower = (byte)(lower & 0x0f);
 		  result [0] = (int) lower + (int) upper * 10;
 
 		  // now grab minutes. The upper half holds the 10s of minutes
 		  lower = state [timeReg++];
-		  upper = (sbyte)(((int)((uint)lower >> 4)) & 0x07);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(((int)((uint)lower >> 4)) & 0x07);
+		  lower = (byte)(lower & 0x0f);
 		  result [1] = (int) lower + (int) upper * 10;
 
 		  // now grab the hours. The lower half is single hours again, but the
 		  // upper half of the byte is determined by the 2nd bit - specifying
 		  // 12/24 hour time.
 		  lower = state [timeReg];
-		  upper = (sbyte)(((int)((uint)lower >> 4)) & 0x07);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(((int)((uint)lower >> 4)) & 0x07);
+		  lower = (byte)(lower & 0x0f);
 
-		  sbyte PM = 0;
+		  byte PM = 0;
 		  // if the 2nd bit is 1, convert 12 hour time to 24 hour time.
 		  if ((upper & 0x04) != 0)
 		  {
@@ -4625,34 +4619,34 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Set the time in the DS1922 time register format.
 	   /// </summary>
-	   private void setTime(int timeReg, int hours, int minutes, int seconds, bool AMPM, sbyte[] state)
+	   private void setTime(int timeReg, int hours, int minutes, int seconds, bool AMPM, byte[] state)
 	   {
-		  sbyte upper, lower;
+		  byte upper, lower;
 
 		  /* format in bytes and write seconds */
-		  upper = unchecked((sbyte)(((seconds / 10) << 4) & 0xf0));
-		  lower = (sbyte)((seconds % 10) & 0x0f);
-		  state[timeReg++] = (sbyte)(upper | lower);
+		  upper = unchecked((byte)(((seconds / 10) << 4) & 0xf0));
+		  lower = (byte)((seconds % 10) & 0x0f);
+		  state[timeReg++] = (byte)(upper | lower);
 
 		  /* format in bytes and write minutes */
-		  upper = unchecked((sbyte)(((minutes / 10) << 4) & 0xf0));
-		  lower = (sbyte)((minutes % 10) & 0x0f);
-		  state[timeReg++] = (sbyte)(upper | lower);
+		  upper = unchecked((byte)(((minutes / 10) << 4) & 0xf0));
+		  lower = (byte)((minutes % 10) & 0x0f);
+		  state[timeReg++] = (byte)(upper | lower);
 
 		  /* format in bytes and write hours/(12/24) bit */
 		  if (AMPM)
 		  {
-			 upper = (sbyte)0x04;
+			 upper = (byte)0x04;
 
 			 if (hours > 11)
 			 {
-				upper = (sbyte)(upper | 0x02);
+				upper = (byte)(upper | 0x02);
 			 }
 
 			 // this next logic simply checks for a decade hour
 			 if (((hours % 12) == 0) || ((hours % 12) > 9))
 			 {
-				upper = (sbyte)(upper | 0x01);
+				upper = (byte)(upper | 0x01);
 			 }
 
 			 if (hours > 12)
@@ -4662,22 +4656,22 @@ namespace com.dalsemi.onewire.container
 
 			 if (hours == 0)
 			 {
-				lower = (sbyte)0x02;
+				lower = (byte)0x02;
 			 }
 			 else
 			 {
-				lower = (sbyte)((hours % 10) & 0x0f);
+				lower = (byte)((hours % 10) & 0x0f);
 			 }
 		  }
 		  else
 		  {
-			 upper = (sbyte)(hours / 10);
-			 lower = (sbyte)(hours % 10);
+			 upper = (byte)(hours / 10);
+			 lower = (byte)(hours % 10);
 		  }
 
-		  upper = unchecked((sbyte)((upper << 4) & 0xf0));
-		  lower = (sbyte)(lower & 0x0f);
-		  state[timeReg] = (sbyte)(upper | lower);
+		  upper = unchecked((byte)((upper << 4) & 0xf0));
+		  lower = (byte)(lower & 0x0f);
+		  state[timeReg] = (byte)(upper | lower);
 	   }
 
 	   /// <summary>
@@ -4687,15 +4681,15 @@ namespace com.dalsemi.onewire.container
 	   /// <param name="timeReg"> which register offset to pull the date from </param>
 	   /// <param name="state"> acquired from call to readDevice </param>
 	   /// <returns> array representing {year, month, date} </returns>
-	   private int[] getDate(int timeReg, sbyte[] state)
+	   private int[] getDate(int timeReg, byte[] state)
 	   {
-		  sbyte upper, lower;
+		  byte upper, lower;
 		  int[] result = new int[]{0, 0, 0};
 
 		  /* extract the day of the month */
 		  lower = state [timeReg++];
-		  upper = (sbyte)(((int)((uint)lower >> 4)) & 0x0f);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(((int)((uint)lower >> 4)) & 0x0f);
+		  lower = (byte)(lower & 0x0f);
 		  result[2] = upper * 10 + lower;
 
 		  /* extract the month */
@@ -4704,14 +4698,14 @@ namespace com.dalsemi.onewire.container
 		  {
 			 result[0] = 100;
 		  }
-		  upper = (sbyte)(((int)((uint)lower >> 4)) & 0x01);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(((int)((uint)lower >> 4)) & 0x01);
+		  lower = (byte)(lower & 0x0f);
 		  result[1] = upper * 10 + lower;
 
 		  /* grab the year */
 		  lower = state [timeReg++];
-		  upper = (sbyte)(((int)((uint)lower >> 4)) & 0x0f);
-		  lower = (sbyte)(lower & 0x0f);
+		  upper = (byte)(((int)((uint)lower >> 4)) & 0x0f);
+		  lower = (byte)(lower & 0x0f);
 		  result[0] += upper * 10 + lower + FIRST_YEAR_EVER;
 
 		  return result;
@@ -4724,31 +4718,31 @@ namespace com.dalsemi.onewire.container
 	   /// month - The month to set to, i.e. 1 for January, 12 for December.
 	   /// day - The day of month to set to, i.e. 1 to 31 in January, 1 to 30 in April.
 	   /// </summary>
-	   private void setDate(int timeReg, int year, int month, int day, sbyte[] state)
+	   private void setDate(int timeReg, int year, int month, int day, byte[] state)
 	   {
-		  sbyte upper, lower;
+		  byte upper, lower;
 
 		  /* write the day byte (the upper holds 10s of days, lower holds single days) */
-		  upper = unchecked((sbyte)(((day / 10) << 4) & 0xf0));
-		  lower = (sbyte)((day % 10) & 0x0f);
-		  state [timeReg++] = (sbyte)(upper | lower);
+		  upper = unchecked((byte)(((day / 10) << 4) & 0xf0));
+		  lower = (byte)((day % 10) & 0x0f);
+		  state [timeReg++] = (byte)(upper | lower);
 
 		  /* write the month bit in the same manner, with the MSBit indicating
 		     the century (1 for 2000, 0 for 1900) */
-		  upper = unchecked((sbyte)(((month / 10) << 4) & 0xf0));
-		  lower = (sbyte)((month % 10) & 0x0f);
-		  state [timeReg++] = (sbyte)(upper | lower);
+		  upper = unchecked((byte)(((month / 10) << 4) & 0xf0));
+		  lower = (byte)((month % 10) & 0x0f);
+		  state [timeReg++] = (byte)(upper | lower);
 
 		  // now write the year
 		  year = year - FIRST_YEAR_EVER;
 		  if (year > 100)
 		  {
-			 state[timeReg - 1] |= unchecked((sbyte)0x80);
+			 state[timeReg - 1] |= unchecked((byte)0x80);
 			 year -= 100;
 		  }
-		  upper = unchecked((sbyte)(((year / 10) << 4) & 0xf0));
-		  lower = (sbyte)((year % 10) & 0x0f);
-		  state [timeReg] = (sbyte)(upper | lower);
+		  upper = unchecked((byte)(((year / 10) << 4) & 0xf0));
+		  lower = (byte)((year % 10) & 0x0f);
+		  state [timeReg] = (byte)(upper | lower);
 	   }
 
 
@@ -4805,7 +4799,7 @@ namespace com.dalsemi.onewire.container
 	   ///     DS1922T - Extended Temperature iButton
 	   ///     DS1i22S - Temperature/A-D iButton
 	   /// </summary>
-	   private sbyte[] ContainerVariables
+	   private byte[] ContainerVariables
 	   {
 		   set
 		   {
@@ -4826,7 +4820,7 @@ namespace com.dalsemi.onewire.container
 			  adForceResults = false;
     
     
-			  deviceConfigByte = unchecked((sbyte)0xFF);
+			  deviceConfigByte = unchecked((byte)0xFF);
 			  if (value != null)
 			  {
 				 deviceConfigByte = value[DEVICE_CONFIGURATION_BYTE & 0x03F];
@@ -4966,8 +4960,6 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// helper method to pause for specified milliseconds
 	   /// </summary>
-//JAVA TO C# CONVERTER WARNING: 'final' parameters are not available in .NET:
-//ORIGINAL LINE: private static final void msWait(final long ms)
 	   private static void msWait(long ms)
 	   {
 		  try
@@ -4983,7 +4975,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// helper method for decoding temperature values
 	   /// </summary>
-	   private double decodeTemperature(sbyte[] data, int offset, int length, bool reverse)
+	   private double decodeTemperature(byte[] data, int offset, int length, bool reverse)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  if (DEBUG)
@@ -5021,7 +5013,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// helper method for encoding temperature values
 	   /// </summary>
-	   private void encodeTemperature(double temperature, sbyte[] data, int offset, int length, bool reverse)
+	   private void encodeTemperature(double temperature, byte[] data, int offset, int length, bool reverse)
 	   {
 		  double val = 2 * ((temperature) - (temperatureRangeLow - 1));
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
@@ -5032,17 +5024,17 @@ namespace com.dalsemi.onewire.container
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  if (reverse && length == 2)
 		  {
-			 data[offset + 1] = unchecked((sbyte)(0x0C0 & unchecked((sbyte)(val * 256))));
-			 data[offset] = (sbyte)val;
+			 data[offset + 1] = unchecked((byte)(0x0C0 & unchecked((byte)(val * 256))));
+			 data[offset] = (byte)val;
 		  }
 		  else if (length == 2)
 		  {
-			 data[offset] = unchecked((sbyte)(0x0C0 & unchecked((sbyte)(val * 256))));
-			 data[offset + 1] = (sbyte)val;
+			 data[offset] = unchecked((byte)(0x0C0 & unchecked((byte)(val * 256))));
+			 data[offset + 1] = (byte)val;
 		  }
 		  else
 		  {
-			 data[offset] = (sbyte)val;
+			 data[offset] = (byte)val;
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  if (DEBUG)
@@ -5055,7 +5047,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// helper method for decoding humidity values
 	   /// </summary>
-	   private double decodeHumidity(sbyte[] data, int offset, int length, bool reverse)
+	   private double decodeHumidity(byte[] data, int offset, int length, bool reverse)
 	   {
 		  // get the 10-bit value of Vout
 		  double val = getADVoltage(data, offset, length, reverse);
@@ -5077,7 +5069,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// helper method for encoding humidity values
 	   /// </summary>
-	   private void encodeHumidity(double humidity, sbyte[] data, int offset, int length, bool reverse)
+	   private void encodeHumidity(double humidity, byte[] data, int offset, int length, bool reverse)
 	   {
 		  // uncalibrate the alarm value before writing
 		  if (useHumdCalibrationRegisters)
@@ -5091,7 +5083,7 @@ namespace com.dalsemi.onewire.container
 		  setADVoltage(val, data, offset, length, reverse);
 	   }
 
-	   private double getADVoltage(sbyte[] data, int offset, int length, bool reverse)
+	   private double getADVoltage(byte[] data, int offset, int length, bool reverse)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  if (DEBUG)
@@ -5128,7 +5120,7 @@ namespace com.dalsemi.onewire.container
 		  return dval;
 	   }
 
-	   private void setADVoltage(double voltage, sbyte[] data, int offset, int length, bool reverse)
+	   private void setADVoltage(double voltage, byte[] data, int offset, int length, bool reverse)
 	   {
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  if (DEBUG)
@@ -5146,17 +5138,17 @@ namespace com.dalsemi.onewire.container
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  if (reverse && length == 2)
 		  {
-			 data[offset] = (sbyte)(val >> (adDeviceBits - 8));
-			 data[offset + 1] = (sbyte)(val << (16 - adDeviceBits));
+			 data[offset] = (byte)(val >> (adDeviceBits - 8));
+			 data[offset + 1] = (byte)(val << (16 - adDeviceBits));
 		  }
 		  else if (length == 2)
 		  {
-			 data[offset + 1] = (sbyte)(val >> (adDeviceBits - 8));
-			 data[offset] = (sbyte)(val << (16 - adDeviceBits));
+			 data[offset + 1] = (byte)(val >> (adDeviceBits - 8));
+			 data[offset] = (byte)(val << (16 - adDeviceBits));
 		  }
 		  else
 		  {
-			 data[offset] = (sbyte)((val & 0x3FC) >> (adDeviceBits - 8));
+			 data[offset] = (byte)((val & 0x3FC) >> (adDeviceBits - 8));
 		  }
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  if (DEBUG)

@@ -413,21 +413,22 @@ public class DemoSHAEE1
 	  {
 		 if (!eight_bytes)
 		 {
-			string tstr = getString(1);
+ 			 string tstr = getString(1);
 
-            //TODO swap bytes!!
-            var temp = Int64.Parse(tstr, System.Globalization.NumberStyles.HexNumber);
-            data = com.dalsemi.onewire.utils.Convert.toByteArray(temp);
-			//data = System.Text.Encoding.UTF8.GetBytes(tstr);
+             data = new byte[tstr.Length];
+
+             for(int i = 0; i < tstr.Length; i++)
+             {
+                 data[i] = byte.Parse(tstr.Substring(i, 1), System.Globalization.NumberStyles.HexNumber);
+             }
          }
 		 else
 		 {
 			do
 			{
-			   string tstr = getString(1);
-
-               var temp = Int64.Parse(tstr, System.Globalization.NumberStyles.HexNumber);
-               data = com.dalsemi.onewire.utils.Convert.toByteArray(temp);
+			   string tstr = getString(2);
+    
+			   data = parseByteString(tstr);
 
 			   if (data.Length > 8)
 			   {

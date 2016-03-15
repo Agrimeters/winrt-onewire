@@ -145,6 +145,7 @@
     <Compile Include="com\dalsemi\onewire\application\sha\SHADebit.cs" />
     <Compile Include="com\dalsemi\onewire\application\sha\SHADebitUnsigned.cs" />
     <Compile Include="com\dalsemi\onewire\application\sha\SHAiButtonCopr.cs" />
+    <Compile Include="com\dalsemi\onewire\application\sha\SHAiButtonCoprVM.cs" />
     <Compile Include="com\dalsemi\onewire\application\sha\SHAiButtonUser.cs" />
     <Compile Include="com\dalsemi\onewire\application\sha\SHAiButtonUser18.cs" />
     <Compile Include="com\dalsemi\onewire\application\sha\SHAiButtonUser33.cs" />
@@ -165,6 +166,7 @@
     <Compile Include="com\dalsemi\onewire\container\CommandAPDU.cs" />
     <Compile Include="com\dalsemi\onewire\container\HumidityContainer.cs" />
     <Compile Include="com\dalsemi\onewire\container\OneWireContainer21.cs" />
+    <Compile Include="com\dalsemi\onewire\container\OneWireContainer41.cs" />
     <Compile Include="com\dalsemi\onewire\InterruptedException.cs" />
     <Compile Include="com\dalsemi\onewire\container\MemoryBank.cs" />
     <Compile Include="com\dalsemi\onewire\container\MemoryBankAD.cs" />

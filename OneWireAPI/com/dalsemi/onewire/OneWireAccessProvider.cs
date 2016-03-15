@@ -562,7 +562,8 @@ namespace com.dalsemi.onewire
                         try
                         {
                             onewire_defaults = new Properties();
-                            onewire_defaults.loadResourceFile("OneWireAPI.Resources.onewire_properties");
+                            Assembly asm = typeof(OneWireAccessProvider).GetTypeInfo().Assembly;
+                            onewire_defaults.loadResourceFile(asm, "OneWireAPI.Resources.onewire_properties");
                         }
                         catch (Exception)
                         {
