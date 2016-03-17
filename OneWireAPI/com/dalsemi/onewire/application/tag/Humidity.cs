@@ -64,7 +64,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <returns> String humidity in %RH </returns>
 	   public virtual string readSensor()
 	   {
-		  HumidityContainer hc = (HumidityContainer) DeviceContainer_Renamed;
+		  HumidityContainer hc = (HumidityContainer) _DeviceContainer;
 
 		  // read the device first to get the state
 		  byte[] state = hc.readDevice();

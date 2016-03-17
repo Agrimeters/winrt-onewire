@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -411,11 +412,11 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>,
 	   /// and <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>. </summary>
 	   /// <returns> <CODE>Enumeration</CODE> of memory banks </returns>
-	   public override System.Collections.IEnumerator MemoryBanks
+	   public override IEnumerator MemoryBanks
 	   {
 		   get
 		   {
-			  ArrayList bank_vector = new ArrayList(2);
+			  List<MemoryBankEPROM> bank_vector = new List<MemoryBankEPROM>(2);
     
 			  // EPROM main bank
 			  MemoryBankEPROM mn = new MemoryBankEPROM(this);
@@ -444,10 +445,10 @@ namespace com.dalsemi.onewire.container
     
 			  // setup OTP features in main memory
 			  mn.mbLock = st;
-			  mn.lockPage_Renamed = true;
+			  mn._lockPage = true;
 			  mn.mbRedirect = st;
 			  mn.redirectOffset = 1;
-			  mn.redirectPage_Renamed = true;
+			  mn._redirectPage = true;
     
 			  return bank_vector.GetEnumerator();
 		   }

@@ -198,8 +198,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Flag if memory bank can have pages locked
 	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
-	   protected internal bool lockPage_Renamed;
+	   protected internal bool _lockPage;
 
 	   /// <summary>
 	   /// Memory bank to lock pages in 'this' memory bank
@@ -226,7 +225,7 @@ namespace com.dalsemi.onewire.container
 
 		  // get references to MemoryBanks used in OTP operations, assume locking
 		  mbLock = null;
-		  lockPage_Renamed = true;
+		  _lockPage = true;
 
 		  // initialize attributes of this memory bank - DEFAULT: Main memory DS2431
 		  generalPurposeMemory = true;
@@ -240,7 +239,7 @@ namespace com.dalsemi.onewire.container
 		  readOnly = false;
 		  nonVolatile = true;
 		  pageAutoCRC = false;
-		  lockPage_Renamed = true;
+		  _lockPage = true;
 		  programPulse = false;
 		  powerDelivery = true;
 		  extraInfo = false;
@@ -548,7 +547,7 @@ namespace com.dalsemi.onewire.container
 	   ///          to a new page. </returns>
 	   public virtual bool canLockPage()
 	   {
-		  return lockPage_Renamed;
+		  return _lockPage;
 	   }
 
 	   /// <summary>

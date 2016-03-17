@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
@@ -59,7 +60,7 @@ public class DS2408Demo1
 	  byte[] hexstr = new byte[32];
 	  byte[] state = new byte[3];
 	  byte[] register = new byte[3];
-	  ArrayList owd_vect = new ArrayList(5);
+	  List<OneWireContainer> owd_vect = new List<OneWireContainer>(5);
 	  int channel;
 	  int i;
 	  int addr , len ;
@@ -736,7 +737,7 @@ public class DS2408Demo1
    /// <param name="owd_vect"> vector of devices to choose from
    /// </param>
    /// <returns> OneWireContainer device selected </returns>
-   public static OneWireContainer29 selectDevice(ArrayList owd_vect)
+   public static OneWireContainer29 selectDevice(List<OneWireContainer> owd_vect)
    {
 
 	  // create a menu
@@ -748,7 +749,7 @@ public class DS2408Demo1
 
 	  for (i = 0; i < owd_vect.Count; i++)
 	  {
-		 owd = (OneWireContainer) owd_vect[i];
+		 owd = owd_vect[i];
 		 menu [i + 1] = "(" + i + ") " + owd.AddressAsString + " - " + owd.Name;
 
 		 if (owd.AlternateNames.Length > 0)
@@ -944,11 +945,11 @@ public class DS2408Demo1
    {
 
 	  // create a menu
-	  ArrayList banks = new ArrayList(3);
+	  List<MemoryBank> banks = new List<MemoryBank>(3);
 	  int i;
 
 	  // get a vector of the banks
-	  for (System.Collections.IEnumerator bank_enum = owd.MemoryBanks; bank_enum.MoveNext();)
+	  for (IEnumerator bank_enum = owd.MemoryBanks; bank_enum.MoveNext();)
 	  {
 		 banks.Add((MemoryBank) bank_enum.Current);
 	  }
@@ -964,7 +965,7 @@ public class DS2408Demo1
 
 	  for (i = 0; i < banks.Count; i++)
 	  {
-		 menu [i + 1] = "(" + i + ") " + ((MemoryBank) banks[i]).BankDescription;
+		 menu [i + 1] = "(" + i + ") " + banks[i].BankDescription;
 	  }
 	  menu [i + 1] = "[" + i + "]--Quit";
 
@@ -975,7 +976,7 @@ public class DS2408Demo1
 		 throw new OperationCanceledException("Quit in bank selection");
 	  }
 
-	  return (MemoryBank) banks[select];
+	  return banks[select];
    }
 
 
@@ -1109,9 +1110,9 @@ public class DS2408Demo1
   /// <param name="adapter"> valid 1-Wire adapter
   /// </param>
   /// <returns> Vector or OneWireContainers </returns>
-   public static ArrayList findAllDevices(DSPortAdapter adapter)
+   public static List<OneWireContainer> findAllDevices(DSPortAdapter adapter)
    {
-	  ArrayList owd_vect = new ArrayList(3);
+	  List<OneWireContainer> owd_vect = new List<OneWireContainer>(3);
 	  OneWireContainer owd;
 
 	  try

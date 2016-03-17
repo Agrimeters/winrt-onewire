@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Threading;
+using System.Collections.Generic;
 
 // C#
 // Month     -> value between 1 - 12
@@ -680,11 +680,11 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>,
 	   /// and <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>. </summary>
 	   /// <returns> <CODE>Enumeration</CODE> of memory banks </returns>
-	   public override System.Collections.IEnumerator MemoryBanks
+	   public override IEnumerator MemoryBanks
 	   {
 		   get
 		   {
-			  ArrayList bank_vector = new ArrayList(6);
+			  List<object> bank_vector = new List<object>(6);
     
 			  // scratchpad
 			  bank_vector.Add(scratch);

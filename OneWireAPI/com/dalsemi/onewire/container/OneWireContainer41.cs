@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002-2003 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -1182,11 +1183,11 @@ namespace com.dalsemi.onewire.container
 	   /// <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>,
 	   /// and <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>. </summary>
 	   /// <returns> <CODE>Enumeration</CODE> of memory banks </returns>
-	   public override System.Collections.IEnumerator MemoryBanks
+	   public override IEnumerator MemoryBanks
 	   {
 		   get
 		   {
-			  ArrayList v = new ArrayList(4);
+              List<object> v = new List<object>(4);
     
 			  v.Add(scratch);
 			  v.Add(userDataMemory);

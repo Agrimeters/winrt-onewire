@@ -202,9 +202,9 @@ namespace com.dalsemi.onewire
 	   /// each adapter, a search can be done to find all available hardware adapters.
 	   /// </summary>
 	   /// <returns>  <code>Enumeration</code> of <code>DSPortAdapters</code> in the system </returns>
-	   public static System.Collections.IEnumerator enumerateAllAdapters()
+	   public static IEnumerator enumerateAllAdapters()
 	   {
-		  ArrayList adapter_vector = new ArrayList(3);
+		  List<DSPortAdapter> adapter_vector = new List<DSPortAdapter>(3);
 		  DSPortAdapter adapter_instance;
 		  bool serial_loaded = false;
           bool usb_loaded = false;

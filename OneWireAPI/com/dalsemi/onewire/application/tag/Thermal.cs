@@ -64,7 +64,7 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		  string returnString = "";
 		  double theTemperature;
-		  TemperatureContainer tc = (TemperatureContainer) DeviceContainer_Renamed;
+		  TemperatureContainer tc = (TemperatureContainer) _DeviceContainer;
 
 		  // read the device first before getting the temperature
 		  byte[] state = tc.readDevice();

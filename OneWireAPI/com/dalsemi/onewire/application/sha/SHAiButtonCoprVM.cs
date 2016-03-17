@@ -176,18 +176,18 @@ namespace com.dalsemi.onewire.application.sha
 
           //Check to see if this coprocessor's authentication secret
           //is appropriately padded to be used with a DS1961S
-            this.DS1961Scompatible_Renamed = ((l_authSecret.Length % 47) == 0);
+            this._DS1961Scompatible = ((l_authSecret.Length % 47) == 0);
 		  int secretDiv = l_authSecret.Length / 47;
-		  for (int j = 0; j < secretDiv && DS1961Scompatible_Renamed; j++)
+		  for (int j = 0; j < secretDiv && _DS1961Scompatible; j++)
 		  {
 			 int offset = 47 * j;
-			 for (int i = 32; i < 36 && this.DS1961Scompatible_Renamed; i++)
+			 for (int i = 32; i < 36 && this._DS1961Scompatible; i++)
 			 {
-				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == 0x0FF);
+				this._DS1961Scompatible = (l_authSecret[i + offset] == 0x0FF);
 			 }
-			 for (int i = 44; i < 47 && this.DS1961Scompatible_Renamed; i++)
+			 for (int i = 44; i < 47 && this._DS1961Scompatible; i++)
 			 {
-				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == 0x0FF);
+				this._DS1961Scompatible = (l_authSecret[i + offset] == 0x0FF);
 			 }
 		  }
 

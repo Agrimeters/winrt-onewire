@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -47,7 +48,7 @@ public class HumidityTest1
    {
 	  try
 	  {
-		 ArrayList humidity_devices = new ArrayList(1);
+		 List<OneWireContainer> humidity_devices = new List<OneWireContainer>(1);
 
 		 // get the default adapter and show header
 		 DSPortAdapter adapter = OneWireAccessProvider.DefaultAdapter;

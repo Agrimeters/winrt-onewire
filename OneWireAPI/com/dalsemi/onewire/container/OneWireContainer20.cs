@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using System.Threading;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -157,7 +157,7 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Control/Alarms/calibration memory banks vector
 	   /// </summary>
-	   private ArrayList regs;
+	   private List<MemoryBankAD> regs;
 
 	   //--------
 	   //-------- Constructors
@@ -280,7 +280,7 @@ namespace com.dalsemi.onewire.container
 	   {
 		   get
 		   {
-			  ArrayList bank_vector = new ArrayList(4);
+			  List<MemoryBankAD> bank_vector = new List<MemoryBankAD>(4);
     
 			  // readout
 			  bank_vector.Add(readout);
@@ -1201,7 +1201,7 @@ namespace com.dalsemi.onewire.container
 		  readout = new MemoryBankAD(this);
 
 		  // control
-		  regs = new ArrayList(3);
+		  regs = new List<MemoryBankAD>(3);
 
 		  MemoryBankAD temp_mb = new MemoryBankAD(this);
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -82,7 +83,7 @@ namespace com.dalsemi.onewire.utils
 
 	   /// <summary>
 	   /// Elements of the path in a Vector </summary>
-	   private ArrayList elements;
+	   private List<OWPathElement> elements;
 
 	   /// <summary>
 	   /// Adapter where this path is based </summary>
@@ -104,7 +105,7 @@ namespace com.dalsemi.onewire.utils
 	   public OWPath(DSPortAdapter adapter)
 	   {
 		  this.adapter = adapter;
-		  elements = new ArrayList(2);
+		  elements = new List<OWPathElement>(2);
 	   }
 
 	   /// <summary>
@@ -118,7 +119,7 @@ namespace com.dalsemi.onewire.utils
 	   public OWPath(DSPortAdapter adapter, OWPath currentOWPath)
 	   {
 		  this.adapter = adapter;
-		  elements = new ArrayList(2);
+		  elements = new List<OWPathElement>(2);
 
 		  copy(currentOWPath);
 	   }
@@ -133,13 +134,11 @@ namespace com.dalsemi.onewire.utils
 
 		  if (currentOWPath != null)
 		  {
-
 			 // enumerature through elements in current path
-			 for (System.Collections.IEnumerator path_enum = currentOWPath.AllOWPathElements; path_enum.MoveNext();)
+			 for (IEnumerator path_enum = currentOWPath.AllOWPathElements; path_enum.MoveNext();)
 			 {
-
 				// cast the enum as a OWPathElements and add to vector
-				elements.Add((OWPathElement) path_enum.Current);
+				elements.Add((OWPathElement)path_enum.Current);
 			 }
 		  }
 	   }

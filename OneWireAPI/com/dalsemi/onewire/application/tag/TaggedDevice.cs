@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -31,9 +31,9 @@ using System.Collections;
 namespace com.dalsemi.onewire.application.tag
 {
 
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+	using com.dalsemi.onewire.adapter;
 	using com.dalsemi.onewire.container;
-	using OWPath = com.dalsemi.onewire.utils.OWPath;
+	using com.dalsemi.onewire.utils;
 
 
 	/// <summary>
@@ -50,7 +50,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <param name="netAddress"> </param>
 	   public TaggedDevice(DSPortAdapter adapter, string netAddress)
 	   {
-		  this.DeviceContainer_Renamed = adapter.getDeviceContainer(netAddress);
+		  this._DeviceContainer = adapter.getDeviceContainer(netAddress);
 	   }
 
 	   /// <summary>
@@ -69,7 +69,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// </summary>
 	   public virtual void setDeviceContainer(DSPortAdapter adapter, string netAddress)
 	   {
-		  DeviceContainer_Renamed = adapter.getDeviceContainer(netAddress);
+		  _DeviceContainer = adapter.getDeviceContainer(netAddress);
 	   }
 
 	   /// <summary>
@@ -80,11 +80,11 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   set
 		   {
-			  DeviceType_Renamed = value;
+			  _DeviceType = value;
 		   }
 		   get
 		   {
-			  return DeviceType_Renamed;
+			  return _DeviceType;
 		   }
 	   }
 
@@ -169,7 +169,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// Sets the vector of branches to get to the tagged device.
 	   /// </summary>
 	   /// <param name="branches"> </param>
-	   public virtual ArrayList Branches
+	   public virtual List<TaggedDevice> Branches
 	   {
 		   set
 		   {
@@ -192,11 +192,11 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   set
 		   {
-			  branchPath = value;
+			  _branchPath = value;
 		   }
 		   get
 		   {
-			  return branchPath;
+			  return _branchPath;
 		   }
 	   }
 
@@ -208,17 +208,17 @@ namespace com.dalsemi.onewire.application.tag
 	   /// </summary>
 	   /// <param name="adapter"> </param>
 	   /// <param name="Branches"> </param>
-	   public virtual void setOWPath(DSPortAdapter adapter, ArrayList Branches)
+	   public virtual void setOWPath(DSPortAdapter adapter, List<TaggedDevice> Branches)
 	   {
-		  branchPath = new OWPath(adapter);
+		  _branchPath = new OWPath(adapter);
 
 		  TaggedDevice TDevice;
 
 		  for (int i = 0; i < Branches.Count; i++)
 		  {
-			 TDevice = (TaggedDevice) Branches[i];
+			 TDevice = Branches[i];
 
-			 branchPath.add(TDevice.DeviceContainer, TDevice.Channel);
+			 _branchPath.add(TDevice.DeviceContainer, TDevice.Channel);
 		  }
 	   }
 
@@ -234,7 +234,7 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   get
 		   {
-			  return DeviceContainer_Renamed;
+			  return _DeviceContainer;
 		   }
 	   }
 
@@ -291,7 +291,7 @@ namespace com.dalsemi.onewire.application.tag
 		  if (o is TaggedDevice)
 		  {
 			 TaggedDevice td = (TaggedDevice)o;
-			 return (td.DeviceContainer_Renamed.Equals(this.DeviceContainer_Renamed)) && (td.DeviceType_Renamed.Equals(this.DeviceType_Renamed)) && (td.min.Equals(this.min)) && (td.max.Equals(this.max)) && (td.init.Equals(this.init)) && (td.clusterName.Equals(this.clusterName)) && (td.label.Equals(this.label));
+			 return (td._DeviceContainer.Equals(this._DeviceContainer)) && (td._DeviceType.Equals(this._DeviceType)) && (td.min.Equals(this.min)) && (td.max.Equals(this.max)) && (td.init.Equals(this.init)) && (td.clusterName.Equals(this.clusterName)) && (td.label.Equals(this.label));
 		  }
 		  return false;
 	   }
@@ -312,14 +312,12 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <summary>
 	   /// 1-Wire Container for the tagged device.
 	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
-	   public OneWireContainer DeviceContainer_Renamed;
+	   public OneWireContainer _DeviceContainer;
 
 	   /// <summary>
 	   /// Device type for the device (i.e., contact, switch, d2a, etc.).
 	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
-	   public string DeviceType_Renamed;
+	   public string _DeviceType;
 
 	   /// <summary>
 	   /// Label for the "name" of the device.
@@ -362,14 +360,14 @@ namespace com.dalsemi.onewire.application.tag
 	   /// A Vector of branches describing how to physically get to
 	   /// the tagged device through a set of 1-Wire switches.
 	   /// </summary>
-	   public ArrayList branchVector;
+	   public List<TaggedDevice> branchVector;
 
 	   /// <summary>
 	   /// This is an OWPath describing how to physically get to
 	   /// the tagged device through a set of nested 1-Wire branches
 	   /// (switches).
 	   /// </summary>
-	   private OWPath branchPath;
+	   private OWPath _branchPath;
 	}
 
 }

@@ -64,7 +64,7 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		  string returnString = "";
 
-		  if (DeviceContainer_Renamed.Present)
+		  if (_DeviceContainer.Present)
 		  {
 			 returnString = max;
 		  }

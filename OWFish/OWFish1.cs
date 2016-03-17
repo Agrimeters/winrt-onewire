@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
@@ -56,7 +57,7 @@ public class OWFish1
    /// </summary>
    public static void Main1(string[] args)
    {
-	  ArrayList owd_vect = new ArrayList(5);
+	  List<OneWireContainer> owd_vect = new List<OneWireContainer>(5);
 	  OneWireContainer[] owd = null;
 	  DSPortAdapter adapter = null;
 	  int selection, len;
@@ -481,9 +482,9 @@ public class OWFish1
    /// <param name="adapter"> valid 1-Wire adapter
    /// </param>
    /// <returns> Vector or OneWireContainers </returns>
-   public static ArrayList findAllDevices(DSPortAdapter adapter)
+   public static List<OneWireContainer> findAllDevices(DSPortAdapter adapter)
    {
-	  ArrayList owd_vect = new ArrayList(3);
+	  List<OneWireContainer> owd_vect = new List<OneWireContainer>(3);
 	  OneWireContainer owd;
 
 	  try
@@ -521,11 +522,11 @@ public class OWFish1
    /// <param name="owd_vect"> vector of devices to choose from
    /// </param>
    /// <returns> OneWireContainer device selected </returns>
-   public static OneWireContainer[] selectDevice(ArrayList owd_vect)
+   public static OneWireContainer[] selectDevice(List<OneWireContainer> owd_vect)
    {
 	  // create a menu
 	  string[] menu = new string[owd_vect.Count + 3];
-	  ArrayList rewrite = new ArrayList(1);
+	  List<OneWireContainer> rewrite = new List<OneWireContainer>(1);
 	  OneWireContainer owd;
 	  int i;
 	  OneWireContainer[] oca;
@@ -576,14 +577,14 @@ public class OWFish1
 		 oca = new OneWireContainer[rewrite.Count];
 		 for (i = 0; i < oca.Length; i++)
 		 {
-			oca[i] = (OneWireContainer)rewrite[i];
+			oca[i] = rewrite[i];
 		 }
 	  }
 	  // single device
 	  else
 	  {
 		 oca = new OneWireContainer[1];
-		 oca[0] = (OneWireContainer)owd_vect[select];
+		 oca[0] = owd_vect[select];
 	  }
 
 	  return oca;

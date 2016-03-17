@@ -71,7 +71,7 @@ namespace com.dalsemi.onewire.application.tag
 		  byte[] switchState;
 		  int switchChannel = Channel;
 		  SwitchContainer Container;
-		  Container = (SwitchContainer) DeviceContainer_Renamed;
+		  Container = (SwitchContainer) _DeviceContainer;
 
 		  if (Container.hasLevelSensing()) // if it can sense levels, read it.
 		  {

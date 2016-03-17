@@ -227,20 +227,17 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Flag if memory bank can have pages redirected
 	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
-	   protected internal bool redirectPage_Renamed;
+	   protected internal bool _redirectPage;
 
 	   /// <summary>
 	   /// Flag if memory bank can have pages locked
 	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
-	   protected internal bool lockPage_Renamed;
+	   protected internal bool _lockPage;
 
 	   /// <summary>
 	   /// Flag if memory bank can have pages locked from redirected
 	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
-	   protected internal bool lockRedirectPage_Renamed;
+	   protected internal bool _lockRedirectPage;
 
 	   /// <summary>
 	   /// Memory bank to lock pages in 'this' memory bank
@@ -308,9 +305,9 @@ namespace com.dalsemi.onewire.container
 		  readOnly = false;
 		  nonVolatile = true;
 		  pageAutoCRC = true;
-		  redirectPage_Renamed = false;
-		  lockPage_Renamed = false;
-		  lockRedirectPage_Renamed = false;
+		  _redirectPage = false;
+		  _lockPage = false;
+		  _lockRedirectPage = false;
 		  programPulse = true;
 		  powerDelivery = false;
 		  extraInfo = true;
@@ -614,7 +611,7 @@ namespace com.dalsemi.onewire.container
 	   ///          to a new page. </returns>
 	   public virtual bool canRedirectPage()
 	   {
-		  return redirectPage_Renamed;
+		  return _redirectPage;
 	   }
 
 	   /// <summary>
@@ -625,7 +622,7 @@ namespace com.dalsemi.onewire.container
 	   ///          to a new page. </returns>
 	   public virtual bool canLockPage()
 	   {
-		  return lockPage_Renamed;
+		  return _lockPage;
 	   }
 
 	   /// <summary>
@@ -637,7 +634,7 @@ namespace com.dalsemi.onewire.container
 	   ///          being redirected to a new page. </returns>
 	   public virtual bool canLockRedirectPage()
 	   {
-		  return lockRedirectPage_Renamed;
+		  return _lockRedirectPage;
 	   }
 
 	   //--------

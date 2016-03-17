@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2004 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -31,9 +32,9 @@ using System.Collections;
 namespace com.dalsemi.onewire.container
 {
 
-	// imports
-	using Address = com.dalsemi.onewire.utils.Address;
-	using com.dalsemi.onewire.adapter;
+    // imports
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.utils;
 
 
 	/// <summary>
@@ -447,11 +448,11 @@ namespace com.dalsemi.onewire.container
 	   /// <returns> enumeration of memory banks to read and write memory
 	   ///   on this iButton or 1-Wire device </returns>
 	   /// <seealso cref= MemoryBank </seealso>
-	   public virtual System.Collections.IEnumerator MemoryBanks
+	   public virtual IEnumerator MemoryBanks
 	   {
 		   get
 		   {
-			  return (new ArrayList(0)).GetEnumerator();
+			  return (new List<MemoryBank>()).GetEnumerator();
 		   }
 	   }
 

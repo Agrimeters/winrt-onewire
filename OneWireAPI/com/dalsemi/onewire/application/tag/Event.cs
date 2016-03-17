@@ -66,7 +66,7 @@ namespace com.dalsemi.onewire.application.tag
 		  string returnString = "";
 		  byte[] switchState;
 		  SwitchContainer Container;
-		  Container = (SwitchContainer) DeviceContainer_Renamed;
+		  Container = (SwitchContainer) _DeviceContainer;
 
 		  if (Container.hasActivitySensing()) // if there is any activity, read it.
 		  {

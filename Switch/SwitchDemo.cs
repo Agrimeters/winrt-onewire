@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
@@ -53,7 +54,7 @@ public class SwitchDemo
    /// </summary>
    public static void Main1(string[] args)
    {
-	  ArrayList owd_vect = new ArrayList(5);
+	  List<OneWireContainer> owd_vect = new List<OneWireContainer>(5);
 	  SwitchContainer sw = null;
 	  int ch;
 	  bool done = false;
@@ -184,9 +185,9 @@ public class SwitchDemo
    /// <param name="adapter"> valid 1-Wire adapter
    /// </param>
    /// <returns> Vector or OneWireContainers </returns>
-   public static ArrayList findAllSwitchDevices(DSPortAdapter adapter)
+   public static List<OneWireContainer> findAllSwitchDevices(DSPortAdapter adapter)
    {
-	  ArrayList owd_vect = new ArrayList(3);
+	  List<OneWireContainer> owd_vect = new List<OneWireContainer>(3);
 	  OneWireContainer owd;
 
 	  try
@@ -235,7 +236,7 @@ public class SwitchDemo
    /// <param name="owd_vect"> vector of devices to choose from
    /// </param>
    /// <returns> OneWireContainer device selected </returns>
-   public static OneWireContainer selectDevice(ArrayList owd_vect)
+   public static OneWireContainer selectDevice(List<OneWireContainer> owd_vect)
    {
 	  // create a menu
 	  string[] menu = new string[owd_vect.Count + 2];
@@ -245,7 +246,7 @@ public class SwitchDemo
 	  menu[0] = "Device Selection";
 	  for (i = 0; i < owd_vect.Count; i++)
 	  {
-		 owd = (OneWireContainer)owd_vect[i];
+		 owd = owd_vect[i];
 		 menu[i + 1] = "(" + i + ") " + owd.AddressAsString + " - " + owd.Name;
 		 if (owd.AlternateNames.Length > 0)
 		 {
@@ -261,7 +262,7 @@ public class SwitchDemo
 		 throw new OperationCanceledException("Quit in device selection");
 	  }
 
-	  return (OneWireContainer)owd_vect[select];
+	  return owd_vect[select];
    }
 
    //--------

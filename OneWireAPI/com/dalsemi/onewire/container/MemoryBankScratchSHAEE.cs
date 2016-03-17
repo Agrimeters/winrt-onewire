@@ -1333,8 +1333,6 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// helper method to pause for specified milliseconds
 	   /// </summary>
-//JAVA TO C# CONVERTER WARNING: 'final' parameters are not available in .NET:
-//ORIGINAL LINE: private static final void msWait(final long ms)
 	   private static void msWait(long ms)
 	   {
 		  try

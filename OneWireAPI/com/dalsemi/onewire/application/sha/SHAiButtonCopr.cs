@@ -146,8 +146,7 @@ namespace com.dalsemi.onewire.application.sha
 	   /// the DS1961S.  This entails the use of a specifically padded
 	   /// authentication secret.
 	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
-	   protected internal bool DS1961Scompatible_Renamed = false;
+	   protected internal bool _DS1961Scompatible = false;
 
 	   /// <summary>
 	   /// Code used to specify encryption type.
@@ -291,18 +290,18 @@ namespace com.dalsemi.onewire.application.sha
 
 		  //Check to see if this coprocessor's authentication secret
 		  //is appropriately padded to be used with a DS1961S
-		  this.DS1961Scompatible_Renamed = ((l_authSecret.Length % 47) == 0);
+		  this._DS1961Scompatible = ((l_authSecret.Length % 47) == 0);
 		  int secretDiv = l_authSecret.Length / 47;
-		  for (int j = 0; j < secretDiv && DS1961Scompatible_Renamed; j++)
+		  for (int j = 0; j < secretDiv && _DS1961Scompatible; j++)
 		  {
 			 int offset = 47 * j;
-			 for (int i = 32; i < 36 && this.DS1961Scompatible_Renamed; i++)
+			 for (int i = 32; i < 36 && this._DS1961Scompatible; i++)
 			 {
-				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == 0x0FF);
+				this._DS1961Scompatible = (l_authSecret[i + offset] == 0x0FF);
 			 }
-			 for (int i = 44; i < 47 && this.DS1961Scompatible_Renamed; i++)
+			 for (int i = 44; i < 47 && this._DS1961Scompatible; i++)
 			 {
-				this.DS1961Scompatible_Renamed = (l_authSecret[i + offset] == 0x0FF);
+				this._DS1961Scompatible = (l_authSecret[i + offset] == 0x0FF);
 			 }
 		  }
 
@@ -345,7 +344,7 @@ namespace com.dalsemi.onewire.application.sha
 			 fos.write(l_initialSignature,0,(byte)l_initialSignature.Length);
 			 fos.write(l_auxData,0,(byte)l_auxData.Length);
 			 fos.write(l_encCode);
-			 fos.write(DS1961Scompatible_Renamed?0x55:0x00);
+			 fos.write(_DS1961Scompatible?0x55:0x00);
 			 fos.Flush();
 			 fos.close();
 		  }
@@ -910,7 +909,7 @@ namespace com.dalsemi.onewire.application.sha
 	   {
 		   get
 		   {
-			  return DS1961Scompatible_Renamed;
+			  return _DS1961Scompatible;
 		   }
 	   }
 	   // ***********************************************************************
@@ -1514,7 +1513,7 @@ namespace com.dalsemi.onewire.application.sha
 		  this.auxData = System.Text.Encoding.Unicode.GetString(l_auxData);
 
 		  this.encCode = @is.Read();
-		  this.DS1961Scompatible_Renamed = (@is.Read() != 0);
+		  this._DS1961Scompatible = (@is.Read() != 0);
 #endif
         }
 
@@ -1550,7 +1549,7 @@ namespace com.dalsemi.onewire.application.sha
 		  os.Write(this.initialSignature,0,(byte)this.initialSignature.Length);
 		  os.Write(l_auxData,0,(byte)l_auxData.Length);
 		  os.WriteByte(this.encCode);
-		  os.WriteByte(this.DS1961Scompatible_Renamed?0x55:0x00);
+		  os.WriteByte(this._DS1961Scompatible?0x55:0x00);
 
 		  os.Flush();
 #endif

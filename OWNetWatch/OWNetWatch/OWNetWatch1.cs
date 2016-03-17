@@ -83,7 +83,7 @@ namespace OWNetWatch
 
         /// <summary>
         /// Vector of temperature watches, used in cleanup </summary>
-        private ArrayList watchers;
+        private List<BackgroundTaskRegistration> watchers;
 
         //--------
         //-------- Constructor
@@ -97,7 +97,7 @@ namespace OWNetWatch
         {
 
             // create vector to keep track of temperature watches
-            watchers = new ArrayList();
+            watchers = new List<BackgroundTaskRegistration>();
 
             // create a network monitor
             nm = new NetworkDeviceMonitor(adapter);

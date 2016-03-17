@@ -2085,7 +2085,7 @@ namespace com.dalsemi.onewire.application.file
 
 			 if (Directory)
 			 {
-				ArrayList entries = new ArrayList(1);
+				List<string> entries = new List<string>(1);
 
 				try
 				{

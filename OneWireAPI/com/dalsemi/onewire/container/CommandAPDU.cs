@@ -84,36 +84,31 @@ namespace com.dalsemi.onewire.container
 	   /// Index for addressing <code>CLA</code> in this <code>CommandAPDU</code>
 	   ///    <code>apduBuffer</code>. 
 	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
-	   public const int CLA_Renamed = 0;
+	   public const int _CLA = 0;
 
 	   /// <summary>
 	   /// Index for addressing <code>INS</code> in this <code>CommandAPDU</code>
 	   ///    <code>apduBuffer</code>. 
 	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
-	   public const int INS_Renamed = 1;
+	   public const int _INS = 1;
 
 	   /// <summary>
 	   /// Index for addressing <code>P1</code>  in this <code>CommandAPDU</code>
 	   ///    <code>apduBuffer</code>. 
 	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
-	   public const int P1_Renamed = 2;
+	   public const int _P1 = 2;
 
 	   /// <summary>
 	   /// Index for addressing <code>P2</code>  in this <code>CommandAPDU</code>
 	   ///    <code>apduBuffer</code>. 
 	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
-	   public const int P2_Renamed = 3;
+	   public const int _P2 = 3;
 
 	   /// <summary>
 	   /// Index for addressing <code>LC</code> in this <code>CommandAPDU</code>   
 	   ///    <code>apduBuffer</code>. 
 	   /// </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
-	   public const int LC_Renamed = 4;
+	   public const int _LC = 4;
 
 	   /// <summary>
 	   /// Byte array containing the entire <code>CommandAPDU</code>. </summary>
@@ -224,21 +219,21 @@ namespace com.dalsemi.onewire.container
 		  apduBuffer = new byte [apduLength];
 
 		  // fill CommandAPDU buffer body
-		  apduBuffer [CLA_Renamed] = cla;
-		  apduBuffer [INS_Renamed] = ins;
-		  apduBuffer [P1_Renamed] = p1;
-		  apduBuffer [P2_Renamed] = p2;
+		  apduBuffer [_CLA] = cla;
+		  apduBuffer [_INS] = ins;
+		  apduBuffer [_P1] = p1;
+		  apduBuffer [_P2] = p2;
 
 		  if (data != null)
 		  {
-			 apduBuffer [LC_Renamed] = (byte) data.Length;
+			 apduBuffer [_LC] = (byte) data.Length;
 
-			 Array.Copy(data, 0, apduBuffer, LC_Renamed + 1, data.Length);
+			 Array.Copy(data, 0, apduBuffer, _LC + 1, data.Length);
 		  }
 		  else
 		  {
 			 // fill in the LC byte anyhoo
-			 apduBuffer[LC_Renamed] = (byte)0;
+			 apduBuffer[_LC] = (byte)0;
 		  }
 
 		  if (le >= 0)
@@ -255,7 +250,7 @@ namespace com.dalsemi.onewire.container
 	   {
 		   get
 		   {
-			  return apduBuffer [CLA_Renamed];
+			  return apduBuffer [_CLA];
 		   }
 	   } // getCLA
 
@@ -267,7 +262,7 @@ namespace com.dalsemi.onewire.container
 	   {
 		   get
 		   {
-			  return apduBuffer [INS_Renamed];
+			  return apduBuffer [_INS];
 		   }
 	   } // getINS
 
@@ -279,7 +274,7 @@ namespace com.dalsemi.onewire.container
 	   {
 		   get
 		   {
-			  return apduBuffer [P1_Renamed];
+			  return apduBuffer [_P1];
 		   }
 	   } //getP1
 
@@ -291,7 +286,7 @@ namespace com.dalsemi.onewire.container
 	   {
 		   get
 		   {
-			  return apduBuffer [P2_Renamed];
+			  return apduBuffer [_P2];
 		   }
 	   } // getP2
 
@@ -307,7 +302,7 @@ namespace com.dalsemi.onewire.container
 		   {
 			  if (apduLength >= 6)
 			  {
-				 return apduBuffer [LC_Renamed];
+				 return apduBuffer [_LC];
 			  }
 			  else
 			  {
@@ -442,10 +437,10 @@ namespace com.dalsemi.onewire.container
 	   {
 		  string apduString = "";
 
-		  apduString += "CLA = " + (apduBuffer [CLA_Renamed] & 0xFF).ToString("x");
-		  apduString += " INS = " + (apduBuffer [INS_Renamed] & 0xFF).ToString("x");
-		  apduString += " P1 = " + (apduBuffer [P1_Renamed] & 0xFF).ToString("x");
-		  apduString += " P2 = " + (apduBuffer [P2_Renamed] & 0xFF).ToString("x");
+		  apduString += "CLA = " + (apduBuffer [_CLA] & 0xFF).ToString("x");
+		  apduString += " INS = " + (apduBuffer [_INS] & 0xFF).ToString("x");
+		  apduString += " P1 = " + (apduBuffer [_P1] & 0xFF).ToString("x");
+		  apduString += " P2 = " + (apduBuffer [_P2] & 0xFF).ToString("x");
 		  apduString += " LC = " + (LC & 0xFF).ToString("x");
 
 		  if (LE == -1)

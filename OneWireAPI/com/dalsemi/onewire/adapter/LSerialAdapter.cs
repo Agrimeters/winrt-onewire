@@ -205,7 +205,7 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// String name of the current opened port </summary>
-	   private bool adapterPresent_Renamed;
+	   private bool _adapterPresent;
 
 	   /// <summary>
 	   /// flag to indicate the last discrepancy </summary>
@@ -261,7 +261,7 @@ namespace com.dalsemi.onewire.adapter
 	   public LSerialAdapter()
 	   {
 		  serial = null;
-		  adapterPresent_Renamed = false;
+		  _adapterPresent = false;
 		  haveLocalUse = false;
 		  syncObject = new object();
 	   }
@@ -417,7 +417,7 @@ namespace com.dalsemi.onewire.adapter
 			 // acquire exclusive use of the port
 			 beginLocalExclusive();
 
-			 adapterPresent_Renamed = false;
+			 _adapterPresent = false;
 
 			 // attempt to close the port
 			 serial.closePort();
@@ -447,7 +447,7 @@ namespace com.dalsemi.onewire.adapter
 	   ///  <exception cref="OneWireException"> </exception>
 	   public override bool adapterDetected()
 	   {
-		  if (!adapterPresent_Renamed)
+		  if (!_adapterPresent)
 		  {
 			 try
 			 {
@@ -467,7 +467,7 @@ namespace com.dalsemi.onewire.adapter
 			 }
 		  }
 
-		  return adapterPresent_Renamed;
+		  return _adapterPresent;
 	   }
 
 	   /// <summary>
@@ -1267,7 +1267,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <returns> true if adapter likely present </returns>
 	   private bool adapterPresent()
 	   {
-		  if (!adapterPresent_Renamed)
+		  if (!_adapterPresent)
 		  {
 			 byte[] test_buf = new byte[] { 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xe3, 0xc1, Convert.ToByte('A'), Convert.ToByte('T'), Convert.ToByte('E'), Convert.ToByte('0'), 0x0D, Convert.ToByte('A') };
 
@@ -1292,7 +1292,7 @@ namespace com.dalsemi.onewire.adapter
 				serial.flush();
 
 				// if get entire echo then must be OK
-				adapterPresent_Renamed = true;
+				_adapterPresent = true;
 			 }
 			 catch (IOException)
 			 {
@@ -1300,7 +1300,7 @@ namespace com.dalsemi.onewire.adapter
 			 }
 		  }
 
-		  return adapterPresent_Renamed;
+		  return _adapterPresent;
 	   }
 
 	   /// <summary>
