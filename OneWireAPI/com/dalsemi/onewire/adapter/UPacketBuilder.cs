@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
@@ -186,7 +187,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <summary>
 	   /// Vector of raw send packets
 	   /// </summary>
-	   protected internal ArrayList packetsVector;
+	   protected internal List<RawSendPacket> packetsVector;
 
 	   /// <summary>
 	   /// Flag to send only 'bit' commands to the DS2480
@@ -212,7 +213,7 @@ namespace com.dalsemi.onewire.adapter
 		  packet = new RawSendPacket();
 
 		  // create the vector
-		  packetsVector = new ArrayList();
+		  packetsVector = new List<RawSendPacket>();
 
 		  // restart the packet to initialize
 		  restart();
@@ -698,7 +699,7 @@ namespace com.dalsemi.onewire.adapter
 		  // set to command mode
 		  setToCommandMode();
 
-          byte encoded = (byte)(((parameter << 4) | parameterValue) | CONFIG_MASK);
+          byte encoded = (byte)(((parameter << 4) | (parameterValue << 1)) | CONFIG_MASK);
 
 		  // append the paramter set with value
           packet.writer.Write(encoded);

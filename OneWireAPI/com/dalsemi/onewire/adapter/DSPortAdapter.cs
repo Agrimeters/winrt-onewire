@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Diagnostics;
 
@@ -33,136 +34,135 @@ using System.Diagnostics;
 namespace com.dalsemi.onewire.adapter
 {
 
-	// imports
-	using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-	using com.dalsemi.onewire.utils;
+    // imports
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.utils;
 
-
-	/// <summary>
-	/// The abstract base class for all 1-Wire port
-	/// adapter objects.  An implementation class of this type is therefore
-	/// independent of the adapter type.  Instances of valid DSPortAdapter's are
-	/// retrieved from methods in
-	/// <seealso cref="com.dalsemi.onewire.OneWireAccessProvider OneWireAccessProvider"/>.
-	/// 
-	/// <P>The DSPortAdapter methods can be organized into the following categories: </P>
-	/// <UL>
-	///   <LI> <B> Information </B>
-	///     <UL>
-	///       <LI> <seealso cref="#getAdapterName() getAdapterName"/>
-	///       <LI> <seealso cref="#getPortTypeDescription() getPortTypeDescription"/>
-	///       <LI> <seealso cref="#getClassVersion() getClassVersion"/>
-	///       <LI> <seealso cref="#adapterDetected() adapterDetected"/>
-	///       <LI> <seealso cref="#getAdapterVersion() getAdapterVersion"/>
-	///       <LI> <seealso cref="#getAdapterAddress() getAdapterAddress"/>
-	///     </UL>
-	///   <LI> <B> Port Selection </B>
-	///     <UL>
-	///       <LI> <seealso cref="#getPortNames() getPortNames"/>
-	///       <LI> <seealso cref="#selectPort(String) selectPort"/>
-	///       <LI> <seealso cref="#getPortName() getPortName"/>
-	///       <LI> <seealso cref="#freePort() freePort"/>
-	///     </UL>
-	///   <LI> <B> Adapter Capabilities </B>
-	///     <UL>
-	///       <LI> <seealso cref="#canOverdrive() canOverdrive"/>
-	///       <LI> <seealso cref="#canHyperdrive() canHyperdrive"/>
-	///       <LI> <seealso cref="#canFlex() canFlex"/>
-	///       <LI> <seealso cref="#canProgram() canProgram"/>
-	///       <LI> <seealso cref="#canDeliverPower() canDeliverPower"/>
-	///       <LI> <seealso cref="#canDeliverSmartPower() canDeliverSmartPower"/>
-	///       <LI> <seealso cref="#canBreak() canBreak"/>
-	///     </UL>
-	///   <LI> <B> 1-Wire Network Semaphore </B>
-	///     <UL>
-	///       <LI> <seealso cref="#beginExclusive(bool) beginExclusive"/>
-	///       <LI> <seealso cref="#endExclusive() endExclusive"/>
-	///     </UL>
-	///   <LI> <B> 1-Wire Device Discovery </B>
-	///     <UL>
-	///       <LI> Selective Search Options
-	///         <UL>
-	///          <LI> <seealso cref="#targetAllFamilies() targetAllFamilies"/>
-	///          <LI> <seealso cref="#targetFamily(int) targetFamily(int)"/>
-	///          <LI> <seealso cref="#targetFamily(byte[]) targetFamily(byte[])"/>
-	///          <LI> <seealso cref="#excludeFamily(int) excludeFamily(int)"/>
-	///          <LI> <seealso cref="#excludeFamily(byte[]) excludeFamily(byte[])"/>
-	///          <LI> <seealso cref="#setSearchOnlyAlarmingDevices() setSearchOnlyAlarmingDevices"/>
-	///          <LI> <seealso cref="#setNoResetSearch() setNoResetSearch"/>
-	///          <LI> <seealso cref="#setSearchAllDevices() setSearchAllDevices"/>
-	///         </UL>
-	///       <LI> Search With Automatic 1-Wire Container creation
-	///         <UL>
-	///          <LI> <seealso cref="#getAllDeviceContainers() getAllDeviceContainers"/>
-	///          <LI> <seealso cref="#getFirstDeviceContainer() getFirstDeviceContainer"/>
-	///          <LI> <seealso cref="#getNextDeviceContainer() getNextDeviceContainer"/>
-	///         </UL>
-	///       <LI> Search With NO 1-Wire Container creation
-	///         <UL>
-	///          <LI> <seealso cref="#findFirstDevice() findFirstDevice"/>
-	///          <LI> <seealso cref="#findNextDevice() findNextDevice"/>
-	///          <LI> <seealso cref="#getAddress(byte[]) getAddress(byte[])"/>
-	///          <LI> <seealso cref="#getAddressAsLong() getAddressAsLong"/>
-	///          <LI> <seealso cref="#getAddressAsString() getAddressAsString"/>
-	///         </UL>
-	///       <LI> Manual 1-Wire Container creation
-	///         <UL>
-	///          <LI> <seealso cref="#getDeviceContainer(byte[]) getDeviceContainer(byte[])"/>
-	///          <LI> <seealso cref="#getDeviceContainer(long) getDeviceContainer(long)"/>
-	///          <LI> <seealso cref="#getDeviceContainer(String) getDeviceContainer(String)"/>
-	///          <LI> <seealso cref="#getDeviceContainer() getDeviceContainer()"/>
-	///         </UL>
-	///     </UL>
-	///   <LI> <B> 1-Wire Network low level access (usually not called directly) </B>
-	///     <UL>
-	///       <LI> Device Selection and Presence Detect
-	///         <UL>
-	///          <LI> <seealso cref="#isPresent(byte[]) isPresent(byte[])"/>
-	///          <LI> <seealso cref="#isPresent(long) isPresent(long)"/>
-	///          <LI> <seealso cref="#isPresent(String) isPresent(String)"/>
-	///          <LI> <seealso cref="#isAlarming(byte[]) isAlarming(byte[])"/>
-	///          <LI> <seealso cref="#isAlarming(long) isAlarming(long)"/>
-	///          <LI> <seealso cref="#isAlarming(String) isAlarming(String)"/>
-	///          <LI> <seealso cref="#select(byte[]) select(byte[])"/>
-	///          <LI> <seealso cref="#select(long) select(long)"/>
-	///          <LI> <seealso cref="#select(String) select(String)"/>
-	///         </UL>
-	///       <LI> Raw 1-Wire IO
-	///         <UL>
-	///          <LI> <seealso cref="#reset() reset"/>
-	///          <LI> <seealso cref="#putBit(bool) putBit"/>
-	///          <LI> <seealso cref="#getBit() getBit"/>
-	///          <LI> <seealso cref="#putByte(int) putByte"/>
-	///          <LI> <seealso cref="#getByte() getByte"/>
-	///          <LI> <seealso cref="#getBlock(int) getBlock(int)"/>
-	///          <LI> <seealso cref="#getBlock(byte[], int) getBlock(byte[], int)"/>
-	///          <LI> <seealso cref="#getBlock(byte[], int, int) getBlock(byte[], int, int)"/>
-	///          <LI> <seealso cref="#dataBlock(byte[], int, int) dataBlock(byte[], int, int)"/>
-	///         </UL>
-	///       <LI> 1-Wire Speed and Power Selection
-	///         <UL>
-	///          <LI> <seealso cref="#setPowerDuration(int) setPowerDuration"/>
-	///          <LI> <seealso cref="#startPowerDelivery(int) startPowerDelivery"/>
-	///          <LI> <seealso cref="#setProgramPulseDuration(int) setProgramPulseDuration"/>
-	///          <LI> <seealso cref="#startProgramPulse(int) startProgramPulse"/>
-	///          <LI> <seealso cref="#startBreak() startBreak"/>
-	///          <LI> <seealso cref="#setPowerNormal() setPowerNormal"/>
-	///          <LI> <seealso cref="#setSpeed(int) setSpeed"/>
-	///          <LI> <seealso cref="#getSpeed() getSpeed"/>
-	///         </UL>
-	///     </UL>
-	///   <LI> <B> Advanced </B>
-	///     <UL>
-	///        <LI> <seealso cref="#registerOneWireContainerClass(int, Class) registerOneWireContainerClass"/>
-	///     </UL>
-	///  </UL>
-	/// </summary>
-	/// <seealso cref= com.dalsemi.onewire.OneWireAccessProvider </seealso>
-	/// <seealso cref= com.dalsemi.onewire.container.OneWireContainer
-	/// 
-	/// @version    0.00, 28 Aug 2000
-	/// @author     DS </seealso>
-	public abstract class DSPortAdapter
+    /// <summary>
+    /// The abstract base class for all 1-Wire port
+    /// adapter objects.  An implementation class of this type is therefore
+    /// independent of the adapter type.  Instances of valid DSPortAdapter's are
+    /// retrieved from methods in
+    /// <seealso cref="com.dalsemi.onewire.OneWireAccessProvider OneWireAccessProvider"/>.
+    /// 
+    /// <P>The DSPortAdapter methods can be organized into the following categories: </P>
+    /// <UL>
+    ///   <LI> <B> Information </B>
+    ///     <UL>
+    ///       <LI> <seealso cref="#getAdapterName() getAdapterName"/>
+    ///       <LI> <seealso cref="#getPortTypeDescription() getPortTypeDescription"/>
+    ///       <LI> <seealso cref="#getClassVersion() getClassVersion"/>
+    ///       <LI> <seealso cref="#adapterDetected() adapterDetected"/>
+    ///       <LI> <seealso cref="#getAdapterVersion() getAdapterVersion"/>
+    ///       <LI> <seealso cref="#getAdapterAddress() getAdapterAddress"/>
+    ///     </UL>
+    ///   <LI> <B> Port Selection </B>
+    ///     <UL>
+    ///       <LI> <seealso cref="#getPortNames() getPortNames"/>
+    ///       <LI> <seealso cref="#selectPort(String) selectPort"/>
+    ///       <LI> <seealso cref="#getPortName() getPortName"/>
+    ///       <LI> <seealso cref="#freePort() freePort"/>
+    ///     </UL>
+    ///   <LI> <B> Adapter Capabilities </B>
+    ///     <UL>
+    ///       <LI> <seealso cref="#canOverdrive() canOverdrive"/>
+    ///       <LI> <seealso cref="#canHyperdrive() canHyperdrive"/>
+    ///       <LI> <seealso cref="#canFlex() canFlex"/>
+    ///       <LI> <seealso cref="#canProgram() canProgram"/>
+    ///       <LI> <seealso cref="#canDeliverPower() canDeliverPower"/>
+    ///       <LI> <seealso cref="#canDeliverSmartPower() canDeliverSmartPower"/>
+    ///       <LI> <seealso cref="#canBreak() canBreak"/>
+    ///     </UL>
+    ///   <LI> <B> 1-Wire Network Semaphore </B>
+    ///     <UL>
+    ///       <LI> <seealso cref="#beginExclusive(bool) beginExclusive"/>
+    ///       <LI> <seealso cref="#endExclusive() endExclusive"/>
+    ///     </UL>
+    ///   <LI> <B> 1-Wire Device Discovery </B>
+    ///     <UL>
+    ///       <LI> Selective Search Options
+    ///         <UL>
+    ///          <LI> <seealso cref="#targetAllFamilies() targetAllFamilies"/>
+    ///          <LI> <seealso cref="#targetFamily(int) targetFamily(int)"/>
+    ///          <LI> <seealso cref="#targetFamily(byte[]) targetFamily(byte[])"/>
+    ///          <LI> <seealso cref="#excludeFamily(int) excludeFamily(int)"/>
+    ///          <LI> <seealso cref="#excludeFamily(byte[]) excludeFamily(byte[])"/>
+    ///          <LI> <seealso cref="#setSearchOnlyAlarmingDevices() setSearchOnlyAlarmingDevices"/>
+    ///          <LI> <seealso cref="#setNoResetSearch() setNoResetSearch"/>
+    ///          <LI> <seealso cref="#setSearchAllDevices() setSearchAllDevices"/>
+    ///         </UL>
+    ///       <LI> Search With Automatic 1-Wire Container creation
+    ///         <UL>
+    ///          <LI> <seealso cref="#getAllDeviceContainers() getAllDeviceContainers"/>
+    ///          <LI> <seealso cref="#getFirstDeviceContainer() getFirstDeviceContainer"/>
+    ///          <LI> <seealso cref="#getNextDeviceContainer() getNextDeviceContainer"/>
+    ///         </UL>
+    ///       <LI> Search With NO 1-Wire Container creation
+    ///         <UL>
+    ///          <LI> <seealso cref="#findFirstDevice() findFirstDevice"/>
+    ///          <LI> <seealso cref="#findNextDevice() findNextDevice"/>
+    ///          <LI> <seealso cref="#getAddress(byte[]) getAddress(byte[])"/>
+    ///          <LI> <seealso cref="#getAddressAsLong() getAddressAsLong"/>
+    ///          <LI> <seealso cref="#getAddressAsString() getAddressAsString"/>
+    ///         </UL>
+    ///       <LI> Manual 1-Wire Container creation
+    ///         <UL>
+    ///          <LI> <seealso cref="#getDeviceContainer(byte[]) getDeviceContainer(byte[])"/>
+    ///          <LI> <seealso cref="#getDeviceContainer(long) getDeviceContainer(long)"/>
+    ///          <LI> <seealso cref="#getDeviceContainer(String) getDeviceContainer(String)"/>
+    ///          <LI> <seealso cref="#getDeviceContainer() getDeviceContainer()"/>
+    ///         </UL>
+    ///     </UL>
+    ///   <LI> <B> 1-Wire Network low level access (usually not called directly) </B>
+    ///     <UL>
+    ///       <LI> Device Selection and Presence Detect
+    ///         <UL>
+    ///          <LI> <seealso cref="#isPresent(byte[]) isPresent(byte[])"/>
+    ///          <LI> <seealso cref="#isPresent(long) isPresent(long)"/>
+    ///          <LI> <seealso cref="#isPresent(String) isPresent(String)"/>
+    ///          <LI> <seealso cref="#isAlarming(byte[]) isAlarming(byte[])"/>
+    ///          <LI> <seealso cref="#isAlarming(long) isAlarming(long)"/>
+    ///          <LI> <seealso cref="#isAlarming(String) isAlarming(String)"/>
+    ///          <LI> <seealso cref="#select(byte[]) select(byte[])"/>
+    ///          <LI> <seealso cref="#select(long) select(long)"/>
+    ///          <LI> <seealso cref="#select(String) select(String)"/>
+    ///         </UL>
+    ///       <LI> Raw 1-Wire IO
+    ///         <UL>
+    ///          <LI> <seealso cref="#reset() reset"/>
+    ///          <LI> <seealso cref="#putBit(bool) putBit"/>
+    ///          <LI> <seealso cref="#getBit() getBit"/>
+    ///          <LI> <seealso cref="#putByte(int) putByte"/>
+    ///          <LI> <seealso cref="#getByte() getByte"/>
+    ///          <LI> <seealso cref="#getBlock(int) getBlock(int)"/>
+    ///          <LI> <seealso cref="#getBlock(byte[], int) getBlock(byte[], int)"/>
+    ///          <LI> <seealso cref="#getBlock(byte[], int, int) getBlock(byte[], int, int)"/>
+    ///          <LI> <seealso cref="#dataBlock(byte[], int, int) dataBlock(byte[], int, int)"/>
+    ///         </UL>
+    ///       <LI> 1-Wire Speed and Power Selection
+    ///         <UL>
+    ///          <LI> <seealso cref="#setPowerDuration(int) setPowerDuration"/>
+    ///          <LI> <seealso cref="#startPowerDelivery(int) startPowerDelivery"/>
+    ///          <LI> <seealso cref="#setProgramPulseDuration(int) setProgramPulseDuration"/>
+    ///          <LI> <seealso cref="#startProgramPulse(int) startProgramPulse"/>
+    ///          <LI> <seealso cref="#startBreak() startBreak"/>
+    ///          <LI> <seealso cref="#setPowerNormal() setPowerNormal"/>
+    ///          <LI> <seealso cref="#setSpeed(int) setSpeed"/>
+    ///          <LI> <seealso cref="#getSpeed() getSpeed"/>
+    ///         </UL>
+    ///     </UL>
+    ///   <LI> <B> Advanced </B>
+    ///     <UL>
+    ///        <LI> <seealso cref="#registerOneWireContainerClass(int, Class) registerOneWireContainerClass"/>
+    ///     </UL>
+    ///  </UL>
+    /// </summary>
+    /// <seealso cref= com.dalsemi.onewire.OneWireAccessProvider </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer
+    /// 
+    /// @version    0.00, 28 Aug 2000
+    /// @author     DS </seealso>
+    public abstract class DSPortAdapter
 	{
 
 	   //--------
@@ -598,7 +598,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		   get
 		   {
-			  ArrayList ibutton_vector = new ArrayList();
+			  List<OneWireContainer> ibutton_vector = new List<OneWireContainer>();
 			  OneWireContainer temp_ibutton;
     
 			  temp_ibutton = FirstDeviceContainer;

@@ -205,7 +205,6 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// String name of the current opened port </summary>
-//JAVA TO C# CONVERTER NOTE: Fields cannot have the same name as methods:
 	   private bool adapterPresent_Renamed;
 
 	   /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -43,7 +44,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// </summary>
 	   public D2A() : base()
 	   {
-		  ActuatorSelections = new ArrayList();
+		  ActuatorSelections = new List<string>();
 	   }
 
 	   /// <summary>
@@ -53,14 +54,14 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <param name="netAddress"> The 1-Wire network address of the actuator. </param>
 	   public D2A(DSPortAdapter adapter, string netAddress) : base(adapter, netAddress)
 	   {
-		  ActuatorSelections = new ArrayList();
+		  ActuatorSelections = new List<string>();
 	   }
 
 	   /// <summary>
 	   /// Get the possible selection states of this actuator
 	   /// </summary>
 	   /// <returns> Vector of Strings representing selection states. </returns>
-	   public virtual ArrayList Selections
+	   public virtual List<string> Selections
 	   {
 		   get
 		   {
@@ -153,7 +154,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <summary>
 	   /// Keeps the selections of this actuator
 	   /// </summary>
-	   private ArrayList ActuatorSelections;
+	   private List<string> ActuatorSelections;
 	}
 
 

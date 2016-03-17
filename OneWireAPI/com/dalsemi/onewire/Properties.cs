@@ -61,6 +61,7 @@ namespace com.dalsemi.onewire
         public async void loadLocalFile(string file)
         {
             StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+            Debug.WriteLine("Loading " + localFolder.Path + "\\" + file);
 
             if (File.Exists(localFolder.Path + "\\" + file))
             {

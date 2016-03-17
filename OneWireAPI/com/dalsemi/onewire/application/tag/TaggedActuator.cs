@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -39,7 +40,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// Get the possible selection states of this actuator
 	   /// </summary>
 	   /// <returns> result of sensor reading </returns>
-	   ArrayList Selections {get;}
+	   List<string> Selections {get;}
 
 	   /// <summary>
 	   /// Set the selectionof this actuator

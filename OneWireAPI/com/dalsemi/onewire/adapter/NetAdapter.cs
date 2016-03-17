@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Diagnostics;
@@ -214,7 +215,7 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// Used to block waiting for multicast responses </summary>
-       protected ArrayList vPorts = null;
+       protected List<string> vPorts = null;
 
        /// <summary>
        /// Creates an instance of NetAdapter that isn't connected.  Must call
@@ -410,7 +411,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		   get
 		   {
-              vPorts = new ArrayList();
+              vPorts = new List<string>();
     
 			  // figure out if multicast is enabled
 			  if (multicastEnabled == null)

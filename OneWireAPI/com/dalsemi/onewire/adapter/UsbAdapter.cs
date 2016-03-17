@@ -113,11 +113,11 @@ namespace com.dalsemi.onewire.adapter
 
         /// <summary>
         /// Vector of thread hash codes that have done an open but no close </summary>
-        private readonly ArrayList users = new ArrayList(4);
+        private readonly List<int> users = new List<int>(4);
 
         internal int containers_index = 0;
 
-        private ArrayList containers = new ArrayList();
+        private List<OneWireContainer> containers = new List<OneWireContainer>();
 
 
         public UsbAdapter()

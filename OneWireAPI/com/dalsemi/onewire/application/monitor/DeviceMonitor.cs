@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -90,7 +91,7 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// </summary>
 	   /// <param name="address"> a Long object representing the address of the device </param>
 	   /// <returns> The OWPath representing the network path to the device. </returns>
-	   public override OWPath getDevicePath(long? address)
+	   public override OWPath getDevicePath(long address)
 	   {
 		  return defaultPath;
 	   }
@@ -100,7 +101,7 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// </summary>
 	   /// <param name="arrivals"> A vector of Long objects, represent new arrival addresses. </param>
 	   /// <param name="departures"> A vector of Long objects, represent departed addresses. </param>
-	   public override void search(ArrayList arrivals, ArrayList departures)
+	   public override void search(List<long> arrivals, List<long> departures)
 	   {
 		  lock (sync_flag)
 		  {
@@ -120,13 +121,13 @@ namespace com.dalsemi.onewire.application.monitor
 				while (search_result)
 				{
 				   // get the 1-Wire address
-				   long? longAddress = new long?(adapter.AddressAsLong);
+				   long longAddress = adapter.AddressAsLong; //new long?(
 				   if (!deviceAddressHash.ContainsKey(longAddress) && arrivals != null)
 				   {
 					  arrivals.Add(longAddress);
 				   }
 
-				   deviceAddressHash[longAddress] = new int?(max_state_count);
+				   deviceAddressHash[longAddress] = max_state_count; //new int?(
 
 				   // search for the next device
 				   search_result = adapter.findNextDevice();
@@ -140,10 +141,10 @@ namespace com.dalsemi.onewire.application.monitor
 			 // remove any devices that have not been seen
 			 for (System.Collections.IEnumerator device_enum = deviceAddressHash.Keys.GetEnumerator(); device_enum.MoveNext();)
 			 {
-				long? longAddress = (long?)device_enum.Current;
+				long longAddress = (long)device_enum.Current; //(long?)
 
 				// check for removal by looking at state counter
-				int cnt = ((int?)deviceAddressHash[longAddress]).Value;
+				int cnt = deviceAddressHash[longAddress];
 				if (cnt <= 0)
 				{
 				   deviceAddressHash.Remove(longAddress);
@@ -160,8 +161,8 @@ namespace com.dalsemi.onewire.application.monitor
 				else
 				{
 				   // it stays
-				   deviceAddressHash[longAddress] = new int?(cnt - 1);
-				}
+				   deviceAddressHash[longAddress] = cnt - 1; //new int?(
+                }
 			 }
 
 			 // fire notification events

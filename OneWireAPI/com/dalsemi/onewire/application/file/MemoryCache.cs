@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
@@ -122,7 +123,7 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Field banks - vector of memory banks that contain the Filesystem </summary>
-	   private ArrayList banks;
+	   private List<MemoryBank> banks;
 
 	   /// <summary>
 	   /// Field totalPages - total pages in this Filesystem </summary>
@@ -162,11 +163,11 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Field owners - vector of classes that are using this cache </summary>
-	   private ArrayList owners;
+	   private List<object> owners;
 
 	   /// <summary>
 	   /// Field openedToWrite - vector of files that have been opened to write on this filesystem </summary>
-	   private ArrayList openedToWrite;
+	   private List<string> openedToWrite;
 
 	   /// <summary>
 	   /// Field canRedirect - flag to indicate page redirection information must be gathered </summary>
@@ -244,9 +245,9 @@ namespace com.dalsemi.onewire.application.file
 
 		  PagedMemoryBank pmb = null;
 
-		  banks = new ArrayList(1);
-		  owners = new ArrayList(1);
-		  openedToWrite = new ArrayList(1);
+		  banks = new List<MemoryBank>();
+		  owners = new List<object>();
+		  openedToWrite = new List<string>();
 		  startPages = new int[owd.Length];
 		  lastDevice = 0;
 

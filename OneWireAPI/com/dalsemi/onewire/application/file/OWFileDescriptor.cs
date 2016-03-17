@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Diagnostics;
@@ -129,11 +130,11 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Field path - converted path to vector of 5 byte arrays </summary>
-	   private ArrayList path;
+	   private List<byte[]> path;
 
 	   /// <summary>
 	   /// Field verbosePath - same as 'path' but includes '.' and '..' </summary>
-	   private ArrayList verbosePath;
+	   private List<byte[]> verbosePath;
 
 	   //--------
 	   // file entry (fe) info on device
@@ -449,7 +450,7 @@ namespace com.dalsemi.onewire.application.file
 			 }
 
 			 // parse the path into a Vector
-			 verbosePath = new ArrayList(3);
+			 verbosePath = new List<byte[]>();
 
 			 // done could not parse the skip compressing
 			 if (!parsePath(rawPath, verbosePath))
@@ -458,7 +459,7 @@ namespace com.dalsemi.onewire.application.file
 			 }
 
 			 // create a compressed path (take out "." and "..")
-			 path = new ArrayList(verbosePath.Count);
+			 path = new List<byte[]>(); //verbosePath.Count
 
 			 byte[] element;
 
@@ -2817,7 +2818,7 @@ namespace com.dalsemi.onewire.application.file
 	   /// <param name="single"> true if only need a single field not a path
 	   /// </param>
 	   /// <returns> string representation of the specified path </returns>
-	   private string pathToString(ArrayList tempPath, int beginIndex, int endIndex, bool single)
+	   private string pathToString(List<byte[]> tempPath, int beginIndex, int endIndex, bool single)
 	   {
 		  if (beginIndex < 0)
 		  {
@@ -3643,7 +3644,7 @@ namespace com.dalsemi.onewire.application.file
 	   /// Parse the provided raw path and set the provided vector.
 	   /// </summary>
 	   /// <param name="rawPath"> path to parse </param>
-	   private bool parsePath(string rawPath, ArrayList parsedPath)
+	   private bool parsePath(string rawPath, List<byte[]> parsedPath)
 	   {
 		  // parse name into a vector of byte arrays using the file structure
 		  int index , last_index = 0, period_index , i , name_len ;

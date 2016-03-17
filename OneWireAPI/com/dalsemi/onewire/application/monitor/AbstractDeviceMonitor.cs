@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Threading;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -30,50 +29,46 @@ using System.Threading;
  */
 namespace com.dalsemi.onewire.application.monitor
 {
-
-
-	using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
-	using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-	using Address = com.dalsemi.onewire.utils.Address;
-	using OWPath = com.dalsemi.onewire.utils.OWPath;
-
-	/// <summary>
-	/// <P>Abstract super-class for 1-Wire Monitors, a optionally-threadable
-	/// object for searching 1-Wire networks.  If this object is not run in it's own
-	/// thread, it is possible to perform single-step searches by calling the search </summary>
-	/// method directly {<seealso cref= #search(Vector, Vector)}.  The monitor will generate
-	/// events for device arrivals, device departures, and exceptions from the
-	/// DSPortAdapter.</P>
-	/// 
-	/// <P>In a touch-contact environment, it is not suitable to say that a
-	/// device has "departed" because it was missing for one cycle of searching.
-	/// In the time it takes to get an iButton into a blue-dot receptor, the
-	/// monitor could have generated a handful of arrival and departure events.  To
-	/// circumvent this problem, the device monitor keeps a "missing state count" for
-	/// each device on the network.  Each search cycle that passes where the device
-	/// is missing causes it's "missing state count" to be incremented.  Once the
-	/// device's "missing state count" is equal to the "max state count" </seealso>
-	/// {<seealso cref= #getMaxStateCount()}, a departure event is generated for the device.
-	/// If the 1-Wire Network is not in a touch environment, it may be unnecessary
-	/// to use this "missing state count".  In those instances, setting the state </seealso>
-	/// count to 1 will disable the feature {<seealso cref= #setMaxStateCount(int)}.</P>
-	/// 
-	/// <P>Similarly, the reporting of exceptions could be spurious in a
-	/// touch-contact environment.  Instead of reporting the exception on each
-	/// failed search attempt, the monitor will default to retrying the search a </seealso>
-	/// handful of times {<seealso cref= #getMaxErrorCount()} before finally reporting the
-	/// exception.  To disable this feature, set the max error count to 1 </seealso>
-	/// {<seealso cref= #setMaxErrorCount(int)}.</P>
-	/// 
-	/// <P>To receive events, an object must implement the
-	/// <code>DeviceMonitorEventListener</code> interface </seealso>
-	/// {<seealso cref= DeviceMonitorEventListener} and must be added to </seealso>
-	/// the list of listeners {<seealso cref= #addDeviceMonitorEventListener}.</P>
-	/// 
-	/// @author SH
-	/// @version 1.00 </seealso>
-	public abstract class AbstractDeviceMonitor
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.utils;
+    using System.Collections.Generic;
+    /// <summary>
+    /// <P>Abstract super-class for 1-Wire Monitors, a optionally-threadable
+    /// object for searching 1-Wire networks.  If this object is not run in it's own
+    /// thread, it is possible to perform single-step searches by calling the search </summary>
+    /// method directly {<seealso cref= #search(Vector, Vector)}.  The monitor will generate
+    /// events for device arrivals, device departures, and exceptions from the
+    /// DSPortAdapter.</P>
+    /// 
+    /// <P>In a touch-contact environment, it is not suitable to say that a
+    /// device has "departed" because it was missing for one cycle of searching.
+    /// In the time it takes to get an iButton into a blue-dot receptor, the
+    /// monitor could have generated a handful of arrival and departure events.  To
+    /// circumvent this problem, the device monitor keeps a "missing state count" for
+    /// each device on the network.  Each search cycle that passes where the device
+    /// is missing causes it's "missing state count" to be incremented.  Once the
+    /// device's "missing state count" is equal to the "max state count" </seealso>
+    /// {<seealso cref= #getMaxStateCount()}, a departure event is generated for the device.
+    /// If the 1-Wire Network is not in a touch environment, it may be unnecessary
+    /// to use this "missing state count".  In those instances, setting the state </seealso>
+    /// count to 1 will disable the feature {<seealso cref= #setMaxStateCount(int)}.</P>
+    /// 
+    /// <P>Similarly, the reporting of exceptions could be spurious in a
+    /// touch-contact environment.  Instead of reporting the exception on each
+    /// failed search attempt, the monitor will default to retrying the search a </seealso>
+    /// handful of times {<seealso cref= #getMaxErrorCount()} before finally reporting the
+    /// exception.  To disable this feature, set the max error count to 1 </seealso>
+    /// {<seealso cref= #setMaxErrorCount(int)}.</P>
+    /// 
+    /// <P>To receive events, an object must implement the
+    /// <code>DeviceMonitorEventListener</code> interface </seealso>
+    /// {<seealso cref= DeviceMonitorEventListener} and must be added to </seealso>
+    /// the list of listeners {<seealso cref= #addDeviceMonitorEventListener}.</P>
+    /// 
+    /// @author SH
+    /// @version 1.00 </seealso>
+    public abstract class AbstractDeviceMonitor
 	{
 	   //--------
 	   //-------- Constants
@@ -85,19 +80,22 @@ namespace com.dalsemi.onewire.application.monitor
 
 	   /// <summary>
 	   /// Addresses of all current devices, mapped to their state count </summary>
-	   protected internal readonly Hashtable deviceAddressHash = new Hashtable();
+       protected internal Dictionary<long, int> deviceAddressHash = 
+            new Dictionary<long, int>();
 
 	   /// <summary>
 	   /// hashtable for holding device containers, static to keep only a
 	   /// single instance of each OneWireContainer.
 	   /// </summary>
-	   protected internal static readonly Hashtable deviceContainerHash = new Hashtable();
+       protected internal static readonly Dictionary<long, OneWireContainer> deviceContainerHash = 
+            new Dictionary<long, OneWireContainer>();
 
 	   /// <summary>
 	   /// Listeners who receive notification of events generated by this
 	   /// device Monitor
 	   /// </summary>
-	   protected internal readonly ArrayList listeners = new ArrayList();
+	   protected internal readonly List<DeviceMonitorEventListener> listeners = 
+            new List<DeviceMonitorEventListener>();
 
 	   //--------
 	   //-------- Variables
@@ -142,7 +140,7 @@ namespace com.dalsemi.onewire.application.monitor
 			 System.Collections.IEnumerator e = deviceContainerHash.Keys.GetEnumerator();
 			 while (e.MoveNext())
 			 {
-				object o = e.Current;
+				long o = (long)e.Current;
 				if (!deviceAddressHash.ContainsKey(o))
 				{
 				   deviceContainerHash.Remove(o);
@@ -175,11 +173,11 @@ namespace com.dalsemi.onewire.application.monitor
 			 // fire departures for all devices
 			 if (deviceAddressHash.Count > 0 && listeners.Count > 0)
 			 {
-				ArrayList v = new ArrayList(deviceAddressHash.Count);
+                List<long> v = new List<long>(deviceAddressHash.Count);
 				System.Collections.IEnumerator e = deviceAddressHash.Keys.GetEnumerator();
 				while (e.MoveNext())
 				{
-				   v.Add(e.Current);
+				   v.Add((long)e.Current);
 				}
 				fireDepartureEvent(adapter, v);
 			 }
@@ -235,19 +233,6 @@ namespace com.dalsemi.onewire.application.monitor
 	   }
 
 
-
-	   /// <summary>
-	   /// Returns the DSPortAdapter this device is searching
-	   /// </summary>
-	   /// <param name="the"> DSPortAdapter this monitor is searching </param>
-	   //public virtual DSPortAdapter Adapter
-	   //{
-		  // get
-		  // {
-			 // return this.adapter;
-		  // }
-	   //}
-
 	   /// <summary>
 	   /// Sets this monitor to search a new DSPortAdapter
 	   /// </summary>
@@ -263,7 +248,7 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// </summary>
 	   /// <param name="arrivals"> A vector of Long objects, represent new arrival addresses. </param>
 	   /// <param name="departures"> A vector of Long objects, represent departed addresses. </param>
-	   public abstract void search(ArrayList arrivals, ArrayList departures);
+	   public abstract void search(List<long> arrivals, List<long> departures);
 
 	   /// <summary>
 	   /// Pause this monitor
@@ -372,7 +357,7 @@ namespace com.dalsemi.onewire.application.monitor
 			 hasCompletelyStopped = false;
 		  }
 
-		  ArrayList arrivals = new ArrayList(), departures = new ArrayList();
+		  List<long> arrivals = new List<long>(), departures = new List<long>();
 		  while (keepRunning)
 		  {
 			 if (startRunning)
@@ -384,8 +369,8 @@ namespace com.dalsemi.onewire.application.monitor
 				}
 
 				// erase previous arrivals and departures
-				arrivals.Capacity = 0;
-				departures.Capacity = 0;
+                arrivals.Clear();
+                departures.Clear();
 
 				// number of times an error occurred during 1-Wire search
 				int errorCount = 0;
@@ -471,10 +456,10 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// </summary>
 	   /// <param name="address"> Vector of Long objects representing the address of new
 	   /// arrivals. </param>
-	   protected internal virtual void fireArrivalEvent(DSPortAdapter adapter, ArrayList address)
+	   protected internal virtual void fireArrivalEvent(DSPortAdapter adapter, List<long> address)
 	   {
-		  DeviceMonitorEvent dme = new DeviceMonitorEvent(DeviceMonitorEvent.ARRIVAL, this, adapter, (ArrayList)address.Clone());
-		  for (int i = 0; i < listeners.Count; i++)
+		  DeviceMonitorEvent dme = new DeviceMonitorEvent(DeviceMonitorEvent.ARRIVAL, this, adapter, address);
+            for (int i = 0; i < listeners.Count; i++)
 		  {
 			 DeviceMonitorEventListener listener = (DeviceMonitorEventListener)listeners[i];
 			 listener.deviceArrival(dme);
@@ -486,9 +471,9 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// </summary>
 	   /// <param name="address"> Vector of Long objects representing the address of
 	   /// departed devices. </param>
-	   protected internal virtual void fireDepartureEvent(DSPortAdapter adapter, ArrayList address)
+	   protected internal virtual void fireDepartureEvent(DSPortAdapter adapter, List<long> address)
 	   {
-		  DeviceMonitorEvent dme = new DeviceMonitorEvent(DeviceMonitorEvent.DEPARTURE, this, adapter, (ArrayList)address.Clone());
+		  DeviceMonitorEvent dme = new DeviceMonitorEvent(DeviceMonitorEvent.DEPARTURE, this, adapter, address);
 
 		  for (int i = 0; i < listeners.Count; i++)
 		  {
@@ -532,19 +517,9 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// <summary>
 	   /// Returns the OWPath of the device with the given address.
 	   /// </summary>
-	   /// <param name="address"> a long representing the address of the device </param>
-	   /// <returns> The OWPath representing the network path to the device. </returns>
-	   public virtual OWPath getDevicePath(long address)
-	   {
-		  return getDevicePath(new long?(address));
-	   }
-
-	   /// <summary>
-	   /// Returns the OWPath of the device with the given address.
-	   /// </summary>
 	   /// <param name="address"> a Long object representing the address of the device </param>
 	   /// <returns> The OWPath representing the network path to the device. </returns>
-	   public abstract OWPath getDevicePath(long? address);
+	   public abstract OWPath getDevicePath(long address); //?
 
 	   /// <summary>
 	   /// Returns all addresses known by this monitor as an Enumeration of Long
@@ -589,30 +564,22 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// Returns the OneWireContainer object of the device with the given address.
 	   /// </summary>
 	   /// <param name="adapter"> The DSPortAdapter that the device is connected to. </param>
-	   /// <param name="address"> a long representing the address of the device </param>
-	   /// <returns> The specific OneWireContainer object of the device </returns>
-	   public static OneWireContainer getDeviceContainer(DSPortAdapter adapter, long address)
-	   {
-		  return getDeviceContainer(adapter, new long?(address));
-	   }
-
-	   /// <summary>
-	   /// Returns the OneWireContainer object of the device with the given address.
-	   /// </summary>
-	   /// <param name="adapter"> The DSPortAdapter that the device is connected to. </param>
 	   /// <param name="address"> a Long object representing the address of the device </param>
 	   /// <returns> The specific OneWireContainer object of the device </returns>
-	   public static OneWireContainer getDeviceContainer(DSPortAdapter adapter, long? longAddress)
+	   public static OneWireContainer getDeviceContainer(DSPortAdapter adapter, long longAddress)
 	   {
 		  lock (deviceContainerHash)
 		  {
-			 object o = deviceContainerHash[longAddress];
-			 if (o == null)
+             if(!deviceContainerHash.ContainsKey(longAddress))
 			 {
-				o = adapter.getDeviceContainer(longAddress.Value);
-				putDeviceContainer(longAddress.Value, (OneWireContainer)o);
+                var o = adapter.getDeviceContainer(longAddress);
+				putDeviceContainer(longAddress, o);
+                return o;
 			 }
-			 return (OneWireContainer)o;
+             else
+             {
+                return deviceContainerHash[longAddress];
+             }
 		  }
 	   }
 
@@ -639,19 +606,9 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// <summary>
 	   /// Sets the OneWireContainer object of the device with the given address.
 	   /// </summary>
-	   /// <param name="address"> a long object representing the address of the device </param>
-	   /// <param name="owc"> The specific OneWireContainer object of the device </param>
-	   public static void putDeviceContainer(long address, OneWireContainer owc)
-	   {
-		  putDeviceContainer(new long?(address),owc);
-	   }
-
-	   /// <summary>
-	   /// Sets the OneWireContainer object of the device with the given address.
-	   /// </summary>
 	   /// <param name="address"> a Long object representing the address of the device </param>
 	   /// <param name="owc"> The specific OneWireContainer object of the device </param>
-	   public static void putDeviceContainer(long? longAddress, OneWireContainer owc)
+	   public static void putDeviceContainer(long longAddress, OneWireContainer owc)
 	   {
 		  lock (deviceContainerHash)
 		  {

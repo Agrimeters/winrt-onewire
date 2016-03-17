@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -31,34 +32,33 @@ using System.Collections;
 namespace com.dalsemi.onewire.adapter
 {
 
-	// imports
-	using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-	using com.dalsemi.onewire.utils;
+    // imports
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.utils;
 
-
-	/// <summary>
-	/// <para>This <code>DSPortAdapter</code> class was designed to be used for
-	/// the iB-IDE's emulator.  The <code>DumbAdapter</code> allows
-	/// programmers to add and remove <code>OneWireContainer</code>
-	/// objects that will be found in its search.  The Java iButton
-	/// emulator works by creating a class that subclasses all of
-	/// <code>OneWireContainer16</code>'s relevant methods and redirecting them
-	/// to the emulation code.  That object is then added to this class's
-	/// list of <code>OneWireContainer</code>s.</para>
-	/// 
-	/// <para>Note that methods such as <code>selectPort</code> and
-	/// <code>beginExclusive</code> by default do nothing.  This class is
-	/// mainly meant for debugging using an emulated iButton.  It will do
-	/// a poor job of debugging any multi-threading, port-sharing issues.
-	/// 
-	/// </para>
-	/// </summary>
-	/// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter </seealso>
-	/// <seealso cref= com.dalsemi.onewire.container.OneWireContainer
-	/// 
-	/// @version    0.00, 16 Mar 2001
-	/// @author     K </seealso>
-	public class DumbAdapter : DSPortAdapter
+    /// <summary>
+    /// <para>This <code>DSPortAdapter</code> class was designed to be used for
+    /// the iB-IDE's emulator.  The <code>DumbAdapter</code> allows
+    /// programmers to add and remove <code>OneWireContainer</code>
+    /// objects that will be found in its search.  The Java iButton
+    /// emulator works by creating a class that subclasses all of
+    /// <code>OneWireContainer16</code>'s relevant methods and redirecting them
+    /// to the emulation code.  That object is then added to this class's
+    /// list of <code>OneWireContainer</code>s.</para>
+    /// 
+    /// <para>Note that methods such as <code>selectPort</code> and
+    /// <code>beginExclusive</code> by default do nothing.  This class is
+    /// mainly meant for debugging using an emulated iButton.  It will do
+    /// a poor job of debugging any multi-threading, port-sharing issues.
+    /// 
+    /// </para>
+    /// </summary>
+    /// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer
+    /// 
+    /// @version    0.00, 16 Mar 2001
+    /// @author     K </seealso>
+    public class DumbAdapter : DSPortAdapter
 	{
 	   //--------
 	   //-------- Variables
@@ -67,7 +67,7 @@ namespace com.dalsemi.onewire.adapter
 
 	   internal int containers_index = 0;
 
-	   private ArrayList containers = new ArrayList();
+	   private List<OneWireContainer> containers = new List<OneWireContainer>();
 
 	   /// <summary>
 	   /// Adds a <code>OneWireContainer</code> to the list of containers that
@@ -173,7 +173,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		   get
 		   {
-				ArrayList portNames = new ArrayList();
+				List<string> portNames = new List<string>();
 				portNames.Add("NULL0");
 				return portNames.GetEnumerator();
 		   }
@@ -345,7 +345,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		   get
 		   {
-				ArrayList copy_vector = new ArrayList();
+				List<OneWireContainer> copy_vector = new List<OneWireContainer>();
 				lock (containers)
 				{
 					for (int i = 0;i < containers.Count;i++)

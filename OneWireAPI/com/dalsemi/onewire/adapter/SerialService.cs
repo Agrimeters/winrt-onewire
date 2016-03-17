@@ -34,11 +34,11 @@ namespace com.dalsemi.onewire.adapter
         private byte[] tempArray = new byte[128];
         /// <summary>
         /// Vector of thread hash codes that have done an open but no close </summary>
-        private readonly ArrayList users = new ArrayList(4);
+        private readonly List<int> users = new List<int>();
 
         /// <summary>
         /// Vector of serial port ID strings (i.e. "COM1", "COM2", etc) </summary>
-        private static readonly ArrayList vPortIDs = new ArrayList(2);
+        private static readonly List<string> vPortIDs = new List<string>(2);
         /// <summary>
         /// static list of threadIDs to the services they are using </summary>
         private static Hashtable knownServices = new Hashtable();
@@ -178,9 +178,6 @@ namespace com.dalsemi.onewire.adapter
                     {
                         // set baud rate
                         serialPort.BaudRate = (uint)value;
-                        serialPort.DataBits = 8;
-                        serialPort.StopBits = SerialStopBitCount.One;
-                        serialPort.Parity = SerialParity.None;
 
                         //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
                         if (DEBUG)

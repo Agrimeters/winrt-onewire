@@ -371,52 +371,6 @@ namespace com.dalsemi.onewire
 	   }
 
         /// <summary>
-        /// Finds, opens, and verifies the specified adapter on the
-        /// indicated port.
-        /// </summary>
-        /// <param name="adapterName"> string name of the adapter (match to result
-        ///             of call to getAdapterName() method in DSPortAdapter) </param>
-        /// <param name="serialDevice"> handle of the SerialCommunication port used
-        ///             in the method selectPort() in DSPortAdapter
-        /// </param>
-        /// <returns>  <code>DSPortAdapter</code> if adapter present
-        /// </returns>
-        /// <exception cref="OneWireIOException"> when communcation with the adapter fails </exception>
-        /// <exception cref="OneWireException"> when the port or adapter not present </exception>
-        public static DSPortAdapter getAdapter(string adapterName, SerialDevice serialDevice)
-        {
-            return null;
-            //USerialAdapter SerialAdapter = new USerialAdapter();
-
-            //// attempt to open and verify the adapter
-            //if (SerialAdapter.selectPort(serialDevice))
-            //{
-            //    SerialAdapter.beginExclusive(true);
-
-            //    try
-            //    {
-            //        // check for the adapter
-            //        if (SerialAdapter.adapterDetected())
-            //        {
-            //            return SerialAdapter;
-            //        }
-            //        else
-            //        {
-            //            throw new OneWireException("Port found \"" + serialDevice.PortName + "\" but Adapter \"" + adapterName + "\" not detected");
-            //        }
-            //    }
-            //    finally
-            //    {
-            //        SerialAdapter.endExclusive();
-            //    }
-            //}
-            //else
-            //{
-            //    throw new OneWireException("Specified port \"" + serialDevice.PortName + "\" could not be selected for adapter \"" + adapterName + "\"");
-            //}
-        }
-
-        /// <summary>
         /// Finds, opens, and verifies the default adapter and
         /// port.  Looks for the default adapter/port in the following locations:
         /// <para>
@@ -590,7 +544,6 @@ namespace com.dalsemi.onewire
                         {
                             adapter_instance = (DSPortAdapter)new USerialAdapter();
 
-                            // check if has any ports (common javax.comm problem)
                             IEnumerator list = adapter_instance.PortNames;
                             if (list.MoveNext())
                             {

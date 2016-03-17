@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -28,14 +30,12 @@ using System.Collections;
  *---------------------------------------------------------------------------
  */
 
- namespace com.dalsemi.onewire.application.monitor
+namespace com.dalsemi.onewire.application.monitor
  {
-    using OWPath = com.dalsemi.onewire.utils.OWPath;
-    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
-    using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
-    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-    using SwitchContainer = com.dalsemi.onewire.container.SwitchContainer;
-
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.utils;
+    
     /// <summary>
     /// Class NetworkDeviceMonitor represents the monitor that searches the
     /// 1-Wire net, including the traversal of branches, looing for new arrivals
@@ -48,10 +48,10 @@ using System.Collections;
 	{
 	   /// <summary>
 	   /// hashtable for holding the OWPath objects for each device container. </summary>
-	   protected internal readonly Hashtable devicePathHash = new Hashtable();
-	   /// <summary>
-	   /// A vector of paths, or branches, to search </summary>
-	   protected internal ArrayList paths = null;
+       protected internal readonly Dictionary<long, OWPath> devicePathHash = new Dictionary<long, OWPath>();
+       /// <summary>
+       /// A vector of paths, or branches, to search </summary>
+        protected internal List<OWPath> paths = null;
 	   /// <summary>
 	   /// indicates whether or not branches are automatically traversed </summary>
 	   protected internal bool branchAutoSearching = true;
@@ -85,11 +85,11 @@ using System.Collections;
     
 				 if (this.paths == null)
 				 {
-					this.paths = new ArrayList();
+					this.paths = new List<OWPath>();
 				 }
 				 else
 				 {
-					this.paths.Capacity = 0;
+					this.paths.Clear();
 				 }
 				 this.paths.Add(new OWPath(value));
     
@@ -120,12 +120,12 @@ using System.Collections;
 		   }
 	   }
 
-        /// <summary>
-        /// Adds a branch for searching.  Must be used to traverse branches if
-        /// auto-searching is disabled.
-        /// </summary>
-        /// <param name="path"> A branch to be searched during the next search routine </param>
-        public virtual void addBranch(OWPath path)
+       /// <summary>
+       /// Adds a branch for searching.  Must be used to traverse branches if
+       /// auto-searching is disabled.
+       /// </summary>
+       /// <param name="path"> A branch to be searched during the next search routine </param>
+       public virtual void addBranch(OWPath path)
 	   {
 		  paths.Add(path);
 	   }
@@ -135,11 +135,13 @@ using System.Collections;
 	   /// </summary>
 	   /// <param name="address"> a Long object representing the address of the device </param>
 	   /// <returns> The OWPath representing the network path to the device. </returns>
-	   public override OWPath getDevicePath(long? address)
+	   public override OWPath getDevicePath(long address)
 	   {
 		  lock (devicePathHash)
 		  {
-			 return (OWPath)devicePathHash[address];
+             OWPath val = null;
+             devicePathHash.TryGetValue(address, out val);
+             return val;
 		  }
 	   }
 
@@ -155,10 +157,10 @@ using System.Collections;
 	   {
 		  lock (devicePathHash)
 		  {
-			 System.Collections.IEnumerator e = devicePathHash.Keys.GetEnumerator();
+			 IEnumerator e = devicePathHash.Keys.GetEnumerator();
 			 while (e.MoveNext())
 			 {
-				object o = e.Current;
+				long o = (long)e.Current;
 				if (!deviceAddressHash.ContainsKey(o))
 				{
 				   devicePathHash.Remove(o);
@@ -172,7 +174,7 @@ using System.Collections;
 	   /// </summary>
 	   /// <param name="arrivals"> A vector of Long objects, represent new arrival addresses. </param>
 	   /// <param name="departures"> A vector of Long objects, represent departed addresses. </param>
-	   public override void search(ArrayList arrivals, ArrayList departures)
+	   public override void search(List<long> arrivals, List<long> departures)
 	   {
 		  lock (sync_flag)
 		  {
@@ -225,11 +227,11 @@ using System.Collections;
 				   while (search_result)
 				   {
 					  // get the 1-Wire address
-					  long? longAddress = new long?(adapter.AddressAsLong);
+					  long longAddress = adapter.AddressAsLong;
 					  // check if the device allready exists in our hashtable
 					  if (!deviceAddressHash.ContainsKey(longAddress))
 					  {
-						 OneWireContainer owc = getDeviceContainer(adapter, longAddress.Value);
+						 OneWireContainer owc = getDeviceContainer(adapter, longAddress);
 						 // check to see if it's a switch and if we are supposed
 						 // to automatically search down branches
 						 if (this.branchAutoSearching && (owc is SwitchContainer))
@@ -257,7 +259,7 @@ using System.Collections;
 						 }
 					  }
 					  // check if the existing device moved
-					  else if (!path.Equals((OWPath)devicePathHash[longAddress]))
+					  else if (!path.Equals(devicePathHash[longAddress]))
 					  {
 						 lock (devicePathHash)
 						 {
@@ -274,10 +276,10 @@ using System.Collections;
 					  }
 
 					  // update count
-					  deviceAddressHash[longAddress] = new int?(max_state_count);
+					  deviceAddressHash[longAddress] = max_state_count;
 
-					  // find the next device on this branch
-					  path.open();
+                      // find the next device on this branch
+                      path.open();
 					  search_result = adapter.findNextDevice();
 				   }
 				}
@@ -287,28 +289,22 @@ using System.Collections;
 				adapter.endExclusive();
 			 }
 
-			 // remove any devices that have not been seen
-			 for (System.Collections.IEnumerator device_enum = deviceAddressHash.Keys.GetEnumerator(); device_enum.MoveNext();)
-			 {
-				long? longAddress = (long?)device_enum.Current;
+             // remove any devices that have not been seen
+             foreach (var address in deviceAddressHash.Keys.Where(kv => deviceAddressHash[kv] <= 0).ToList())
+             {
+                // device entry is stale, should be removed
+                deviceAddressHash.Remove(address);
+                if (departures != null)
+                {
+                    departures.Add(address);
+                }
+             }
 
-				// check for removal by looking at state counter
-				int cnt = ((int?)deviceAddressHash[longAddress]).Value;
-				if (cnt <= 0)
-				{
-				   // device entry is stale, should be removed
-				   deviceAddressHash.Remove(longAddress);
-				   if (departures != null)
-				   {
-					  departures.Add(longAddress);
-				   }
-				}
-				else
-				{
-				   // device entry isn't stale, it stays
-				   deviceAddressHash[longAddress] = new int?(cnt - 1);
-				}
-			 }
+             foreach (var address in deviceAddressHash.Keys.Where(kv => deviceAddressHash[kv] > 0).ToList())
+             {
+                 // device entry isn't stale, it stays
+                 deviceAddressHash[address] -= 1;
+             }
 
 			 // fire notification events
 			 if (departures != null && departures.Count > 0)

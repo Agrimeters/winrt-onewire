@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -59,7 +60,7 @@ namespace com.dalsemi.onewire.application.monitor
 	   protected internal DSPortAdapter adapter = null;
 	   /// <summary>
 	   /// Vector of addresses for devices </summary>
-	   protected internal ArrayList vDeviceAddress = null;
+	   protected internal List<long> vDeviceAddress = null;
 
 	   /// <summary>
 	   /// Creates a new DeviceMonitor event with the specified characteristics.
@@ -68,7 +69,7 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// <param name="source"> The monitor which generated the event </param>
 	   /// <param name="adapter"> The DSPortAdapter the monitor was using </param>
 	   /// <param name="addresses"> Vector of addresses for devices </param>
-	   internal DeviceMonitorEvent(int eventType, AbstractDeviceMonitor source, DSPortAdapter adapter, ArrayList addresses) //TODO : base(source)
+	   internal DeviceMonitorEvent(int eventType, AbstractDeviceMonitor source, DSPortAdapter adapter, List<long> addresses) //TODO : base(source)
 	   {
 
 		  if (eventType != ARRIVAL && eventType != DEPARTURE)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
@@ -186,7 +187,7 @@ namespace com.dalsemi.onewire.adapter
 	   /// <summary>
 	   /// Vector of raw send packets
 	   /// </summary>
-	   protected internal ArrayList packetsVector;
+	   protected internal List<RawSendPacket> packetsVector;
 
 	   //--------
 	   //-------- Constructors
@@ -207,7 +208,7 @@ namespace com.dalsemi.onewire.adapter
 		  packet = new RawSendPacket();
 
 		  // create the vector
-		  packetsVector = new ArrayList();
+		  packetsVector = new List<RawSendPacket>();
 
 		  // restart the packet to initialize
 		  restart();
