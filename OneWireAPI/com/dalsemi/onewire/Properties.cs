@@ -1,11 +1,10 @@
-﻿using com.dalsemi.onewire.utils;
-using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Windows.Storage;
-using System.Collections;
 
 namespace com.dalsemi.onewire
 {
@@ -23,6 +22,7 @@ namespace com.dalsemi.onewire
         /// </summary>
         public Properties()
         {
+            props = new Dictionary<string, string>();
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace com.dalsemi.onewire
         /// </summary>
         /// <param name="table"></param>
         /// <param name="reader"></param>
-        private static void loadTable(Dictionary<string, string> table, StreamReader reader)
+        private void loadTable(Dictionary<string, string> table, StreamReader reader)
         {
             while (!reader.EndOfStream)
             {
@@ -72,7 +72,6 @@ namespace com.dalsemi.onewire
                 Stream stream = await localFile.OpenStreamForReadAsync();
                 using (var reader = new StreamReader(stream))
                 {
-                    props = new Dictionary<string, string>();
                     Debug.WriteLine("Loading " + localFolder.Path + "\\" + file);
                     loadTable(props, reader);
                 }
@@ -95,7 +94,6 @@ namespace com.dalsemi.onewire
                 using (StreamReader reader = new StreamReader(stream))
                 {
                     Debug.WriteLine("Loading resource: " + file);
-                    props = new Dictionary<string, string>();
                     loadTable(props, reader);
                 }
             }
@@ -193,24 +191,48 @@ namespace com.dalsemi.onewire
             return defValue;
         }
 
-        internal void put(string v1, string v2)
+        /// <summary>
+        /// Put with default value
+        /// </summary>
+        /// <param name="v1"></param>
+        /// <param name="v2"></param>
+        internal void put(string key, string value)
         {
-            throw new NotImplementedException();
+            props.Add(key, value);
         }
 
+        /// <summary>
+        /// Returns Enumerator of hash table
+        /// </summary>
+        /// <returns></returns>
         internal IEnumerator keys()
         {
-            throw new NotImplementedException();
+            return props.GetEnumerator();
         }
 
+        /// <summary>
+        /// Removes hashtable entry
+        /// </summary>
+        /// <param name="key"></param>
         internal void remove(string key)
         {
-            throw new NotImplementedException();
+            if (props.ContainsKey(key))
+                props.Remove(key);
         }
 
+        /// <summary>
+        /// Returns hashtable entry
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         internal string get(string key)
         {
-            throw new NotImplementedException();
+            string val;
+
+            if(!props.TryGetValue(key, out val))
+                return null;
+
+            return val;
         }
     }
 
