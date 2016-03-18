@@ -1,5 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -138,35 +138,26 @@ namespace com.dalsemi.onewire.application.monitor
 				adapter.endExclusive();
 			 }
 
-			 // remove any devices that have not been seen
-			 for (System.Collections.IEnumerator device_enum = deviceAddressHash.Keys.GetEnumerator(); device_enum.MoveNext();)
-			 {
-				long longAddress = (long)device_enum.Current; //(long?)
+             // remove any devices that have not been seen
+             foreach (var address in deviceAddressHash.Keys.Where(kv => deviceAddressHash[kv] <= 0).ToList())
+             {
+                 // device entry is stale, should be removed
+                 deviceAddressHash.Remove(address);
+                 if (departures != null)
+                 {
+                     departures.Add(address);
+                 }
+             }
 
-				// check for removal by looking at state counter
-				int cnt = deviceAddressHash[longAddress];
-				if (cnt <= 0)
-				{
-				   deviceAddressHash.Remove(longAddress);
-				   if (departures != null)
-				   {
-					  departures.Add(longAddress);
-				   }
+             foreach (var address in deviceAddressHash.Keys.Where(kv => deviceAddressHash[kv] > 0).ToList())
+             {
+                 // device entry isn't stale, it stays
+                 deviceAddressHash[address] -= 1;
+             }
 
-				   lock (deviceContainerHash)
-				   {
-					  deviceContainerHash.Remove(longAddress);
-				   }
-				}
-				else
-				{
-				   // it stays
-				   deviceAddressHash[longAddress] = cnt - 1; //new int?(
-                }
-			 }
 
-			 // fire notification events
-			 if (arrivals != null && arrivals.Count > 0)
+             // fire notification events
+             if (arrivals != null && arrivals.Count > 0)
 			 {
 				fireArrivalEvent(adapter, arrivals);
 			 }

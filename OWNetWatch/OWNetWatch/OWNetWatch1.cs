@@ -85,6 +85,11 @@ namespace OWNetWatch
         /// Vector of temperature watches, used in cleanup </summary>
         private List<BackgroundTaskRegistration> watchers;
 
+        /// <summary>
+        /// Container for application settings shared with IBackgroundTask
+        /// </summary>
+        private ApplicationDataContainer _container;
+
         //--------
         //-------- Constructor
         //--------
@@ -104,6 +109,17 @@ namespace OWNetWatch
 
             // add this to the event listers
             nm.addDeviceMonitorEventListener(this);
+
+            var localSettings = ApplicationData.Current.LocalSettings;
+
+            if (!localSettings.Containers.ContainsKey("AppSettings"))
+            {
+                _container = localSettings.CreateContainer("AppSettings", ApplicationDataCreateDisposition.Always);
+            }
+            else
+            {
+                _container = localSettings.Containers["AppSettings"];
+            }
 
             // start the monitor
             var t = Task.Run(() =>
@@ -147,9 +163,8 @@ namespace OWNetWatch
 
                 if (owc is TemperatureContainer)
                 {
-                    var settings = ApplicationData.Current.LocalSettings;
-//TODO                    settings.Values["TemperatureContainer"] = owc;
-//TODO                    settings.Values["OWPath"] = dme.getPathForContainerAt(i);
+//TODO                    SetValue("TemperatureContainer", owc);
+//TODO                    SetValue("OWPath", dme.getPathForContainerAt(i));
 
                     var t = Task<BackgroundTaskRegistration>.Run(() =>
                     {
@@ -303,6 +318,31 @@ namespace OWNetWatch
         private void OnCompleted(IBackgroundTaskRegistration task, BackgroundTaskCompletedEventArgs args)
         {
 
+        }
+
+        /// <summary>
+        /// Writes value to the Local Application settings container
+        /// The IBackgroundTask uses this
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        private void SetValue(string key, object value)
+        {
+            try
+            {
+                if (!_container.Values.ContainsKey(key))
+                {
+                    _container.Values.Add(key, value);
+                }
+                else
+                {
+                    _container.Values[key] = value;
+                }
+            }
+            catch (System.Runtime.InteropServices.COMException e)
+            {
+                Debug.WriteLine("This Data type is not allowed");
+            }
         }
     }
 }

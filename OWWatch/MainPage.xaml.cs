@@ -26,7 +26,9 @@ namespace OWWatch
         {
             this.InitializeComponent();
 
-            OWWatch1.Main1(null);
+            OWWatch1 o = new OWWatch1();
+            string[] args = new string[] { "20000" };
+            o.Main1(args);
         }
     }
 }

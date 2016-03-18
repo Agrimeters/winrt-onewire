@@ -12,10 +12,10 @@ namespace Tasks
 
     public sealed class WatchTemp : IBackgroundTask
     {
-        TemperatureContainer _tc;
+        TemperatureContainer _tc = null;
         OneWireContainer _owc;
         DSPortAdapter _adapter;
-        OWPath _path;
+        OWPath _path = null;
         string _address;
 
         BackgroundTaskCancellationReason _cancelReason = BackgroundTaskCancellationReason.Abort;
@@ -29,9 +29,9 @@ namespace Tasks
         //
         public void Run(IBackgroundTaskInstance taskInstance)
         {
-            var settings = ApplicationData.Current.LocalSettings;
-            _tc = (TemperatureContainer)settings.Values["TemperatureContainer"];
-            _path = (OWPath)settings.Values["OWPath"];
+//TODO            var settings = ApplicationData.Current.LocalSettings;
+//TODO            _tc = (TemperatureContainer)settings.Values["TemperatureContainer"];
+//TODO            _path = (OWPath)settings.Values["OWPath"];
 
             if ((_tc == null) || (_path == null))
             {
