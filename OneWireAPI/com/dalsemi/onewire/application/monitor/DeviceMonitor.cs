@@ -30,10 +30,8 @@ using System.Linq;
 namespace com.dalsemi.onewire.application.monitor
 {
 
-
-	using OWPath = com.dalsemi.onewire.utils.OWPath;
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
-	using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
+	using com.dalsemi.onewire.utils;
+	using com.dalsemi.onewire.adapter;
 
 	/// <summary>
 	/// <P>Class DeviceMonitor represents the monitor that searches the 1-Wire net

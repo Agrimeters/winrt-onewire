@@ -94,7 +94,7 @@ namespace com.dalsemi.onewire.application.tag
 			 // Thanks to Apache project for specs for these characters.
 			 if ((c < ' ' && c != '\t' && c != '\n' && c != '\r') || c > 0x7E || c == 0xF7)
 			 {
-				rc.Append("&#").Append(Convert.ToString(c)).Append(';');
+				rc.Append("&#").Append(c).Append(';');
 			 }
 			 else
 			 {

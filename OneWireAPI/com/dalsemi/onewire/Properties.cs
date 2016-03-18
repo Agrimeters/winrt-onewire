@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Windows.Storage;
+using System.Collections;
 
 namespace com.dalsemi.onewire
 {
@@ -14,7 +15,9 @@ namespace com.dalsemi.onewire
         /// property table
         /// </summary>
         private Dictionary<string, string> props = null;
- 
+
+        public bool Empty { get; internal set; }
+
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -188,6 +191,26 @@ namespace com.dalsemi.onewire
                 }
             }
             return defValue;
+        }
+
+        internal void put(string v1, string v2)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal IEnumerator keys()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void remove(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal string get(string key)
+        {
+            throw new NotImplementedException();
         }
     }
 

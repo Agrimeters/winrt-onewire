@@ -156,11 +156,15 @@
     <Compile Include="com\dalsemi\onewire\application\tag\Event.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\Humidity.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\Level.cs" />
+    <Compile Include="com\dalsemi\onewire\application\tag\SAXParser.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\Switch.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\TaggedActuator.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\TaggedDevice.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\TaggedSensor.cs" />
+    <Compile Include="com\dalsemi\onewire\application\tag\TAGHandler.cs" />
+    <Compile Include="com\dalsemi\onewire\application\tag\TAGParser.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\Thermal.cs" />
+    <Compile Include="com\dalsemi\onewire\application\tag\XML.cs" />
     <Compile Include="com\dalsemi\onewire\container\ADContainer.cs" />
     <Compile Include="com\dalsemi\onewire\container\ClockContainer.cs" />
     <Compile Include="com\dalsemi\onewire\container\CommandAPDU.cs" />
@@ -248,13 +252,28 @@
     <Compile Include="com\dalsemi\onewire\utils\OWPathElement.cs" />
     <Compile Include="com\dalsemi\onewire\utils\SHA.cs" />
     <Compile Include="com\dalsemi\onewire\Properties.cs" />
+    <Compile Include="nanoxml\sax\SAXLocator.cs" />
+    <Compile Include="nanoxml\sax\SAXParser.cs" />
+    <Compile Include="nanoxml\XMLElement.cs" />
+    <Compile Include="nanoxml\XMLParseException.cs" />
+    <Compile Include="org\xml\sax\AttributeList.cs" />
+    <Compile Include="org\xml\sax\DocumentHandler.cs" />
+    <Compile Include="org\xml\sax\DTDHandler.cs" />
+    <Compile Include="org\xml\sax\EntityResolver.cs" />
+    <Compile Include="org\xml\sax\ErrorHandler.cs" />
+    <Compile Include="org\xml\sax\HandlerBase.cs" />
+    <Compile Include="org\xml\sax\helpers\AttributeListImpl.cs" />
+    <Compile Include="org\xml\sax\helpers\LocatorImpl.cs" />
+    <Compile Include="org\xml\sax\helpers\ParserFactory.cs" />
+    <Compile Include="org\xml\sax\InputSource.cs" />
+    <Compile Include="org\xml\sax\Locator.cs" />
+    <Compile Include="org\xml\sax\Parser.cs" />
+    <Compile Include="org\xml\sax\SAXException.cs" />
+    <Compile Include="org\xml\sax\SAXParseException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\OneWireAPI.rd.xml" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="nanoxml\sax\" />
-    <Folder Include="org\xml\sax\helpers\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

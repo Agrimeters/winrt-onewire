@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Xml;
+using System.IO;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000,2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -33,15 +33,14 @@ using System.Xml;
 namespace com.dalsemi.onewire.application.tag
 {
 
-	using SAXException = org.xml.sax.SAXException;
-	using InputSource = org.xml.sax.InputSource;
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+    using org.xml.sax;
+    using com.dalsemi.onewire.adapter;
+    using utils;
 
-
-	/// <summary>
-	/// The tag parser parses tagging information.
-	/// </summary>
-	public class TAGParser
+    /// <summary>
+    /// The tag parser parses tagging information.
+    /// </summary>
+    public class TAGParser
 	{
 
 	   /// <summary>
@@ -62,8 +61,8 @@ namespace com.dalsemi.onewire.application.tag
 			 Debug.WriteLine(e);
 		  }
 
-		  parser.DocumentHandler = handler;
-		  parser.ErrorHandler = handler;
+		  parser.DocumentHandler = (DocumentHandler)handler;
+		  parser.ErrorHandler = (ErrorHandler)handler;
 	   }
 
 	   /// <summary>
@@ -74,13 +73,13 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <returns> Vector of TaggedDevice objects. </returns>
 	   /// <exception cref="SAXException"> If a parse error occurs parsing <var>in</var>. </exception>
 	   /// <exception cref="IOException"> If an I/O error occurs while reading <var>in</var>. </exception>
-	   public virtual ArrayList parse(System.IO.Stream @in)
+	   public virtual List<TaggedDevice> parse(Stream inp)
 	   {
-		  InputSource insource = new InputSource(@in);
+		  InputSource insource = new InputSource(inp);
 
 		  parser.parse(insource);
 
-		  ArrayList v = handler.TaggedDeviceList;
+		  List<TaggedDevice> v = handler.TaggedDeviceList;
 
 		  return v;
 	   }
@@ -92,12 +91,12 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <param name="in"> The XML document to parse.
 	   /// </param>
 	   /// <returns> Vector of Branch TaggedDevice objects. </returns>
-	   public virtual ArrayList Branches
+	   public virtual List<TaggedDevice> Branches
 	   {
 		   get
 		   {
     
-			  ArrayList v = handler.AllBranches;
+			  List<TaggedDevice> v = handler.AllBranches;
     
 			  return v;
 		   }
@@ -111,12 +110,12 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <param name="no"> parameters.
 	   /// </param>
 	   /// <returns> Vector of OWPath objects. </returns>
-	   public virtual ArrayList OWPaths
+	   public virtual List<OWPath> OWPaths
 	   {
 		   get
 		   {
     
-			  ArrayList v = handler.AllBranchPaths;
+			  List<OWPath> v = handler.AllBranchPaths;
     
 			  return v;
 		   }
@@ -125,8 +124,7 @@ namespace com.dalsemi.onewire.application.tag
 
        /// <summary>
        /// Field parser </summary>
-       private XmlReader parser;
-	   //TODO private SAXParser parser;
+	   private SAXParser parser;
 
 	   /// <summary>
 	   /// Field handler </summary>
