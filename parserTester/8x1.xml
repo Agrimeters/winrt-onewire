@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OW:Cluster
+	xmlns:OW="http://xml1-wire.sourceforge.net">
+	<OW:Description>Systronix 8x1-wire board</OW:Description>
+        <OW:Cluster>
+          <OW:Description>Pushbuttons</OW:Description>
+	  <OW:Sensor accessMethod="AM_LEVEL_2406">
+	        <OW:NetAddress>0B00000018AF5412</OW:NetAddress>
+		<OW:ChannelMask>02</OW:ChannelMask>
+		<OW:Description>Push-Button 2</OW:Description>
+	  </OW:Sensor>
+	  <OW:Sensor accessMethod="AM_LEVEL_2406">
+		<OW:NetAddress>F100000018AF4C12</OW:NetAddress>
+		<OW:ChannelMask>02</OW:ChannelMask>
+		<OW:Description>Push-Button 3</OW:Description>
+	  </OW:Sensor>
+	  <OW:Sensor accessMethod="AM_LEVEL_2406">
+		<OW:NetAddress>A300000018738A12</OW:NetAddress>
+		<OW:ChannelMask>02</OW:ChannelMask>
+		<OW:Description>Push-Button 4</OW:Description>
+	  </OW:Sensor>
+	  <OW:Sensor accessMethod="AM_LEVEL_2406">
+		<OW:NetAddress>D000000018AEF912</OW:NetAddress>
+		<OW:ChannelMask>02</OW:ChannelMask>
+		<OW:Description>Push-Button 1</OW:Description>
+	  </OW:Sensor>
+        </OW:Cluster>
+        <OW:Cluster>
+        <OW:Description>LEDs</OW:Description>
+	  <OW:Actuator accessMethod="AM_SWITCH_2406">
+		<OW:NetAddress>0B00000018AF5412</OW:NetAddress>
+		<OW:ChannelMask>01</OW:ChannelMask>
+		<OW:Description>LED2</OW:Description>
+	  </OW:Actuator>
+	  <OW:Actuator accessMethod="AM_SWITCH_2406">
+		<OW:NetAddress>F100000018AF4C12</OW:NetAddress>
+		<OW:ChannelMask>01</OW:ChannelMask>
+		<OW:Description>LED3</OW:Description>
+	  </OW:Actuator>
+	  <OW:Actuator accessMethod="AM_SWITCH_2406">
+		<OW:NetAddress>A300000018738A12</OW:NetAddress>
+		<OW:ChannelMask>01</OW:ChannelMask>
+		<OW:Description>LED4 AND BUZZER</OW:Description>
+	  </OW:Actuator>
+	  <OW:Actuator accessMethod="AM_SWITCH_2406">
+		<OW:NetAddress>D000000018AEF912</OW:NetAddress>
+		<OW:ChannelMask>01</OW:ChannelMask>
+		<OW:Description>LED1</OW:Description>
+	  </OW:Actuator>
+        </OW:Cluster>
+</OW:Cluster>

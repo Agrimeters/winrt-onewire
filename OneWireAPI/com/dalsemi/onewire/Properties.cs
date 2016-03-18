@@ -15,8 +15,6 @@ namespace com.dalsemi.onewire
         /// </summary>
         private Dictionary<string, string> props = null;
 
-        public bool Empty { get; internal set; }
-
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -192,13 +190,21 @@ namespace com.dalsemi.onewire
         }
 
         /// <summary>
-        /// Put with default value
+        /// Returns true if hashtable is empty, false otherwise
         /// </summary>
-        /// <param name="v1"></param>
-        /// <param name="v2"></param>
-        internal void put(string key, string value)
+        public bool Empty
         {
-            props.Add(key, value);
+            get
+            {
+                if (props.Count == 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
 
         /// <summary>
@@ -211,13 +217,13 @@ namespace com.dalsemi.onewire
         }
 
         /// <summary>
-        /// Removes hashtable entry
+        /// Put with default value
         /// </summary>
-        /// <param name="key"></param>
-        internal void remove(string key)
+        /// <param name="v1"></param>
+        /// <param name="v2"></param>
+        internal void put(string key, string value)
         {
-            if (props.ContainsKey(key))
-                props.Remove(key);
+            props.Add(key, value);
         }
 
         /// <summary>
@@ -234,6 +240,15 @@ namespace com.dalsemi.onewire
 
             return val;
         }
-    }
 
+        /// <summary>
+        /// Removes hashtable entry
+        /// </summary>
+        /// <param name="key"></param>
+        internal void remove(string key)
+        {
+            if (props.ContainsKey(key))
+                props.Remove(key);
+        }
+    }
 }
