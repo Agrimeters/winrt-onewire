@@ -80,7 +80,7 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   set
 		   {
-			  PotentiometerContainer pc = (PotentiometerContainer) DeviceContainer;
+			  PotentiometerContainer pc = DeviceContainer as PotentiometerContainer;
 			  int Index = 0;
 			  Index = ActuatorSelections.IndexOf(value);
 			  // must first read the device

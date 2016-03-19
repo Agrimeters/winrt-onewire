@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -31,7 +30,7 @@ using System.Collections.Generic;
 namespace com.dalsemi.onewire.application.tag
 {
 
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+	using com.dalsemi.onewire.adapter;
 	using com.dalsemi.onewire.container;
 
 	/// <summary>
@@ -80,7 +79,7 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   set
 		   {
-			  SwitchContainer switchcontainer = (SwitchContainer) DeviceContainer;
+			  SwitchContainer switchcontainer = DeviceContainer as SwitchContainer;
 			  int Index = 0;
 			  int channelValue = Channel;
 			  Index = ActuatorSelections.IndexOf(value);
@@ -116,7 +115,7 @@ namespace com.dalsemi.onewire.application.tag
 	   ///  </exception>
 	   public virtual void initActuator()
 	   {
-		  SwitchContainer switchcontainer = (SwitchContainer) DeviceContainer;
+		  SwitchContainer switchcontainer = DeviceContainer as SwitchContainer;
 		  // initialize the ActuatorSelections Vector
 		  ActuatorSelections.Add(Min); // for switch, use min and max
 		  ActuatorSelections.Add(Max);

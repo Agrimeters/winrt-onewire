@@ -27,10 +27,8 @@
 
 namespace com.dalsemi.onewire.application.tag
 {
-
 	using com.dalsemi.onewire.adapter;
 	using com.dalsemi.onewire.container;
-
 
 	/// <summary>
 	/// This class provides a default object for the Thermal type of a tagged 1-Wire device.
@@ -64,7 +62,7 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		  string returnString = "";
 		  double theTemperature;
-		  TemperatureContainer tc = (TemperatureContainer) _DeviceContainer;
+		  TemperatureContainer tc = DeviceContainer as TemperatureContainer;
 
 		  // read the device first before getting the temperature
 		  byte[] state = tc.readDevice();

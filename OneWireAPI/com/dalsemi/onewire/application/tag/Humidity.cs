@@ -28,7 +28,7 @@
 namespace com.dalsemi.onewire.application.tag
 {
 
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+	using com.dalsemi.onewire.adapter;
 	using com.dalsemi.onewire.container;
 
 
@@ -64,7 +64,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <returns> String humidity in %RH </returns>
 	   public virtual string readSensor()
 	   {
-		  HumidityContainer hc = (HumidityContainer) _DeviceContainer;
+		  HumidityContainer hc = DeviceContainer as HumidityContainer;
 
 		  // read the device first to get the state
 		  byte[] state = hc.readDevice();

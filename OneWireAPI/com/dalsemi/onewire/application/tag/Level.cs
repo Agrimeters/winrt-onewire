@@ -28,7 +28,7 @@
 namespace com.dalsemi.onewire.application.tag
 {
 
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+	using com.dalsemi.onewire.adapter;
 	using com.dalsemi.onewire.container;
 
 
@@ -71,7 +71,7 @@ namespace com.dalsemi.onewire.application.tag
 		  byte[] switchState;
 		  int switchChannel = Channel;
 		  SwitchContainer Container;
-		  Container = (SwitchContainer) _DeviceContainer;
+		  Container = DeviceContainer as SwitchContainer;
 
 		  if (Container.hasLevelSensing()) // if it can sense levels, read it.
 		  {

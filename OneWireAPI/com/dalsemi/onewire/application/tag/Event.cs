@@ -28,9 +28,8 @@
 namespace com.dalsemi.onewire.application.tag
 {
 
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+    using com.dalsemi.onewire.adapter;
 	using com.dalsemi.onewire.container;
-
 
 	/// <summary>
 	/// This class provides a default object for the Event type of a tagged 1-Wire device.
@@ -66,7 +65,7 @@ namespace com.dalsemi.onewire.application.tag
 		  string returnString = "";
 		  byte[] switchState;
 		  SwitchContainer Container;
-		  Container = (SwitchContainer) _DeviceContainer;
+		  Container = DeviceContainer as SwitchContainer;
 
 		  if (Container.hasActivitySensing()) // if there is any activity, read it.
 		  {

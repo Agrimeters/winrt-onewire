@@ -11,7 +11,7 @@ namespace com.dalsemi.onewire
 
         public static void yield()
         {
-            new System.Threading.ManualResetEvent(false).WaitOne(0);
+            new System.Threading.ManualResetEvent(false).WaitOne(1);
         }
     }
 }

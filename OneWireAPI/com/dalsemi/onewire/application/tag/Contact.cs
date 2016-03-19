@@ -64,13 +64,13 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		  string returnString = "";
 
-		  if (_DeviceContainer.Present)
+		  if (DeviceContainer.Present)
 		  {
-			 returnString = max;
+			 returnString = Max;
 		  }
 		  else
 		  {
-			 returnString = min;
+			 returnString = Min;
 		  }
 		  return returnString;
 	   }

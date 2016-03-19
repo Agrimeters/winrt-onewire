@@ -32,21 +32,14 @@ using System.Diagnostics;
 
 namespace com.dalsemi.onewire.application.tag
 {
-
-	using DocumentHandler = org.xml.sax.DocumentHandler;
-	using ErrorHandler = org.xml.sax.ErrorHandler;
-	using SAXParseException = org.xml.sax.SAXParseException;
-	using Locator = org.xml.sax.Locator;
-	using SAXException = org.xml.sax.SAXException;
-	using AttributeList = org.xml.sax.AttributeList;
-	using com.dalsemi.onewire.adapter;
-	using com.dalsemi.onewire.utils;
-
-
-	/// <summary>
-	/// SAX parser handler that handles XML 1-wire tags.
-	/// </summary>
-	internal class TAGHandler : ErrorHandler, DocumentHandler
+    using org.xml.sax;
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.utils;
+    using System.Text;
+    /// <summary>
+    /// SAX parser handler that handles XML 1-wire tags.
+    /// </summary>
+    internal class TAGHandler : ErrorHandler, DocumentHandler
 	{
 
 	   /// <summary>
@@ -333,14 +326,14 @@ namespace com.dalsemi.onewire.application.tag
 
 		  if (currentElement.ToUpper().Equals("MAX"))
 		  {
-			 currentDevice.max = new string(ch, start, length);
+			 currentDevice.Max = new string(ch, start, length);
 
 			 //System.out.println("This device's max message is: " + currentDevice.max);
 		  }
 
 		  if (currentElement.ToUpper().Equals("MIN"))
 		  {
-			 currentDevice.min = new string(ch, start, length);
+			 currentDevice.Min = new string(ch, start, length);
 
 			 //System.out.println("This device's min message is: " + currentDevice.min);
 		  }
@@ -464,9 +457,7 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   get
 		   {
-    
 			  return branchVector;
-    
 		   }
 	   }
 
@@ -482,9 +473,7 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   get
 		   {
-    
 			  return branchPaths;
-    
 		   }
 	   }
 
@@ -499,14 +488,14 @@ namespace com.dalsemi.onewire.application.tag
 	   ///  </param>
 	   private string getClusterStackAsString(Stack clusters, string separator)
 	   {
-		  string returnString = "";
+          StringBuilder returnString = new StringBuilder();
 
 		  for (int j = 0; j < clusters.Count; j++)
 		  {
-			 returnString = returnString + separator + clusters.ToArray()[j];
+			 returnString.Append(separator + clusters.ToArray()[j]);
 		  }
 
-		  return returnString;
+		  return returnString.ToString();
 	   }
 
 	   /// <summary>
@@ -540,7 +529,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <summary>
 	   /// Field branchVectors </summary>
 	   private List<Stack> branchVectors; // to hold all branches to eventually
-									  // make OWPaths
+   									      // make OWPaths
 
 	   /// <summary>
 	   /// Field branchPaths </summary>

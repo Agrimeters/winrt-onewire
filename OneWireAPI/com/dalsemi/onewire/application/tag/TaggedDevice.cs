@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -50,7 +49,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <param name="netAddress"> </param>
 	   public TaggedDevice(DSPortAdapter adapter, string netAddress)
 	   {
-		  this._DeviceContainer = adapter.getDeviceContainer(netAddress);
+		  this.DeviceContainer = adapter.getDeviceContainer(netAddress);
 	   }
 
 	   /// <summary>
@@ -69,40 +68,20 @@ namespace com.dalsemi.onewire.application.tag
 	   /// </summary>
 	   public virtual void setDeviceContainer(DSPortAdapter adapter, string netAddress)
 	   {
-		  _DeviceContainer = adapter.getDeviceContainer(netAddress);
+		  DeviceContainer = adapter.getDeviceContainer(netAddress);
 	   }
 
 	   /// <summary>
 	   /// Sets the device type for the tagged device.
 	   /// </summary>
 	   /// <param name="tType"> </param>
-	   public virtual string DeviceType
-	   {
-		   set
-		   {
-			  _DeviceType = value;
-		   }
-		   get
-		   {
-			  return _DeviceType;
-		   }
-	   }
+	   public virtual string DeviceType { get; set; }
 
 	   /// <summary>
 	   /// Sets the label for the tagged device.
 	   /// </summary>
 	   /// <param name="Label"> </param>
-	   public virtual string Label
-	   {
-		   set
-		   {
-			  label = value;
-		   }
-		   get
-		   {
-			  return label;
-		   }
-	   }
+	   public virtual string Label { get; set; }
 
 	   /// <summary>
 	   /// Sets the channel for the tagged device from a String.
@@ -112,7 +91,7 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   set
 		   {
-			  channel = System.Convert.ToInt32(value);
+			  Channel = System.Convert.ToInt32(value);
 		   }
 	   }
 
@@ -120,66 +99,26 @@ namespace com.dalsemi.onewire.application.tag
 	   /// Sets the channel for the tagged device from an int.
 	   /// </summary>
 	   /// <param name="Channel"> </param>
-	   public virtual int Channel
-	   {
-		   set
-		   {
-			  channel = new int?(value);
-		   }
-		   get
-		   {
-			  return channel.Value;
-		   }
-	   }
+	   public virtual int Channel { get; set; }
 
 	   /// <summary>
 	   /// Sets the init (initialization String) for the
 	   /// tagged device.
 	   /// </summary>
 	   /// <param name="init"> </param>
-	   public virtual string Init
-	   {
-		   set
-		   {
-			  init = value;
-		   }
-		   get
-		   {
-			  return init;
-		   }
-	   }
+	   public virtual string Init { get; set; }
 
 	   /// <summary>
 	   /// Sets the cluster name for the tagged device.
 	   /// </summary>
 	   /// <param name="cluster"> </param>
-	   public virtual string ClusterName
-	   {
-		   set
-		   {
-			  clusterName = value;
-		   }
-		   get
-		   {
-			  return clusterName;
-		   }
-	   }
+	   public virtual string ClusterName { get; set; }
 
 	   /// <summary>
 	   /// Sets the vector of branches to get to the tagged device.
 	   /// </summary>
 	   /// <param name="branches"> </param>
-	   public virtual List<TaggedDevice> Branches
-	   {
-		   set
-		   {
-			  branchVector = value;
-		   }
-		   get
-		   {
-			  return branchVector;
-		   }
-	   }
+	   public virtual List<TaggedDevice> Branches { get; set; }
 
 	   /// <summary>
 	   /// Sets the OWPath for the tagged device.  An
@@ -188,17 +127,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// set of nested 1-Wire switches.
 	   /// </summary>
 	   /// <param name="branchOWPath"> </param>
-	   public virtual OWPath OWPath
-	   {
-		   set
-		   {
-			  _branchPath = value;
-		   }
-		   get
-		   {
-			  return _branchPath;
-		   }
-	   }
+	   public virtual OWPath OWPath { get; set; }
 
 	   /// <summary>
 	   /// Sets the OWPath for the tagged device.  An
@@ -210,7 +139,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <param name="Branches"> </param>
 	   public virtual void setOWPath(DSPortAdapter adapter, List<TaggedDevice> Branches)
 	   {
-		  _branchPath = new OWPath(adapter);
+          OWPath = new OWPath(adapter);
 
 		  TaggedDevice TDevice;
 
@@ -218,7 +147,7 @@ namespace com.dalsemi.onewire.application.tag
 		  {
 			 TDevice = Branches[i];
 
-			 _branchPath.add(TDevice.DeviceContainer, TDevice.Channel);
+             OWPath.add(TDevice.DeviceContainer, TDevice.Channel);
 		  }
 	   }
 
@@ -230,15 +159,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// Gets the 1-Wire Container for the tagged device.
 	   /// </summary>
 	   /// <returns> The 1-Wire container for the tagged device. </returns>
-	   public virtual OneWireContainer DeviceContainer
-	   {
-		   get
-		   {
-			  return _DeviceContainer;
-		   }
-	   }
-
-
+	   public virtual OneWireContainer DeviceContainer { get; private set; }
 
 	   /// <summary>
 	   /// Gets the channel for the tagged device as a String.
@@ -248,37 +169,21 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   get
 		   {
-			  return channel.ToString();
+			  return Channel.ToString();
 		   }
 	   }
-
-
 
 	   /// <summary>
 	   /// Gets the max string for the tagged device.
 	   /// </summary>
 	   /// <returns> String  Gets the max string </returns>
-	   public virtual string Max
-	   {
-		   get
-		   {
-			  return max;
-		   }
-	   }
+	   public virtual string Max { get; set; }
 
 	   /// <summary>
 	   /// Gets the min string for the tagged device.
 	   /// </summary>
 	   /// <returns> String  Gets the min string </returns>
-	   public virtual string Min
-	   {
-		   get
-		   {
-			  return min;
-		   }
-	   }
-
-
+	   public virtual string Min { get; set; }
 
 
 	   public override bool Equals(object o)
@@ -291,7 +196,7 @@ namespace com.dalsemi.onewire.application.tag
 		  if (o is TaggedDevice)
 		  {
 			 TaggedDevice td = (TaggedDevice)o;
-			 return (td._DeviceContainer.Equals(this._DeviceContainer)) && (td._DeviceType.Equals(this._DeviceType)) && (td.min.Equals(this.min)) && (td.max.Equals(this.max)) && (td.init.Equals(this.init)) && (td.clusterName.Equals(this.clusterName)) && (td.label.Equals(this.label));
+			 return (td.DeviceContainer.Equals(this.DeviceContainer)) && (td.DeviceType.Equals(this.DeviceType)) && (td.Min.Equals(this.Min)) && (td.Max.Equals(this.Max)) && (td.Init.Equals(this.Init)) && (td.ClusterName.Equals(this.ClusterName)) && (td.Label.Equals(this.Label));
 		  }
 		  return false;
 	   }
@@ -310,64 +215,10 @@ namespace com.dalsemi.onewire.application.tag
 	   /// ********* Properties (fields) for this object ********** </summary>
 
 	   /// <summary>
-	   /// 1-Wire Container for the tagged device.
-	   /// </summary>
-	   public OneWireContainer _DeviceContainer;
-
-	   /// <summary>
-	   /// Device type for the device (i.e., contact, switch, d2a, etc.).
-	   /// </summary>
-	   public string _DeviceType;
-
-	   /// <summary>
-	   /// Label for the "name" of the device.
-	   /// </summary>
-	   public string label;
-
-	   /// <summary>
-	   /// The channel on which to probe for info.
-	   /// </summary>
-	   public int? channel;
-
-	   /// <summary>
-	   /// A string message representing a high or maximum value.
-	   /// </summary>
-	   public string max;
-
-	   /// <summary>
-	   /// A string message representing a low or minimum value.
-	   /// </summary>
-	   public string min;
-
-	   /// <summary>
 	   /// A true or false describing the state of the tagged device.
 	   /// </summary>
 	   public bool? state;
 
-	   /// <summary>
-	   /// An initialization parameter for the tagged device.
-	   /// </summary>
-	   public string init;
-
-	   /// <summary>
-	   /// The name of the cluster to which the tagged device is associated.
-	   /// Nested clusters will have a forward slash ("/") between each
-	   /// cluster, much like a path.
-	   /// </summary>
-	   public string clusterName;
-
-	   /// <summary>
-	   /// A Vector of branches describing how to physically get to
-	   /// the tagged device through a set of 1-Wire switches.
-	   /// </summary>
-	   public List<TaggedDevice> branchVector;
-
-	   /// <summary>
-	   /// This is an OWPath describing how to physically get to
-	   /// the tagged device through a set of nested 1-Wire branches
-	   /// (switches).
-	   /// </summary>
-	   private OWPath _branchPath;
 	}
 
 }

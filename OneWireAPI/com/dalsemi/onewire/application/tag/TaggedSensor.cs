@@ -28,8 +28,6 @@
 namespace com.dalsemi.onewire.application.tag
 {
 
-	using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
-
 	public interface TaggedSensor
 	{
 
