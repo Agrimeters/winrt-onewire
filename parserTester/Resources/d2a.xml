@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<sensor addr="E200000006283826" type="D2A">
+  <label>Voltage Monitor</label>
+  <channel>0</channel>
+  <lowtrip>2.0</lowtrip>
+  <hightrip>4.0</hightrip>
+  <min>Voltage too low</min>
+  <max>Voltage too high</max>
+</sensor>

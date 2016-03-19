@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<cluster name="DS2406 Demo">
+  <sensor addr="36000000000F2212" type="Level">
+    <label>Regrigerator Door Light</label>
+    <max>Light is on</max>
+    <min>Light is off</min>
+    <channel>0</channel>
+  </sensor>
+  <actuator addr="36000000000F2212" type="Switch">
+    <label>Contact Maker</label>
+    <min>Open Circuit</min>
+    <max>Make Contact</max>
+    <channel>1</channel>
+    <init>0</init>
+  </actuator>
+</cluster>

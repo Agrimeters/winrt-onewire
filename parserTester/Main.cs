@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Reflection;
@@ -6,93 +7,37 @@ using System.Reflection;
 using com.dalsemi.onewire.adapter;
 using com.dalsemi.onewire;
 using com.dalsemi.onewire.application.tag;
+using com.dalsemi.onewire.utils;
 
 public class Main
 {
-	public Main(string filename)
+    /// <summary>
+    /// Vector of devices that have been 'tagged' </summary>
+    public static List<TaggedDevice> taggedDevices;
+
+    /// <summary>
+    /// 1-Wire search paths </summary>
+    public static List<OWPath> paths;
+
+    public Main(string[] files)
 	{
-		try
-		{
-			DSPortAdapter adapter;
-			adapter = OneWireAccessProvider.DefaultAdapter;
-			TAGParser p = new TAGParser(adapter);
+        try
+        {
+            DSPortAdapter adapter;
+            adapter = OneWireAccessProvider.DefaultAdapter;
+            TAGParser p = new TAGParser(adapter);
 
             Debug.WriteLine("starting...");
 
-            OWCluster maincluster = p.parse(loadResourceFile("parserTester.8x1.xml"));
-			Debug.WriteLine("Clusters: ");
+            // create the tagParser
+            p = new TAGParser(adapter);
 
-			System.Collections.IEnumerator clusters = p.getClusters(loadResourceFile("parserTester.8x1.xml"));
-			while (clusters.MoveNext())
-			{
-				OWCluster cluster = (OWCluster)clusters.Current;
-				Debug.WriteLine("    cluster:" + cluster.Description + " in cluster " + cluster.ContainerCluster);
-				for (System.Collections.IEnumerator e = p.getDevices(cluster); e.MoveNext();)
-				{
-					OWDevice dev = (OWDevice)e.Current;
-					Debug.WriteLine("        device:" + dev.Description + " in cluster " + dev.Cluster);
-				}
-			}
-
-			OWSwitch[] Switches = new OWSwitch[4];
-			System.Collections.IEnumerator sw = p.getDevices(loadResourceFile("parserTester.8x1.xml"), new OWSwitchFilter());
-
-			while (sw.MoveNext())
-			{
-				OWSwitch Switch = (OWSwitch)sw.Current;
-				if (Switch.Description.Equals("LED1"))
-				{
-					Switches[0] = Switch;
-				}
-				if (Switch.Description.Equals("LED2"))
-				{
-					Switches[1] = Switch;
-				}
-				if (Switch.Description.Equals("LED3"))
-				{
-					Switches[2] = Switch;
-				}
-				if (Switch.Description.Equals("LED4 AND BUZZER"))
-				{
-					Switches[3] = Switch;
-				}
-			}
-
-			OWLevelSensor[] Sensors = new OWLevelSensor[4];
-			for (System.Collections.IEnumerator e = p.getDevices(loadResourceFile("parserTester.8x1.xml"), new OWLevelSensorFilter()); e.MoveNext();)
-			{
-				OWLevelSensor Sensor = (OWLevelSensor)e.Current;
-				Debug.WriteLine(Sensor.Description);
-				if (Sensor.Description.Equals("Push-Button 1"))
-				{
-					Sensors[0] = Sensor;
-				}
-				if (Sensor.Description.Equals("Push-Button 2"))
-				{
-					Sensors[1] = Sensor;
-				}
-				if (Sensor.Description.Equals("Push-Button 3"))
-				{
-					Sensors[2] = Sensor;
-				}
-				if (Sensor.Description.Equals("Push-Button 4"))
-				{
-					Sensors[3] = Sensor;
-				}
-			}
-
-			while (true)
-			{
-				for (int i = 0; i < 4; i++)
-				{
-					((OWSwitch)Switches[i]).toggle(0);
-					if (!Sensors[i].Level)
-					{
-						Debug.WriteLine(Sensors[i].Description + " active.");
-					}
-				}
-			}
-		}
+            foreach(var file in files)
+            {
+                // attempt to parse it
+                parseStream(p, loadResourceFile(file), new OWPath(adapter), true);
+            }
+        }
 		catch (Exception ex)
 		{
 			Debug.WriteLine("Exception " + ex.GetType().FullName + ": " + ex.Message);
@@ -101,15 +46,71 @@ public class Main
 		}
 	}
 
-	public static void Main1(string[] args)
-	{
-		if (args.Length != 1)
-		{
-			Debug.WriteLine("usage: parserTester XMLfile");
-            return;
-		}
-		Main test = new Main(args[0]);
-	}
+
+    /// <summary>
+    /// Parse the provided XML input stream with the provided parser.
+    /// Gather the new TaggedDevices and OWPaths into the global vectors
+    /// 'taggedDevices' and 'paths'.
+    /// </summary>
+    /// <param name="parser"> parser to parse 1-Wire XML files </param>
+    /// <param name="stream">  XML file stream </param>
+    /// <param name="currentPath">  OWPath that was opened to get to this file </param>
+    /// <param name="autoSpawnFrames"> true if new DeviceFrames are spawned with
+    ///        new taggedDevices discovered </param>
+    /// <returns> true an XML file was successfully parsed. </returns>
+    public static bool parseStream(TAGParser parser, Stream stream, OWPath currentPath, bool autoSpawnFrames)
+    {
+        bool rslt = false;
+        OWPath tempPath;
+
+        try
+        {
+            // parse the file
+            List<TaggedDevice> new_devices = parser.parse(stream);
+
+            // get the new paths
+            List<OWPath> new_paths = parser.OWPaths;
+
+            Debug.WriteLine("Success, XML parsed with " + new_devices.Count + " devices " + new_paths.Count + " paths");
+
+            // add the new devices to the old list
+            for (int i = 0; i < new_devices.Count; i++)
+            {
+                TaggedDevice current_device = (TaggedDevice)new_devices[i];
+
+                // update this devices OWPath depending on where we got it if its OWPath is empty
+                tempPath = current_device.OWPath;
+                if (!tempPath.AllOWPathElements.MoveNext())
+                {
+                    // replace this devices path with the current path
+                    tempPath.copy(currentPath);
+                    current_device.OWPath = tempPath;
+                }
+
+                // add the new device to the device list
+                taggedDevices.Add(current_device);
+            }
+
+            // add the new paths
+            for (int i = 0; i < new_paths.Count; i++)
+            {
+                paths.Add(new_paths[i]);
+            }
+
+            rslt = true;
+
+        }
+        catch (org.xml.sax.SAXException se)
+        {
+            Debug.WriteLine("XML error: " + se);
+        }
+        catch (IOException ioe)
+        {
+            Debug.WriteLine("IO error: " + ioe);
+        }
+
+        return rslt;
+    }
 
     /// <summary>
     /// Loads resource file to be used as Input Stream to drive program
@@ -130,4 +131,14 @@ public class Main
         return null;
     }
 
+
+    public static void Main1(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            Debug.WriteLine("usage: parserTester XMLfile");
+            return;
+        }
+       Main test = new Main(args);
+    }
 }

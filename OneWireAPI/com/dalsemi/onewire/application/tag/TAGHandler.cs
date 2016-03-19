@@ -89,7 +89,6 @@ namespace com.dalsemi.onewire.application.tag
 	   ///  </exception>
 	   public virtual void endDocument()
 	   {
-
 		  // Iterate through deviceList and make all the 
 		  // OWPaths from the TaggedDevice's vector of Branches.
 		  TaggedDevice device;

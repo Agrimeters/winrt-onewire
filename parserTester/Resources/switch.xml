@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<actuator addr="B700000018AE3212" type="Switch">
+  <label>Buzzer</label>
+  <max>Buzz!!!</max>
+  <min>Sleep</min>
+  <channel>0</channel>
+  <init>0</init>
+</actuator>

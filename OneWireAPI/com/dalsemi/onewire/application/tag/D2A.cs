@@ -31,7 +31,7 @@ using System.Collections.Generic;
 namespace com.dalsemi.onewire.application.tag
 {
 
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+	using com.dalsemi.onewire.adapter;
 	using com.dalsemi.onewire.container;
 
 	/// <summary>

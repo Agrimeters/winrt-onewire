@@ -34,49 +34,49 @@ namespace nanoxml.sax
 {
 
 
-	using AttributeListImpl = org.xml.sax.helpers.AttributeListImpl;
-	using Parser = org.xml.sax.Parser;
-	using DocumentHandler = org.xml.sax.DocumentHandler;
-	using DTDHandler = org.xml.sax.DTDHandler;
-	using EntityResolver = org.xml.sax.EntityResolver;
-	using ErrorHandler = org.xml.sax.ErrorHandler;
-	using HandlerBase = org.xml.sax.HandlerBase;
-	using InputSource = org.xml.sax.InputSource;
-	using SAXException = org.xml.sax.SAXException;
-	using SAXParseException = org.xml.sax.SAXParseException;
+    using AttributeListImpl = org.xml.sax.helpers.AttributeListImpl;
+    using Parser = org.xml.sax.Parser;
+    using DocumentHandler = org.xml.sax.DocumentHandler;
+    using DTDHandler = org.xml.sax.DTDHandler;
+    using EntityResolver = org.xml.sax.EntityResolver;
+    using ErrorHandler = org.xml.sax.ErrorHandler;
+    using HandlerBase = org.xml.sax.HandlerBase;
+    using InputSource = org.xml.sax.InputSource;
+    using SAXException = org.xml.sax.SAXException;
+    using SAXParseException = org.xml.sax.SAXParseException;
+    using System.Collections.Generic;
 
-
-	/// <summary>
-	/// This is the SAX adapter for NanoXML. Note that this adapter is provided
-	/// to make NanoXML "buzzword compliant". If you're not stuck with SAX
-	/// compatibility, you should use the basic API (nanoxml.NanoXML) which is
-	/// much more programmer-friendly as it doesn't require the cumbersome use
-	/// of event handlers and has more powerful attribute-handling methods, but
-	/// that is just IMHO. If you really want to use the SAX API, I would like you
-	/// to point to the currently available native SAX parsers.
-	/// <P>
-	/// Here are some important notes:
-	/// <UL><LI>The parser is non-validating.
-	///     <LI>The DTD is fully ignored, including <CODE>&lt;!ENTITY...&gt;</CODE>.
-	///     <LI>SAXParser is reentrant.
-	///     <LI>There is support for a document locator.
-	///     <LI>There is no support for mixed content (elements containing both
-	///         subelements and CDATA elements)
-	///     <LI>There are no ignorableWhitespace() events
-	///     <LI>Attribute types are always reported as CDATA
-	/// </UL>
-	/// <P>
-	/// $Revision: 2 $<BR>
-	/// $Date: 3/25/04 6:24p $<P>
-	/// </summary>
-	/// <seealso cref= nanoxml.sax.SAXLocator </seealso>
-	/// <seealso cref= nanoxml.XMLElement
-	/// 
-	/// @author Marc De Scheemaecker
-	///         &lt;<A HREF="mailto:Marc.DeScheemaecker@advalvas.be"
-	///         >Marc.DeScheemaecker@advalvas.be</A>&gt;
-	/// @version 1.6 </seealso>
-	public class SAXParser : Parser
+    /// <summary>
+    /// This is the SAX adapter for NanoXML. Note that this adapter is provided
+    /// to make NanoXML "buzzword compliant". If you're not stuck with SAX
+    /// compatibility, you should use the basic API (nanoxml.NanoXML) which is
+    /// much more programmer-friendly as it doesn't require the cumbersome use
+    /// of event handlers and has more powerful attribute-handling methods, but
+    /// that is just IMHO. If you really want to use the SAX API, I would like you
+    /// to point to the currently available native SAX parsers.
+    /// <P>
+    /// Here are some important notes:
+    /// <UL><LI>The parser is non-validating.
+    ///     <LI>The DTD is fully ignored, including <CODE>&lt;!ENTITY...&gt;</CODE>.
+    ///     <LI>SAXParser is reentrant.
+    ///     <LI>There is support for a document locator.
+    ///     <LI>There is no support for mixed content (elements containing both
+    ///         subelements and CDATA elements)
+    ///     <LI>There are no ignorableWhitespace() events
+    ///     <LI>Attribute types are always reported as CDATA
+    /// </UL>
+    /// <P>
+    /// $Revision: 2 $<BR>
+    /// $Date: 3/25/04 6:24p $<P>
+    /// </summary>
+    /// <seealso cref= nanoxml.sax.SAXLocator </seealso>
+    /// <seealso cref= nanoxml.XMLElement
+    /// 
+    /// @author Marc De Scheemaecker
+    ///         &lt;<A HREF="mailto:Marc.DeScheemaecker@advalvas.be"
+    ///         >Marc.DeScheemaecker@advalvas.be</A>&gt;
+    /// @version 1.6 </seealso>
+    public class SAXParser : Parser
 	{
 
 	   /// <summary>
@@ -179,11 +179,11 @@ namespace nanoxml.sax
 	   {
 		  AttributeListImpl attrList = new AttributeListImpl();
 		  locator.LineNr = element.LineNr;
-		  System.Collections.IEnumerator l_enum = element.enumeratePropertyNames();
+		  IEnumerator l_enum = element.enumeratePropertyNames();
 
 		  while (l_enum.MoveNext())
 		  {
-				string key = (string)(l_enum.Current);
+				string key = ((KeyValuePair<string, string>)l_enum.Current).Key;
 				string value = element.getProperty(key);
 				attrList.addAttribute(key, "CDATA", value);
 		  }

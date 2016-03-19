@@ -926,6 +926,7 @@ public class DS2408Demo1
    {
 	  int value = Character.digit(c, 16);
 
+
 	  if (value == -1)
 	  {
 		 throw new IndexOutOfRangeException("Invalid Hex value: " + c);

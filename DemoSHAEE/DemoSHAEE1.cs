@@ -619,6 +619,7 @@ public class DemoSHAEE1
    {
 	  int value = Character.digit(c, 16);
 
+
 	  if (value == -1)
 	  {
 		 throw new IndexOutOfRangeException("Invalid Hex value: " + c);

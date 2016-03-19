@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2004 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -211,14 +212,14 @@ namespace com.dalsemi.onewire.utils
 	   ///                 code (LS byte) first. </returns>
 	   public static byte[] toByteArray(string address)
 	   {
-		  byte[] address_byte = new byte [8];
+           byte[] address_byte = new byte [8];
 
-		  for (int i = 0; i < 8; i++)
-		  {
-			 address_byte [7 - i] = (byte)((Character.digit((address[i * 2]), 16) << 4) | (Character.digit(address[i * 2 + 1], 16)));
-		  }
+		   for (int i = 0; i < 8; i++)
+		   {
+                address_byte [7 - i] = (byte)((Character.digit((address[i * 2]), 16) << 4) | (Character.digit(address[i * 2 + 1], 16)));
+		   }
 
-		  return address_byte;
+		   return address_byte;
 	   }
 
 	   /// <summary>

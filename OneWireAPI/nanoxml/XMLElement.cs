@@ -785,7 +785,7 @@ namespace nanoxml
 
 				int charsRead = reader.Read(input, size, blockSize);
 
-				if (charsRead < 0)
+				if (charsRead == 0)
 				{
 					  break;
 				}
@@ -802,9 +802,9 @@ namespace nanoxml
 	   /// </summary>
 	   /// <exception cref="nanoxml.XMLParseException">
 	   ///    if an error occured while parsing the string </exception>
-	   public virtual void parseString(string @string)
+	   public virtual void parseString(string str)
 	   {
-		  this.parseCharArray(@string.ToCharArray(), 0, @string.Length, 1);
+		  this.parseCharArray(str.ToCharArray(), 0, str.Length, 1);
 	   }
 
 
@@ -815,9 +815,9 @@ namespace nanoxml
 	   /// </returns>
 	   /// <exception cref="nanoxml.XMLParseException">
 	   ///    if an error occured while parsing the string </exception>
-	   public virtual int parseString(string @string, int offset)
+	   public virtual int parseString(string str, int offset)
 	   {
-		  return this.parseCharArray(@string.ToCharArray(), offset, @string.Length, 1);
+		  return this.parseCharArray(str.ToCharArray(), offset, str.Length, 1);
 	   }
 
 
@@ -828,9 +828,9 @@ namespace nanoxml
 	   /// </returns>
 	   /// <exception cref="nanoxml.XMLParseException">
 	   ///    if an error occured while parsing the string </exception>
-	   public virtual int parseString(string @string, int offset, int end)
+	   public virtual int parseString(string str, int offset, int end)
 	   {
-		  return this.parseCharArray(@string.ToCharArray(), offset, end, 1);
+		  return this.parseCharArray(str.ToCharArray(), offset, end, 1);
 	   }
 
 
@@ -841,9 +841,9 @@ namespace nanoxml
 	   /// </returns>
 	   /// <exception cref="nanoxml.XMLParseException">
 	   ///    if an error occured while parsing the string </exception>
-	   public virtual int parseString(string @string, int offset, int end, int startingLineNr)
+	   public virtual int parseString(string str, int offset, int end, int startingLineNr)
 	   {
-		  return this.parseCharArray(@string.ToCharArray(), offset, end, startingLineNr);
+		  return this.parseCharArray(str.ToCharArray(), offset, end, startingLineNr);
 	   }
 
 

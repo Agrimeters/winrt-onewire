@@ -358,7 +358,7 @@ namespace com.dalsemi.onewire.utils
 			 }
 
 			 uVal = Character.digit(upper, 16);
-			 lVal = Character.digit(lower, 16);
+             lVal = Character.digit(lower, 16);
 			 if (uVal != -1 && lVal != -1)
 			 {
 				bData[index++] = (byte)(((uVal & 0x0F) << 4) | (lVal & 0x0F));

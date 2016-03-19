@@ -89,7 +89,13 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <EmbeddedResource Include="8x1.xml" />
+    <EmbeddedResource Include="Resources\weatherstation.xml" />
+    <EmbeddedResource Include="Resources\d2a.xml" />
+    <EmbeddedResource Include="Resources\contact.xml" />
+    <EmbeddedResource Include="Resources\humidity.xml" />
+    <EmbeddedResource Include="Resources\level.xml" />
+    <EmbeddedResource Include="Resources\switch.xml" />
+    <EmbeddedResource Include="Resources\thermal.xml" />
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -112,6 +118,7 @@
     <None Include="parserTester_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\event.xml" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sensor addr="6E00000013C69A28" type="Thermal">
+  <label>Indoor Temperature</label>
+  <lowtrip>18.0</lowtrip>
+  <hightrip>30.0</hightrip>
+  <min>It's too cold, please turn up the heat</min>
+  <max>It's too hot, please turn on the air conditioner</max>
+</sensor>

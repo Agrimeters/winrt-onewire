@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<sensor addr="E200000006283826" type="Humidity">
+  <label>Outdoor Humidity</label>
+  <lowtrip>20.0</lowtrip>
+  <hightrip>90.0</hightrip>
+  <min>It's too dry</min>
+  <max>Expect fog or rain</max>
+</sensor>
