@@ -125,7 +125,7 @@ public class Main
         }
 
         stopWatch.Stop();
-        Debug.Write("Parsed in " + stopWatch.ElapsedMilliseconds + "ms");
+        Debug.WriteLine("Parsed in " + stopWatch.ElapsedMilliseconds + "ms");
 
         return rslt;
     }
@@ -191,7 +191,7 @@ public class Main
         }
 
         stopWatch.Stop();
-        Debug.Write("Parsed in " + stopWatch.ElapsedMilliseconds + "ms");
+        Debug.WriteLine("Parsed in " + stopWatch.ElapsedMilliseconds + "ms");
 
         return rslt;
     }
