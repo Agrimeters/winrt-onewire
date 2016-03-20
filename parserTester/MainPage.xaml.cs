@@ -28,13 +28,13 @@ namespace parserTester
             string[] args = new string[]
             {
                 //"parserTester.Resources.a2d.xml",
-                //"parserTester.Resources.contact.xml",
-                //"parserTester.Resources.event.xml",
-                //"parserTester.Resources.humidity.xml",
-                //"parserTester.Resources.level.xml",
-                //"parserTester.Resources.switch.xml",
+                "parserTester.Resources.contact.xml",
+                "parserTester.Resources.event.xml",
+                "parserTester.Resources.humidity.xml",
+                "parserTester.Resources.level.xml",
+                "parserTester.Resources.switch.xml",
                 "parserTester.Resources.thermal.xml",
-                //"parserTester.Resources.weatherstation.xml",
+                "parserTester.Resources.weatherstation.xml",
             };
             Main.Main1(args);
         }

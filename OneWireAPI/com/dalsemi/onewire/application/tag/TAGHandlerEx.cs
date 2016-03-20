@@ -52,7 +52,7 @@ namespace com.dalsemi.onewire.application.tag
 
 		  // Instantiate deviceList and clusterStack
 		  deviceList = new List<TaggedDevice>();
-		  clusterStack = new Stack(); // keep track of clusters
+		  clusterStack = new Stack<string>(); // keep track of clusters
 		  branchStack = new Stack<TaggedDevice>(); // keep track of current branches
 		  branchVector = new List<TaggedDevice>(); // keep track of every branch
 		  branchVectors = new List<Stack<TaggedDevice>>(); // keep a vector of cloned branchStacks
@@ -107,7 +107,6 @@ namespace com.dalsemi.onewire.application.tag
            currentDevice.ClusterName = getClusterStackAsString(clusterStack, "/");
            // copy branchStack to it's related object in TaggedDevice
            currentDevice.Branches = branchStack.ToArray().ToList<TaggedDevice>();
-//           currentDevice.Branches = branchStack.Select(s => (TaggedDevice)s).ToList<TaggedDevice>();
        }
 
 	   /// <summary>
@@ -381,7 +380,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// 
 	   /// @return
 	   ///  </param>
-	   private string getClusterStackAsString(Stack clusters, string separator)
+	   private string getClusterStackAsString(Stack<string> clusters, string separator)
 	   {
           StringBuilder returnString = new StringBuilder();
 
@@ -408,7 +407,7 @@ namespace com.dalsemi.onewire.application.tag
 
 	   /// <summary>
 	   /// Field clusterStack </summary>
-	   private Stack clusterStack;
+	   private Stack<string> clusterStack;
 
 	   /// <summary>
 	   /// Field branchStack </summary>

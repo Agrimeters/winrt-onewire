@@ -201,7 +201,7 @@ namespace com.dalsemi.onewire.application.tag
 			 currentDevice.DeviceType = attributeType;
 			 currentDevice.ClusterName = getClusterStackAsString(clusterStack, "/");
              // copy branchStack to it's related object in TaggedDevice
-             currentDevice.Branches = branchStack.Select(s => (TaggedDevice)s).ToList<TaggedDevice>();
+             currentDevice.Branches = branchStack.ToArray().ToList<TaggedDevice>();
 
              // ** do branch specific work here: **
              if (name.Equals("branch"))
