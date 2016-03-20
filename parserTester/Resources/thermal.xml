@@ -1,8 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sensor addr="6E00000013C69A28" type="Thermal">
-  <label>Indoor Temperature</label>
-  <lowtrip>18.0</lowtrip>
-  <hightrip>30.0</hightrip>
-  <min>It's too cold, please turn up the heat</min>
-  <max>It's too hot, please turn on the air conditioner</max>
-</sensor>
+<cluster name="Lab Setup">
+  <branch addr="EA00000001C6681F">
+    <label>TAI-8595 IC1</label>
+    <channel>1</channel>
+    <init>1</init>
+    <cluster name="1-Wire Weather Station #1">
+      <sensor addr="6E00000013C69A28" type="Thermal">
+        <label>Indoor Temperature</label>
+        <lowtrip>18.0</lowtrip>
+        <hightrip>30.0</hightrip>
+        <min>It's too cold, please turn up the heat</min>
+        <max>It's too hot, please turn on the air conditioner</max>
+      </sensor>
+    </cluster>
+  </branch>
+  <branch addr="EA00000001C67C1F">
+    <label>TAI-8595 IC2</label>
+    <channel>2</channel>
+    <init>0</init>
+    <cluster name="DS2408 Demo">
+      <sensor addr="36000000000F2212" type="Level">
+        <label>Front Door Light</label>
+        <max>Light is on</max>
+        <min>Light is off</min>
+        <channel>0</channel>
+      </sensor>
+      <actuator addr="36000000000F2212" type="Switch">
+        <label>Front Door Jam Contact Maker</label>
+        <min>Open Circuit</min>
+        <max>Make Contact</max>
+        <channel>1</channel>
+        <init>0</init>
+      </actuator>
+      <sensor addr="36000000000F2212" type="Level">
+        <label>Regrigerator Door Light</label>
+        <max>Light is on</max>
+        <min>Light is off</min>
+        <channel>2</channel>
+      </sensor>
+      <actuator addr="36000000000F2212" type="Switch">
+        <label>Contact Maker</label>
+        <min>Open Circuit</min>
+        <max>Make Contact</max>
+        <channel>3</channel>
+        <init>0</init>
+      </actuator>
+      <sensor addr="36000000000F2212" type="Level">
+        <label>Gargage Door #1 Light</label>
+        <max>Light is on</max>
+        <min>Light is off</min>
+        <channel>4</channel>
+      </sensor>
+      <actuator addr="36000000000F2212" type="Switch">
+        <label>Garage Door #1 Sensor</label>
+        <min>Open Circuit</min>
+        <max>Make Contact</max>
+        <channel>5</channel>
+        <init>0</init>
+      </actuator>
+    </cluster>
+  </branch>
+</cluster>

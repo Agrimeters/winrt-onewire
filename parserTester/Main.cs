@@ -25,7 +25,7 @@ public class Main
         {
             DSPortAdapter adapter;
             adapter = OneWireAccessProvider.DefaultAdapter;
-            TAGParserEx p = new TAGParserEx(adapter);
+            TAGParser p = new TAGParser(adapter);
 
             Debug.WriteLine("starting...");
 
@@ -55,7 +55,7 @@ public class Main
     /// <param name="autoSpawnFrames"> true if new DeviceFrames are spawned with
     ///        new taggedDevices discovered </param>
     /// <returns> true an XML file was successfully parsed. </returns>
-    public static bool parseStream(TAGParserEx parser, Stream stream, OWPath currentPath, bool autoSpawnFrames)
+    public static bool parseStream(TAGParser parser, Stream stream, OWPath currentPath, bool autoSpawnFrames)
     {
         bool rslt = false;
         OWPath tempPath;

@@ -178,8 +178,8 @@ namespace com.dalsemi.onewire.application.tag
              currentDevice.Branches = branchStack.Select(s => (TaggedDevice)s).ToList<TaggedDevice>();
 
 
-                // ** do branch specific work here: **
-                if (name.ToUpper().Equals("BRANCH"))
+             // ** do branch specific work here: **
+             if (name.ToUpper().Equals("BRANCH"))
 			 {
 				// push the not-quite-finished branch TaggedDevice on the branch stack.
 				branchStack.Push(currentDevice);
@@ -191,7 +191,7 @@ namespace com.dalsemi.onewire.application.tag
 				deviceList.Add(currentDevice);
 			 }
 
-             if (name.ToUpper().Equals("SENSOR") || name.ToUpper().Equals("ACTUATOR"))
+             if (name.ToUpper().Equals("SENSOR") || name.ToUpper().Equals("ACTUATOR") || name.ToUpper().Equals("BRANCH"))
              {
                 while(reader.Read())
                 {
@@ -222,10 +222,8 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		  if (name.ToUpper().Equals("SENSOR") || name.ToUpper().Equals("ACTUATOR"))
 		  {
-
 			 //System.out.println(name + " element finished");
 			 deviceList.Add(currentDevice);
-
 			 currentDevice = null;
 		  }
 
@@ -234,9 +232,7 @@ namespace com.dalsemi.onewire.application.tag
 			 branchVectors.Add(branchStack); // adds a snapshot of
 															// the stack to 
 															// make OWPaths later
-
 			 branchStack.Pop();
-
 			 currentDevice = null; // !!! not sure if this is needed.
 		  }
 
@@ -286,10 +282,8 @@ namespace com.dalsemi.onewire.application.tag
 				   try
 				   {
 				      currentDevice = (TaggedDevice) branchStack.Peek();
-
 				      currentDevice.ChannelFromString = reader.Value.Trim();
-
-                                currentDevice = null;
+                      currentDevice = null;
 				   }
 				   catch (InvalidOperationException)
 				   {

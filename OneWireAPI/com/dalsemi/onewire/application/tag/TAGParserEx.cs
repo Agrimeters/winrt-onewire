@@ -93,9 +93,7 @@ namespace com.dalsemi.onewire.application.tag
 
           handler.endDocument();
 
-          List<TaggedDevice> v = handler.TaggedDeviceList;
-
-          return v;
+          return handler.TaggedDeviceList;
 	   }
 
 
@@ -110,10 +108,8 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   get
 		   {
-			  List<TaggedDevice> v = handler.AllBranches;
-    
-			  return v;
-		   }
+			  return handler.AllBranches;
+            }
 	   }
 
 	   /// <summary>
@@ -128,10 +124,7 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   get
 		   {
-    
-			  List<OWPath> v = handler.AllBranchPaths;
-    
-			  return v;
+			  return handler.AllBranchPaths;
 		   }
 	   }
 
