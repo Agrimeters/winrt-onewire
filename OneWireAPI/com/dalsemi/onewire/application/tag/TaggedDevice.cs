@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Xml.Serialization;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -30,15 +32,14 @@
 namespace com.dalsemi.onewire.application.tag
 {
 
-	using com.dalsemi.onewire.adapter;
-	using com.dalsemi.onewire.container;
-	using com.dalsemi.onewire.utils;
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.utils;
 
-
-	/// <summary>
-	/// This class provides a default object for a tagged 1-Wire device.
-	/// </summary>
-	public class TaggedDevice
+    /// <summary>
+    /// This class provides a default object for a tagged 1-Wire device.
+    /// </summary>
+    public class TaggedDevice
 	{
 
 	   /// <summary>
@@ -75,13 +76,15 @@ namespace com.dalsemi.onewire.application.tag
 	   /// Sets the device type for the tagged device.
 	   /// </summary>
 	   /// <param name="tType"> </param>
+       [XmlAttribute]
 	   public virtual string DeviceType { get; set; }
 
 	   /// <summary>
 	   /// Sets the label for the tagged device.
 	   /// </summary>
 	   /// <param name="Label"> </param>
-	   public virtual string Label { get; set; }
+	   [XmlAttribute]
+       public virtual string Label { get; set; }
 
 	   /// <summary>
 	   /// Sets the channel for the tagged device from a String.
@@ -91,7 +94,7 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   set
 		   {
-			  Channel = System.Convert.ToInt32(value);
+			  Channel = Int32.Parse(value);
 		   }
 	   }
 
@@ -99,6 +102,7 @@ namespace com.dalsemi.onewire.application.tag
 	   /// Sets the channel for the tagged device from an int.
 	   /// </summary>
 	   /// <param name="Channel"> </param>
+       [XmlAttribute]
 	   public virtual int Channel { get; set; }
 
 	   /// <summary>
@@ -177,12 +181,14 @@ namespace com.dalsemi.onewire.application.tag
 	   /// Gets the max string for the tagged device.
 	   /// </summary>
 	   /// <returns> String  Gets the max string </returns>
+       [XmlAttribute]
 	   public virtual string Max { get; set; }
 
 	   /// <summary>
 	   /// Gets the min string for the tagged device.
 	   /// </summary>
 	   /// <returns> String  Gets the min string </returns>
+       [XmlAttribute]
 	   public virtual string Min { get; set; }
 
 

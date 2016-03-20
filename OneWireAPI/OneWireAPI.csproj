@@ -161,7 +161,9 @@
     <Compile Include="com\dalsemi\onewire\application\tag\TaggedActuator.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\TaggedDevice.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\TaggedSensor.cs" />
+    <Compile Include="com\dalsemi\onewire\application\tag\TAGHandlerEx.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\TAGHandler.cs" />
+    <Compile Include="com\dalsemi\onewire\application\tag\TAGParserEx.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\TAGParser.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\Thermal.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\XML.cs" />

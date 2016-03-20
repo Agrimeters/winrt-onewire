@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Reflection;
+using System.Xml;
 
 using com.dalsemi.onewire.adapter;
 using com.dalsemi.onewire;
@@ -25,12 +26,9 @@ public class Main
         {
             DSPortAdapter adapter;
             adapter = OneWireAccessProvider.DefaultAdapter;
-            TAGParser p = new TAGParser(adapter);
+            TAGParserEx p = new TAGParserEx(adapter);
 
             Debug.WriteLine("starting...");
-
-            // create the tagParser
-            p = new TAGParser(adapter);
 
             foreach(var file in files)
             {
@@ -58,7 +56,7 @@ public class Main
     /// <param name="autoSpawnFrames"> true if new DeviceFrames are spawned with
     ///        new taggedDevices discovered </param>
     /// <returns> true an XML file was successfully parsed. </returns>
-    public static bool parseStream(TAGParser parser, Stream stream, OWPath currentPath, bool autoSpawnFrames)
+    public static bool parseStream(TAGParserEx parser, Stream stream, OWPath currentPath, bool autoSpawnFrames)
     {
         bool rslt = false;
         OWPath tempPath;
@@ -104,9 +102,9 @@ public class Main
         {
             Debug.WriteLine("XML error: " + se);
         }
-        catch (IOException ioe)
+        catch (Exception e)
         {
-            Debug.WriteLine("IO error: " + ioe);
+            Debug.WriteLine("Error: " + e);
         }
 
         return rslt;

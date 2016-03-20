@@ -30,13 +30,13 @@
 namespace com.dalsemi.onewire.application.tag
 {
 
-	using com.dalsemi.onewire.adapter;
-	using com.dalsemi.onewire.container;
-
-	/// <summary>
-	/// This class provides a default object for the Switch type of a tagged 1-Wire device.
-	/// </summary>
-	public class Switch : TaggedDevice, TaggedActuator
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.container;
+    using System;
+    /// <summary>
+    /// This class provides a default object for the Switch type of a tagged 1-Wire device.
+    /// </summary>
+    public class Switch : TaggedDevice, TaggedActuator
 	{
 	   /// <summary>
 	   /// Creates an object for the device.
@@ -123,12 +123,9 @@ namespace com.dalsemi.onewire.application.tag
 		  // This condition is in the <init> tag and, of course, the  
 		  // <channel> tag is also needed to know which channel to 
 		  // to open or close.
-		  int initValue;
 		  int channelValue;
 		  int switchStateIntValue = 0;
-//TODO		  int? init = new int?(Init);
-          int? init = System.Convert.ToInt32(Init);
-		  initValue = init.Value;
+          int initValue = Int32.Parse(Init);
 		  channelValue = Channel;
 
 		  byte[] state = switchcontainer.readDevice();
