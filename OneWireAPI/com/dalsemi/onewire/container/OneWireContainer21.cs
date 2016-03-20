@@ -666,7 +666,7 @@ namespace com.dalsemi.onewire.container
 	   ///                           this iButton </param>
 	   /// <param name="newAddress">        address of this 1-Wire device </param>
 	   /// <seealso cref= com.dalsemi.onewire.utils.Address </seealso>
-	   public virtual void setupContainer(DSPortAdapter sourceAdapter, string newAddress)
+	   public override void setupContainer(DSPortAdapter sourceAdapter, string newAddress)
 	   {
 		  base.setupContainer(sourceAdapter, newAddress);
 		  setThermochronVariables();

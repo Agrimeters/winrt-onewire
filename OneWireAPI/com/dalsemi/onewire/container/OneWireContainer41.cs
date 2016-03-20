@@ -2217,7 +2217,7 @@ namespace com.dalsemi.onewire.container
         
 			  // default size of the log, could be different if using an odd
 			  // sample size combination.
-			  int logSize = MISSION_LOG_SIZE;
+			  //int logSize = MISSION_LOG_SIZE;
         
 			  // figure max number of samples
 			  int maxSamples = 0;
@@ -2231,7 +2231,7 @@ namespace com.dalsemi.onewire.container
 					break;
 				 case 3:
 					maxSamples = 2560;
-					logSize = ODD_MISSION_LOG_SIZE;
+					//logSize = ODD_MISSION_LOG_SIZE;
 					break;
 				 case 4:
 					maxSamples = 2048;

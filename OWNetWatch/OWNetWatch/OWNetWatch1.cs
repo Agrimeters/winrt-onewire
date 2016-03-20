@@ -339,7 +339,7 @@ namespace OWNetWatch
                     _container.Values[key] = value;
                 }
             }
-            catch (System.Runtime.InteropServices.COMException e)
+            catch (System.Runtime.InteropServices.COMException)
             {
                 Debug.WriteLine("This Data type is not allowed");
             }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Xml;
@@ -107,7 +106,8 @@ namespace com.dalsemi.onewire.application.tag
            currentDevice.DeviceType = type;
            currentDevice.ClusterName = getClusterStackAsString(clusterStack, "/");
            // copy branchStack to it's related object in TaggedDevice
-           currentDevice.Branches = branchStack.Select(s => (TaggedDevice)s).ToList<TaggedDevice>();
+           currentDevice.Branches = branchStack.ToArray().ToList<TaggedDevice>();
+//           currentDevice.Branches = branchStack.Select(s => (TaggedDevice)s).ToList<TaggedDevice>();
        }
 
 	   /// <summary>
@@ -227,7 +227,6 @@ namespace com.dalsemi.onewire.application.tag
 				 deviceList.Add(currentDevice);
                  break;
              }
-
              case ("SENSOR"):
              case ("ACTUATOR"):
              {

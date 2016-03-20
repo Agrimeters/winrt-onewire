@@ -83,7 +83,7 @@ namespace org.xml.sax
 	  /// </summary>
 	  /// <returns> The error or warning message. </returns>
 	  /// <seealso cref= org.xml.sax.Parser#setLocale </seealso>
-	  public virtual string Message
+	  public override string Message
 	  {
 		  get
 		  {
