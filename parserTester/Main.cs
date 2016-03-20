@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 
 using com.dalsemi.onewire.adapter;
@@ -13,29 +13,45 @@ public class Main
 {
     /// <summary>
     /// Vector of devices that have been 'tagged' </summary>
-    public static List<TaggedDevice> taggedDevices = new List<TaggedDevice>();
+    public static List<TaggedDevice> taggedDevices = null;
 
     /// <summary>
     /// 1-Wire search paths </summary>
-    public static List<OWPath> paths = new List<OWPath>();
+    public static List<OWPath> paths = null;
 
     public Main(string[] files)
 	{
+        Stopwatch stopWatch = new Stopwatch();
         try
         {
             DSPortAdapter adapter;
             adapter = OneWireAccessProvider.DefaultAdapter;
-            TAGParser p = new TAGParser(adapter);
 
             Debug.WriteLine("starting...");
 
-            foreach(var file in files)
+            taggedDevices = new List<TaggedDevice>();
+            paths = new List<OWPath>();
+            TAGParser p = new TAGParser(adapter);
+
+            foreach (var file in files)
             {
                 // attempt to parse it
                 parseStream(p, loadResourceFile(file), new OWPath(adapter), true);
             }
+
+            taggedDevices = new List<TaggedDevice>();
+            paths = new List<OWPath>();
+            TAGParserEx px = new TAGParserEx(adapter);
+
+            foreach (var file in files)
+            {
+                // attempt to parse it
+                parseStreamEx(px, loadResourceFile(file), new OWPath(adapter), true);
+            }
+
+            Debug.WriteLine("done...");
         }
-		catch (Exception ex)
+        catch (Exception ex)
 		{
 			Debug.WriteLine("Exception " + ex.GetType().FullName + ": " + ex.Message);
 			Debug.WriteLine(ex.ToString());
@@ -59,7 +75,9 @@ public class Main
     {
         bool rslt = false;
         OWPath tempPath;
+        Stopwatch stopWatch = new Stopwatch();
 
+        stopWatch.Start();
         try
         {
             // parse the file
@@ -73,7 +91,7 @@ public class Main
             // add the new devices to the old list
             for (int i = 0; i < new_devices.Count; i++)
             {
-                TaggedDevice current_device = (TaggedDevice)new_devices[i];
+                TaggedDevice current_device = new_devices[i];
 
                 // update this devices OWPath depending on where we got it if its OWPath is empty
                 tempPath = current_device.OWPath;
@@ -105,6 +123,75 @@ public class Main
         {
             Debug.WriteLine("Error: " + e);
         }
+
+        stopWatch.Stop();
+        Debug.Write("Parsed in " + stopWatch.ElapsedMilliseconds + "ms");
+
+        return rslt;
+    }
+
+    /// <summary>
+    /// Parse the provided XML input stream with the provided parser.
+    /// Gather the new TaggedDevices and OWPaths into the global vectors
+    /// 'taggedDevices' and 'paths'.
+    /// </summary>
+    /// <param name="parser"> parser to parse 1-Wire XML files </param>
+    /// <param name="stream">  XML file stream </param>
+    /// <param name="currentPath">  OWPath that was opened to get to this file </param>
+    /// <param name="autoSpawnFrames"> true if new DeviceFrames are spawned with
+    ///        new taggedDevices discovered </param>
+    /// <returns> true an XML file was successfully parsed. </returns>
+    public static bool parseStreamEx(TAGParserEx parser, Stream stream, OWPath currentPath, bool autoSpawnFrames)
+    {
+        bool rslt = false;
+        OWPath tempPath;
+        Stopwatch stopWatch = new Stopwatch();
+
+        stopWatch.Start();
+        try
+        {
+            // parse the file
+            List<TaggedDevice> new_devices = parser.parse(stream);
+
+            // get the new paths
+            List<OWPath> new_paths = parser.OWPaths;
+
+            Debug.WriteLine("Success, XML parsed with " + new_devices.Count + " devices " + new_paths.Count + " paths");
+
+            // add the new devices to the old list
+            for (int i = 0; i < new_devices.Count; i++)
+            {
+                TaggedDevice current_device = new_devices[i];
+
+                // update this devices OWPath depending on where we got it if its OWPath is empty
+                tempPath = current_device.OWPath;
+                if (!tempPath.AllOWPathElements.MoveNext())
+                {
+                    // replace this devices path with the current path
+                    tempPath.copy(currentPath);
+                    current_device.OWPath = tempPath;
+                }
+
+                // add the new device to the device list
+                taggedDevices.Add(current_device);
+            }
+
+            // add the new paths
+            for (int i = 0; i < new_paths.Count; i++)
+            {
+                paths.Add(new_paths[i]);
+            }
+
+            rslt = true;
+
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine("Error: " + e);
+        }
+
+        stopWatch.Stop();
+        Debug.Write("Parsed in " + stopWatch.ElapsedMilliseconds + "ms");
 
         return rslt;
     }

@@ -66,12 +66,11 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <param name="in"> The XML document to parse.
 	   /// </param>
 	   /// <returns> Vector of TaggedDevice objects. </returns>
-	   /// <exception cref="SAXException"> If a parse error occurs parsing <var>in</var>. </exception>
-	   /// <exception cref="IOException"> If an I/O error occurs while reading <var>in</var>. </exception>
 	   public virtual List<TaggedDevice> parse(Stream inp)
 	   {
-          parser = XmlReader.Create(inp,
-             new XmlReaderSettings() { IgnoreWhitespace = true });
+          XmlReaderSettings settings = new XmlReaderSettings() { IgnoreWhitespace = true };
+
+          parser = XmlReader.Create(inp, settings);
 
           handler.startDocument();
 

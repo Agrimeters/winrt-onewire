@@ -57,7 +57,7 @@ namespace com.dalsemi.onewire.application.tag
 		  branchStack = new Stack<TaggedDevice>(); // keep track of current branches
 		  branchVector = new List<TaggedDevice>(); // keep track of every branch
 		  branchVectors = new List<Stack<TaggedDevice>>(); // keep a vector of cloned branchStacks
-										 // to use in making the OWPaths Vector
+                                                           // to use in making the OWPaths Vector
 		  branchPaths = new List<OWPath>(); // keep track of OWPaths
 	   }
 
@@ -96,6 +96,20 @@ namespace com.dalsemi.onewire.application.tag
 		  }
 	   }
 
+       /// <summary>
+       /// Used to set the Members of a newly minted TaggedDevice object
+       /// </summary>
+       /// <param name="Addr"></param>
+       /// <param name="Type"></param>
+       private void setTaggedDeviceMembers(string address, string type)
+       {
+           currentDevice.setDeviceContainer(adapter, address);
+           currentDevice.DeviceType = type;
+           currentDevice.ClusterName = getClusterStackAsString(clusterStack, "/");
+           // copy branchStack to it's related object in TaggedDevice
+           currentDevice.Branches = branchStack.Select(s => (TaggedDevice)s).ToList<TaggedDevice>();
+       }
+
 	   /// <summary>
 	   /// Method startElement
 	   /// 
@@ -105,145 +119,19 @@ namespace com.dalsemi.onewire.application.tag
 	   /// </param>
 	   public virtual void startElement(string name, XmlReader reader)
 	   {
-		  string attributeAddr = "null";
-		  string attributeType = "null";
-		  string className;
-
-		  // Parse cluster elements here, keeping track of them with a Stack.
-		  if (name.ToUpper().Equals("CLUSTER"))
-		  {
-              try
-              {
-                  clusterStack.Push(reader.GetAttribute("name"));
-              }
-              catch (ArgumentNullException) { Debugger.Break(); }
-		  }
-
-		  // Parse sensor, actuator, and branch elements here
-		  if (name.ToUpper().Equals("SENSOR") || name.ToUpper().Equals("ACTUATOR") || name.ToUpper().Equals("BRANCH"))
-		  {
-             try
-             {
-                 attributeAddr = reader.GetAttribute("addr");
-             }
-             catch (ArgumentNullException) { Debugger.Break(); }
-             try
-             {
-                 attributeType = reader.GetAttribute("type");
-             }
-             catch (ArgumentNullException) { Debugger.Break(); }
-
-
-			 // instantiate the appropriate object based on tag type 
-			 // (i.e., "Contact", "Switch", etc).  The only exception 
-			 // is of type "branch"
-			 if (name.ToUpper().Equals("BRANCH"))
-			 {
-				attributeType = "branch";
-				currentDevice = new TaggedDevice(); // instantiates object
-			 }
-			 else
-			 {
-				// first, find tag type to instantiate by CLASS NAME!
-				// if the tag has a "." in it, it indicates the package 
-				// path was included in the tag type.
-				if (attributeType.IndexOf(".", StringComparison.Ordinal) > 0)
-				{
-				   className = attributeType;
-				}
-				else
-				{
-				   className = "com.dalsemi.onewire.application.tag." + attributeType;
-				}
-
-				// instantiate the appropriate object based on tag type (i.e., "Contact", "Switch", etc)
-				try
-				{
-				   Type genericClass = Type.GetType(className);
-
-                   currentDevice = (TaggedDevice)Activator.CreateInstance(genericClass);
-                }
-                catch (System.Exception e)
-				{
-				   throw new Exception("Can't load 1-Wire Tag Type class (" + className + "): " + e.Message);
-				}
-			 }
-
-			 // set the members (fields) of the TaggedDevice object
-			 currentDevice.setDeviceContainer(adapter, attributeAddr);
-			 currentDevice.DeviceType = attributeType;
-			 currentDevice.ClusterName = getClusterStackAsString(clusterStack, "/");
-             // copy branchStack to it's related object in TaggedDevice
-             currentDevice.Branches = branchStack.Select(s => (TaggedDevice)s).ToList<TaggedDevice>();
-
-
-             // ** do branch specific work here: **
-             if (name.ToUpper().Equals("BRANCH"))
-			 {
-				// push the not-quite-finished branch TaggedDevice on the branch stack.
-				branchStack.Push(currentDevice);
-
-				// put currentDevice in the branch vector that holds all branch objects.
-				branchVector.Add(currentDevice);
-
-				// put currentDevice in deviceList (if it is of type "branch", of course)
-				deviceList.Add(currentDevice);
-			 }
-
-             if (name.ToUpper().Equals("SENSOR") || name.ToUpper().Equals("ACTUATOR") || name.ToUpper().Equals("BRANCH"))
-             {
-                while(reader.Read())
-                {
-                    if(reader.NodeType == XmlNodeType.Element)
-                    {
-                       parseDevice(reader.Name, reader);
-                       reader.Read(); //consume tag EndElement
-                    }
-                    else if(reader.NodeType == XmlNodeType.EndElement)
-                    {
-                       // end here if XML only has single sensor child
-                       endElement(reader.Name);
-                       break;
-                    }
-                };
-
-             }
-          }
-	   }
-
-	   /// <summary>
-	   /// Method endElement
-	   /// 
-	   /// </summary>
-	   /// <param name="name">
-	   /// </param>
-	   public virtual void endElement(string name)
-	   {
-		  if (name.ToUpper().Equals("SENSOR") || name.ToUpper().Equals("ACTUATOR"))
-		  {
-			 //System.out.println(name + " element finished");
-			 deviceList.Add(currentDevice);
-			 currentDevice = null;
-		  }
-
-		  if (name.ToUpper().Equals("BRANCH"))
-		  {
-             // adds a snapshot of the stack to make OWPaths later
-			 branchVectors.Add(new Stack<TaggedDevice>(branchStack));
-			 branchStack.Pop();
-			 currentDevice = null; // !!! not sure if this is needed.
-		  }
-
-		  if (name.ToUpper().Equals("CLUSTER"))
-		  {
-			 clusterStack.Pop();
-		  }
-	   }
-    
-       private void parseDevice(string name, XmlReader reader)
-       {
-          switch (reader.Name.ToUpper())
+          switch (name.ToUpper())
           {
+             case ("CLUSTER"):
+             {
+                // Parse cluster elements here, keeping track of them with a Stack.
+                try
+                {
+                   clusterStack.Push(reader.GetAttribute("name"));
+                }
+                catch (ArgumentNullException) {;}
+                catch (InvalidOperationException) {;}
+                break;
+             }
              case ("LABEL"):
              {
                 reader.Read();
@@ -253,7 +141,7 @@ namespace com.dalsemi.onewire.application.tag
 				   // so, set label accordingly
 				   try
 				   {
- 				      currentDevice = (TaggedDevice) branchStack.Peek();
+ 				      currentDevice = branchStack.Peek();
 				      currentDevice.Label = reader.Value.Trim();
 				      currentDevice = null;
 				   }
@@ -279,7 +167,7 @@ namespace com.dalsemi.onewire.application.tag
 				   // so, set channel accordingly
 				   try
 				   {
-				      currentDevice = (TaggedDevice) branchStack.Peek();
+				      currentDevice = branchStack.Peek();
 				      currentDevice.ChannelFromString = reader.Value.Trim();
                       currentDevice = null;
 				   }
@@ -318,12 +206,110 @@ namespace com.dalsemi.onewire.application.tag
 			    //System.out.println("This device's init message is: " + currentDevice.init);
                 break;
              }
-             default:
-                reader.Read();
-                break;
+             case ("BRANCH"):
+             {
+		         string attributeAddr = "null";
+                 try
+                 {
+                     attributeAddr = reader.GetAttribute("addr");
+                 }
+                 catch (ArgumentNullException) {;}
+
+				 currentDevice = new TaggedDevice(); // instantiates object
+
+                 setTaggedDeviceMembers(attributeAddr, "branch");
+
+				 // push the not-quite-finished branch TaggedDevice on the branch stack.
+				 branchStack.Push(currentDevice);
+				 // put currentDevice in the branch vector that holds all branch objects.
+				 branchVector.Add(currentDevice);
+				 // put currentDevice in deviceList (if it is of type "branch", of course)
+				 deviceList.Add(currentDevice);
+                 break;
+             }
+
+             case ("SENSOR"):
+             case ("ACTUATOR"):
+             {
+		         string attributeAddr = "null";
+		         string attributeType = "null";
+                 try
+                 {
+                     attributeAddr = reader.GetAttribute("addr");
+                 }
+                 catch (ArgumentNullException) {;}
+                 try
+                 {
+                     attributeType = reader.GetAttribute("type");
+                 }
+                 catch (ArgumentNullException) {;}
+
+				 // first, find tag type to instantiate by CLASS NAME!
+				 // if the tag has a "." in it, it indicates the package 
+				 // path was included in the tag type.
+		         string className;
+
+				 if (attributeType.IndexOf(".", StringComparison.Ordinal) > 0)
+				 {
+				     className = attributeType;
+				 }
+		         else
+				 {
+				     className = "com.dalsemi.onewire.application.tag." + attributeType;
+				 }
+
+				 // instantiate the appropriate object based on tag type (i.e., "Contact", "Switch", etc)
+				 try
+				 {
+				     Type genericClass = Type.GetType(className);
+
+                     currentDevice = (TaggedDevice)Activator.CreateInstance(genericClass);
+                 }
+                 catch (System.Exception e)
+				 {
+		             throw new Exception("Can't load 1-Wire Tag Type class (" + className + "): " + e.Message);
+				 }
+
+                 setTaggedDeviceMembers(attributeAddr, attributeType);
+                 break;
+			  }
           }
        }
 
+       /// <summary>
+       /// Method endElement
+       /// 
+       /// </summary>
+       /// <param name="name">
+       /// </param>
+       public virtual void endElement(string name)
+	   {
+          switch(name.ToUpper())
+          {
+             case ("SENSOR"):
+             case ("ACTUATOR"):
+             {
+			    //System.out.println(name + " element finished");
+			    deviceList.Add(currentDevice);
+			    currentDevice = null;
+                break;
+             }
+             case ("BRANCH"):
+             {
+                // adds a snapshot of the stack to make OWPaths later
+                branchVectors.Add(new Stack<TaggedDevice>(branchStack));
+                branchStack.Pop();
+                currentDevice = null; // !!! not sure if this is needed.
+                break;
+             }
+             case ("CLUSTER"):
+             {
+                clusterStack.Pop();
+                break;
+             }
+          }
+	   }
+    
        /// <summary>
        /// Method getTaggedDeviceList
        /// 

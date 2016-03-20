@@ -71,7 +71,7 @@ namespace com.dalsemi.onewire.application.tag
 		  branchStack = new Stack<TaggedDevice>(); // keep track of current branches
 		  branchVector = new List<TaggedDevice>(); // keep track of every branch
 		  branchVectors = new List<Stack<TaggedDevice>>(); // keep a vector of cloned branchStacks
-										 // to use in making the OWPaths Vector
+										                   // to use in making the OWPaths Vector
 		  branchPaths = new List<OWPath>(); // keep track of OWPaths
 	   }
 
@@ -101,16 +101,6 @@ namespace com.dalsemi.onewire.application.tag
 
 		  for (int i = 0; i < branchVectors.Count; i++)
 		  {
-                //singleBranchVector = (Vector)branchVectors.elementAt(i);
-                //branchPath = new OWPath(adapter);
-                //for (int j = 0; j < singleBranchVector.size(); j++)
-                //{
-                //    device = (TaggedDevice)singleBranchVector.elementAt(i);
-
-                //    branchPath.add(device.getDeviceContainer(), device.getChannel());
-                //}
-                //branchPaths.addElement(branchPath);
-
              singleBranchVector = new Stack<TaggedDevice>(branchVectors[i]);
              branchPath = new OWPath(adapter);
 			 for (int j = 0; j < singleBranchVector.Count; j++)
