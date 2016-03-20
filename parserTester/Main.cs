@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Reflection;
-using System.Xml;
 
 using com.dalsemi.onewire.adapter;
 using com.dalsemi.onewire;
@@ -14,11 +13,11 @@ public class Main
 {
     /// <summary>
     /// Vector of devices that have been 'tagged' </summary>
-    public static List<TaggedDevice> taggedDevices;
+    public static List<TaggedDevice> taggedDevices = new List<TaggedDevice>();
 
     /// <summary>
     /// 1-Wire search paths </summary>
-    public static List<OWPath> paths;
+    public static List<OWPath> paths = new List<OWPath>();
 
     public Main(string[] files)
 	{
@@ -137,6 +136,6 @@ public class Main
             Debug.WriteLine("usage: parserTester XMLfile");
             return;
         }
-       Main test = new Main(args);
+        Main test = new Main(args);
     }
 }

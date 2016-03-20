@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Xml;
 
@@ -53,9 +54,9 @@ namespace com.dalsemi.onewire.application.tag
 		  // Instantiate deviceList and clusterStack
 		  deviceList = new List<TaggedDevice>();
 		  clusterStack = new Stack(); // keep track of clusters
-		  branchStack = new Stack(); // keep track of current branches
+		  branchStack = new Stack<TaggedDevice>(); // keep track of current branches
 		  branchVector = new List<TaggedDevice>(); // keep track of every branch
-		  branchVectors = new List<Stack>(); // keep a vector of cloned branchStacks
+		  branchVectors = new List<Stack<TaggedDevice>>(); // keep a vector of cloned branchStacks
 										 // to use in making the OWPaths Vector
 		  branchPaths = new List<OWPath>(); // keep track of OWPaths
 	   }
@@ -70,7 +71,7 @@ namespace com.dalsemi.onewire.application.tag
 		  // OWPaths from the TaggedDevice's vector of Branches.
 		  TaggedDevice device;
 		  OWPath branchPath;
-		  List<Stack> singleBranchVector;
+		  Stack<TaggedDevice> singleBranchVector;
 
 		  for (int i = 0; i < deviceList.Count; i++)
 		  {
@@ -84,11 +85,11 @@ namespace com.dalsemi.onewire.application.tag
 
 		  for (int i = 0; i < branchVectors.Count; i++)
 		  {
-			 singleBranchVector = (List<Stack>) branchVectors[i].Clone();
+			 singleBranchVector = branchVectors.ElementAt(i);
 			 branchPath = new OWPath(adapter);
 			 for (int j = 0; j < singleBranchVector.Count; j++)
 			 {
-				device = (TaggedDevice) singleBranchVector.ToArray()[i].Clone();
+				device = (TaggedDevice) singleBranchVector.ElementAt(i);
 
 				branchPath.add(device.DeviceContainer, device.Channel);
 			 }
@@ -105,8 +106,6 @@ namespace com.dalsemi.onewire.application.tag
 	   /// </param>
 	   public virtual void startElement(string name, XmlReader reader)
 	   {
-		  currentElement = name; //save current element name
-
 		  string attributeAddr = "null";
 		  string attributeType = "null";
 		  string className;
@@ -175,10 +174,12 @@ namespace com.dalsemi.onewire.application.tag
 			 currentDevice.setDeviceContainer(adapter, attributeAddr);
 			 currentDevice.DeviceType = attributeType;
 			 currentDevice.ClusterName = getClusterStackAsString(clusterStack, "/");
-			 currentDevice.Branches = branchStack.Clone() as List<TaggedDevice>; // copy branchStack to it's related object in TaggedDevice
+             // copy branchStack to it's related object in TaggedDevice
+             currentDevice.Branches = branchStack.Select(s => (TaggedDevice)s).ToList<TaggedDevice>();
 
-			 // ** do branch specific work here: **
-			 if (name.ToUpper().Equals("BRANCH"))
+
+                // ** do branch specific work here: **
+                if (name.ToUpper().Equals("BRANCH"))
 			 {
 				// push the not-quite-finished branch TaggedDevice on the branch stack.
 				branchStack.Push(currentDevice);
@@ -230,7 +231,7 @@ namespace com.dalsemi.onewire.application.tag
 
 		  if (name.ToUpper().Equals("BRANCH"))
 		  {
-			 branchVectors.Add((Stack)branchStack.Clone()); // adds a snapshot of
+			 branchVectors.Add(branchStack); // adds a snapshot of
 															// the stack to 
 															// make OWPaths later
 
@@ -407,21 +408,18 @@ namespace com.dalsemi.onewire.application.tag
 	   {
           StringBuilder returnString = new StringBuilder();
 
-		  for (int j = 0; j < clusters.Count; j++)
+          for (int j = 0; j < clusters.Count; j++)
 		  {
-			 returnString.Append(separator + clusters.ToArray()[j]);
+              returnString.Append(separator);
+              returnString.Append(clusters.ToArray()[j]);
 		  }
 
-		  return returnString.ToString();
+          return returnString.ToString();
 	   }
 
 	   /// <summary>
 	   /// Field adapter </summary>
 	   private DSPortAdapter adapter;
-
-	   /// <summary>
-	   /// Field currentElement </summary>
-	   private string currentElement;
 
 	   /// <summary>
 	   /// Field currentDevice </summary>
@@ -437,7 +435,7 @@ namespace com.dalsemi.onewire.application.tag
 
 	   /// <summary>
 	   /// Field branchStack </summary>
-	   private Stack branchStack; // keep a stack of current branches
+	   private Stack<TaggedDevice> branchStack; // keep a stack of current branches
 
 	   /// <summary>
 	   /// Field branchVector </summary>
@@ -445,7 +443,7 @@ namespace com.dalsemi.onewire.application.tag
 
 	   /// <summary>
 	   /// Field branchVectors </summary>
-	   private List<Stack> branchVectors; // to hold all branches to eventually
+	   private List<Stack<TaggedDevice>> branchVectors; // to hold all branches to eventually
    									      // make OWPaths
 
 	   /// <summary>
