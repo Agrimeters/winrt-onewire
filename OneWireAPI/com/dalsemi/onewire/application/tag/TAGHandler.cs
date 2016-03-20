@@ -111,12 +111,11 @@ namespace com.dalsemi.onewire.application.tag
                 //}
                 //branchPaths.addElement(branchPath);
 
-             singleBranchVector = branchVectors.ElementAt(i);
-			 branchPath = new OWPath(adapter);
+             singleBranchVector = new Stack<TaggedDevice>(branchVectors[i]);
+             branchPath = new OWPath(adapter);
 			 for (int j = 0; j < singleBranchVector.Count; j++)
 			 {
-				device = (TaggedDevice) singleBranchVector.ElementAt(i);
-
+				device = singleBranchVector.ToArray()[j];
 				branchPath.add(device.DeviceContainer, device.Channel);
 			 }
 			 branchPaths.Add(branchPath);
@@ -211,12 +210,11 @@ namespace com.dalsemi.onewire.application.tag
 			 currentDevice.setDeviceContainer(adapter, attributeAddr);
 			 currentDevice.DeviceType = attributeType;
 			 currentDevice.ClusterName = getClusterStackAsString(clusterStack, "/");
-
-//			 currentDevice.Branches = branchStack.Clone() as List<TaggedDevice>; // copy branchStack to it's related object in TaggedDevice
+             // copy branchStack to it's related object in TaggedDevice
              currentDevice.Branches = branchStack.Select(s => (TaggedDevice)s).ToList<TaggedDevice>();
 
-                // ** do branch specific work here: **
-                if (name.Equals("branch"))
+             // ** do branch specific work here: **
+             if (name.Equals("branch"))
 			 {
 
 				// push the not-quite-finished branch TaggedDevice on the branch stack.
@@ -252,11 +250,12 @@ namespace com.dalsemi.onewire.application.tag
 
 		  if (name.ToUpper().Equals("BRANCH"))
 		  {
-			 branchVectors.Add(branchStack); // adds a snapshot of
-															// the stack to 
-															// make OWPaths later
+			 branchVectors.Add(new Stack<TaggedDevice>(branchStack));
+                // adds a snapshot of
+                // the stack to 
+                // make OWPaths later
 
-			 branchStack.Pop();
+             branchStack.Pop();
 
 			 currentDevice = null; // !!! not sure if this is needed.
 		  }

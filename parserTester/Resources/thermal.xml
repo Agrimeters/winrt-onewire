@@ -19,39 +19,39 @@
     <channel>2</channel>
     <init>0</init>
     <cluster name="DS2408 Demo">
-      <sensor addr="36000000000F2212" type="Level">
+      <sensor addr="B90000000012D829" type="Level">
         <label>Front Door Light</label>
         <max>Light is on</max>
         <min>Light is off</min>
         <channel>0</channel>
       </sensor>
-      <actuator addr="36000000000F2212" type="Switch">
+      <actuator addr="B90000000012D829" type="Switch">
         <label>Front Door Jam Contact Maker</label>
         <min>Open Circuit</min>
         <max>Make Contact</max>
         <channel>1</channel>
         <init>0</init>
       </actuator>
-      <sensor addr="36000000000F2212" type="Level">
+      <sensor addr="B90000000012D829" type="Level">
         <label>Regrigerator Door Light</label>
         <max>Light is on</max>
         <min>Light is off</min>
         <channel>2</channel>
       </sensor>
-      <actuator addr="36000000000F2212" type="Switch">
+      <actuator addr="B90000000012D829" type="Switch">
         <label>Contact Maker</label>
         <min>Open Circuit</min>
         <max>Make Contact</max>
         <channel>3</channel>
         <init>0</init>
       </actuator>
-      <sensor addr="36000000000F2212" type="Level">
+      <sensor addr="B90000000012D829" type="Level">
         <label>Gargage Door #1 Light</label>
         <max>Light is on</max>
         <min>Light is off</min>
         <channel>4</channel>
       </sensor>
-      <actuator addr="36000000000F2212" type="Switch">
+      <actuator addr="B90000000012D829" type="Switch">
         <label>Garage Door #1 Sensor</label>
         <min>Open Circuit</min>
         <max>Make Contact</max>

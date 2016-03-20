@@ -85,12 +85,11 @@ namespace com.dalsemi.onewire.application.tag
 
 		  for (int i = 0; i < branchVectors.Count; i++)
 		  {
-			 singleBranchVector = branchVectors.ElementAt(i);
+             singleBranchVector = new Stack<TaggedDevice>(branchVectors[i]);
 			 branchPath = new OWPath(adapter);
 			 for (int j = 0; j < singleBranchVector.Count; j++)
 			 {
-				device = (TaggedDevice) singleBranchVector.ElementAt(i);
-
+				device = singleBranchVector.ToArray()[j];
 				branchPath.add(device.DeviceContainer, device.Channel);
 			 }
 			 branchPaths.Add(branchPath);
@@ -229,9 +228,8 @@ namespace com.dalsemi.onewire.application.tag
 
 		  if (name.ToUpper().Equals("BRANCH"))
 		  {
-			 branchVectors.Add(branchStack); // adds a snapshot of
-															// the stack to 
-															// make OWPaths later
+             // adds a snapshot of the stack to make OWPaths later
+			 branchVectors.Add(new Stack<TaggedDevice>(branchStack));
 			 branchStack.Pop();
 			 currentDevice = null; // !!! not sure if this is needed.
 		  }
