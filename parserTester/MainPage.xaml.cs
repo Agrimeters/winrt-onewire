@@ -27,7 +27,7 @@ namespace parserTester
             this.InitializeComponent();
             string[] args = new string[]
             {
-                //"parserTester.Resources.a2d.xml",
+                "parserTester.Resources.d2a.xml",
                 "parserTester.Resources.contact.xml",
                 "parserTester.Resources.event.xml",
                 "parserTester.Resources.humidity.xml",

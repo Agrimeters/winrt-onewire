@@ -424,15 +424,7 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// <param name="msTime"> number of milliseconds to sleep </param>
 	   protected internal virtual void msSleep(long msTime)
 	   {
-		  Thread.@yield();
-		  try
-		  {
-			 Thread.Sleep(msTime);
-		  }
-		  catch (InterruptedException)
-		  {
-			  ;
-		  }
+          Thread.Sleep(msTime);
 	   }
 
 	   //--------

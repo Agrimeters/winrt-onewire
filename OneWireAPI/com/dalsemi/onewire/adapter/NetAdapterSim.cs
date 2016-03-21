@@ -76,7 +76,7 @@ namespace com.dalsemi.onewire.adapter
     /// 
     /// @author SH
     /// @version    1.00, 9 Jan 2002 </seealso>
-    public class NetAdapterSim : NetAdapterConstants
+    public class NetAdapterSim : NetAdapterConstants, IDisposable
     {
 	   protected internal static bool SIM_DEBUG = false;
 
@@ -93,8 +93,8 @@ namespace com.dalsemi.onewire.adapter
         //protected internal string execCommand;
 
  	    protected internal Object process; //Process
-        protected internal System.IO.StreamReader processOutput = null;
-        protected internal System.IO.StreamWriter processInput = null;
+        protected internal StreamReader processOutput = null;
+        protected internal StreamWriter processInput = null;
 
 
        /// <summary>
@@ -1877,6 +1877,28 @@ namespace com.dalsemi.onewire.adapter
           t.Wait();
 
           System.Diagnostics.Debug.WriteLine("NetAdapter Host Started");
+        }
+
+        ~NetAdapterSim()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (processOutput != null)
+                    processOutput.Dispose();
+                if (processInput != null)
+                    processInput.Dispose();
+            }
         }
     }
 

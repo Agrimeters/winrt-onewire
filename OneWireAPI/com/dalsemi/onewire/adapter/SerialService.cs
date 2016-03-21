@@ -9,7 +9,7 @@ using Windows.Storage.Streams;
 
 namespace com.dalsemi.onewire.adapter
 {
-    internal partial class SerialService
+    internal partial class SerialService : IDisposable
     {
         private const bool DEBUG = false;
         /// <summary>
@@ -512,14 +512,7 @@ namespace com.dalsemi.onewire.adapter
             }
             catch (Exception e)
             {
-                // close the port if we have an object
-                if (serialPort != null)
-                {
-                    serialPort.Dispose();
-                }
-
-                serialPort = null;
-
+                this.Close();
                 throw new System.IO.IOException("Failed to open (" + comPortName + ") :" + e);
             }
         }
@@ -562,7 +555,7 @@ namespace com.dalsemi.onewire.adapter
                     }
                     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
-                    serialPort.Dispose();
+                    this.Close();
                 }
                 else
                 {
@@ -571,8 +564,36 @@ namespace com.dalsemi.onewire.adapter
                     {
                         Debug.WriteLine("SerialService.closePortByThreadID(Thread): can't close port, owned by another thread");
                     }
+                    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
                 }
-                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+            }
+        }
+
+        ~SerialService()
+        {
+            Dispose(false);
+        }
+
+        public void Close()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (serialPort != null)
+                {
+                    serialPort.Dispose();
+                    serialPort = null;
+                }
             }
         }
 

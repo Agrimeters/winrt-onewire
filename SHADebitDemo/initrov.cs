@@ -74,12 +74,8 @@ public class initrov
 	  long coprID = 0;
 
       // attempt to open the sha.properties file
-      try
-      {
-          sha_properties = new Properties();
-          sha_properties.loadLocalFile("sha.properties");
-      }
-      catch (Exception)
+      sha_properties = new Properties();
+      if(!sha_properties.loadLocalFile("sha.properties"))
       {
           Debug.WriteLine("loading default sha.properties!");
           Assembly asm = typeof(SHADebitDemo.MainPage).GetTypeInfo().Assembly;

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Threading;
 
 namespace com.dalsemi.onewire
 {
@@ -6,12 +6,7 @@ namespace com.dalsemi.onewire
     {
         public static void Sleep (long ms)
         {
-            new System.Threading.ManualResetEvent(false).WaitOne((int)ms);
-        }
-
-        public static void yield()
-        {
-            new System.Threading.ManualResetEvent(false).WaitOne(1);
+            new ManualResetEvent(false).WaitOne((int)ms);
         }
     }
 }

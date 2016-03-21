@@ -400,7 +400,6 @@ public class ADContainerDemo1
 			   case 8 :
 				  cleanup();
 				  return;
-				  break;
 			}
 		 }
 		 catch (Exception e)

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Usb;
 using Windows.Devices.Enumeration;
-using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -34,18 +37,12 @@ using System.Diagnostics;
 
 namespace com.dalsemi.onewire.adapter
 {
+    // imports
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.utils;
+
     using ErrorResult = UsbAdapterIo.ErrorResult;
 
-    // imports
-    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-    using com.dalsemi.onewire.utils;
-    using System.Collections.Generic;
-    using Windows.Storage.Streams;
-    using System.Text;
-    using System.IO;
-    using Windows.Foundation;
-    using System.Threading;
-    
     /// <summary>
     /// <para>This <code>DSPortAdapter</code> class was designed to be used for
     /// the iB-IDE's emulator.  The <code>DumbAdapter</code> allows
@@ -68,7 +65,7 @@ namespace com.dalsemi.onewire.adapter
     /// 
     /// @version    0.00, 16 Mar 2001
     /// @author     K </seealso>
-    public class UsbAdapter : DSPortAdapter
+    public class UsbAdapter : DSPortAdapter, IDisposable
     {
         //--------
         //-------- Variables
@@ -2039,6 +2036,44 @@ namespace com.dalsemi.onewire.adapter
 
 		  return true;
 	   }
-	}
+
+        ~UsbAdapter()
+        {
+            Dispose(false);
+        }
+
+        public void Close()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (UsbBuild != null)
+                {
+                    UsbBuild.Dispose();
+                    UsbBuild = null;
+                }
+
+                try
+                {
+                    freePort();
+                }
+                catch (Exception)
+                {
+                    ;
+                }
+            }
+        }
+
+    }
 
 }

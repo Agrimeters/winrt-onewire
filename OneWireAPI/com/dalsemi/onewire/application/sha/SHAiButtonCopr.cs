@@ -346,7 +346,7 @@ namespace com.dalsemi.onewire.application.sha
 			 fos.write(l_encCode);
 			 fos.write(_DS1961Scompatible?0x55:0x00);
 			 fos.Flush();
-			 fos.close();
+			 fos.Close();
 		  }
 		  catch (System.Exception ioe)
 		  {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Xml.Serialization;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -76,14 +75,12 @@ namespace com.dalsemi.onewire.application.tag
 	   /// Sets the device type for the tagged device.
 	   /// </summary>
 	   /// <param name="tType"> </param>
-       [XmlAttribute]
 	   public virtual string DeviceType { get; set; }
 
 	   /// <summary>
 	   /// Sets the label for the tagged device.
 	   /// </summary>
 	   /// <param name="Label"> </param>
-	   [XmlAttribute]
        public virtual string Label { get; set; }
 
 	   /// <summary>
@@ -102,7 +99,6 @@ namespace com.dalsemi.onewire.application.tag
 	   /// Sets the channel for the tagged device from an int.
 	   /// </summary>
 	   /// <param name="Channel"> </param>
-       [XmlAttribute]
 	   public virtual int Channel { get; set; }
 
 	   /// <summary>
@@ -181,14 +177,12 @@ namespace com.dalsemi.onewire.application.tag
 	   /// Gets the max string for the tagged device.
 	   /// </summary>
 	   /// <returns> String  Gets the max string </returns>
-       [XmlAttribute]
 	   public virtual string Max { get; set; }
 
 	   /// <summary>
 	   /// Gets the min string for the tagged device.
 	   /// </summary>
 	   /// <returns> String  Gets the min string </returns>
-       [XmlAttribute]
 	   public virtual string Min { get; set; }
 
 

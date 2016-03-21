@@ -213,7 +213,7 @@ public class OWFish1
 					 owfd = owfos.FD;
 					 syncFileDescriptor(owfd);
 					 // close the files
-					 owfos.close();
+					 owfos.Close();
                      fis.Dispose();
 					 break;
 				  case MAIN_COPYFROM:

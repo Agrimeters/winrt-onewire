@@ -1,7 +1,4 @@
-﻿os.arch=x64
-os.name=Windows
-os.version=10.0.10586
-#onewire.adapter.default=UsbAdapter
+﻿#onewire.adapter.default=UsbAdapter
 #onewire.port.default=USB\VID_04FA&PID_2490\6&f0f8e95&0&6
 onewire.adapter.default=DS9097U
 onewire.port.default=COM9

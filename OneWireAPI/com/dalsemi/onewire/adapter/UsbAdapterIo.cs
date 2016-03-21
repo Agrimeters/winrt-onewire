@@ -14,7 +14,7 @@ namespace com.dalsemi.onewire.adapter
     /// <summary>
     /// UsbAdapterIo class handles low level IO with USB device
     /// </summary>
-    public class UsbAdapterIo
+    public class UsbAdapterIo : IDisposable
     {
         /// <summary>
         /// Result code
@@ -652,5 +652,32 @@ namespace com.dalsemi.onewire.adapter
             EOS = 0x80
         }
 
+        ~UsbAdapterIo()
+        {
+            Dispose(false);
+        }
+
+        public void Close()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (ReadResultWait != null)
+                {
+                    ReadResultWait.Dispose();
+                    ReadResultWait = null;
+                }
+            }
+        }
     }
 }

@@ -488,18 +488,17 @@ namespace com.dalsemi.onewire
                 {
                     if (onewire_properties == null && onewire_properties_present)
                     {
-                        try
+                        onewire_properties = new Properties();
+
+                        if(onewire_properties.loadLocalFile("onewire.properties"))
                         {
-                            onewire_properties = new Properties();
-                            onewire_properties.loadLocalFile("onewire.properties");
+                            ret_str = onewire_properties.getProperty(propName);
                         }
-                        catch (Exception)
+                        else
                         {
                             onewire_properties = null;
                             onewire_properties_present = false;
                         }
-
-                        ret_str = onewire_properties.getProperty(propName);
                     }
 
                     if (onewire_properties != null && onewire_properties_present)
@@ -513,13 +512,9 @@ namespace com.dalsemi.onewire
                 {
                     if (onewire_defaults == null && onewire_defaults_present)
                     {
-                        try
-                        {
-                            onewire_defaults = new Properties();
-                            Assembly asm = typeof(OneWireAccessProvider).GetTypeInfo().Assembly;
-                            onewire_defaults.loadResourceFile(asm, "OneWireAPI.Resources.onewire_properties");
-                        }
-                        catch (Exception)
+                        onewire_defaults = new Properties();
+                        Assembly asm = typeof(OneWireAccessProvider).GetTypeInfo().Assembly;
+                        if(!onewire_defaults.loadResourceFile(asm, "OneWireAPI.Resources.onewire_properties"))
                         {
                             onewire_defaults = null;
                             onewire_defaults_present = false;

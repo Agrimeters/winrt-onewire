@@ -4,12 +4,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using Windows.Storage;
 
 namespace com.dalsemi.onewire
 {
     public class Properties
     {
+        /// <summary>
+        /// Enable/disable debug messages </summary>
+        private static bool doDebugMessages = false;
+
         /// <summary>
         /// property table
         /// </summary>
@@ -41,7 +46,10 @@ namespace com.dalsemi.onewire
                 {
                     if (st[0].StartsWith("#"))
                     {
-                        Debug.WriteLine("Commented out property >> " + st[0] + "=" + st[1]);
+                        if(doDebugMessages)
+                        {
+                            Debug.WriteLine("Commented out property >> " + st[0] + "=" + st[1]);
+                        }
                         continue;
                     }
 
@@ -49,7 +57,10 @@ namespace com.dalsemi.onewire
                 }
                 else if (st.Length > 2)
                 {
-                    Debug.WriteLine("Property ignored as it has more than one '='!");
+                    if (doDebugMessages)
+                    {
+                        Debug.WriteLine("Property ignored as it has more than one '='!");
+                    }
                     continue;
                 }
             };
@@ -59,46 +70,79 @@ namespace com.dalsemi.onewire
         /// Called to load property file from local folder on filesystem
         /// </summary>
         /// <param name="file"></param>
-        public async void loadLocalFile(string file)
+        public bool loadLocalFile(string file)
         {
+            bool result = false;
             StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-            Debug.WriteLine("Loading " + localFolder.Path + "\\" + file);
+            if (doDebugMessages)
+            {
+                Debug.WriteLine("Loading " + localFolder.Path + "\\" + file);
+            }
 
             if (File.Exists(localFolder.Path + "\\" + file))
             {
-                StorageFile localFile = await localFolder.GetFileAsync(file);
-                Stream stream = await localFile.OpenStreamForReadAsync();
+                StorageFile localFile = null;
+                Stream stream = null;
+                var t = Task.Run(async () =>
+                {
+                   localFile = await localFolder.GetFileAsync(file);
+                   stream = await localFile.OpenStreamForReadAsync();
+                });
+                t.Wait();
                 using (var reader = new StreamReader(stream))
                 {
-                    Debug.WriteLine("Loading " + localFolder.Path + "\\" + file);
+                    if (doDebugMessages)
+                    {
+                        Debug.WriteLine("Loading " + localFolder.Path + "\\" + file);
+                    }
                     loadTable(props, reader);
+                    result = true;
                 }
             }
             else
             {
-                throw new IOException("Did not find " + localFolder.Path + "\\" + file);
+                if (doDebugMessages)
+                {
+                    Debug.WriteLine("Did not find " + localFolder.Path + "\\" + file);
+                }
             }
+            return result;
         }
 
         /// <summary>
         /// Load property file from the OneWireAPI assembly
         /// </summary>
         /// <param name="resource_file"></param>
-        public void loadResourceFile(Assembly asm, string file)
+        public bool loadResourceFile(Assembly asm, string file)
         {
+            bool result = false;
+            Stream stream = null;
+            StreamReader reader = null;
             try
             {
-                using (Stream stream = asm.GetManifestResourceStream(file))
-                using (StreamReader reader = new StreamReader(stream))
+                stream = asm.GetManifestResourceStream(file);
+                reader = new StreamReader(stream);
+                if (doDebugMessages)
                 {
                     Debug.WriteLine("Loading resource: " + file);
-                    loadTable(props, reader);
                 }
+                loadTable(props, reader);
+                result = true;
             }
             catch(Exception)
             {
-                throw new IOException("Can't find resource: " + file);
+                if (doDebugMessages)
+                {
+                    Debug.WriteLine("Can't find resource: " + file);
+                }
             }
+
+            if(stream != null)
+            {
+                stream.Dispose();
+                stream = null;
+            }
+            return result;
         }
 
         /// <summary>

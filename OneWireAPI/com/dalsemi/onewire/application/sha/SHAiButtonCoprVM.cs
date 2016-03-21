@@ -480,7 +480,7 @@ namespace com.dalsemi.onewire.application.sha
 				}
 			 }
 			 fos.Flush();
-			 fos.close();
+			 fos.Close();
 
 			 return true;
 		  }

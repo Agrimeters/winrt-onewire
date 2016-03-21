@@ -44,7 +44,7 @@ namespace com.dalsemi.onewire.adapter
 	///  @version    0.00, 1 Mar 2016
 	///  @author     JW
 	/// </summary>
-	internal class UsbPacketBuilder
+	internal class UsbPacketBuilder : IDisposable
 	{
 
 	   //--------
@@ -903,6 +903,34 @@ namespace com.dalsemi.onewire.adapter
 			 bitBuffer [byte_number] &= (byte)(~(0x01 << bit_number));
 		  }
 	   }
+
+       ~UsbPacketBuilder()
+       {
+          Dispose(false);
+       }
+
+       public void Close()
+       {
+          Dispose();
+       }
+
+       public void Dispose()
+       {
+          Dispose(true);
+          System.GC.SuppressFinalize(this);
+       }
+
+       protected virtual void Dispose(bool disposing)
+       {
+          if(disposing)
+          {
+             if (packet != null)
+             {
+                packet.Dispose();
+                packet = null;
+             }
+          }
+       }
 	}
 
 }

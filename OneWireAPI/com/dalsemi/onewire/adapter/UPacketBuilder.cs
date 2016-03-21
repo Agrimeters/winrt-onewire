@@ -34,7 +34,7 @@ namespace com.dalsemi.onewire.adapter
 {
 
 	// imports
-	using Address = com.dalsemi.onewire.utils.Address;
+	using com.dalsemi.onewire.utils;
 
 
 	/// <summary>
@@ -44,7 +44,7 @@ namespace com.dalsemi.onewire.adapter
 	///  @version    0.00, 28 Aug 2000
 	///  @author     DS
 	/// </summary>
-	internal class UPacketBuilder
+	internal class UPacketBuilder : IDisposable
 	{
 
 	   //--------
@@ -1080,6 +1080,34 @@ namespace com.dalsemi.onewire.adapter
 			 bitBuffer [byte_number] &= (byte)(~(0x01 << bit_number));
 		  }
 	   }
-	}
+
+        ~UPacketBuilder()
+        {
+            Dispose(false);
+        }
+
+        public void Close()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (packet != null)
+                { 
+                    packet.Dispose();
+                    packet = null;
+                }
+            }
+        }
+    }
 
 }

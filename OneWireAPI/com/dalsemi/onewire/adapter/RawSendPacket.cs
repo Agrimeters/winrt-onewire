@@ -1,8 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using Windows.Storage.Streams;
-
-//TODO add Dispose...
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -41,7 +40,7 @@ namespace com.dalsemi.onewire.adapter
 	///  @version    0.00, 28 Aug 2000
 	///  @author     DS
 	/// </summary>
-	internal class RawSendPacket
+	internal class RawSendPacket : IDisposable
 	{
 
 	   //--------
@@ -51,8 +50,8 @@ namespace com.dalsemi.onewire.adapter
 	   /// <summary>
 	   /// StringBuffer of bytes to send
 	   /// </summary>
-       public MemoryStream buffer;
-       public BinaryWriter writer;
+       public MemoryStream buffer = null;
+       public BinaryWriter writer = null;
 
 	   /// <summary>
 	   /// Expected length of return packet
@@ -72,6 +71,39 @@ namespace com.dalsemi.onewire.adapter
           writer = new BinaryWriter(buffer);
 		  returnLength = 0;
 	   }
+
+       ~RawSendPacket()
+       {
+          Dispose(false);
+       }
+
+       public void Close()
+       {
+          Dispose();
+       }
+
+       public void Dispose()
+       {
+          Dispose(true);
+          System.GC.SuppressFinalize(this);
+       }
+
+       protected virtual void Dispose(bool disposing)
+       {
+          if(disposing)
+          {
+             if (buffer != null)
+             {
+                buffer.Dispose();
+                buffer = null;
+             }
+             if(writer != null)
+             {
+                writer.Dispose();
+                writer = null;
+             }
+          }
+       }
 	}
 
 }

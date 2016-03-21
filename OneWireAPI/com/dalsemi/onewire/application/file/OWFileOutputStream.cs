@@ -1,4 +1,7 @@
-﻿/*---------------------------------------------------------------------------
+﻿using System;
+using System.IO;
+
+/*---------------------------------------------------------------------------
  * Copyright (C) 2001 Dallas Semiconductor Corporation, All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -27,9 +30,7 @@
 
 namespace com.dalsemi.onewire.application.file
 {
-    using System;
-    using System.IO;
-    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
+    using com.dalsemi.onewire.container;
 
 
     /// <summary>
@@ -118,7 +119,7 @@ namespace com.dalsemi.onewire.application.file
     /// <seealso cref=     com.dalsemi.onewire.application.file.OWFile </seealso>
     /// <seealso cref=     com.dalsemi.onewire.application.file.OWFileDescriptor </seealso>
     /// <seealso cref=     com.dalsemi.onewire.application.file.OWFileInputStream </seealso>
-    public class OWFileOutputStream : System.IO.Stream
+    public class OWFileOutputStream : System.IO.Stream, IDisposable
 	{
 
 	   //--------
@@ -426,26 +427,6 @@ namespace com.dalsemi.onewire.application.file
 		  }
 	   }
 
-	   /// <summary>
-	   /// Closes this file output stream and releases any system resources
-	   /// associated with this stream. This file output stream may no longer
-	   /// be used for writing bytes.
-	   /// </summary>
-	   /// <exception cref="IOException">  if an I/O error occurs. </exception>
-	   public virtual void close()
-	   {
-		  if (fd != null)
-		  {
-			 fd.close();
-		  }
-		  else
-		  {
-			 throw new System.IO.IOException("1-Wire FileDescriptor is null");
-		  }
-
-		  fd = null;
-	   }
-
         public override void Flush()
         {
             throw new NotImplementedException();
@@ -481,7 +462,7 @@ namespace com.dalsemi.onewire.application.file
         /// <exception cref="IOException">  if an I/O error occurs. </exception>
         /// <seealso cref=        com.dalsemi.onewire.application.file.OWFileDescriptor </seealso>
         public virtual OWFileDescriptor FD
-	   {
+	    {
 		   get
 		   {
 			  if (fd != null)
@@ -493,7 +474,7 @@ namespace com.dalsemi.onewire.application.file
 				 throw new System.IO.IOException("1-Wire FileDescriptor is null");
 			  }
 		   }
-	   }
+	    }
 
         public override bool CanRead
         {
@@ -548,12 +529,31 @@ namespace com.dalsemi.onewire.application.file
         /// <exception cref="IOException">  if an I/O error occurs. </exception>
         /// <seealso cref=        com.dalsemi.onewire.application.file.OWFileInputStream#close() </seealso>
         ~OWFileOutputStream()
-	   {
-		  if (fd != null)
-		  {
-			 fd.close();
-		  }
-	   }
-	}
+	    {
+           Dispose(false);
+	    }
+
+        /// <summary>
+        /// Closes this file output stream and releases any system resources
+        /// associated with this stream. This file output stream may no longer
+        /// be used for writing bytes.
+        /// </summary>
+        public void Close()
+        {
+            Dispose();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                if (fd != null)
+                {
+                    fd.close();
+                }
+            }
+        }
+    }
 
 }

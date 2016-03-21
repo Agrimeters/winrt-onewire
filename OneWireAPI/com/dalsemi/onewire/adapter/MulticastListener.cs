@@ -43,7 +43,7 @@ namespace com.dalsemi.onewire.adapter
 	/// @author SH
 	/// @version 1.00
 	/// </summary>
-	public class MulticastListener
+	public class MulticastListener : IDisposable
 	{
 	   /// <summary>
 	   /// boolean flag to turn on debug messages </summary>
@@ -193,5 +193,32 @@ namespace com.dalsemi.onewire.adapter
 
            socket.MessageReceived -= Multicast_MessageReceived;
        }
+
+        ~MulticastListener()
+        {
+            Dispose(false);
+        }
+
+        public void Close()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (waitPacketDone != null)
+                    waitPacketDone.Dispose();
+                if (socket != null) 
+                    socket.Dispose();
+            }
+        }
     }
 }

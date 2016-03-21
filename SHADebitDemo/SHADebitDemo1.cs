@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -47,7 +48,7 @@ public class SHADebitDemo1
 
    /// <summary>
    /// turns on DEBUG messages </summary>
-   internal const bool DEBUG = false;
+   internal const bool DEBUG = true;
 
     private static Properties sha_properties = null;
 
@@ -97,15 +98,13 @@ public class SHADebitDemo1
 			}
 
 			// attempt to open the sha.properties file
-			try
-			{
-               sha_properties = new Properties();
-               sha_properties.loadLocalFile("sha.properties");
-			}
-			catch (Exception)
-			{
-			   sha_properties = null;
-			}
+            sha_properties = new Properties();
+            if(!sha_properties.loadLocalFile("sha.properties"))
+            {
+               Debug.WriteLine("loading default sha.properties!");
+               Assembly asm = typeof(SHADebitDemo.MainPage).GetTypeInfo().Assembly;
+               sha_properties.loadResourceFile(asm, "SHADebitDemo.sha.properties");
+            }
 		 }
 		 else
 		 {
@@ -633,9 +632,6 @@ public class SHADebitDemo1
 				  //update the main list of buttons
 				  buttons = temp;
 				  index = cIndex;
-
-				  //might as well play nice, every once in a while
-				  Thread.yield();
 
 				  //if user presses the enter key, we'll quit and clean up nicely
 //TODO				  applicationFinished = (System.in.available() > 0);

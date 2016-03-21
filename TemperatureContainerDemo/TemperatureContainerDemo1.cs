@@ -240,7 +240,6 @@ public class TemperatureContainerDemo1
 			   case 6 :
 				  cleanup();
 				  return;
-				  break;
 			} //switch
 		 }
 		 catch (Exception e)

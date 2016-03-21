@@ -76,7 +76,7 @@ namespace com.dalsemi.onewire.adapter
     /// 
     /// @author SH
     /// @version    1.00, 9 Jan 2002 </seealso>
-    public class NetAdapterHost : NetAdapterConstants
+    public class NetAdapterHost : NetAdapterConstants, IDisposable
     {
         /// <summary>
         /// random number generator, used to issue challenges to client </summary>
@@ -1343,5 +1343,34 @@ namespace com.dalsemi.onewire.adapter
             //   System.exit(1);
             //}
         }
+
+        ~NetAdapterHost()
+        {
+            Dispose(false);
+        }
+
+        public void Close()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (multicastListener != null)
+                {
+                    multicastListener.Dispose();
+                    multicastListener = null;
+                }
+            }
+        }
+
     }
 }

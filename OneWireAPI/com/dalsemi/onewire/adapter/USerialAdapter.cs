@@ -164,7 +164,7 @@ namespace com.dalsemi.onewire.adapter
     ///  @version    0.10, 24 Aug 2001
     ///  @author     DS
     ///  </seealso>
-    public class USerialAdapter : DSPortAdapter
+    public class USerialAdapter : DSPortAdapter, IDisposable
     {
 
         //--------
@@ -262,18 +262,6 @@ namespace com.dalsemi.onewire.adapter
         //--------
         //-------- Information Methods
         //--------
-
-        ~USerialAdapter()
-        {
-            try
-            {
-                freePort();
-            }
-            catch (Exception)
-            {
-                ;
-            }
-        }
 
         /// <summary>
         /// Cleans up the resources used by the thread argument.  If another
@@ -2917,6 +2905,44 @@ namespace com.dalsemi.onewire.adapter
                 maxBaud = 115200;
             }
         }
+
+        ~USerialAdapter()
+        {
+            Dispose(false);
+        }
+
+        public void Close()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (uBuild != null)
+                {
+                   uBuild.Dispose();
+                   uBuild = null;
+                }
+
+                try
+                {
+                    freePort();
+                }
+                catch (Exception)
+                {
+                    ;
+                }
+            }
+        }
+
     }
 
 }

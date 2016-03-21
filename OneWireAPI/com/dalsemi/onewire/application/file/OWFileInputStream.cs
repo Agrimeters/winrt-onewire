@@ -1,4 +1,7 @@
-﻿/*---------------------------------------------------------------------------
+﻿using System;
+using System.IO;
+
+/*---------------------------------------------------------------------------
  * Copyright (C) 2001 Dallas Semiconductor Corporation, All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -27,9 +30,7 @@
 
 namespace com.dalsemi.onewire.application.file
 {
-    using System;
-    using System.IO;
-    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
+    using com.dalsemi.onewire.container;
 
     /// <summary>
     /// A <code>OWFileInputStream</code> obtains input bytes
@@ -80,7 +81,7 @@ namespace com.dalsemi.onewire.application.file
     /// <seealso cref=     com.dalsemi.onewire.application.file.OWFile </seealso>
     /// <seealso cref=     com.dalsemi.onewire.application.file.OWFileDescriptor </seealso>
     /// <seealso cref=     com.dalsemi.onewire.application.file.OWFileOutputStream </seealso>
-    public class OWFileInputStream : System.IO.Stream
+    public class OWFileInputStream : Stream, IDisposable
 	{
 
 	   //--------
@@ -478,45 +479,64 @@ namespace com.dalsemi.onewire.application.file
         /// <exception cref="IOException">  if an I/O error occurs. </exception>
         /// <seealso cref=        com.dalsemi.onewire.application.file.OWFileInputStream#close() </seealso>
         ~OWFileInputStream()
-	   {
-		  if (fd != null)
-		  {
-			 fd.close();
-		  }
-	   }
+        {
+            Dispose(false);
+        }
 
-	   //--------
-	   //-------- Mark Methods
-	   //--------
+        /// <summary>
+        /// Closes this file output stream and releases any system resources
+        /// associated with this stream. This file output stream may no longer
+        /// be used for writing bytes.
+        /// </summary>
+        public void Close()
+        {
+            Dispose();
+        }
 
-	   /// <summary>
-	   /// Marks the current position in this input stream. A subsequent call to
-	   /// the <code>reset</code> method repositions this stream at the last marked
-	   /// position so that subsequent reads re-read the same bytes.
-	   /// 
-	   /// <para> The <code>readlimit</code> arguments tells this input stream to
-	   /// allow that many bytes to be read before the mark position gets
-	   /// invalidated.
-	   /// 
-	   /// </para>
-	   /// <para> The general contract of <code>mark</code> is that, if the method
-	   /// <code>markSupported</code> returns <code>true</code>, the stream somehow
-	   /// remembers all the bytes read after the call to <code>mark</code> and
-	   /// stands ready to supply those same bytes again if and whenever the method
-	   /// <code>reset</code> is called.  However, the stream is not required to
-	   /// remember any data at all if more than <code>readlimit</code> bytes are
-	   /// read from the stream before <code>reset</code> is called.
-	   /// 
-	   /// </para>
-	   /// <para> The <code>mark</code> method of <code>InputStream</code> does
-	   /// nothing.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="readlimit">   the maximum limit of bytes that can be read before
-	   ///                      the mark position becomes invalid. </param>
-	   /// <seealso cref=     java.io.InputStream#reset() </seealso>
-	   public virtual void mark(int readlimit)
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                if (fd != null)
+                {
+                    fd.close();
+                }
+            }
+        }
+
+        //--------
+        //-------- Mark Methods
+        //--------
+
+        /// <summary>
+        /// Marks the current position in this input stream. A subsequent call to
+        /// the <code>reset</code> method repositions this stream at the last marked
+        /// position so that subsequent reads re-read the same bytes.
+        /// 
+        /// <para> The <code>readlimit</code> arguments tells this input stream to
+        /// allow that many bytes to be read before the mark position gets
+        /// invalidated.
+        /// 
+        /// </para>
+        /// <para> The general contract of <code>mark</code> is that, if the method
+        /// <code>markSupported</code> returns <code>true</code>, the stream somehow
+        /// remembers all the bytes read after the call to <code>mark</code> and
+        /// stands ready to supply those same bytes again if and whenever the method
+        /// <code>reset</code> is called.  However, the stream is not required to
+        /// remember any data at all if more than <code>readlimit</code> bytes are
+        /// read from the stream before <code>reset</code> is called.
+        /// 
+        /// </para>
+        /// <para> The <code>mark</code> method of <code>InputStream</code> does
+        /// nothing.
+        /// 
+        /// </para>
+        /// </summary>
+        /// <param name="readlimit">   the maximum limit of bytes that can be read before
+        ///                      the mark position becomes invalid. </param>
+        /// <seealso cref=     java.io.InputStream#reset() </seealso>
+        public virtual void mark(int readlimit)
 	   {
 		  if (fd != null)
 		  {
