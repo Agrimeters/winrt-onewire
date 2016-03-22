@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
-using com.dalsemi.onewire.adapter;
 using com.dalsemi.onewire;
+using com.dalsemi.onewire.adapter;
 using com.dalsemi.onewire.application.tag;
 using com.dalsemi.onewire.utils;
 

@@ -99,7 +99,7 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Enable/disable debug messages </summary>
-	   private const bool doDebugMessages = true;
+	   private const bool doDebugMessages = false;
 
 	   //--------
 	   //-------- Variables

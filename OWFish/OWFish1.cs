@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -30,19 +32,11 @@ using System.Diagnostics;
  *---------------------------------------------------------------------------
  */
 
-using OneWireException = com.dalsemi.onewire.OneWireException;
-using OneWireAccessProvider = com.dalsemi.onewire.OneWireAccessProvider;
-using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
-using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-using OWFileDescriptor = com.dalsemi.onewire.application.file.OWFileDescriptor;
-using OWFileInputStream = com.dalsemi.onewire.application.file.OWFileInputStream;
-using OWFileOutputStream = com.dalsemi.onewire.application.file.OWFileOutputStream;
-using OWFile = com.dalsemi.onewire.application.file.OWFile;
-using OWSyncFailedException = com.dalsemi.onewire.application.file.OWSyncFailedException;
-using MemoryBank = com.dalsemi.onewire.container.MemoryBank;
-using PagedMemoryBank = com.dalsemi.onewire.container.PagedMemoryBank;
-using System.IO;
-using System.Reflection;
+using com.dalsemi.onewire;
+using com.dalsemi.onewire.adapter;
+using com.dalsemi.onewire.container;
+using com.dalsemi.onewire.application.file;
+using Windows.Storage;
 
 /// <summary>
 /// Console application to demonstrate file IO on 1-Wire devices.
@@ -64,8 +58,8 @@ public class OWFish1
       long start_time, end_time;
       Stopwatch stopWatch = new Stopwatch();
       FileStream fos;
-	  FileStream fis;
-//TODO	  FileDescriptor fd;
+	  Stream fis;
+//	  FileDescriptor fd;
 	  OWFileOutputStream owfos;
 	  OWFileInputStream owfis;
 	  OWFileDescriptor owfd;
@@ -194,9 +188,10 @@ public class OWFish1
 				  case MAIN_COPYTO:
 					 // system SOURCE file
 					 Debug.Write("Enter the path/file of the SOURCE file on the system: ");
-					 fis = new FileStream(getString(1), FileMode.Open, FileAccess.Read);
-					 // 1-Wire DESTINATION file
-					 Debug.Write("Enter the path/file of the DESTINATION on 1-Wire device: ");
+//TODO					 fis = new FileStream(getString(1), FileMode.Open, FileAccess.Read);
+                     fis = loadResourceFile(getString(1));
+                     // 1-Wire DESTINATION file
+                     Debug.Write("Enter the path/file of the DESTINATION on 1-Wire device: ");
 					 owfos = new OWFileOutputStream(owd, getString(1));
 					 // start time of operation
 					 start_time = stopWatch.ElapsedMilliseconds;
@@ -222,7 +217,9 @@ public class OWFish1
 					 owfis = new OWFileInputStream(owd, getString(1));
 					 // system DESTINATION file
 					 Debug.Write("Enter the path/file of the DESTINATION on system: ");
-					 fos = new FileStream(getString(1), FileMode.Create, FileAccess.Write);
+                     StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+                     string outp = localFolder.Path + "\\" + getString(1);
+					 fos = new FileStream(outp, FileMode.Create, FileAccess.Write);
 					 // start time of operation
 					 start_time = stopWatch.ElapsedMilliseconds;
 					 // loop to copy block from SOURCE to DESTINATION
@@ -234,12 +231,10 @@ public class OWFish1
 						   fos.Write(block,0,len);
 						}
 					 } while (len > 0);
-					 // get 1-Wire File descriptor to flush to device
-//TODO					 fd = fos.FD;
-//TODO					 fd.sync();
+                     // get 1-Wire File descriptor to flush to device
+                     fos.Flush();
 					 // close the files
 					 owfis.close();
-                     fos.Flush();
                      fos.Dispose();
 					 break;
 				  case MAIN_CAT:
@@ -256,6 +251,7 @@ public class OWFish1
 						len = owfis.read(block);
 						if (len > 0)
 						{
+                           Debug.Write(System.Text.Encoding.UTF8.GetString(block));
                            com.dalsemi.onewire.debug.Debug.debug("file cat", block, 0, len);
 						}
 					 } while (len > 0);
@@ -495,7 +491,7 @@ public class OWFish1
 		 adapter.Speed = DSPortAdapter.SPEED_REGULAR;
 
 		 // enumerate through all the 1-Wire devices and collect them in a vector
-		 for (System.Collections.IEnumerator owd_enum = adapter.AllDeviceContainers; owd_enum.MoveNext();)
+		 for (IEnumerator owd_enum = adapter.AllDeviceContainers; owd_enum.MoveNext();)
 		 {
 			owd = (OneWireContainer)owd_enum.Current;
 			owd_vect.Add(owd);
@@ -543,7 +539,7 @@ public class OWFish1
 		 }
 
 		 // collect a list of re-writable devices
-		 for (System.Collections.IEnumerator bank_enum = owd.MemoryBanks; bank_enum.MoveNext();)
+		 for (IEnumerator bank_enum = owd.MemoryBanks; bank_enum.MoveNext();)
 		 {
 			// get the next memory bank
 			mb = (MemoryBank)bank_enum.Current;

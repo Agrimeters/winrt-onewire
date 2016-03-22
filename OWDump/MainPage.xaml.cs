@@ -27,8 +27,11 @@ namespace OWDump
             this.InitializeComponent();
 
             //string[] args = new string[] { "r", "TIME_TEST" };
-            string[] args = new string[] { "p", "TIME_TEST" };
-            //string[] args = new string[] { "k", "TIME_TEST" };
+            //string[] args = new string[] { "k", "TIME_TEST" }; //Fails on second read, as it's expecting status byte at offset 0, not the case...
+            //string[] args = new string[] { "p", "TIME_TEST" };
+            //string[] args = new string[] { "r" };
+            //string[] args = new string[] { "k" }; //Fails on second read, as it's expecting status byte at offset 0, not the case...
+            string[] args = new string[] { "p" };
 
             OWDump1.Main1(args);
         }

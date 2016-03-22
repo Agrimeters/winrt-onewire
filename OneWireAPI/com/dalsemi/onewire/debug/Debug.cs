@@ -79,6 +79,8 @@ namespace com.dalsemi.onewire.debug
                   StorageFolder localFolder = ApplicationData.Current.LocalFolder;
                   string logFilePath = localFolder.Path + "\\" + strtok[strtok.Length - 1].Trim();
 
+                  System.Diagnostics.Debug.WriteLine(logFilePath);
+
                   try
                   {
                       @out = new StreamWriter(new FileStream(logFilePath, FileMode.Create, FileAccess.Write));

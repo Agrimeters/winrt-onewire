@@ -106,7 +106,7 @@ namespace com.dalsemi.onewire.application.file
 
 	   /// <summary>
 	   /// Enable/disable debug messages </summary>
-	   private const bool doDebugMessages = true;
+	   private const bool doDebugMessages = false;
 
 	   //--------
 	   //-------- Variables
@@ -3653,8 +3653,16 @@ namespace com.dalsemi.onewire.application.file
 
 		  do
 		  {
-			 index = rawPath.IndexOf(OWFile.separator, last_index, StringComparison.Ordinal);
-			 name_len = 0;
+             if ((rawPath.Length - last_index) > 0)
+             {
+                index = rawPath.IndexOf(OWFile.separator, last_index, StringComparison.Ordinal);
+             }
+             else
+             {
+                index = -1;
+             }
+
+             name_len = 0;
 
 			 // check if this is the last field
 			 if ((index == -1) && (last_index < rawPath.Length))

@@ -31,7 +31,7 @@ namespace com.dalsemi.onewire.container
 {
 
 	// imports
-	using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
+	using com.dalsemi.onewire.adapter;
 	using com.dalsemi.onewire.utils;
 
 
