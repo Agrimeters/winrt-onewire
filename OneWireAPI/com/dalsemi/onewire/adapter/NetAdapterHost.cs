@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Threading;
+//using System.Diagnostics;
 using System.Text;
-using System.Diagnostics;
+using System.Threading.Tasks;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 
@@ -37,9 +37,9 @@ namespace com.dalsemi.onewire.adapter
 {
 
     using com.dalsemi.onewire;
+    using com.dalsemi.onewire.logging;
     using com.dalsemi.onewire.utils;
-    using System.Threading.Tasks;
-    using Windows.Networking.Sockets;
+
     /// <summary>
     /// <P>NetAdapterHost is the host (or server) component for a network-based
     /// DSPortAdapter.  It actually wraps the hardware DSPortAdapter and handles
@@ -454,7 +454,7 @@ namespace com.dalsemi.onewire.adapter
                 //{
                 // Don't limit traffic to an address or an adapter.
                 await this.serverSocket.BindServiceNameAsync(this.serviceName);
-                Debug.WriteLine("Listening");
+                OneWireEventSource.Log.Info("Listening");
                 //}
                 //else if (BindToAddress.IsChecked == true)
                 //{
@@ -489,7 +489,7 @@ namespace com.dalsemi.onewire.adapter
                     throw;
                 }
 
-                Debug.WriteLine("Start listening failed with error: " + exception.Message);
+                OneWireEventSource.Log.Critical("Start listening failed with error: " + exception.Message);
             }
         }
 
@@ -521,7 +521,7 @@ namespace com.dalsemi.onewire.adapter
             //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("\n------------------------------------------");
+                OneWireEventSource.Log.Debug("\n------------------------------------------");
             }
             //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
@@ -533,7 +533,7 @@ namespace com.dalsemi.onewire.adapter
             //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("CMD received: " + cmd.ToString("x"));
+                OneWireEventSource.Log.Debug("CMD received: " + cmd.ToString("x"));
             }
             //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
@@ -711,7 +711,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   findFirstDevice returned " + b);
+                OneWireEventSource.Log.Debug("   findFirstDevice returned " + b);
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -725,7 +725,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   findNextDevice returned " + b);
+                OneWireEventSource.Log.Debug("   findNextDevice returned " + b);
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -742,7 +742,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   adapter.getAddress(byte[]) called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("   adapter.getAddress(byte[]) called, speed=" + adapter.Speed);
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -754,7 +754,7 @@ namespace com.dalsemi.onewire.adapter
         {
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   setSearchOnlyAlarmingDevices called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("   setSearchOnlyAlarmingDevices called, speed=" + adapter.Speed);
             }
 
             adapter.setSearchOnlyAlarmingDevices();
@@ -767,7 +767,7 @@ namespace com.dalsemi.onewire.adapter
         {
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   setNoResetSearch called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("   setNoResetSearch called, speed=" + adapter.Speed);
             }
 
             adapter.setNoResetSearch();
@@ -780,7 +780,7 @@ namespace com.dalsemi.onewire.adapter
         {
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   setSearchAllDevices called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("   setSearchAllDevices called, speed=" + adapter.Speed);
             }
 
             adapter.setSearchAllDevices();
@@ -793,7 +793,7 @@ namespace com.dalsemi.onewire.adapter
         {
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   targetAllFamilies called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("   targetAllFamilies called, speed=" + adapter.Speed);
             }
 
             adapter.targetAllFamilies();
@@ -812,8 +812,8 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   targetFamily called, speed=" + adapter.Speed);
-                Debug.WriteLine("      families: " + Convert.toHexString(family));
+                OneWireEventSource.Log.Debug("   targetFamily called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      families: " + Convert.toHexString(family));
             }
 
             // call targetFamily
@@ -833,8 +833,8 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   excludeFamily called, speed=" + adapter.Speed);
-                Debug.WriteLine("      families: " + Convert.toHexString(family));
+                OneWireEventSource.Log.Debug("   excludeFamily called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      families: " + Convert.toHexString(family));
             }
 
             // call excludeFamily
@@ -852,7 +852,7 @@ namespace com.dalsemi.onewire.adapter
         {
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   adapter.beginExclusive called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("   adapter.beginExclusive called, speed=" + adapter.Speed);
             }
 
             // get blocking boolean
@@ -866,7 +866,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("      adapter.beginExclusive returned " + b);
+                OneWireEventSource.Log.Debug("      adapter.beginExclusive returned " + b);
             }
         }
 
@@ -874,7 +874,7 @@ namespace com.dalsemi.onewire.adapter
         {
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   adapter.endExclusive called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("   adapter.endExclusive called, speed=" + adapter.Speed);
             }
 
             // call endExclusive
@@ -894,7 +894,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   reset, speed=" + adapter.Speed + ", returned " + i);
+                OneWireEventSource.Log.Debug("   reset, speed=" + adapter.Speed + ", returned " + i);
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -909,8 +909,8 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   putBit called, speed=" + adapter.Speed);
-                Debug.WriteLine("      bit=" + bit);
+                OneWireEventSource.Log.Debug("   putBit called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      bit=" + bit);
             }
 
             adapter.putBit(bit);
@@ -926,8 +926,8 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   putByte called, speed=" + adapter.Speed);
-                Debug.WriteLine("      byte=" + Convert.toHexString(b));
+                OneWireEventSource.Log.Debug("   putByte called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      byte=" + Convert.toHexString(b));
             }
 
             adapter.putByte(b);
@@ -936,20 +936,19 @@ namespace com.dalsemi.onewire.adapter
             await conn.output.StoreAsync();
         }
 
-        private void adapterGetBit(NetAdapterConstants_Connection conn)
+        private async void adapterGetBit(NetAdapterConstants_Connection conn)
         {
-//TODO
-            //bool bit = this.Bit; //adapter
+            bool bit = adapter.getBit; //adapter
 
-            //if (NetAdapterConstants_Fields.DEBUG)
-            //{
-            //    Debug.WriteLine("   getBit called, speed=" + adapter.Speed);
-            //    Debug.WriteLine("      bit=" + bit);
-            //}
+            if (NetAdapterConstants_Fields.DEBUG)
+            {
+                OneWireEventSource.Log.Debug("   getBit called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      bit=" + bit);
+            }
 
-            //conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
-            //conn.output.WriteBoolean(bit);
-            //await conn.output.StoreAsync();
+            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteBoolean(bit);
+            await conn.output.StoreAsync();
         }
 
         private async void adapterGetByte(NetAdapterConstants_Connection conn)
@@ -958,8 +957,8 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   getByte called, speed=" + adapter.Speed);
-                Debug.WriteLine("      byte=" + Convert.toHexString((byte)b));
+                OneWireEventSource.Log.Debug("   getByte called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      byte=" + Convert.toHexString((byte)b));
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -972,8 +971,8 @@ namespace com.dalsemi.onewire.adapter
             int len = conn.input.ReadInt32();
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   getBlock called, speed=" + adapter.Speed);
-                Debug.WriteLine("      len=" + len);
+                OneWireEventSource.Log.Debug("   getBlock called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      len=" + len);
             }
 
             // get the bytes
@@ -981,7 +980,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("      returned: " + Convert.toHexString(b));
+                OneWireEventSource.Log.Debug("      returned: " + Convert.toHexString(b));
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -993,7 +992,7 @@ namespace com.dalsemi.onewire.adapter
         {
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   DataBlock called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("   DataBlock called, speed=" + adapter.Speed);
             }
             // get the number to block
             int len = conn.input.ReadInt32();
@@ -1003,8 +1002,8 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("      " + len + " bytes");
-                Debug.WriteLine("      Send: " + Convert.toHexString(b));
+                OneWireEventSource.Log.Debug("      " + len + " bytes");
+                OneWireEventSource.Log.Debug("      Send: " + Convert.toHexString(b));
             }
 
             // do the block
@@ -1012,7 +1011,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("      Recv: " + Convert.toHexString(b));
+                OneWireEventSource.Log.Debug("      Recv: " + Convert.toHexString(b));
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -1031,8 +1030,8 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   setPowerDuration called, speed=" + adapter.Speed);
-                Debug.WriteLine("      timeFactor=" + timeFactor);
+                OneWireEventSource.Log.Debug("   setPowerDuration called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      timeFactor=" + timeFactor);
             }
 
             // call setPowerDuration
@@ -1049,8 +1048,8 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   startPowerDelivery called, speed=" + adapter.Speed);
-                Debug.WriteLine("      changeCondition=" + changeCondition);
+                OneWireEventSource.Log.Debug("   startPowerDelivery called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      changeCondition=" + changeCondition);
             }
 
             // call startPowerDelivery
@@ -1068,8 +1067,8 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   setProgramPulseDuration called, speed=" + adapter.Speed);
-                Debug.WriteLine("      timeFactor=" + timeFactor);
+                OneWireEventSource.Log.Debug("   setProgramPulseDuration called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      timeFactor=" + timeFactor);
             }
 
             // call setProgramPulseDuration
@@ -1086,8 +1085,8 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   startProgramPulse called, speed=" + adapter.Speed);
-                Debug.WriteLine("      changeCondition=" + changeCondition);
+                OneWireEventSource.Log.Debug("   startProgramPulse called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      changeCondition=" + changeCondition);
             }
 
             // call startProgramPulse();
@@ -1102,7 +1101,7 @@ namespace com.dalsemi.onewire.adapter
         {
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   startBreak called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("   startBreak called, speed=" + adapter.Speed);
             }
 
             // call startBreak();
@@ -1116,7 +1115,7 @@ namespace com.dalsemi.onewire.adapter
         {
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   setPowerNormal called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("   setPowerNormal called, speed=" + adapter.Speed);
             }
 
             // call setPowerNormal
@@ -1137,8 +1136,8 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   setSpeed called, speed=" + adapter.Speed);
-                Debug.WriteLine("      speed=" + speed);
+                OneWireEventSource.Log.Debug("   setSpeed called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      speed=" + speed);
             }
 
             // do the setSpeed
@@ -1155,8 +1154,8 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   getSpeed called, speed=" + adapter.Speed);
-                Debug.WriteLine("      speed=" + speed);
+                OneWireEventSource.Log.Debug("   getSpeed called, speed=" + adapter.Speed);
+                OneWireEventSource.Log.Debug("      speed=" + speed);
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -1175,7 +1174,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   canOverdrive returned " + b);
+                OneWireEventSource.Log.Debug("   canOverdrive returned " + b);
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -1189,7 +1188,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   canHyperDrive returned " + b);
+                OneWireEventSource.Log.Debug("   canHyperDrive returned " + b);
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -1203,7 +1202,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   canFlex returned " + b);
+                OneWireEventSource.Log.Debug("   canFlex returned " + b);
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -1217,7 +1216,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   canProgram returned " + b);
+                OneWireEventSource.Log.Debug("   canProgram returned " + b);
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -1231,7 +1230,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   canDeliverPower returned " + b);
+                OneWireEventSource.Log.Debug("   canDeliverPower returned " + b);
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -1245,7 +1244,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   canDeliverSmartPower returned " + b);
+                OneWireEventSource.Log.Debug("   canDeliverSmartPower returned " + b);
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -1259,7 +1258,7 @@ namespace com.dalsemi.onewire.adapter
 
             if (NetAdapterConstants_Fields.DEBUG)
             {
-                Debug.WriteLine("   canBreak returned " + b);
+                OneWireEventSource.Log.Debug("   canBreak returned " + b);
             }
 
             conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
@@ -1327,10 +1326,10 @@ namespace com.dalsemi.onewire.adapter
 
             NetAdapterHost host = new NetAdapterHost(adapter, true);
 
-            Debug.WriteLine("Starting Multicast Listener");
+            OneWireEventSource.Log.Info("Starting Multicast Listener");
             host.createMulticastListener();
 
-            Debug.WriteLine("Starting NetAdapter Host");
+            OneWireEventSource.Log.Info("Starting NetAdapter Host");
             host.StartServer();
 
             while (true) { ; }

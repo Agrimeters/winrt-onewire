@@ -60,7 +60,6 @@ namespace nanoxml
     ///         &lt;<A HREF="mailto:Marc.DeScheemaecker@advalvas.be"
     ///         >Marc.DeScheemaecker@advalvas.be</A>&gt;
     /// @version 1.6 </seealso>
-//TODO    [Serializable]
     public class XMLElement
 	{
 
@@ -1668,8 +1667,6 @@ namespace nanoxml
 	   /// </summary>
 	   public virtual void write(TextWriter writer, int indent)
 	   {
-		  //TODO PrintWriter @out = new PrintWriter(writer);
-
 		  for (int i = 0; i < indent; i++)
 		  {
 				writer.Write(' ');

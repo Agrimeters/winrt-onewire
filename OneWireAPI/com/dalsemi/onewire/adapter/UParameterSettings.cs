@@ -65,7 +65,7 @@ namespace com.dalsemi.onewire.adapter
 
         /// <summary>
         /// Parameter selection, load </summary>
-//TODO        public const byte PARAMETER_LOAD = 0x06;
+        public const byte PARAMETER_LOAD = 0x06;
 
         /// <summary>
         /// Parameter selection, baud rate </summary>

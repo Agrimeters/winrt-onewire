@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
-using System.Threading;
-using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -34,8 +31,9 @@ using System.Diagnostics;
 namespace com.dalsemi.onewire.adapter
 {
 
-	// imports
-	using CRC8 = com.dalsemi.onewire.utils.CRC8;
+    // imports
+    using com.dalsemi.onewire.logging;
+	using com.dalsemi.onewire.utils;
 
 
 	/// <summary>
@@ -458,7 +456,7 @@ namespace com.dalsemi.onewire.adapter
 			 }
 			 catch (OneWireIOException e)
 			 {
-				Debug.WriteLine("DS9097EAdapter: Not detected " + e);
+                OneWireEventSource.Log.Critical("DS9097EAdapter: Not detected " + e);
 			 }
 			 finally
 			 {
@@ -1083,7 +1081,7 @@ namespace com.dalsemi.onewire.adapter
 		  {
 			 if (doDebugMessages)
 			 {
-				Debug.WriteLine("DS9097EAdapter: Not detected " + e);
+                OneWireEventSource.Log.Critical("DS9097EAdapter: Not detected " + e);
 			 }
 
 			 return RESET_NOPRESENCE;
@@ -1269,7 +1267,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		  if (!_adapterPresent)
 		  {
-			 byte[] test_buf = new byte[] { 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xe3, 0xc1, Convert.ToByte('A'), Convert.ToByte('T'), Convert.ToByte('E'), Convert.ToByte('0'), 0x0D, Convert.ToByte('A') };
+			 byte[] test_buf = new byte[] { 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xe3, 0xc1, System.Convert.ToByte('A'), System.Convert.ToByte('T'), System.Convert.ToByte('E'), System.Convert.ToByte('0'), 0x0D, System.Convert.ToByte('A') };
 
 			 try
 			 {

@@ -43,7 +43,7 @@ namespace com.dalsemi.onewire.application.monitor
 	/// @author SH
 	/// @version 1.00
 	/// </summary>
-	public class DeviceMonitorEvent //TODO : EventObject
+	public class DeviceMonitorEvent
 	{
 	   /// <summary>
 	   /// enum for arrival/departure event types </summary>
@@ -69,7 +69,7 @@ namespace com.dalsemi.onewire.application.monitor
 	   /// <param name="source"> The monitor which generated the event </param>
 	   /// <param name="adapter"> The DSPortAdapter the monitor was using </param>
 	   /// <param name="addresses"> Vector of addresses for devices </param>
-	   internal DeviceMonitorEvent(int eventType, AbstractDeviceMonitor source, DSPortAdapter adapter, List<long> addresses) //TODO : base(source)
+	   internal DeviceMonitorEvent(int eventType, AbstractDeviceMonitor source, DSPortAdapter adapter, List<long> addresses)
 	   {
 
 		  if (eventType != ARRIVAL && eventType != DEPARTURE)

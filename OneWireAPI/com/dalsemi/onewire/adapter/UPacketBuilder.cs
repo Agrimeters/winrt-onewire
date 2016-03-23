@@ -218,8 +218,7 @@ namespace com.dalsemi.onewire.adapter
 		  // restart the packet to initialize
 		  restart();
 
-          // Default on SunOS to bit-banging
-          //TODO bitsOnly = (System.Environment.GetEnvironmentVariable("os.name").IndexOf("SunOS") != -1);
+          // no bit banging supported
           bitsOnly = false;
 
 		  // check for a bits only property

@@ -1,9 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Diagnostics;
+using System.Text;
+using System.Threading.Tasks;
+using Windows.Networking;
+using Windows.Networking.Sockets;
+using Windows.Storage.Streams;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -36,11 +38,8 @@ namespace com.dalsemi.onewire.adapter
 {
 
     using com.dalsemi.onewire;
+    using com.dalsemi.onewire.logging;
     using com.dalsemi.onewire.utils;
-    using System.Threading.Tasks;
-    using Windows.Storage.Streams;
-    using Windows.Networking.Sockets;
-    using Windows.Networking;
 
     /// <summary>
     /// <P>NetAdapter is a network-based DSPortAdapter.  It allows for the use of
@@ -176,10 +175,10 @@ namespace com.dalsemi.onewire.adapter
 
 	   /// <summary>
 	   /// constant for no exclusive lock </summary>
-	   protected internal static readonly int? NOT_OWNED = new int?(0);
+	   protected internal static readonly int NOT_OWNED = 0;
 	   /// <summary>
 	   /// Keeps hash of current thread for exclusive lock </summary>
-	   protected internal int? currentThreadHash = NOT_OWNED;
+	   protected internal int currentThreadHash = NOT_OWNED;
 
 	   /// <summary>
 	   /// instance for current connection, defaults to EMPTY </summary>
@@ -492,8 +491,8 @@ namespace com.dalsemi.onewire.adapter
 					//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 					if (NetAdapterConstants_Fields.DEBUG)
 					{
-					   Debug.WriteLine("DEBUG: Opening multicast on port: " + datagramPort);
-					   Debug.WriteLine("DEBUG: joining group: " + multicastGroup);
+					   OneWireEventSource.Log.Debug("DEBUG: Opening multicast on port: " + datagramPort);
+                       OneWireEventSource.Log.Debug("DEBUG: joining group: " + multicastGroup);
 					}
 					//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
@@ -514,7 +513,7 @@ namespace com.dalsemi.onewire.adapter
                     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
                     if (NetAdapterConstants_Fields.DEBUG)
                     {
-                        Debug.WriteLine("DEBUG: waiting for multicast packets");
+                        OneWireEventSource.Log.Debug("DEBUG: waiting for multicast packets");
                     }
                     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
@@ -555,7 +554,7 @@ namespace com.dalsemi.onewire.adapter
 					}
 					catch (Exception)
 					{ //drain
-                        Debugger.Break();
+                        ;
                     }
 				 }
 			  }
@@ -597,7 +596,7 @@ namespace com.dalsemi.onewire.adapter
                 }
                 else
                 {
-                    Debugger.Break();
+                    ;
                 }
             }
             else
@@ -605,8 +604,8 @@ namespace com.dalsemi.onewire.adapter
                 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
                 if (NetAdapterConstants_Fields.DEBUG)
                 {
-                    Debug.WriteLine("DEBUG: packet.length=" + length);
-                    Debug.WriteLine("DEBUG: expecting=" + 5);
+                    OneWireEventSource.Log.Debug("DEBUG: packet.length=" + length);
+                    OneWireEventSource.Log.Debug("DEBUG: expecting=" + 5);
                 }
                 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
             }
@@ -1559,27 +1558,27 @@ namespace com.dalsemi.onewire.adapter
 	   /// <exception cref="OneWireException"> </exception>
 	   private bool beginExclusive()
 	   {
-//TODO		  lock (currentThreadHash)
+		  lock ((object)currentThreadHash)
 		  {
 			 if (currentThreadHash == NOT_OWNED)
 			 {
 				// not owned so take
-				currentThreadHash = new int?(Environment.CurrentManagedThreadId.GetHashCode());
+				currentThreadHash = Environment.CurrentManagedThreadId.GetHashCode();
 
 				// provided debug on standard out
 				if (NetAdapterConstants_Fields.DEBUG)
 				{
-				   Debug.WriteLine("beginExclusive, now owned by: " + System.Environment.CurrentManagedThreadId);
+				   OneWireEventSource.Log.Debug("beginExclusive, now owned by: " + Environment.CurrentManagedThreadId);
 				}
 
 				return true;
 			 }
-			 else if (currentThreadHash.Value == Environment.CurrentManagedThreadId.GetHashCode())
+			 else if (currentThreadHash == Environment.CurrentManagedThreadId.GetHashCode())
 			 {
 				// provided debug on standard out
 				if (NetAdapterConstants_Fields.DEBUG)
 				{
-				   Debug.WriteLine("beginExclusive, already owned by: " + Environment.CurrentManagedThreadId);
+				   OneWireEventSource.Log.Debug("beginExclusive, already owned by: " + Environment.CurrentManagedThreadId);
 				}
 
 				// already own
@@ -1600,14 +1599,14 @@ namespace com.dalsemi.onewire.adapter
 	   /// </summary>
 	   public override void endExclusive()
 	   {
-//TODO		  lock (currentThreadHash)
+		  lock ((object)currentThreadHash)
 		  {
 			 // if own then release
-			 if (currentThreadHash != NOT_OWNED && currentThreadHash.Value == Environment.CurrentManagedThreadId.GetHashCode())
+			 if (currentThreadHash != NOT_OWNED && currentThreadHash == Environment.CurrentManagedThreadId.GetHashCode())
 			 {
 				if (NetAdapterConstants_Fields.DEBUG)
 				{
-				   Debug.WriteLine("endExclusive, was owned by: " + Environment.CurrentManagedThreadId);
+				   OneWireEventSource.Log.Debug("endExclusive, was owned by: " + Environment.CurrentManagedThreadId);
 				}
 
 				currentThreadHash = NOT_OWNED;
@@ -1718,53 +1717,52 @@ namespace com.dalsemi.onewire.adapter
 		  }
 	   }
 
-	   /// <summary>
-	   /// Gets a bit from the 1-Wire Network.
-	   /// </summary>
-	   /// <returns>  the bit value recieved from the the 1-Wire Network.
-	   /// </returns>
-	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
-	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-//TODO
-	   //public override bool Bit
-	   //{
-		  // get
-		  // {
-			 // try
-			 // {
-				// lock (conn)
-				// {
-				//	// send getBit command
-				//	conn.output.WriteByte(NetAdapterConstants_Fields.CMD_GETBIT);
-    //                var t = Task.Run(async () =>
-    //                {
-    //                    await conn.output.StoreAsync();
-    //                });
-    //                t.Wait();
+        /// <summary>
+        /// Gets a bit from the 1-Wire Network.
+        /// </summary>
+        /// <returns>  the bit value recieved from the the 1-Wire Network.
+        /// </returns>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
+        /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
+        public override bool getBit
+        {
+            get
+            {
+                try
+                {
+                    lock (conn)
+                    {
+                        // send getBit command
+                        conn.output.WriteByte(NetAdapterConstants_Fields.CMD_GETBIT);
+                        var t = Task.Run(async () =>
+                        {
+                            await conn.output.StoreAsync();
+                        });
+                        t.Wait();
 
-    
-				//	// check return value for success
-				//	checkReturnValue(conn);
-    
-				//	// next parameter should be the return from getBit
-				//	return conn.input.ReadBoolean();
-				// }
-			 // }
-			 // catch (System.IO.IOException ioe)
-			 // {
-				// throw new OneWireException(COMM_FAILED + ioe.Message);
-			 // }
-		  // }
-	   //}
 
-	   /// <summary>
-	   /// Sends a byte to the 1-Wire Network.
-	   /// </summary>
-	   /// <param name="byteValue">  the byte value to send to the 1-Wire Network.
-	   /// </param>
-	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
-	   /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
-	   public override void putByte(int byteValue)
+                        // check return value for success
+                        checkReturnValue(conn);
+
+                        // next parameter should be the return from getBit
+                        return conn.input.ReadBoolean();
+                    }
+                }
+                catch (System.IO.IOException ioe)
+                {
+                    throw new OneWireException(COMM_FAILED + ioe.Message);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sends a byte to the 1-Wire Network.
+        /// </summary>
+        /// <param name="byteValue">  the byte value to send to the 1-Wire Network.
+        /// </param>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
+        /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
+        public override void putByte(int byteValue)
 	   {
 		  try
 		  {
@@ -1891,7 +1889,7 @@ namespace com.dalsemi.onewire.adapter
                 // next should be the bytes
                 if (off != 0)
                     Debugger.Break();
-				conn.input.ReadBytes(arr); //TODO off, len
+				conn.input.ReadBytes(arr);
              }
 		  }
 		  catch (System.IO.IOException ioe)
@@ -1916,7 +1914,7 @@ namespace com.dalsemi.onewire.adapter
 	   {
 		  if (NetAdapterConstants_Fields.DEBUG)
 		  {
-			 Debug.WriteLine("DataBlock called for " + len + " bytes");
+			 OneWireEventSource.Log.Debug("DataBlock called for " + len + " bytes");
 		  }
 		  try
 		  {
@@ -1950,7 +1948,7 @@ namespace com.dalsemi.onewire.adapter
 		  }
 		  if (NetAdapterConstants_Fields.DEBUG)
 		  {
-			 Debug.WriteLine("   Done DataBlocking");
+			 OneWireEventSource.Log.Debug("   Done DataBlocking");
 		  }
 	   }
 
@@ -2317,14 +2315,5 @@ namespace com.dalsemi.onewire.adapter
 			  return -1;
 		   }
 	   }
-
-//TODO
-        public override bool getBit
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
     }
 }

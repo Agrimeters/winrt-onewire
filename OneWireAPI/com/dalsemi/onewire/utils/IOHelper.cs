@@ -67,7 +67,7 @@ namespace com.dalsemi.onewire.utils
 		  }
 		  catch (System.Exception)
 		  {
-			Debug.WriteLine("IOHelper: Catastrophic Failure!");
+            Debug.WriteLine("IOHelper: Catastrophic Failure!");
 			//TODO Environment.Exit(1);
 		  }
 		  try

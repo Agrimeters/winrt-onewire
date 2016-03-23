@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -36,6 +35,7 @@ namespace com.dalsemi.onewire.adapter
 
     // imports
     using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.logging;
     using com.dalsemi.onewire.utils;
 
     /// <summary>
@@ -1572,7 +1572,7 @@ namespace com.dalsemi.onewire.adapter
 				}
 				catch (System.Exception e)
 				{
-				   Debug.WriteLine("EXCEPTION: Unable to load OneWireContainer" + e);
+                   OneWireEventSource.Log.Critical("EXCEPTION: Unable to load OneWireContainer" + e);
 				   return null;
 				}
 			 }
@@ -1589,10 +1589,9 @@ namespace com.dalsemi.onewire.adapter
 		  }
 		  catch (System.Exception e)
 		  {
-			 Debug.WriteLine("EXCEPTION: Unable to instantiate OneWireContainer " + ibutton_class + ": " + e);
-			 Debug.WriteLine(e.ToString());
-			 Debug.Write(e.StackTrace);
-
+             OneWireEventSource.Log.Critical("EXCEPTION: Unable to instantiate OneWireContainer " + ibutton_class + ": " + e);
+             OneWireEventSource.Log.Critical(e.ToString());
+             OneWireEventSource.Log.Critical(e.StackTrace);
 			 return null;
 		  }
 

@@ -34,23 +34,6 @@ namespace org.xml.sax
 	{
 
 	  /// <summary>
-	  /// Allow an application to request a locale for errors and warnings.
-	  ///  
-	  /// <para>SAX parsers are not required to provide localisation for errors
-	  /// and warnings; if they cannot support the requested locale,
-	  /// however, they must throw a SAX exception.  Applications may
-	  /// not request a locale change in the middle of a parse.</para>
-	  /// </summary>
-	  /// <param name="locale"> A Java Locale object. </param>
-	  /// <exception cref="org.xml.sax.SAXException"> Throws an exception
-	  ///            (using the previous or default locale) if the 
-	  ///            requested locale is not supported. </exception>
-	  /// <seealso cref= org.xml.sax.SAXException </seealso>
-	  /// <seealso cref= org.xml.sax.SAXParseException </seealso>
-//TODO	  Locale Locale {set;}
-
-
-	  /// <summary>
 	  /// Allow an application to register a custom entity resolver.
 	  ///  
 	  /// <para>If the application does not register an entity resolver, the

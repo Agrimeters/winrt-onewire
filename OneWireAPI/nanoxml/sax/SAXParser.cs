@@ -102,25 +102,6 @@ namespace nanoxml.sax
 
 
 	   /// <summary>
-	   /// Sets the locale. Only locales using the language english are accepted.
-	   /// </summary>
-	   /// <exception cref="org.xml.sax.SAXException">
-	   ///    if <CODE>locale</CODE> is <CODE>null</CODE> or the associated
-	   ///    language is not english. </exception>
-//TODO
-	   //public virtual Locale Locale
-	   //{
-		  // set
-		  // {
-			 // if ((value == null) || (!value.Language.Equals("en")))
-			 // {
-				//	throw new SAXException("NanoXML/SAX doesn't support locale: " + value);
-			 // }
-		  // }
-	   //}
-
-
-	   /// <summary>
 	   /// Sets the entity resolver. As the DTD is ignored, this resolver is never
 	   /// called.
 	   /// </summary>
@@ -260,7 +241,6 @@ namespace nanoxml.sax
 
 					  try
 					  {
-                            Uri url = new Uri(systemId);
 //TODO							stream = url.openStream();
 					  }
 					  catch (Exception)

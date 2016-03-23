@@ -108,11 +108,11 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// DS1920 copy data from scratchpad to EEPROM command </summary>
-	   private static readonly byte COPY_SCRATCHPAD_COMMAND = (byte) 0x48;
+	   private static readonly byte COPY_SCRATCHPAD_COMMAND = 0x48;
 
 	   /// <summary>
 	   /// DS1920 recall EEPROM command </summary>
-	   //TODO private static readonly byte RECALL_EEPROM_COMMAND = 0xB8;
+	   private static readonly byte RECALL_EEPROM_COMMAND = 0xB8;
 
 
 	   /// <summary>

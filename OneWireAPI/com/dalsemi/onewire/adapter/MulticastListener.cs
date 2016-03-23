@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading;
-using System.Diagnostics;
+using System.Threading.Tasks;
 using Windows.Networking;
 using Windows.Networking.Sockets;
-using System.Threading.Tasks;
 using Windows.Storage.Streams;
 
 /*---------------------------------------------------------------------------
@@ -34,6 +33,8 @@ using Windows.Storage.Streams;
  */
 namespace com.dalsemi.onewire.adapter
 {
+
+    using com.dalsemi.onewire.logging;
 
 	/// <summary>
 	/// Generic Mulitcast broadcast listener.  Listens for a specific message and,
@@ -91,9 +92,9 @@ namespace com.dalsemi.onewire.adapter
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  if (DEBUG)
 		  {
-			 Debug.WriteLine("DEBUG: Creating Multicast Listener");
-			 Debug.WriteLine("DEBUG:    Multicast port: " + multicastPort);
-			 Debug.WriteLine("DEBUG:    Multicast group: " + multicastGroup);
+			 OneWireEventSource.Log.Debug("DEBUG: Creating Multicast Listener");
+             OneWireEventSource.Log.Debug("DEBUG:    Multicast port: " + multicastPort);
+             OneWireEventSource.Log.Debug("DEBUG:    Multicast group: " + multicastGroup);
 		  }
           //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
@@ -117,7 +118,7 @@ namespace com.dalsemi.onewire.adapter
           //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
           if (DEBUG)
           {
-              Debug.WriteLine("DEBUG: waiting for multicast packet");
+              OneWireEventSource.Log.Debug("DEBUG: waiting for multicast packet");
           }
           //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
         }
@@ -133,8 +134,8 @@ namespace com.dalsemi.onewire.adapter
             //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
             if (DEBUG)
             {
-                Debug.WriteLine("DEBUG: packet.length=" + length);
-                Debug.WriteLine("DEBUG: expecting=" + expectedMessage.Length);
+                OneWireEventSource.Log.Debug("DEBUG: packet.length=" + length);
+                OneWireEventSource.Log.Debug("DEBUG: expecting=" + expectedMessage.Length);
             }
             //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
             try
@@ -153,7 +154,7 @@ namespace com.dalsemi.onewire.adapter
                         //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
                         if (DEBUG)
                         {
-                            Debug.WriteLine("DEBUG: packet match, replying");
+                            OneWireEventSource.Log.Debug("DEBUG: packet match, replying");
                         }
                         //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
@@ -168,13 +169,13 @@ namespace com.dalsemi.onewire.adapter
                 }
                 else
                 {
-                    Debug.WriteLine("Unknown packet length recieved: " + length);
+                    OneWireEventSource.Log.Critical("Unknown packet length recieved: " + length);
                 }
             }
             catch (System.IO.IOException)
             {
                 // drain
-                Debugger.Break();
+                ;
             }
             finally
             {

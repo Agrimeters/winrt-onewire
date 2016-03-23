@@ -264,25 +264,6 @@ namespace com.dalsemi.onewire.adapter
         //--------
 
         /// <summary>
-        /// Cleans up the resources used by the thread argument.  If another
-        /// thread starts communicating with this port, and then goes away,
-        /// there is no way to relinquish the port without stopping the
-        /// process. This method allows other threads to clean up.
-        /// </summary>
-        /// <param name="thread"> that may have used a <code>USerialAdapter</code> </param>
-#if false //TODO
-        public static void CleanUpByThread(Thread t)
-        {
-            if (doDebugMessages)
-            {
-                Debug.WriteLine("CleanUpByThread called: Thread=" + t);
-            }
-            SerialService.CleanUpByThread(t);
-        }
-#endif
-
-
-        /// <summary>
         /// Retrieve the name of the port adapter as a string.  The 'Adapter'
         /// is a device that connects to a 'port' that allows one to
         /// communicate with an iButton or other 1-Wire device.  As example
@@ -596,7 +577,7 @@ namespace com.dalsemi.onewire.adapter
                                 int i;
 
                                 // extended read memory command
-                                read_buffer[cnt++] = unchecked((byte)EXTENDED_READ_PAGE); //TODO - added unchecked
+                                read_buffer[cnt++] = (byte)EXTENDED_READ_PAGE;
 
                                 // address of first page
                                 read_buffer[cnt++] = 0;
