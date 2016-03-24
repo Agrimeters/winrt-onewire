@@ -33,13 +33,11 @@ namespace com.dalsemi.onewire.application.sha
 {
 
 
-	using OneWireContainer18 = com.dalsemi.onewire.container.OneWireContainer18;
-	using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
-	using IOHelper = com.dalsemi.onewire.utils.IOHelper;
-	using OWFile = com.dalsemi.onewire.application.file.OWFile;
-	using OWFileOutputStream = com.dalsemi.onewire.application.file.OWFileOutputStream;
-	using OWFileInputStream = com.dalsemi.onewire.application.file.OWFileInputStream;
-	using OWFileNotFoundException = com.dalsemi.onewire.application.file.OWFileNotFoundException;
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.application.file;
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.logging;
+    using com.dalsemi.onewire.utils;
 
 	/// <summary>
 	/// <P>Class for holding instances of SHA iButton Coprocessors involved in SHA
@@ -88,11 +86,6 @@ namespace com.dalsemi.onewire.application.sha
 	/// @author  SKH </seealso>
 	public class SHAiButtonCopr
 	{
-	   /// <summary>
-	   /// Turns on extra debugging output
-	   /// </summary>
-	   internal const bool DEBUG = true;
-
 	   // ***********************************************************************
 	   // Constants for Error codes
 	   // ***********************************************************************
@@ -367,37 +360,24 @@ namespace com.dalsemi.onewire.application.sha
 			 throw new OneWireException("Could not install authentication secret");
 		  }
 
-		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-		  if (DEBUG)
-		  {
-			 IOHelper.writeLine("------------------------------------");
-			 IOHelper.writeLine("Initialized Coprocessor");
-			 IOHelper.writeLine("address");
-			 IOHelper.writeBytesHex(l_owc.Address);
-			 IOHelper.writeLine("signPageNumber: " + l_signPageNumber);
-			 IOHelper.writeLine("authPageNumber: " + l_authPageNumber);
-			 IOHelper.writeLine("wspcPageNumber: " + l_wspcPageNumber);
-			 IOHelper.writeLine("serviceFilename");
-			 IOHelper.writeBytesHex(l_serviceFilename);
-			 IOHelper.writeLine("bindData");
-			 IOHelper.writeBytesHex(l_bindData);
-			 IOHelper.writeLine("bindCode");
-			 IOHelper.writeBytesHex(l_bindCode);
-			 IOHelper.writeLine("initialSignature");
-			 IOHelper.writeBytesHex(l_initialSignature);
-			 IOHelper.writeLine("signingChlg");
-			 IOHelper.writeBytesHex(l_signingChlg);
-			 IOHelper.writeLine("signingSecret");
-			 IOHelper.writeBytesHex(l_signingSecret);
-			 IOHelper.writeLine("authSecret");
-			 IOHelper.writeBytesHex(l_authSecret);
-			 IOHelper.writeLine("------------------------------------");
-		  }
-		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+          OneWireEventSource.Log.Debug("------------------------------------");
+          OneWireEventSource.Log.Debug("Initialized Coprocessor");
+          OneWireEventSource.Log.Debug("address: " + Convert.toHexString(l_owc.Address));
+          OneWireEventSource.Log.Debug("signPageNumber: " + l_signPageNumber);
+          OneWireEventSource.Log.Debug("authPageNumber: " + l_authPageNumber);
+          OneWireEventSource.Log.Debug("wspcPageNumber: " + l_wspcPageNumber);
+          OneWireEventSource.Log.Debug("serviceFilename: " + Convert.toHexString(l_serviceFilename));
+          OneWireEventSource.Log.Debug("bindData: " + Convert.toHexString(l_bindData));
+          OneWireEventSource.Log.Debug("bindCode: " + Convert.toHexString(l_bindCode));
+          OneWireEventSource.Log.Debug("initialSignature: " + Convert.toHexString(l_initialSignature));
+          OneWireEventSource.Log.Debug("signingChlg: " + Convert.toHexString(l_signingChlg));
+          OneWireEventSource.Log.Debug("signingSecret: " + Convert.toHexString(l_signingSecret));
+          OneWireEventSource.Log.Debug("authSecret: " + Convert.toHexString(l_authSecret));
+          OneWireEventSource.Log.Debug("------------------------------------");
 
-		  //Call this method because it will read back the file.  Ensuring
-		  //there were no errors in writing the file in the first place.
-		  this.setiButton(l_owc, coprFilename);
+          //Call this method because it will read back the file.  Ensuring
+          //there were no errors in writing the file in the first place.
+          this.setiButton(l_owc, coprFilename);
 
 	   }
 
@@ -472,19 +452,14 @@ namespace com.dalsemi.onewire.application.sha
 		  OWFileInputStream fis = null;
 		  try
 		  {
-			 if (DEBUG)
-			 {
-				IOHelper.writeLine("opening file: " + coprFilename + " on token: " + owc);
-			 }
+             OneWireEventSource.Log.Debug("opening file: " + coprFilename + " on token: " + owc);
+
 			 fis = new OWFileInputStream(owc, coprFilename);
 		  }
 		  catch (OWFileNotFoundException e)
 		  {
-			 if (DEBUG)
-			 {
-				Debug.WriteLine(e.ToString());
-				Debug.Write(e.StackTrace);
-			 }
+             OneWireEventSource.Log.Debug(e.ToString());
+             OneWireEventSource.Log.Debug(e.StackTrace);
 			 throw new OneWireIOException("Coprocessor service file Not found: " + e);
 		  }
 		  try
@@ -494,48 +469,34 @@ namespace com.dalsemi.onewire.application.sha
 		  }
 		  catch (IOException ioe)
 		  {
-			 if (DEBUG)
-			 {
-				Debug.WriteLine(ioe.ToString());
-				Debug.Write(ioe.StackTrace);
-			 }
+             OneWireEventSource.Log.Debug(ioe.ToString());
+             OneWireEventSource.Log.Debug(ioe.StackTrace);
 			 throw new OneWireException("Bad Data in Coproccessor Service File: " + ioe);
 		  }
 		  finally
 		  {
 			 try
 			 {
-				   fis.close();
+			    fis.close();
 			 }
 			 catch (IOException)
 			 { //well, at least I tried!
-	;
+                ;
 			 }
 		  }
 
-		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-		  if (DEBUG)
-		  {
-			 IOHelper.writeLine("------------------------------------");
-			 IOHelper.writeLine("Loaded Coprocessor");
-			 IOHelper.writeLine("address");
-			 IOHelper.writeBytesHex(owc.Address);
-			 IOHelper.writeLine("signPageNumber: " + signPageNumber);
-			 IOHelper.writeLine("authPageNumber: " + authPageNumber);
-			 IOHelper.writeLine("wspcPageNumber: " + wspcPageNumber);
-			 IOHelper.writeLine("serviceFilename");
-			 IOHelper.writeBytesHex(filename);
-			 IOHelper.writeLine("bindData");
-			 IOHelper.writeBytesHex(bindData);
-			 IOHelper.writeLine("bindCode");
-			 IOHelper.writeBytesHex(bindCode);
-			 IOHelper.writeLine("initialSignature");
-			 IOHelper.writeBytesHex(initialSignature);
-			 IOHelper.writeLine("signingChallenge");
-			 IOHelper.writeBytesHex(signingChallenge);
-			 IOHelper.writeLine("------------------------------------");
-		  }
-		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+          OneWireEventSource.Log.Debug("------------------------------------");
+		  OneWireEventSource.Log.Debug("Loaded Coprocessor");
+		  OneWireEventSource.Log.Debug("address: " + Convert.toHexString(owc.Address));
+          OneWireEventSource.Log.Debug("signPageNumber: " + signPageNumber);
+          OneWireEventSource.Log.Debug("authPageNumber: " + authPageNumber);
+          OneWireEventSource.Log.Debug("wspcPageNumber: " + wspcPageNumber);
+          OneWireEventSource.Log.Debug("serviceFilename: " + Convert.toHexString(filename));
+          OneWireEventSource.Log.Debug("bindData: " + Convert.toHexString(bindData));
+          OneWireEventSource.Log.Debug("bindCode: " + Convert.toHexString(bindCode));
+          OneWireEventSource.Log.Debug("initialSignature: " + Convert.toHexString(initialSignature));
+          OneWireEventSource.Log.Debug("signingChallenge: " + Convert.toHexString(signingChallenge));
+          OneWireEventSource.Log.Debug("------------------------------------");
 	   }
 
 
@@ -996,17 +957,11 @@ namespace com.dalsemi.onewire.application.sha
 			 return false;
 		  }
 
-		  //\\//\\//\\//\\//\\//\\//\\////\\////\\////\\////\\////\\////\\//
-		  if (DEBUG)
-		  {
-			 IOHelper.writeLine("-----------------------------------------------------------");
-			 IOHelper.writeLine("COPR DEBUG - createDataSignature");
-			 IOHelper.write("address: ");
-			 IOHelper.writeBytesHex(address, 0, 8);
-			 IOHelper.writeLine("speed: " + this.ibc.Adapter.Speed);
-			 IOHelper.writeLine("-----------------------------------------------------------");
-		  }
-		  //\\//\\//\\//\\//\\//\\//\\////\\////\\////\\////\\////\\////\\//
+          OneWireEventSource.Log.Debug("------------------------------------");
+          OneWireEventSource.Log.Debug("COPR DEBUG - createDataSignature");
+          OneWireEventSource.Log.Debug("address: " + Convert.toHexString(address));
+          OneWireEventSource.Log.Debug("speed: " + this.ibc.Adapter.Speed);
+          OneWireEventSource.Log.Debug("------------------------------------");
 
 		  //sign that baby!
 		  if (ibcL.SHAFunction(OneWireContainer18.SIGN_DATA_PAGE, addr))
@@ -1073,32 +1028,22 @@ namespace com.dalsemi.onewire.application.sha
 		  int page = this.signPageNumber;
 		  int addr = page << 5;
 
-		  //\\//\\//\\//\\//\\//\\//\\////\\////\\////\\////\\////\\////\\//
-		  if (DEBUG)
+          OneWireEventSource.Log.Debug("-----------------------------------------------------------");
+          OneWireEventSource.Log.Debug("COPR DEBUG - createDataSignatureAuth");
+          OneWireEventSource.Log.Debug("address:" + Convert.toHexString(address));
+          OneWireEventSource.Log.Debug("accountData: " + Convert.toHexString(accountData));
+          OneWireEventSource.Log.Debug("signScratchpad: " + Convert.toHexString(signScratchpad));
+          OneWireEventSource.Log.Debug("mac_buffer: " + Convert.toHexString(mac_buffer));
+          if (fullBindCode != null)
 		  {
-			 IOHelper.writeLine("-----------------------------------------------------------");
-			 IOHelper.writeLine("COPR DEBUG - createDataSignatureAuth");
-			 IOHelper.writeLine("address:");
-			 IOHelper.writeBytesHex(address, 0, 8);
-			 IOHelper.writeLine("accountData");
-			 IOHelper.writeBytesHex(accountData);
-			 IOHelper.writeLine("signScratchpad");
-			 IOHelper.writeBytesHex(signScratchpad);
-			 IOHelper.writeLine("mac_buffer: ");
-			 IOHelper.writeBytesHex(mac_buffer,macStart,20);
-			 IOHelper.writeLine("fullBindCode: ");
-			 if (fullBindCode != null)
-			 {
-				IOHelper.writeBytesHex(fullBindCode);
-			 }
-			 else
-			 {
-				IOHelper.writeLine("null");
-			 }
-			 IOHelper.writeLine("-----------------------------------------------------------");
-		  }
+             OneWireEventSource.Log.Debug("fullBindCode: " + Convert.toHexString(fullBindCode));
+          }
+          else
+          {
+             OneWireEventSource.Log.Debug("fullBlindCode: null");
+          }
+          OneWireEventSource.Log.Debug("-----------------------------------------------------------");
 
-		  //\\//\\//\\//\\//\\//\\//\\////\\////\\////\\////\\////\\////\\//
 		  if (fullBindCode != null)
 		  {
 			 //recreate the user's secret on the coprocessor.
@@ -1208,23 +1153,17 @@ namespace com.dalsemi.onewire.application.sha
 					//copy the requested 3 return bytes
 					Array.Copy(scratchpad, 8 + (offset % 17), ch, start, 3);
         
-					//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-					if (DEBUG)
-					{
-					   IOHelper.writeLine("-----------------------------------------------------------");
-					   IOHelper.writeLine("COPR DEBUG");
-					   IOHelper.writeLine("address:");
-					   IOHelper.writeLine("speed: " + this.ibc.Adapter.Speed);
-					   IOHelper.writeBytesHex(address, 0, 8);
-					   IOHelper.writeLine("Challenge:");
-					   IOHelper.writeBytesHex(ch, start, 3);
-					   ch[start] = 0x01;
-					   ch[start + 1] = 0x02;
-					   ch[start + 2] = 0x03;
-					   IOHelper.writeBytesHex(ch, start, 3);
-					   IOHelper.writeLine("-----------------------------------------------------------");
-					}
-					//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+                    OneWireEventSource.Log.Debug("-----------------------------------------------------------");
+                    OneWireEventSource.Log.Debug("COPR DEBUG");
+                    OneWireEventSource.Log.Debug("speed: " + this.ibc.Adapter.Speed);
+                    OneWireEventSource.Log.Debug("address: " + Convert.toHexString(address));
+                    OneWireEventSource.Log.Debug("Challenge: " + Convert.toHexString(ch));
+				    ch[start] = 0x01;
+				    ch[start + 1] = 0x02;
+				    ch[start + 2] = 0x03;
+                    OneWireEventSource.Log.Debug("Challenge: " + Convert.toHexString(ch));
+                    OneWireEventSource.Log.Debug("-----------------------------------------------------------");
+					
 					ibcL.useResume(false);
 					return true;
 				 }
@@ -1314,26 +1253,16 @@ namespace com.dalsemi.onewire.application.sha
 
 		  ibcL.useResume(true);
 
-		  //\\//\\//\\//\\//\\//\\//\\////\\////\\////\\////\\////\\////\\//
-		  if (DEBUG)
-		  {
-			 IOHelper.writeLine("-----------------------------------------------------------");
-			 IOHelper.writeLine("COPR DEBUG - verifyAuthentication");
-			 IOHelper.write("address: ");
-			 IOHelper.writeBytesHex(address, 0, 8);
-			 IOHelper.writeLine("speed: " + this.ibc.Adapter.Speed);
-			 IOHelper.writeLine("pageData");
-			 IOHelper.writeBytesHex(pageData);
-			 IOHelper.writeLine("scratchpad");
-			 IOHelper.writeBytesHex(scratchpad);
-			 IOHelper.writeLine("authCmd: " + authCmd);
-			 IOHelper.writeLine("bindData: ");
-			 IOHelper.writeBytesHex(bindData);
-			 IOHelper.writeLine("fullBindCode: ");
-			 IOHelper.writeBytesHex(fullBindCode);
-			 IOHelper.writeLine("-----------------------------------------------------------");
-		  }
-		  //\\//\\//\\//\\//\\//\\//\\////\\////\\////\\////\\////\\////\\//
+          OneWireEventSource.Log.Debug("-----------------------------------------------------------");
+          OneWireEventSource.Log.Debug("COPR DEBUG - verifyAuthentication");
+          OneWireEventSource.Log.Debug("address: " + Convert.toHexString(address));
+          OneWireEventSource.Log.Debug("speed: " + this.ibc.Adapter.Speed);
+          OneWireEventSource.Log.Debug("pageData: " + Convert.toHexString(pageData));
+          OneWireEventSource.Log.Debug("scratchpad: " + Convert.toHexString(scratchpad));
+          OneWireEventSource.Log.Debug("authCmd: " + authCmd);
+          OneWireEventSource.Log.Debug("bindData: " + Convert.toHexString(bindData));
+          OneWireEventSource.Log.Debug("fullBindCode: " + Convert.toHexString(fullBindCode));
+          OneWireEventSource.Log.Debug("-----------------------------------------------------------");
 
 		  //write the account data
 		  if (!ibcL.writeDataPage(wspc, pageData))
@@ -1428,17 +1357,11 @@ namespace com.dalsemi.onewire.application.sha
 			 return false;
 		  }
 
-		  //\\//\\//\\//\\//\\//\\//\\////\\////\\////\\////\\////\\////\\//
-		  if (DEBUG)
-		  {
-			 IOHelper.writeLine("-----------------------------------------------------------");
-			 IOHelper.writeLine("COPR DEBUG - verifySignature");
-			 IOHelper.write("address: ");
-			 IOHelper.writeBytesHex(address, 0, 8);
-			 IOHelper.writeLine("speed: " + this.ibc.Adapter.Speed);
-			 IOHelper.writeLine("-----------------------------------------------------------");
-		  }
-		  //\\//\\//\\//\\//\\//\\//\\////\\////\\////\\////\\////\\////\\//
+          OneWireEventSource.Log.Debug("-----------------------------------------------------------");
+          OneWireEventSource.Log.Debug("COPR DEBUG - verifySignature");
+          OneWireEventSource.Log.Debug("address: " + Convert.toHexString(address));
+          OneWireEventSource.Log.Debug("speed: " + this.ibc.Adapter.Speed);
+          OneWireEventSource.Log.Debug("-----------------------------------------------------------");
 
 		  //sign that baby!
 		  if (ibcL.SHAFunction(OneWireContainer18.VALIDATE_DATA_PAGE, addr))

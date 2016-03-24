@@ -484,7 +484,7 @@ namespace com.dalsemi.onewire.adapter
 			 //// multi-threaded
 			 //Thread t = new Thread(sh);
 			 //t.Start();
-			 //lock (hashHandlers)
+			                                                      //lock (hashHandlers)
 			 //{
 				//hashHandlers[t] = sh;
 			 //}

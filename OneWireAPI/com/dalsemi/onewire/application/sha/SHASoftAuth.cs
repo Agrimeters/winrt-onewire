@@ -32,6 +32,7 @@ namespace com.dalsemi.onewire.application.sha
 
 	using com.dalsemi.onewire;
 	using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.logging;
 	using com.dalsemi.onewire.utils;
 
 	/// <summary>
@@ -312,26 +313,16 @@ namespace com.dalsemi.onewire.application.sha
         
 			  //set the same challenge bytes
 			  Array.Copy(chlg, 0, scratchpad, 20, 3);
-        
-			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-			  if (DEBUG)
-			  {
-				 IOHelper.writeLine("------------------------------------");
-				 IOHelper.writeLine("Verifying user");
-				 IOHelper.writeLine("chlg");
-				 IOHelper.writeBytesHex(chlg);
-				 IOHelper.writeLine("accountData");
-				 IOHelper.writeBytesHex(accountData);
-				 IOHelper.writeLine("mac");
-				 IOHelper.writeBytesHex(mac);
-				 IOHelper.writeLine("wcc: " + user.WriteCycleCounter);
-				 IOHelper.writeLine("fullBindCode");
-				 IOHelper.writeBytesHex(fullBindCode);
-				 IOHelper.writeLine("scratchpad");
-				 IOHelper.writeBytesHex(scratchpad);
-				 IOHelper.writeLine("------------------------------------");
-			  }
-			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+
+              OneWireEventSource.Log.Debug("------------------------------------");
+              OneWireEventSource.Log.Debug("Verifying user");
+              OneWireEventSource.Log.Debug("chlg: " + Convert.toHexString(chlg));
+              OneWireEventSource.Log.Debug("accountData: " + Convert.toHexString(accountData));
+              OneWireEventSource.Log.Debug("mac: " + Convert.toHexString(mac));
+              OneWireEventSource.Log.Debug("wcc: " + user.WriteCycleCounter);
+              OneWireEventSource.Log.Debug("fullBindCode: " + Convert.toHexString(fullBindCode));
+              OneWireEventSource.Log.Debug("scratchpad: " + Convert.toHexString(scratchpad));
+              OneWireEventSource.Log.Debug("------------------------------------");
         
 			  if (!copr.verifyAuthentication(fullBindCode, accountData, scratchpad, mac, user.AuthorizationCommand))
 			  {
@@ -625,17 +616,11 @@ namespace com.dalsemi.onewire.application.sha
 		  accountData[I_FILE_CRC16 + 0] = (byte)crc;
 		  accountData[I_FILE_CRC16 + 1] = (byte)(crc >> 8);
 
-		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-		  if (DEBUG)
-		  {
-			 IOHelper.writeLine("------------------------------------");
-			 IOHelper.writeLine("writing transaction data");
-			 IOHelper.writeLine("acctPageNum: " + acctPageNum);
-			 IOHelper.writeLine("accountData");
-			 IOHelper.writeBytesHex(accountData);
-			 IOHelper.writeLine("------------------------------------");
-		  }
-		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+          OneWireEventSource.Log.Debug("------------------------------------");
+          OneWireEventSource.Log.Debug("writing transaction data");
+          OneWireEventSource.Log.Debug("acctPageNum: " + acctPageNum);
+          OneWireEventSource.Log.Debug("accountData: " + Convert.toHexString(accountData));
+	      OneWireEventSource.Log.Debug("------------------------------------");
 
 		  // write it to the button
 		  try
@@ -648,10 +633,7 @@ namespace com.dalsemi.onewire.application.sha
 		  }
 		  catch (OneWireException owe)
 		  {
-			 if (DEBUG)
-			 {
-				IOHelper.writeLine(owe);
-			 }
+             OneWireEventSource.Log.Debug(owe.ToString());
 		  }
 
 		  this.lastError = SHATransaction.USER_WRITE_DATA_FAILED;

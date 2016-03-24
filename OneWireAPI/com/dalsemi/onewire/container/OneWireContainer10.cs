@@ -112,7 +112,7 @@ namespace com.dalsemi.onewire.container
 
 	   /// <summary>
 	   /// DS1920 recall EEPROM command </summary>
-	   private static readonly byte RECALL_EEPROM_COMMAND = 0xB8;
+	   //Unused private static readonly byte RECALL_EEPROM_COMMAND = 0xB8;
 
 
 	   /// <summary>

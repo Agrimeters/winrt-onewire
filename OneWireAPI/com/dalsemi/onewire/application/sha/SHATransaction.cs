@@ -61,10 +61,6 @@ namespace com.dalsemi.onewire.application.sha
 	/// @author  SKH </seealso>
 	public abstract class SHATransaction
 	{
-	   /// <summary>
-	   /// Turns on extra debugging for all SHATransactions </summary>
-	   internal const bool DEBUG = true;
-
 	   internal const int MAX_RETRY_CNT = 65536;
 
 	   internal static readonly Random rand = new Random();

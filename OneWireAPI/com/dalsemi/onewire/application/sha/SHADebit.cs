@@ -31,93 +31,93 @@ namespace com.dalsemi.onewire.application.sha
 {
 
 	using com.dalsemi.onewire;
-	using com.dalsemi.onewire.adapter;
-	using com.dalsemi.onewire.utils;
+    using com.dalsemi.onewire.logging;
+    using com.dalsemi.onewire.utils;
 
-	/// <summary>
-	/// <P>This class implements an account debit application for SHA Transactions.
-	/// Account data is stored on user iButtons after being digitally signed by
-	/// a coprocessor iButton. Account data consists of the following:
-	///  <UL>
-	///    <LI> 1 byte: Length of the account file</LI>
-	///    <LI> 1 byte: Data type code (dynamic or static)</LI>
-	///    <LI>20 bytes: Account Data Signature</LI>
-	///    <LI> 2 bytes: Money Conversion Factor</LI>
-	///    <LI> 3 bytes: Account Balance</LI>
-	///    <LI> 2 bytes: Transaction ID</LI>
-	///    <LI> 1 byte: File continuation pointer</LI>
-	///    <LI> 2 bytes: CRC16 of entire 30 bytes seeded with the page number</LI>
-	///    <LI> <B>32 bytes Total</B></LI>
-	///  </UL></P>
-	/// 
-	/// <P>A typical use case for this class might be as follows:
-	/// <pre>
-	///   OneWireContainer18 coprOWC18 = new OneWireContainer18(adapter,address);
-	/// 
-	///   //COPR.0 is the filename for coprocessor service data
-	///   SHAiButtonCopr copr = new SHAiButtonCopr(coprOWC18,"COPR.0");
-	/// 
-	///   //Initial amount for new users is $100, and debit amount is 50 cents
-	///   SHATransaction trans = new SHADebit(copr, 10000, 50);
-	/// 
-	///   OneWireContainer18 owc18 = new OneWireContainer18(adapter, userAddress);
-	/// 
-	///   //The following constructor erases all transaction data from the user and
-	///   //installs the system authentication secret on the user iButton.
-	///   SHAiButtonUser user = new SHAiButtonUser18(copr, owc18, true, authSecret);
-	/// 
-	///   //creates account data on iButton
-	///   if(trans.setupTransactionData(user))
-	///      System.out.println("Account data installed successfully");
-	///   else
-	///      System.out.println("Account data installation failed");
-	/// 
-	///   //... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ...
-	/// 
-	///   //"challenges" user iButton
-	///   if(trans.verifyUser(user))
-	///   {
-	///      System.out.println("User Verified Successfully");
-	/// 
-	///      //checks data signature and account balance>0
-	///      if(trans.verifyTransactionData(user))
-	///      {
-	///         System.out.println("Account Data Verified Successfully");
-	/// 
-	///         //debits and writes new data to user iButton
-	///         if(trans.executeTransaction(user))
-	///         {
-	///            System.out.println("Account debited.");
-	///            System.out.println("New Balance: " +
-	///               trans.getParameter(SHADebit.USER_BALANCE));
-	///         }
-	///      }
-	///   }
-	/// 
-	///   //... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ...
-	/// 
-	///   if(trans.getLastError()!=0)
-	///   {
-	///      System.err.println("Error code: " + trans.getLastError());
-	///   }
-	/// </pre></P>
-	/// 
-	/// <para>This class makes use of several performance enhancements for TINI.
-	/// For instance, most methods are <code>synchronized</code> to access instance variable
-	/// byte arrays rather than creating new byte arrays every time a transaction
-	/// is performed.  This could hurt performance in multi-threaded
-	/// applications, but the usefulness of having several threads contending
-	/// to talk to a single iButton is questionable since the methods in
-	/// <code>com.dalsemi.onewire.adapter.DSPortAdapter</code>
-	/// <code>beginExclusive(bool)</code> and <code>endExclusive()</code> should be used.</para>
-	/// </summary>
-	/// <seealso cref= SHATransaction </seealso>
-	/// <seealso cref= SHAiButtonCopr </seealso>
-	/// <seealso cref= SHAiButtonUser
-	/// 
-	/// @version 1.00
-	/// @author  SKH </seealso>
-	public class SHADebit : SHATransaction
+    /// <summary>
+    /// <P>This class implements an account debit application for SHA Transactions.
+    /// Account data is stored on user iButtons after being digitally signed by
+    /// a coprocessor iButton. Account data consists of the following:
+    ///  <UL>
+    ///    <LI> 1 byte: Length of the account file</LI>
+    ///    <LI> 1 byte: Data type code (dynamic or static)</LI>
+    ///    <LI>20 bytes: Account Data Signature</LI>
+    ///    <LI> 2 bytes: Money Conversion Factor</LI>
+    ///    <LI> 3 bytes: Account Balance</LI>
+    ///    <LI> 2 bytes: Transaction ID</LI>
+    ///    <LI> 1 byte: File continuation pointer</LI>
+    ///    <LI> 2 bytes: CRC16 of entire 30 bytes seeded with the page number</LI>
+    ///    <LI> <B>32 bytes Total</B></LI>
+    ///  </UL></P>
+    /// 
+    /// <P>A typical use case for this class might be as follows:
+    /// <pre>
+    ///   OneWireContainer18 coprOWC18 = new OneWireContainer18(adapter,address);
+    /// 
+    ///   //COPR.0 is the filename for coprocessor service data
+    ///   SHAiButtonCopr copr = new SHAiButtonCopr(coprOWC18,"COPR.0");
+    /// 
+    ///   //Initial amount for new users is $100, and debit amount is 50 cents
+    ///   SHATransaction trans = new SHADebit(copr, 10000, 50);
+    /// 
+    ///   OneWireContainer18 owc18 = new OneWireContainer18(adapter, userAddress);
+    /// 
+    ///   //The following constructor erases all transaction data from the user and
+    ///   //installs the system authentication secret on the user iButton.
+    ///   SHAiButtonUser user = new SHAiButtonUser18(copr, owc18, true, authSecret);
+    /// 
+    ///   //creates account data on iButton
+    ///   if(trans.setupTransactionData(user))
+    ///      System.out.println("Account data installed successfully");
+    ///   else
+    ///      System.out.println("Account data installation failed");
+    /// 
+    ///   //... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ...
+    /// 
+    ///   //"challenges" user iButton
+    ///   if(trans.verifyUser(user))
+    ///   {
+    ///      System.out.println("User Verified Successfully");
+    /// 
+    ///      //checks data signature and account balance>0
+    ///      if(trans.verifyTransactionData(user))
+    ///      {
+    ///         System.out.println("Account Data Verified Successfully");
+    /// 
+    ///         //debits and writes new data to user iButton
+    ///         if(trans.executeTransaction(user))
+    ///         {
+    ///            System.out.println("Account debited.");
+    ///            System.out.println("New Balance: " +
+    ///               trans.getParameter(SHADebit.USER_BALANCE));
+    ///         }
+    ///      }
+    ///   }
+    /// 
+    ///   //... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ...
+    /// 
+    ///   if(trans.getLastError()!=0)
+    ///   {
+    ///      System.err.println("Error code: " + trans.getLastError());
+    ///   }
+    /// </pre></P>
+    /// 
+    /// <para>This class makes use of several performance enhancements for TINI.
+    /// For instance, most methods are <code>synchronized</code> to access instance variable
+    /// byte arrays rather than creating new byte arrays every time a transaction
+    /// is performed.  This could hurt performance in multi-threaded
+    /// applications, but the usefulness of having several threads contending
+    /// to talk to a single iButton is questionable since the methods in
+    /// <code>com.dalsemi.onewire.adapter.DSPortAdapter</code>
+    /// <code>beginExclusive(bool)</code> and <code>endExclusive()</code> should be used.</para>
+    /// </summary>
+    /// <seealso cref= SHATransaction </seealso>
+    /// <seealso cref= SHAiButtonCopr </seealso>
+    /// <seealso cref= SHAiButtonUser
+    /// 
+    /// @version 1.00
+    /// @author  SKH </seealso>
+    public class SHADebit : SHATransaction
 	{
 	   /// <summary>
 	   /// Used for fast FF copy </summary>
@@ -325,23 +325,15 @@ namespace com.dalsemi.onewire.application.sha
 			  Array.Copy(chlg, 0, scratchpad, 20, 3);
         
 			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-			  if (DEBUG)
-			  {
-				 IOHelper.writeLine("------------------------------------");
-				 IOHelper.writeLine("Verifying user");
-				 IOHelper.writeLine("chlg");
-				 IOHelper.writeBytesHex(chlg);
-				 IOHelper.writeLine("accountData");
-				 IOHelper.writeBytesHex(accountData);
-				 IOHelper.writeLine("mac");
-				 IOHelper.writeBytesHex(mac);
-				 IOHelper.writeLine("wcc: " + user.WriteCycleCounter);
-				 IOHelper.writeLine("fullBindCode");
-				 IOHelper.writeBytesHex(fullBindCode);
-				 IOHelper.writeLine("scratchpad");
-				 IOHelper.writeBytesHex(scratchpad);
-				 IOHelper.writeLine("------------------------------------");
-			  }
+              OneWireEventSource.Log.Debug("------------------------------------");
+              OneWireEventSource.Log.Debug("Verifying user");
+              OneWireEventSource.Log.Debug("chlg: " + Convert.toHexString(chlg));
+              OneWireEventSource.Log.Debug("accountData: " + Convert.toHexString(accountData));
+              OneWireEventSource.Log.Debug("mac: " + Convert.toHexString(mac));
+              OneWireEventSource.Log.Debug("wcc: " + user.WriteCycleCounter);
+              OneWireEventSource.Log.Debug("fullBindCode: " + Convert.toHexString(fullBindCode));
+              OneWireEventSource.Log.Debug("scratchpad: " + Convert.toHexString(scratchpad));
+              OneWireEventSource.Log.Debug("------------------------------------");
 			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
         
 			  if (!copr.verifyAuthentication(fullBindCode, accountData, scratchpad, mac, user.AuthorizationCommand))
@@ -667,15 +659,11 @@ namespace com.dalsemi.onewire.application.sha
 		  accountData[I_FILE_CRC16 + 1] = (byte)(crc >> 8);
 
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-		  if (DEBUG)
-		  {
-			 IOHelper.writeLine("------------------------------------");
-			 IOHelper.writeLine("writing transaction data");
-			 IOHelper.writeLine("acctPageNum: " + acctPageNum);
-			 IOHelper.writeLine("accountData");
-			 IOHelper.writeBytesHex(accountData);
-			 IOHelper.writeLine("------------------------------------");
-		  }
+		  OneWireEventSource.Log.Debug("------------------------------------");
+          OneWireEventSource.Log.Debug("writing transaction data");
+          OneWireEventSource.Log.Debug("acctPageNum: " + acctPageNum);
+          OneWireEventSource.Log.Debug("accountData: " + Convert.toHexString(accountData));
+	      OneWireEventSource.Log.Debug("------------------------------------");
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
 		  // write it to the button
@@ -689,10 +677,7 @@ namespace com.dalsemi.onewire.application.sha
 		  }
 		  catch (OneWireException owe)
 		  {
-			 if (DEBUG)
-			 {
-				IOHelper.writeLine(owe);
-			 }
+             OneWireEventSource.Log.Debug(owe.ToString());
 		  }
 
 		  this.lastError = SHATransaction.USER_WRITE_DATA_FAILED;

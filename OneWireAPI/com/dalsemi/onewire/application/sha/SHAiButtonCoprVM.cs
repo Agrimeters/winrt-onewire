@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text;
-using System.Diagnostics;
+//using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -28,15 +28,15 @@ using System.Diagnostics;
  * Branding Policy.
  *---------------------------------------------------------------------------
  */
-
-using com.dalsemi.onewire.adapter;
-using com.dalsemi.onewire.application.file;
-using com.dalsemi.onewire.container;
-using com.dalsemi.onewire.utils;
-
+ 
 namespace com.dalsemi.onewire.application.sha
 {
 
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.application.file;
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.logging;
+    using utils;
     /// <summary>
     /// <P>Class for simulating an instance of a SHA iButton Coprocessor involved
     /// in SHA Transactions.  The Coprocessor is used for digitally signing transaction
@@ -598,8 +598,8 @@ namespace com.dalsemi.onewire.application.sha
 		  }
 		  catch (System.Exception e)
 		  {
-			 Debug.WriteLine(e.ToString());
-			 Debug.Write(e.StackTrace);
+             OneWireEventSource.Log.Critical(e.ToString());
+             OneWireEventSource.Log.Critical(e.StackTrace);
 			 return false;
 		  }
 	   }
@@ -1167,54 +1167,44 @@ namespace com.dalsemi.onewire.application.sha
 			  }
 			  digestBuff[62] = 0x01;
 			  digestBuff[63] = 0xB8;
+
         
-			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-			  if (DEBUG)
+              OneWireEventSource.Log.Debug("------------------------------------------------------------");
+        
+ 			  if (function == OneWireContainer18.VALIDATE_DATA_PAGE)
 			  {
-				 IOHelper.writeLine("------------------------------------------------------------");
-        
-				 if (function == OneWireContainer18.VALIDATE_DATA_PAGE)
-				 {
-					IOHelper.writeLine("Validating data page");
-				 }
-				 else if (function == OneWireContainer18.AUTH_HOST)
-				 {
-					IOHelper.writeLine("Authenticating Host");
-				 }
-				 else if (function == OneWireContainer18.SIGN_DATA_PAGE)
-				 {
-					IOHelper.writeLine("Signing Data Page");
-				 }
-				 else if (function == OneWireContainer18.COMPUTE_NEXT_SECRET)
-				 {
-					IOHelper.writeLine("Computing Next Secret");
-				 }
-				 else if (function == OneWireContainer18.COMPUTE_FIRST_SECRET)
-				 {
-					IOHelper.writeLine("Computing FIRST Secret");
-				 }
-				 else
-				 {
-					IOHelper.writeLine("SHA Function" + function);
-				 }
-        
-				 IOHelper.writeLine("pageNum: " + pageNum);
-				 IOHelper.writeLine("DigestBuffer: ");
-				 IOHelper.writeBytesHex(digestBuff);
+                 OneWireEventSource.Log.Debug("Validating data page");
 			  }
-			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-        
-			  //compute the MAC
-			  SHA.ComputeSHA(digestBuff,scratchpad,offset);
-        
-			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-			  if (DEBUG)
+			  else if (function == OneWireContainer18.AUTH_HOST)
 			  {
-				 IOHelper.writeLine("SHA Result: ");
-				 IOHelper.writeBytesHex(scratchpad,offset,20);
-				 IOHelper.writeLine("------------------------------------------------------------");
+                 OneWireEventSource.Log.Debug("Authenticating Host");
 			  }
-			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+			  else if (function == OneWireContainer18.SIGN_DATA_PAGE)
+			  {
+                 OneWireEventSource.Log.Debug("Signing Data Page");
+			  }
+			  else if (function == OneWireContainer18.COMPUTE_NEXT_SECRET)
+			  {
+                 OneWireEventSource.Log.Debug("Computing Next Secret");
+			  }
+			  else if (function == OneWireContainer18.COMPUTE_FIRST_SECRET)
+			  {
+                 OneWireEventSource.Log.Debug("Computing FIRST Secret");
+			  }
+			  else
+			  {
+                 OneWireEventSource.Log.Debug("SHA Function" + function);
+			  }
+
+              OneWireEventSource.Log.Debug("pageNum: " + pageNum);
+              OneWireEventSource.Log.Debug("DigestBuffer: " + Convert.toHexString(digestBuff));
+
+              //compute the MAC
+              SHA.ComputeSHA(digestBuff,scratchpad,offset);
+        
+              OneWireEventSource.Log.Debug("SHA Result: " + Convert.toHexString(scratchpad));
+              OneWireEventSource.Log.Debug("------------------------------------------------------------");
+			  
         
 			  //is this a secret computation?
 			  if (offset == 0)

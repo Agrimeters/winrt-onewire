@@ -67,12 +67,12 @@ namespace com.dalsemi.onewire.container
 	   /// <summary>
 	   /// Status memory bank of the DS2413 for memory map registers
 	   /// </summary>
-	   private MemoryBankEEPROMstatus map;
+	   //NeverUsed private MemoryBankEEPROMstatus map;
 
 	   /// <summary>
 	   /// Status memory bank of the DS2413 for the conditional search
 	   /// </summary>
-	   private MemoryBankEEPROMstatus search;
+	   //NeverUsed private MemoryBankEEPROMstatus search;
 
 	   /// <summary>
 	   /// PIO Access read command

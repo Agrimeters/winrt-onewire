@@ -9,9 +9,10 @@ using Windows.Storage.Streams;
 
 namespace com.dalsemi.onewire.adapter
 {
+    using com.dalsemi.onewire.logging;
+
     internal partial class SerialService : IDisposable
     {
-        private const bool DEBUG = false;
         /// <summary>
         /// The serial port name of this object (e.g. COM1, /dev/ttyS0) </summary>
         private readonly string comPortName;
@@ -77,12 +78,7 @@ namespace com.dalsemi.onewire.adapter
         {
             lock (uniqueServices)
             {
-                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                if (DEBUG)
-                {
-                    Debug.WriteLine("SerialService.getSerialService called: strComPort=" + strComPort);
-                }
-                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                OneWireEventSource.Log.Debug("SerialService.getSerialService called: strComPort=" + strComPort);
 
                 string strLowerCaseComPort = strComPort.ToLower();
                 object o = uniqueServices[strLowerCaseComPort];
@@ -143,12 +139,7 @@ namespace com.dalsemi.onewire.adapter
         {
             lock (this)
             {
-                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                if (DEBUG)
-                {
-                    System.Diagnostics.Debug.WriteLine("sendBreak {0}ms", duration);
-                }
-                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                OneWireEventSource.Log.Debug("sendBreak " + duration + "ms");
 
                 serialPort.BreakSignalState = true;
                 Thread.Sleep(duration);
@@ -179,12 +170,7 @@ namespace com.dalsemi.onewire.adapter
                         // set baud rate
                         serialPort.BaudRate = (uint)value;
 
-                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                        if (DEBUG)
-                        {
-                            Debug.WriteLine("SerialService.setBaudRate: baudRate=" + value);
-                        }
-                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                        OneWireEventSource.Log.Debug("SerialService.setBaudRate: baudRate=" + value);
                     }
                     catch (System.Exception uncoe)
                     {
@@ -220,13 +206,7 @@ namespace com.dalsemi.onewire.adapter
                     foreach (var item in DeviceList)
                     {
                         list.Add(item.Id);
-                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                        if (DEBUG)
-                        {
-                            Debug.WriteLine("\t" + item.Id);
-                        }
-                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-
+                        OneWireEventSource.Log.Debug("\t" + item.Id);
                     }
 
                     return (list.GetEnumerator());
@@ -248,12 +228,7 @@ namespace com.dalsemi.onewire.adapter
 
         public virtual void flush()
         {
-            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-            if (DEBUG)
-            {
-                Debug.WriteLine("SerialService.flush");
-            }
-            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+            OneWireEventSource.Log.Debug("SerialService.flush");
 
             if (!PortOpen)
             {
@@ -270,12 +245,13 @@ namespace com.dalsemi.onewire.adapter
             {
                 writer.WriteByte(data);
                 var count = await writer.StoreAsync();
-                debug.Debug.debug(serialPort.PortName + " Transmit", new byte[] { data });
+                //TODO debug.Debug.debug(serialPort.PortName + " Transmit", new byte[] { data });
+                OneWireEventSource.Log.Debug(serialPort.PortName + " Transmit: " + com.dalsemi.onewire.utils.Convert.toHexString(data));
             });
             t.Wait();
             if(t.Status != TaskStatus.RanToCompletion)
             {
-                Debug.WriteLine("Error writing to serial port!");
+                OneWireEventSource.Log.Critical("Error writing to serial port!");
             }
         }
 
@@ -285,12 +261,13 @@ namespace com.dalsemi.onewire.adapter
             {
                 writer.WriteBytes(data);
                 var count = await writer.StoreAsync();
-                debug.Debug.debug(serialPort.PortName + " Transmit", data);
+                //TODO debug.Debug.debug(serialPort.PortName + " Transmit", data);
+                OneWireEventSource.Log.Debug(serialPort.PortName + " Transmit: " + com.dalsemi.onewire.utils.Convert.toHexString(data, " "));
             });
             t.Wait();
             if(t.Status != TaskStatus.RanToCompletion)
             {
-                Debug.WriteLine("Error writing to serial port!");
+                OneWireEventSource.Log.Critical("Error writing to serial port!");
             }
         }
 
@@ -313,7 +290,8 @@ namespace com.dalsemi.onewire.adapter
                         {
                             throw new Exception();
                         }
-                        debug.Debug.debug(serialPort.PortName + " Receive", result);
+                        //TODO debug.Debug.debug(serialPort.PortName + " Receive", result);
+                        OneWireEventSource.Log.Debug(serialPort.PortName + " Receive: " + com.dalsemi.onewire.utils.Convert.toHexString(result, " "));
                     }
                 }
                 catch (Exception)
@@ -327,7 +305,7 @@ namespace com.dalsemi.onewire.adapter
 
             if(t.Status != TaskStatus.RanToCompletion)
             {
-                Debug.WriteLine("readWithTimeout failed!");
+                OneWireEventSource.Log.Critical("readWithTimeout failed!");
                 return null;
             }
 
@@ -389,12 +367,7 @@ namespace com.dalsemi.onewire.adapter
         {
             lock (this)
             {
-                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                if (DEBUG)
-                {
-                    Debug.WriteLine("SerialService.closePort");
-                }
-                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                OneWireEventSource.Log.Debug("SerialService.closePort");
                 closePortByThreadID(Environment.CurrentManagedThreadId);
             }
         }
@@ -410,17 +383,9 @@ namespace com.dalsemi.onewire.adapter
 
         public virtual void openPort()
         {
-            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-            if (DEBUG)
-            {
-                Debug.WriteLine("SerialService.openPort() called");
-            }
-            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-            if (DEBUG)
-            {
-                Debug.WriteLine("SerialService.openPort: System.Enivronment.CurrentManagedThreadId()=" + Environment.CurrentManagedThreadId);
-            }
-            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+            OneWireEventSource.Log.Debug("SerialService.openPort() called");
+            OneWireEventSource.Log.Debug("SerialService.openPort: System.Enivronment.CurrentManagedThreadId()=" + Environment.CurrentManagedThreadId);
+
             // record this thread as an owner
             if (users.IndexOf(Environment.CurrentManagedThreadId) == -1)
             {
@@ -457,12 +422,12 @@ namespace com.dalsemi.onewire.adapter
 
                     if (device == null)
                     {
-                        Debug.WriteLine("Your Package.appxmanifest Capabilities section is missing:");
-                        Debug.WriteLine("<DeviceCapability Name = \"serialcommunication\">");
-                        Debug.WriteLine("  <Device Id = \"any\">");
-                        Debug.WriteLine("    <Function Type = \"name:serialPort\"/>");
-                        Debug.WriteLine("  </Device>");
-                        Debug.WriteLine("</DeviceCapability>");
+                        OneWireEventSource.Log.Critical("Your Package.appxmanifest Capabilities section is missing:");
+                        OneWireEventSource.Log.Critical("<DeviceCapability Name = \"serialcommunication\">");
+                        OneWireEventSource.Log.Critical("  <Device Id = \"any\">");
+                        OneWireEventSource.Log.Critical("    <Function Type = \"name:serialPort\"/>");
+                        OneWireEventSource.Log.Critical("  </Device>");
+                        OneWireEventSource.Log.Critical("</DeviceCapability>");
 
                         throw new System.IO.IOException("Failed to open (" + comPortName + ") due to Package.appxmanifest problem!");
                     }
@@ -503,12 +468,7 @@ namespace com.dalsemi.onewire.adapter
                 serialPort.IsDataTerminalReadyEnabled = true;
                 serialPort.IsRequestToSendEnabled = true;
 
-                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                if (DEBUG)
-                {
-                    Debug.WriteLine("SerialService.openPort: Port Openend (" + comPortName + ")");
-                }
-                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                OneWireEventSource.Log.Debug("SerialService.openPort: Port Openend (" + comPortName + ")");
             }
             catch (Exception e)
             {
@@ -524,12 +484,7 @@ namespace com.dalsemi.onewire.adapter
         {
             lock (this)
             {
-                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                if (DEBUG)
-                {
-                    Debug.WriteLine("SerialService.closePortByThreadID(ManagedThreadId), ManagedThreadId" + t);
-                }
-                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                OneWireEventSource.Log.Debug("SerialService.closePortByThreadID(ManagedThreadId), ManagedThreadId" + t);
 
                 // added singleUser object for case where one thread creates the adapter
                 // (like the main thread), and another thread closes it (like the AWT event)
@@ -548,23 +503,13 @@ namespace com.dalsemi.onewire.adapter
                     }
 
                     // close the port
-                    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                    if (DEBUG)
-                    {
-                        Debug.WriteLine("SerialService.closePortByThreadID(Thread): calling serialPort.removeEventListener() and .close()");
-                    }
-                    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                    OneWireEventSource.Log.Debug("SerialService.closePortByThreadID(Thread): calling serialPort.removeEventListener() and .close()");
 
                     this.Close();
                 }
                 else
                 {
-                    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                    if (DEBUG)
-                    {
-                        Debug.WriteLine("SerialService.closePortByThreadID(Thread): can't close port, owned by another thread");
-                    }
-                    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+                    OneWireEventSource.Log.Debug("SerialService.closePortByThreadID(Thread): can't close port, owned by another thread");
                 }
             }
         }

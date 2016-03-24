@@ -127,7 +127,7 @@ namespace com.dalsemi.onewire
 	   /// <summary>
 	   /// Smart default port
 	   /// </summary>
-	   private static string smartDefaultPort = "COM1";
+	   //NeverUsed private static string smartDefaultPort = "COM1";
 
 	   /// <summary>
 	   /// Override adapter variables

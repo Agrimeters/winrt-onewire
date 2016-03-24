@@ -47,10 +47,6 @@ namespace com.dalsemi.onewire.adapter
 	public class MulticastListener : IDisposable
 	{
 	   /// <summary>
-	   /// boolean flag to turn on debug messages </summary>
-	   private const bool DEBUG = true;
-
-	   /// <summary>
 	   /// timeout for socket receive </summary>
 	   private const int timeoutInSeconds = 3;
 
@@ -90,12 +86,9 @@ namespace com.dalsemi.onewire.adapter
 		  this.returnMessage = returnMessage;
 
 		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-		  if (DEBUG)
-		  {
-			 OneWireEventSource.Log.Debug("DEBUG: Creating Multicast Listener");
-             OneWireEventSource.Log.Debug("DEBUG:    Multicast port: " + multicastPort);
-             OneWireEventSource.Log.Debug("DEBUG:    Multicast group: " + multicastGroup);
-		  }
+		  OneWireEventSource.Log.Debug("DEBUG: Creating Multicast Listener");
+          OneWireEventSource.Log.Debug("DEBUG:    Multicast port: " + multicastPort);
+          OneWireEventSource.Log.Debug("DEBUG:    Multicast group: " + multicastGroup);
           //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
           // create multicast socket
@@ -116,10 +109,7 @@ namespace com.dalsemi.onewire.adapter
           socket.JoinMulticastGroup(new HostName(multicastGroup));
 
           //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-          if (DEBUG)
-          {
-              OneWireEventSource.Log.Debug("DEBUG: waiting for multicast packet");
-          }
+          OneWireEventSource.Log.Debug("DEBUG: waiting for multicast packet");
           //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
         }
 
@@ -132,11 +122,8 @@ namespace com.dalsemi.onewire.adapter
             uint length = reader.UnconsumedBufferLength;
 
             //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-            if (DEBUG)
-            {
-                OneWireEventSource.Log.Debug("DEBUG: packet.length=" + length);
-                OneWireEventSource.Log.Debug("DEBUG: expecting=" + expectedMessage.Length);
-            }
+            OneWireEventSource.Log.Debug("DEBUG: packet.length=" + length);
+            OneWireEventSource.Log.Debug("DEBUG: expecting=" + expectedMessage.Length);
             //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
             try
             {
@@ -152,10 +139,7 @@ namespace com.dalsemi.onewire.adapter
                     if (dataMatch)
                     {
                         //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-                        if (DEBUG)
-                        {
-                            OneWireEventSource.Log.Debug("DEBUG: packet match, replying");
-                        }
+                        OneWireEventSource.Log.Debug("DEBUG: packet match, replying");
                         //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
                         // send return message

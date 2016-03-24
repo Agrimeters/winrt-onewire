@@ -134,7 +134,7 @@ namespace com.dalsemi.onewire.container
 	   private string partNumber = "DS1977";
 
 	   // Letter appended at end of partNumber (S/H/L/T)
-	   private char partLetter = '0';
+	   //Unused private char partLetter = '0';
 
 
 	   // should we check the speed

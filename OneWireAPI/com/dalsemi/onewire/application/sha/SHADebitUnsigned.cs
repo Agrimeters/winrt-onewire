@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -34,6 +32,7 @@ namespace com.dalsemi.onewire.application.sha
 
 	using com.dalsemi.onewire;
 	using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.logging;
 	using com.dalsemi.onewire.utils;
 
 	/// <summary>
@@ -386,25 +385,15 @@ namespace com.dalsemi.onewire.application.sha
 			  //set the same challenge bytes
 			  Array.Copy(chlg, 0, scratchpad, 20, 3);
         
-			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-			  if (DEBUG)
-			  {
-				 IOHelper.writeLine("------------------------------------");
-				 IOHelper.writeLine("Verifying user");
-				 IOHelper.writeLine("chlg");
-				 IOHelper.writeBytesHex(chlg);
-				 IOHelper.writeLine("accountData");
-				 IOHelper.writeBytesHex(accountData);
-				 IOHelper.writeLine("mac");
-				 IOHelper.writeBytesHex(mac);
-				 IOHelper.writeLine("wcc: " + user.WriteCycleCounter);
-				 IOHelper.writeLine("fullBindCode");
-				 IOHelper.writeBytesHex(fullBindCode);
-				 IOHelper.writeLine("scratchpad");
-				 IOHelper.writeBytesHex(scratchpad);
-				 IOHelper.writeLine("------------------------------------");
-			  }
-			  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+              OneWireEventSource.Log.Debug("------------------------------------");
+              OneWireEventSource.Log.Debug("Verifying user");
+              OneWireEventSource.Log.Debug("chlg: " + Convert.toHexString(chlg));
+			  OneWireEventSource.Log.Debug("accountData: " + Convert.toHexString(accountData));
+			  OneWireEventSource.Log.Debug("mac: " + Convert.toHexString(mac));
+			  OneWireEventSource.Log.Debug("wcc: " + user.WriteCycleCounter);
+			  OneWireEventSource.Log.Debug("fullBindCode: " + Convert.toHexString(fullBindCode));
+			  OneWireEventSource.Log.Debug("scratchpad: " + Convert.toHexString(scratchpad));
+			  OneWireEventSource.Log.Debug("------------------------------------");
         
 			  if (!copr.verifyAuthentication(fullBindCode, accountData, scratchpad, mac, user.AuthorizationCommand))
 			  {
@@ -512,12 +501,7 @@ namespace com.dalsemi.onewire.application.sha
         
 			  if (validA && validB)
 			  {
-				 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-				 if (DEBUG)
-				 {
-					Debug.WriteLine("Both A and B are valid");
-				 }
-				 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+                 OneWireEventSource.Log.Debug("Both A and B are valid");
 				 // Both A & B are valid!  And we know that we can only
 				 // get here if the pointer or the header was not valid.
 				 // That means that B was the last updated one but the
@@ -527,12 +511,7 @@ namespace com.dalsemi.onewire.application.sha
 			  }
 			  else if (validA)
 			  {
-				 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-				 if (DEBUG)
-				 {
-					Debug.WriteLine("A is valid not B");
-				 }
-				 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+                 OneWireEventSource.Log.Debug("A is valid not B");
 				 // B is invalid, A is valid.  Means A is the last updated one,
 				 // but B is the last known good value.  The header was not updated
 				 // to point to A before debit was aborted.  Let's go with B
@@ -540,12 +519,7 @@ namespace com.dalsemi.onewire.application.sha
 			  }
 			  else if (validB)
 			  {
-				 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-				 if (DEBUG)
-				 {
-					Debug.WriteLine("B is valid not A - impossible");
-				 }
-				 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+                 OneWireEventSource.Log.Debug("B is valid not A - impossible");
 				 // A is invalid, B is valid. Should never ever happen.  Something
 				 // got completely hosed.  What should happen here?
 				 this.lastError = USER_BAD_ACCOUNT_DATA;
@@ -553,12 +527,8 @@ namespace com.dalsemi.onewire.application.sha
 			  }
 			  else
 			  {
-				 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-				 if (DEBUG)
-				 {
-					Debug.WriteLine("Neither record has valid CRC");
-				 }
-				 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+                 OneWireEventSource.Log.Debug("Neither record has valid CRC");
+				 
 				 // neither record contains a valid CRC.  What should happen here?
 				 // probably got weak bit in ptr record, no telling which way to go
 				 this.lastError = USER_BAD_ACCOUNT_DATA;
@@ -690,16 +660,10 @@ namespace com.dalsemi.onewire.application.sha
 			  //the user has on the button.
 			  if (verifySuccess || !success)
 			  {
-				 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-				 if (DEBUG)
-				 {
-					Debug.WriteLine("attempting to re-write transaction data: ");
-					Debug.Write("cur Data: ");
-					Debug.WriteLine(Convert.toHexString(accountData, 0, 32, " "));
-					Debug.Write("old data: ");
-					Debug.WriteLine(Convert.toHexString(oldAcctData, 0, 32, " "));
-				 }
-				 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+                 OneWireEventSource.Log.Debug("attempting to re-write transaction data: ");
+                 OneWireEventSource.Log.Debug("cur Data: " + Convert.toHexString(accountData));
+                 OneWireEventSource.Log.Debug("old data: " + Convert.toHexString(oldAcctData));
+
 				 bool dataOK = false;
 				 int cnt = MAX_RETRY_CNT;
 				 do
@@ -716,13 +680,7 @@ namespace com.dalsemi.onewire.application.sha
 						  //copy and the backup copy.
 						  if (user.readAccountData(newAcctData,0))
 						  {
-							 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-							 if (DEBUG)
-							 {
-								Debug.Write("new data: ");
-								Debug.WriteLine(Convert.toHexString(newAcctData, 0, 32, " "));
-							 }
-							 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+                             OneWireEventSource.Log.Debug("new data: " + Convert.toHexString(newAcctData));
 							 bool isOld = true;
 							 bool isCur = true;
 							 for (int i = 0; i < 32 && (isOld || isCur); i++)
@@ -830,12 +788,7 @@ namespace com.dalsemi.onewire.application.sha
 
 		  if (accountData[I_FILE_LENGTH] == RECORD_A_LENGTH)
 		  {
-			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-			 if (DEBUG)
-			 {
-				Debug.WriteLine("Was A, now using B");
-			 }
-			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+             OneWireEventSource.Log.Debug("Was A, now using B");
 
 			 // length of the TMEX file
 			 accountData[I_FILE_LENGTH] = RECORD_B_LENGTH;
@@ -861,13 +814,9 @@ namespace com.dalsemi.onewire.application.sha
 		  }
 		  else
 		  {
-			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-			 if (DEBUG)
-			 {
-				Debug.WriteLine("Was B, now using A");
-			 }
-			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-			 // length of the TMEX file
+             OneWireEventSource.Log.Debug("Was B, now using A");
+
+             // length of the TMEX file
 			 accountData[I_FILE_LENGTH] = RECORD_A_LENGTH;
 
 			 // account balance - 3 data bytes
@@ -890,17 +839,11 @@ namespace com.dalsemi.onewire.application.sha
 			 accountData[I_FILE_CRC16_A + 1] = (byte)(crc >> 8);
 		  }
 
-		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-		  if (DEBUG)
-		  {
-			 IOHelper.writeLine("------------------------------------");
-			 IOHelper.writeLine("writing transaction data");
-			 IOHelper.writeLine("acctPageNum: " + acctPageNum);
-			 IOHelper.writeLine("accountData");
-			 IOHelper.writeBytesHex(accountData);
-			 IOHelper.writeLine("------------------------------------");
-		  }
-		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+          OneWireEventSource.Log.Debug("------------------------------------");
+          OneWireEventSource.Log.Debug("writing transaction data");
+          OneWireEventSource.Log.Debug("acctPageNum: " + acctPageNum);
+          OneWireEventSource.Log.Debug("accountData: " + Convert.toHexString(accountData));
+          OneWireEventSource.Log.Debug("------------------------------------");
 
 		  // write it to the button
 		  try
@@ -912,10 +855,7 @@ namespace com.dalsemi.onewire.application.sha
 		  }
 		  catch (OneWireException owe)
 		  {
-			 if (DEBUG)
-			 {
-				IOHelper.writeLine(owe);
-			 }
+             OneWireEventSource.Log.Debug(owe.ToString());
 		  }
 
 		  this.lastError = SHATransaction.USER_WRITE_DATA_FAILED;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using System.Diagnostics;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -33,11 +32,10 @@ using System.Diagnostics;
 namespace com.dalsemi.onewire.application.sha
 {
 
-	using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
-	using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-	using OWFile = com.dalsemi.onewire.application.file.OWFile;
-	using Address = com.dalsemi.onewire.utils.Address;
+	using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.application.file;
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.logging;
 
 	/// <summary>
 	/// <P>The abstract superclass for all users of a SHAiButton transaction system.
@@ -234,13 +232,10 @@ namespace com.dalsemi.onewire.application.sha
 		  catch (IOException ioe)
 		  {
 			 bRetVal = false;
-			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-			 if (DEBUG)
-			 {
-				Debug.WriteLine(ioe.ToString());
-				Debug.Write(ioe.StackTrace);
-			 }
-			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+			 
+             OneWireEventSource.Log.Debug(ioe.ToString());
+             OneWireEventSource.Log.Debug(ioe.StackTrace);
+			 
 		  }
 
 		  try
@@ -250,13 +245,9 @@ namespace com.dalsemi.onewire.application.sha
 		  }
 		  catch (IOException ioe)
 		  {
-			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-			 if (DEBUG)
-			 {
-				Debug.WriteLine(ioe.ToString());
-				Debug.Write(ioe.StackTrace);
-			 }
-			 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+             OneWireEventSource.Log.Debug(ioe.ToString());
+             OneWireEventSource.Log.Debug(ioe.StackTrace);
+
 			 /*well, at least I tried!*/
 			 return false;
 		  }
@@ -305,8 +296,8 @@ namespace com.dalsemi.onewire.application.sha
 					this.accountPageNumber = -1;
 					if (DEBUG)
 					{
-					   Debug.WriteLine(e.ToString());
-					   Debug.Write(e.StackTrace);
+                       OneWireEventSource.Log.Debug(e.ToString());
+                       OneWireEventSource.Log.Debug(e.StackTrace);
 					}
 				 }
 			  }

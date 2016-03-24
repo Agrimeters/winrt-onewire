@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-//using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Networking.Sockets;
@@ -35,7 +34,6 @@ using Windows.Storage.Streams;
 
 namespace com.dalsemi.onewire.adapter
 {
-
     using com.dalsemi.onewire;
     using com.dalsemi.onewire.logging;
     using com.dalsemi.onewire.utils;
