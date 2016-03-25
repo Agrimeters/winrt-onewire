@@ -167,6 +167,7 @@
     <Compile Include="com\dalsemi\onewire\application\tag\TAGParser.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\Thermal.cs" />
     <Compile Include="com\dalsemi\onewire\application\tag\XML.cs" />
+    <Compile Include="com\dalsemi\onewire\BackgroundTaskHelper.cs" />
     <Compile Include="com\dalsemi\onewire\container\ADContainer.cs" />
     <Compile Include="com\dalsemi\onewire\container\ClockContainer.cs" />
     <Compile Include="com\dalsemi\onewire\container\CommandAPDU.cs" />

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="38f9bc5a-3434-4651-9b5b-3d75224e5188" Publisher="CN=joel" Version="1.0.0.0" />
-  <mp:PhoneIdentity PhoneProductId="38f9bc5a-3434-4651-9b5b-3d75224e5188" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Identity Name="d9c45bb6-8783-443e-8882-47b276f851ef" Publisher="CN=joel" Version="1.0.0.0" />
+  <mp:PhoneIdentity PhoneProductId="d9c45bb6-8783-443e-8882-47b276f851ef" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>StartNetAdapterHost</DisplayName>
     <PublisherDisplayName>joel</PublisherDisplayName>
@@ -20,6 +20,13 @@
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
+      <Extensions>
+        <Extension Category="windows.backgroundTasks" EntryPoint="BackgroundTasks.NetAdapterHostTask">
+          <BackgroundTasks>
+            <Task Type="deviceUse" />
+          </BackgroundTasks>
+        </Extension>
+      </Extensions>
     </Application>
   </Applications>
   <Capabilities>

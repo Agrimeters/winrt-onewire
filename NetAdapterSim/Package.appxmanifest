@@ -8,14 +8,14 @@
   IgnorableNamespaces="uap mp iot">
 
   <Identity
-    Name="NetAdapterHost-uwp"
+    Name="NetAdapterSim-uwp"
     Publisher="CN=joel"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="1710ac2c-9d90-4915-9e69-281b752bc8b8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="4823bfd7-d781-4ae3-8ba5-684732011150" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>NetAdapterHost</DisplayName>
+    <DisplayName>NetAdapterSim</DisplayName>
     <PublisherDisplayName>joel</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -31,17 +31,17 @@
   <Applications>
     <Application Id="App">
       <uap:VisualElements
-        DisplayName="NetAdapterHost"
+        DisplayName="NetAdapterSim"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="NetAdapterHost"
+        Description="NetAdapterSim"
         BackgroundColor="transparent"
         AppListEntry="none">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
       <Extensions>
-        <Extension Category="windows.backgroundTasks" EntryPoint="NetAdapterHost.StartupTask">
+        <Extension Category="windows.backgroundTasks" EntryPoint="NetAdapterSim.StartupTask">
           <BackgroundTasks>
             <iot:Task Type="startup" />
           </BackgroundTasks>

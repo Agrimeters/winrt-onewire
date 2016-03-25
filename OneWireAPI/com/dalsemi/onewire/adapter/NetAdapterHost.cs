@@ -456,7 +456,7 @@ namespace com.dalsemi.onewire.adapter
                 //}
                 //else if (BindToAddress.IsChecked == true)
                 //{
-                //    // Try to bind to a specific address.
+                    // Try to bind to a specific address.
                 //    await listener.BindEndpointAsync(selectedLocalHost.LocalHost, ServiceNameForListener.Text);
                 //Debug.WriteLine(
                 //        "Listening on address " + selectedLocalHost.LocalHost.CanonicalName);
@@ -498,15 +498,32 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         /// <param name="conn"> The connection to send/receive data. </param>
         /// <returns> <code>true</code> if the versionUID matched. </returns>
-        private bool sendVersionUID(NetAdapterConstants_Connection conn)
+        private async Task<bool> sendVersionUID(NetAdapterConstants_Connection conn)
         {
-            // write server version
-            conn.output.WriteInt32(NetAdapterConstants_Fields.versionUID);
-            var t = Task.Run(async () => { await conn.output.StoreAsync(); });
+            bool result = false;
 
-            byte retVal = conn.input.ReadByte();
+            try
+            {
+                // write server version
+                conn.output.WriteInt32(NetAdapterConstants_Fields.versionUID);
+                await conn.output.StoreAsync();
+                await conn.input.LoadAsync(1);
+                if (conn.input.UnconsumedBufferLength > 0)
+                {
+                    byte val = conn.input.ReadByte();
+                    result = (val == NetAdapterConstants_Fields.RET_SUCCESS);
+                }
+            }
+            catch (Exception e)
+            {
+                // If this is an unknown status it means that the error if fatal and retry will likely fail.
+                if (SocketError.GetStatus(e.HResult) == SocketErrorStatus.Unknown)
+                {
+                    throw;
+                }
+            }
 
-            return (retVal == NetAdapterConstants_Fields.RET_SUCCESS);
+            return result;
         }
 
         /// <summary>
@@ -1277,11 +1294,15 @@ namespace com.dalsemi.onewire.adapter
             conn = new NetAdapterConstants_Connection();
             conn.sock = args.Socket;
 
-            conn.input = new DataReader(args.Socket.InputStream);
-            conn.output = new DataWriter(args.Socket.OutputStream);
+            OneWireEventSource.Log.Debug("Remote Address: " + args.Socket.Information.RemoteAddress);
+            OneWireEventSource.Log.Debug("Remote Port: " + args.Socket.Information.RemotePort);
+
+            conn.input = new DataReader(conn.sock.InputStream);
+            conn.output = new DataWriter(conn.sock.OutputStream);
 
             // first thing transmitted should be version info
-            if (!sendVersionUID(conn))
+            bool result = await sendVersionUID(conn);
+            if (!result)
             {
                 throw new System.IO.IOException("send version failed");
             }
@@ -1295,6 +1316,7 @@ namespace com.dalsemi.onewire.adapter
             // compute the crc of the secret and the challenge
             int crc = CRC16.compute(netAdapterSecret, 0);
             crc = CRC16.compute(chlg, crc);
+            await conn.input.LoadAsync(4);
             int answer = conn.input.ReadInt32();
             if (answer != crc)
             {
@@ -1366,8 +1388,12 @@ namespace com.dalsemi.onewire.adapter
                     multicastListener.Dispose();
                     multicastListener = null;
                 }
+
+                OnDispose(this, EventArgs.Empty);
             }
         }
+
+        public event EventHandler OnDispose = delegate { };
 
     }
 }

@@ -4,12 +4,12 @@ using Windows.ApplicationModel.Background;
 using Windows.Storage;
 using Windows.System.Threading;
 
+using com.dalsemi.onewire.adapter;
+using com.dalsemi.onewire.container;
+using com.dalsemi.onewire.utils;
+
 namespace BackgroundTasks
 {
-    using com.dalsemi.onewire.adapter;
-    using com.dalsemi.onewire.container;
-    using com.dalsemi.onewire.utils;
-
     public sealed class WatchTempTask : IBackgroundTask
     {
         TemperatureContainer _tc = null;
