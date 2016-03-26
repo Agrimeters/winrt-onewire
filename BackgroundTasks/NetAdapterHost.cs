@@ -19,10 +19,10 @@ namespace BackgroundTasks
 
         private string _adapterName = null, _adapterPort = null;
         private bool _multithread = true, _multicast = true;
-        private string _secret = NetAdapterConstants_Fields.DEFAULT_SECRET;
-        private string _listenPort = NetAdapterConstants_Fields.DEFAULT_PORT;
-        private int _mcPort = NetAdapterConstants_Fields.DEFAULT_MULTICAST_PORT;
-        private string _mcGroup = NetAdapterConstants_Fields.DEFAULT_MULTICAST_GROUP;
+        private string _secret = NetAdapterConstants.DEFAULT_SECRET;
+        private string _listenPort = NetAdapterConstants.DEFAULT_PORT;
+        private int _mcPort = NetAdapterConstants.DEFAULT_MULTICAST_PORT;
+        private string _mcGroup = NetAdapterConstants.DEFAULT_MULTICAST_GROUP;
 
         private BackgroundTaskDeferral deferral;
 

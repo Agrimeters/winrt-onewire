@@ -7,6 +7,7 @@ onewire.serial.maxbaud=115200
 onewire.debug=true
 onewire.debug.logfile=log.txt
 NetAdapter.Secret=secret
+#NetAdapter.HostName=127.0.0.1
 #NetAdapter.MulticastEnabled=true
 #NetAdapter.MulticastPort=6161
 #NetAdapter.MulticastGroup=228.5.6.7

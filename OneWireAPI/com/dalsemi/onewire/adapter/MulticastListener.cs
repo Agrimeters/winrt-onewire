@@ -85,11 +85,9 @@ namespace com.dalsemi.onewire.adapter
 		  this.expectedMessage = expectedMessage;
 		  this.returnMessage = returnMessage;
 
-		  //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 		  OneWireEventSource.Log.Debug("DEBUG: Creating Multicast Listener");
           OneWireEventSource.Log.Debug("DEBUG:    Multicast port: " + multicastPort);
           OneWireEventSource.Log.Debug("DEBUG:    Multicast group: " + multicastGroup);
-          //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
           // create multicast socket
           socket = new DatagramSocket(); // MulticastSocket(multicastPort);
@@ -108,9 +106,7 @@ namespace com.dalsemi.onewire.adapter
 		  //join the multicast group
           socket.JoinMulticastGroup(new HostName(multicastGroup));
 
-          //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
           OneWireEventSource.Log.Debug("DEBUG: waiting for multicast packet");
-          //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
         }
 
         private async void Multicast_MessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
@@ -121,10 +117,8 @@ namespace com.dalsemi.onewire.adapter
             // check to see if the received data matches the expected message
             uint length = reader.UnconsumedBufferLength;
 
-            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
             OneWireEventSource.Log.Debug("DEBUG: packet.length=" + length);
             OneWireEventSource.Log.Debug("DEBUG: expecting=" + expectedMessage.Length);
-            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
             try
             {
 
@@ -138,9 +132,7 @@ namespace com.dalsemi.onewire.adapter
                     // check to see if we received the expected message
                     if (dataMatch)
                     {
-                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
                         OneWireEventSource.Log.Debug("DEBUG: packet match, replying");
-                        //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
                         // send return message
                         using (var writer = new DataWriter(socket.OutputStream))

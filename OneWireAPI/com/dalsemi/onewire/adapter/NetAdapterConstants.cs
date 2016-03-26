@@ -24,81 +24,42 @@
  * Branding Policy.
  *---------------------------------------------------------------------------
  */
+using System;
+using System.Collections;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Windows.Networking.Sockets;
+using Windows.Storage.Streams;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Foundation;
+
 namespace com.dalsemi.onewire.adapter
 {
+
+    using com.dalsemi.onewire.logging;
+
 	/// <summary>
-	/// Interface for holding all constants related to Network Adapter communications.
+	/// Static class for holding all constants related to Network Adapter communications.
 	/// This interface is used by both NetAdapterHost and the NetAdapter.  In
 	/// addition, the common utility class <code>Connection</code> is defined here.
 	/// 
 	/// @author SH
 	/// @version 1.00
 	/// </summary>
-	public interface NetAdapterConstants
+	public sealed class NetAdapterConstants
 	{
-	   /// <summary>
-	   /// Debug message flag </summary>
-
-	   /// <summary>
-	   /// version UID, used to detect incompatible host </summary>
-
-	   /// <summary>
-	   /// Indicates whether or not to buffer the output (probably always true!) </summary>
-
-	   /// <summary>
-	   /// Default port for NetAdapter TCP/IP connection </summary>
-
-	   /// <summary>
-	   /// default secret for authentication with the server </summary>
-
-	   /// <summary>
-	   /// Address for Multicast group for NetAdapter Datagram packets </summary>
-
-	   /// <summary>
-	   /// Default port for NetAdapter Datagram packets </summary>
-
-	   /*------------------------------------------------------------*/
-	   /*----- Method Return codes ----------------------------------*/
-	   /*------------------------------------------------------------*/
-	   /*------------------------------------------------------------*/
-
-	   /*------------------------------------------------------------*/
-	   /*----- Method command bytes ---------------------------------*/
-	   /*------------------------------------------------------------*/
-	   /*------------------------------------------------------------*/
-	   /* Raw Data methods ------------------------------------------*/
-	   /*------------------------------------------------------------*/
-	   /* Power methods ---------------------------------------------*/
-	   /*------------------------------------------------------------*/
-	   /* Speed methods ---------------------------------------------*/
-	   /*------------------------------------------------------------*/
-	   /* Network Semaphore methods ---------------------------------*/
-	   /*------------------------------------------------------------*/
-	   /* Searching methods -----------------------------------------*/
-	   /*------------------------------------------------------------*/
-	   /* feature methods -------------------------------------------*/
-	   /*------------------------------------------------------------*/
-
-	   /// <summary>
-	   /// An inner utility class for coupling Socket with I/O streams
-	   /// </summary>
-
-	   /// <summary>
-	   /// instance for an empty connection, basically it's a NULL object
-	   ///  that's safe to synchronize on. 
-	   /// </summary>
-	}
-
-	public static class NetAdapterConstants_Fields
-	{
-	   public const bool DEBUG = true;
 	   public const int versionUID = 1;
 	   public const string DEFAULT_PORT = "6161";
 	   public const string DEFAULT_SECRET = "Adapter Secret Default";
 	   public const string DEFAULT_MULTICAST_GROUP = "228.5.6.7";
+
 	   public const int DEFAULT_MULTICAST_PORT = 6163;
-	   public static readonly byte RET_SUCCESS = 0x0FF;
-	   public static readonly byte RET_FAILURE = 0x0F0;
+
+	   public static readonly byte RET_SUCCESS = 0xFF;
+	   public static readonly byte RET_FAILURE = 0xF0;
+
 	   public const byte CMD_CLOSECONNECTION = 0x08;
 	   public const byte CMD_PINGCONNECTION = 0x09;
 	   public const byte CMD_RESET = 0x10;
@@ -134,21 +95,52 @@ namespace com.dalsemi.onewire.adapter
 	   public const byte CMD_CANHYPERDRIVE = 0x2E;
 	   public const byte CMD_CANOVERDRIVE = 0x2F;
 	   public const byte CMD_CANPROGRAM = 0x30;
-	   public static readonly NetAdapterConstants_Connection EMPTY_CONNECTION = new NetAdapterConstants_Connection();
-	}
 
-	public sealed class NetAdapterConstants_Connection
-	{
-	  /// <summary>
-	  /// socket to host </summary>
-	  public Windows.Networking.Sockets.StreamSocket sock = null;
-        
-	  /// <summary>
-	  /// input stream from socket </summary>
-	  public Windows.Storage.Streams.DataReader input = null;
-        
-	  /// <summary>
-	  /// output stream from socket </summary>
-	  public Windows.Storage.Streams.DataWriter output = null;
-	}
+	   public static readonly Connection EMPTY_CONNECTION = new Connection();
+
+       public sealed class Connection
+       {
+            /// <summary>
+            /// socket to host </summary>
+            public Windows.Networking.Sockets.StreamSocket sock = null;
+
+            /// <summary>
+            /// input stream from socket </summary>
+            public Windows.Storage.Streams.DataReader input = null;
+
+            /// <summary>
+            /// output stream from socket </summary>
+            public Windows.Storage.Streams.DataWriter output = null;
+
+            /// <summary>
+            /// Cancellaton token to manage DataReader.LoadAsync()
+            /// </summary>
+            public System.Threading.CancellationTokenSource cts = null;
+
+            public byte[] ReadAsync(StreamSocket socket, uint size)
+            {
+                try
+                {
+                    IBuffer buffer = new Windows.Storage.Streams.Buffer(size);
+                    var t = Task<byte[]>.Run(async () =>
+                    {
+                        buffer = await socket.InputStream.ReadAsync(buffer, size, InputStreamOptions.Partial);
+                        if (buffer.Length == 0)
+                            return null;
+                        else
+                            return buffer.ToArray();
+                    });
+                    t.Wait();
+                    return t.Result;
+                }
+                catch (Exception e)
+                {
+                    OneWireEventSource.Log.Debug("ReadAsync(): " + e.ToString());
+                }
+
+                return null;
+            }
+        }
+
+    }
 }

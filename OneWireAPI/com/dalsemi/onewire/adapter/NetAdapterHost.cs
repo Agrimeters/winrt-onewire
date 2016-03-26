@@ -37,6 +37,10 @@ namespace com.dalsemi.onewire.adapter
     using com.dalsemi.onewire;
     using com.dalsemi.onewire.logging;
     using com.dalsemi.onewire.utils;
+    using System.Collections.Generic;
+    using System.Threading;
+    using Windows.Networking;
+    using Windows.Networking.Connectivity;
 
     /// <summary>
     /// <P>NetAdapterHost is the host (or server) component for a network-based
@@ -74,7 +78,7 @@ namespace com.dalsemi.onewire.adapter
     /// 
     /// @author SH
     /// @version    1.00, 9 Jan 2002 </seealso>
-    public class NetAdapterHost : NetAdapterConstants, IDisposable
+    public class NetAdapterHost : IDisposable
     {
         /// <summary>
         /// random number generator, used to issue challenges to client </summary>
@@ -112,10 +116,8 @@ namespace com.dalsemi.onewire.adapter
         /// timeout for socket receive, in seconds </summary>
         protected internal int timeoutInSeconds = 30;
 
-        /// <summary>
-        /// The connection that is being serviced.
-        /// </summary>
-        protected internal NetAdapterConstants_Connection conn;
+        // List containing all available local HostName endpoints
+        private List<LocalHostItem> localHostItems = new List<LocalHostItem>();
 
         /// <summary>
         /// The port we are listening on.
@@ -137,7 +139,7 @@ namespace com.dalsemi.onewire.adapter
         /// </param>
         /// <exception cref="IOException"> if a network error occurs or the listen socket
         /// cannot be created on the specified port. </exception>
-        public NetAdapterHost(DSPortAdapter adapter) : this(adapter, NetAdapterConstants_Fields.DEFAULT_PORT, false)
+        public NetAdapterHost(DSPortAdapter adapter) : this(adapter, NetAdapterConstants.DEFAULT_PORT, false)
         {
         }
 
@@ -177,7 +179,7 @@ namespace com.dalsemi.onewire.adapter
         /// </param>
         /// <exception cref="IOException"> if a network error occurs or the listen socket
         /// cannot be created on the specified port. </exception>
-        public NetAdapterHost(DSPortAdapter adapter, bool multiThread) : this(adapter, NetAdapterConstants_Fields.DEFAULT_PORT, multiThread)
+        public NetAdapterHost(DSPortAdapter adapter, bool multiThread) : this(adapter, NetAdapterConstants.DEFAULT_PORT, multiThread)
         {
         }
 
@@ -222,7 +224,7 @@ namespace com.dalsemi.onewire.adapter
             }
             else
             {
-                netAdapterSecret = Encoding.UTF8.GetBytes(NetAdapterConstants_Fields.DEFAULT_SECRET);
+                netAdapterSecret = Encoding.UTF8.GetBytes(NetAdapterConstants.DEFAULT_SECRET);
             }
         }
 
@@ -287,7 +289,7 @@ namespace com.dalsemi.onewire.adapter
             }
             else
             {
-                netAdapterSecret = Encoding.UTF8.GetBytes(NetAdapterConstants_Fields.DEFAULT_SECRET);
+                netAdapterSecret = Encoding.UTF8.GetBytes(NetAdapterConstants.DEFAULT_SECRET);
             }
         }
 
@@ -311,7 +313,7 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         public virtual void createMulticastListener()
         {
-            createMulticastListener(NetAdapterConstants_Fields.DEFAULT_MULTICAST_PORT);
+            createMulticastListener(NetAdapterConstants.DEFAULT_MULTICAST_PORT);
         }
 
         /// <summary>
@@ -324,7 +326,7 @@ namespace com.dalsemi.onewire.adapter
             string group = OneWireAccessProvider.getProperty("NetAdapter.MulticastGroup");
             if (string.ReferenceEquals(group, null))
             {
-                group = NetAdapterConstants_Fields.DEFAULT_MULTICAST_GROUP;
+                group = NetAdapterConstants.DEFAULT_MULTICAST_GROUP;
             }
             createMulticastListener(port, group);
         }
@@ -340,7 +342,7 @@ namespace com.dalsemi.onewire.adapter
             if (multicastListener == null)
             {
                 // 4 bytes for integer versionUID
-                byte[] versionBytes = Convert.toByteArray(NetAdapterConstants_Fields.versionUID);
+                byte[] versionBytes = Convert.toByteArray(NetAdapterConstants.versionUID);
 
                 // this byte array is 5 because length is used to determine different
                 // packet types by client
@@ -353,131 +355,187 @@ namespace com.dalsemi.onewire.adapter
         }
 
 
-        ///// <summary>
-        ///// Run method for threaded NetAdapterHost.  Maintains server socket which
-        ///// waits for incoming connections.  Whenever a connection is received
-        ///// launches it services the socket or (optionally) launches a new thread
-        ///// for servicing the socket.
-        ///// </summary>
-        //public virtual void run()
-        //{
-        //hostRunning = true;
-        //while (!hostStopped)
-        //{
-        //Socket sock = null;
-        //try
-        //{
-        //sock = serverSocket.accept();
-        //handleConnection(sock);
-        //}
-        //catch (System.IO.IOException)
-        //{
-        //try
-        //{
-        //   if (sock != null)
-        //   {
-        //	  sock.close();
-        //   }
-        //}
-        //catch (System.IO.IOException)
-        //{
-        //	;
-        //}
-        //}
-        //}
-        //hostRunning = false;
-        //}
+        /// <summary>
+        /// Run method for threaded NetAdapterHost.  Maintains server socket which
+        /// waits for incoming connections.  Whenever a connection is received
+        /// launches it services the socket or (optionally) launches a new thread
+        /// for servicing the socket.
+        /// </summary>
+        public virtual void run()
+        {
+            hostRunning = true;
+            while (!hostStopped)
+            {
+                //Socket sock = null;
+                //try
+                //{
+                //    sock = serverSocket.accept();
+                //    handleConnection(sock);
+                //}
+                //catch (System.IO.IOException)
+                //{
+                //    try
+                //    {
+                //        if (sock != null)
+                //        {
+                //            sock.close();
+                //        }
+                //    }
+                //    catch (System.IO.IOException)
+                //    {
+                //        ;
+                //    }
+                //}
+            }
+            hostRunning = false;
+        }
 
         /// <summary>
         /// Stops all threads and kills the server socket.
         /// </summary>
-        // public virtual void stopHost()
-        // {
-        // this.hostStopped = true;
-        // try
-        // {
-        // this.serverSocket.close();
-        // }
-        // catch (System.IO.IOException)
-        // {
-        //  ;
-        // }
+        public virtual void stopHost()
+        {
+            OneWireEventSource.Log.Debug("stopHost +");
 
-        // // wait for run method to quit, with a timeout of 1 second
-        // int i = 0;
-        // while (hostRunning && i++<100)
-        // {
-        // try
-        // {
-        // Thread.Sleep(10);
-        // }
-        //catch (Exception)
-        //{
-        // ;
-        //}
-        // }
+            this.hostStopped = true;
+            try
+            {
+                this.serverSocket.ConnectionReceived -= OnConnection;
+                this.serverSocket.Dispose();
+            }
+            catch (System.IO.IOException)
+            {
+                ;
+            }
 
-        // if (!singleThreaded)
-        // {
-        // lock (hashHandlers)
-        // {
-        //	System.Collections.IEnumerator e = hashHandlers.Values.GetEnumerator();
-        //	while (e.MoveNext())
-        //	{
-        //	   ((SocketHandler)e.Current).stopHandler();
-        //	}
-        // }
-        // }
+            // wait for run method to quit, with a timeout of 1 second
+            int i = 0;
+            while (hostRunning && i++ < 100)
+            {
+                try
+                {
+                    Thread.Sleep(10);
+                }
+                catch (Exception)
+                {
+                    ;
+                }
+            }
 
-        // if (multicastListener != null)
-        // {
-        // multicastListener.stopListener();
-        // }
+            if (!singleThreaded)
+            {
+                lock (hashHandlers)
+                {
+                    foreach (SocketHandler socket in hashHandlers.Values)
+                        socket.stopHandler();
+                }
+            }
 
-        // // ensure that there is no exclusive use of the adapter
-        // adapter.endExclusive();
-        // }
+            if (multicastListener != null)
+            {
+                multicastListener.stopListener();
+            }
+
+            // ensure that there is no exclusive use of the adapter
+            adapter.endExclusive();
+
+            OneWireEventSource.Log.Debug("stopHost -");
+        }
+
+        private void PopulateHostList()
+        {
+            // populate localHost List
+            localHostItems.Clear();
+            foreach (HostName localHostInfo in NetworkInformation.GetHostNames())
+            {
+                if (localHostInfo.IPInformation != null)
+                {
+                    LocalHostItem adapterItem = new LocalHostItem(localHostInfo);
+                    localHostItems.Add(adapterItem);
+                }
+            }
+        }
 
         public async void StartServer()
         {
-            // create the server socket
-            this.serverSocket = new StreamSocketListener();
-            this.serverSocket.ConnectionReceived += OnConnection;
-            this.serverSocket.Control.KeepAlive = false;
+            OneWireEventSource.Log.Debug("StartServer +");
 
-            // Start listen operation.
+            LocalHostItem selectedLocalHost = null;
+
+            PopulateHostList();
+
+            string HostNameForServer = OneWireAccessProvider.getProperty("NetAdapter.HostName");
+            if (!string.ReferenceEquals(HostNameForServer, null))
+            {
+                HostName hostName;
+
+                try
+                {
+                    hostName = new HostName(HostNameForServer);
+                }
+                catch (ArgumentException)
+                {
+                    OneWireEventSource.Log.Critical("Error: Invalid host name specified: " + HostNameForServer);
+                    OneWireEventSource.Log.Critical("Available HostNames:");
+                    foreach (var intf in localHostItems)
+                        OneWireEventSource.Log.Critical(intf.LocalHost.CanonicalName);
+                    return;
+                }
+
+
+                bool valid_address = false;
+
+                if (hostName.CanonicalName.Equals("127.0.0.1"))
+                {
+                    selectedLocalHost = new LocalHostItem(hostName);
+                    valid_address = true;
+                }
+                else
+                {
+                    foreach (var item in localHostItems)
+                    {
+                        if (item.LocalHost.CanonicalName.Equals(hostName.CanonicalName))
+                        {
+                            selectedLocalHost = item;
+                            valid_address = true;
+                            break;
+                        }
+                    }
+                }
+
+
+                if (!valid_address)
+                {
+                    OneWireEventSource.Log.Critical("Error: Invalid host name specified: " + HostNameForServer);
+                    OneWireEventSource.Log.Critical("Available HostNames:");
+                    foreach (var intf in localHostItems)
+                        OneWireEventSource.Log.Critical(intf.DisplayString);
+                    selectedLocalHost = null;
+                }
+            }
+
             try
             {
-                //if (BindToAny.IsChecked == true)
-                //{
-                // Don't limit traffic to an address or an adapter.
-                await this.serverSocket.BindServiceNameAsync(this.serviceName);
-                OneWireEventSource.Log.Info("Listening");
-                //}
-                //else if (BindToAddress.IsChecked == true)
-                //{
-                    // Try to bind to a specific address.
-                //    await listener.BindEndpointAsync(selectedLocalHost.LocalHost, ServiceNameForListener.Text);
-                //Debug.WriteLine(
-                //        "Listening on address " + selectedLocalHost.LocalHost.CanonicalName);
-                //}
-                //else if (BindToAdapter.IsChecked == true)
-                //{
-                //    // Try to limit traffic to the selected adapter.
-                //    // This option will be overridden by interfaces with weak-host or forwarding modes enabled.
-                //    NetworkAdapter selectedAdapter = selectedLocalHost.LocalHost.IPInformation.NetworkAdapter;
+                // create the server socket
+                this.serverSocket = new StreamSocketListener();
+                this.serverSocket.ConnectionReceived += OnConnection;
+                this.serverSocket.Control.KeepAlive = false;
 
-                //    // For demo purposes, ensure that we use the same adapter in the client connect scenario.
-                //    CoreApplication.Properties.Add("adapter", selectedAdapter);
 
-                //    await listener.BindServiceNameAsync(
-                //        ServiceNameForListener.Text,
-                //        SocketProtectionLevel.PlainSocket,
-                //        selectedAdapter);
+                if (selectedLocalHost != null)
+                {
+                    await this.serverSocket.BindEndpointAsync(selectedLocalHost.LocalHost, this.serviceName);
+                    OneWireEventSource.Log.Info("NetAdapter started listening on " + selectedLocalHost.LocalHost.CanonicalName + ":" + this.serviceName);
+                }
+                else
+                {
+                    await this.serverSocket.BindServiceNameAsync(this.serviceName);
+                    OneWireEventSource.Log.Info("NetAdapter started listening on:");
+                    foreach (var intf in localHostItems)
+                        OneWireEventSource.Log.Info("\t" + intf.LocalHost.CanonicalName + ":" + this.serviceName);
+                }
 
-                //    Debug.WriteLine(
-                //        "Listening on adapter " + selectedAdapter.NetworkAdapterId);
-                //}
+                hostStopped = false;
             }
             catch (Exception exception)
             {
@@ -489,6 +547,8 @@ namespace com.dalsemi.onewire.adapter
 
                 OneWireEventSource.Log.Critical("Start listening failed with error: " + exception.Message);
             }
+
+            OneWireEventSource.Log.Debug("StartServer -");
         }
 
         /// <summary>
@@ -498,21 +558,18 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         /// <param name="conn"> The connection to send/receive data. </param>
         /// <returns> <code>true</code> if the versionUID matched. </returns>
-        private async Task<bool> sendVersionUID(NetAdapterConstants_Connection conn)
+        private async Task<bool> sendVersionUID(NetAdapterConstants.Connection conn)
         {
             bool result = false;
 
             try
             {
                 // write server version
-                conn.output.WriteInt32(NetAdapterConstants_Fields.versionUID);
+                conn.output.WriteInt32(NetAdapterConstants.versionUID);
                 await conn.output.StoreAsync();
-                await conn.input.LoadAsync(1);
-                if (conn.input.UnconsumedBufferLength > 0)
-                {
-                    byte val = conn.input.ReadByte();
-                    result = (val == NetAdapterConstants_Fields.RET_SUCCESS);
-                }
+
+                byte[] val = conn.ReadAsync(conn.sock, sizeof(byte));
+                result = (val[0] == NetAdapterConstants.RET_SUCCESS);
             }
             catch (Exception e)
             {
@@ -531,154 +588,145 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         /// <param name="conn"> The connection to send/receive data.
         ///  </param>
-        private async void processRequests(NetAdapterConstants_Connection conn)
+        private async void processRequests(NetAdapterConstants.Connection conn)
         {
-            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("\n------------------------------------------");
-            }
-            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-
             // get the next command
-            byte cmd = 0x00;
+            //byte cmd = 0x00;
 
-            cmd = conn.input.ReadByte();
+            byte[] cmd = conn.ReadAsync(conn.sock, 1);
+            if (cmd == null)
+                return;
 
-            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("CMD received: " + cmd.ToString("x"));
-            }
-            //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+            OneWireEventSource.Log.Debug("\n------------------------------------------");
+            OneWireEventSource.Log.Debug("CMD received: " + cmd[0].ToString("X"));
 
             try
             {
                 // ... and fire the appropriate method
-                switch (cmd)
+                switch (cmd[0])
                 {
                     /* Connection keep-alive and close commands */
-                    case NetAdapterConstants_Fields.CMD_PINGCONNECTION:
+                    case NetAdapterConstants.CMD_PINGCONNECTION:
                         // no-op, might update timer of some sort later
-                        conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+                        conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
                         await conn.output.StoreAsync();
                         break;
-                    case NetAdapterConstants_Fields.CMD_CLOSECONNECTION:
+                    case NetAdapterConstants.CMD_CLOSECONNECTION:
                         close(conn);
                         break;
                     /* Raw Data commands */
-                    case NetAdapterConstants_Fields.CMD_RESET:
-                        adapterReset(conn);
+                    case NetAdapterConstants.CMD_RESET:
+                        await adapterReset(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_PUTBIT:
-                        adapterPutBit(conn);
+                    case NetAdapterConstants.CMD_PUTBIT:
+                        await adapterPutBit(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_PUTBYTE:
-                        adapterPutByte(conn);
+                    case NetAdapterConstants.CMD_PUTBYTE:
+                        await adapterPutByte(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_GETBIT:
-                        adapterGetBit(conn);
+                    case NetAdapterConstants.CMD_GETBIT:
+                        await adapterGetBit(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_GETBYTE:
-                        adapterGetByte(conn);
+                    case NetAdapterConstants.CMD_GETBYTE:
+                        await adapterGetByte(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_GETBLOCK:
-                        adapterGetBlock(conn);
+                    case NetAdapterConstants.CMD_GETBLOCK:
+                        await adapterGetBlock(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_DATABLOCK:
-                        adapterDataBlock(conn);
+                    case NetAdapterConstants.CMD_DATABLOCK:
+                        await adapterDataBlock(conn);
                         break;
                     /* Power methods */
-                    case NetAdapterConstants_Fields.CMD_SETPOWERDURATION:
-                        adapterSetPowerDuration(conn);
+                    case NetAdapterConstants.CMD_SETPOWERDURATION:
+                        await adapterSetPowerDuration(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_STARTPOWERDELIVERY:
-                        adapterStartPowerDelivery(conn);
+                    case NetAdapterConstants.CMD_STARTPOWERDELIVERY:
+                        await adapterStartPowerDelivery(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_SETPROGRAMPULSEDURATION:
-                        adapterSetProgramPulseDuration(conn);
+                    case NetAdapterConstants.CMD_SETPROGRAMPULSEDURATION:
+                        await adapterSetProgramPulseDuration(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_STARTPROGRAMPULSE:
-                        adapterStartProgramPulse(conn);
+                    case NetAdapterConstants.CMD_STARTPROGRAMPULSE:
+                        await adapterStartProgramPulse(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_STARTBREAK:
-                        adapterStartBreak(conn);
+                    case NetAdapterConstants.CMD_STARTBREAK:
+                        await adapterStartBreak(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_SETPOWERNORMAL:
-                        adapterSetPowerNormal(conn);
+                    case NetAdapterConstants.CMD_SETPOWERNORMAL:
+                        await adapterSetPowerNormal(conn);
                         break;
                     /* Speed methods */
-                    case NetAdapterConstants_Fields.CMD_SETSPEED:
-                        adapterSetSpeed(conn);
+                    case NetAdapterConstants.CMD_SETSPEED:
+                        await adapterSetSpeed(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_GETSPEED:
-                        adapterGetSpeed(conn);
+                    case NetAdapterConstants.CMD_GETSPEED:
+                        await adapterGetSpeed(conn);
                         break;
                     /* Network Semaphore methods */
-                    case NetAdapterConstants_Fields.CMD_BEGINEXCLUSIVE:
-                        adapterBeginExclusive(conn);
+                    case NetAdapterConstants.CMD_BEGINEXCLUSIVE:
+                        await adapterBeginExclusive(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_ENDEXCLUSIVE:
-                        adapterEndExclusive(conn);
+                    case NetAdapterConstants.CMD_ENDEXCLUSIVE:
+                        await adapterEndExclusive(conn);
                         break;
                     /* Searching methods */
-                    case NetAdapterConstants_Fields.CMD_FINDFIRSTDEVICE:
-                        adapterFindFirstDevice(conn);
+                    case NetAdapterConstants.CMD_FINDFIRSTDEVICE:
+                        await adapterFindFirstDevice(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_FINDNEXTDEVICE:
-                        adapterFindNextDevice(conn);
+                    case NetAdapterConstants.CMD_FINDNEXTDEVICE:
+                        await adapterFindNextDevice(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_GETADDRESS:
-                        adapterGetAddress(conn);
+                    case NetAdapterConstants.CMD_GETADDRESS:
+                        await adapterGetAddress(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_SETSEARCHONLYALARMINGDEVICES:
-                        adapterSetSearchOnlyAlarmingDevices(conn);
+                    case NetAdapterConstants.CMD_SETSEARCHONLYALARMINGDEVICES:
+                        await adapterSetSearchOnlyAlarmingDevices(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_SETNORESETSEARCH:
-                        adapterSetNoResetSearch(conn);
+                    case NetAdapterConstants.CMD_SETNORESETSEARCH:
+                        await adapterSetNoResetSearch(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_SETSEARCHALLDEVICES:
-                        adapterSetSearchAllDevices(conn);
+                    case NetAdapterConstants.CMD_SETSEARCHALLDEVICES:
+                        await adapterSetSearchAllDevices(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_TARGETALLFAMILIES:
-                        adapterTargetAllFamilies(conn);
+                    case NetAdapterConstants.CMD_TARGETALLFAMILIES:
+                        await adapterTargetAllFamilies(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_TARGETFAMILY:
-                        adapterTargetFamily(conn);
+                    case NetAdapterConstants.CMD_TARGETFAMILY:
+                        await adapterTargetFamily(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_EXCLUDEFAMILY:
-                        adapterExcludeFamily(conn);
+                    case NetAdapterConstants.CMD_EXCLUDEFAMILY:
+                        await adapterExcludeFamily(conn);
                         break;
                     /* feature methods */
-                    case NetAdapterConstants_Fields.CMD_CANBREAK:
-                        adapterCanBreak(conn);
+                    case NetAdapterConstants.CMD_CANBREAK:
+                        await adapterCanBreak(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_CANDELIVERPOWER:
-                        adapterCanDeliverPower(conn);
+                    case NetAdapterConstants.CMD_CANDELIVERPOWER:
+                        await adapterCanDeliverPower(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_CANDELIVERSMARTPOWER:
-                        adapterCanDeliverSmartPower(conn);
+                    case NetAdapterConstants.CMD_CANDELIVERSMARTPOWER:
+                        await adapterCanDeliverSmartPower(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_CANFLEX:
-                        adapterCanFlex(conn);
+                    case NetAdapterConstants.CMD_CANFLEX:
+                        await adapterCanFlex(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_CANHYPERDRIVE:
-                        adapterCanHyperdrive(conn);
+                    case NetAdapterConstants.CMD_CANHYPERDRIVE:
+                        await adapterCanHyperdrive(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_CANOVERDRIVE:
-                        adapterCanOverdrive(conn);
+                    case NetAdapterConstants.CMD_CANOVERDRIVE:
+                        await adapterCanOverdrive(conn);
                         break;
-                    case NetAdapterConstants_Fields.CMD_CANPROGRAM:
-                        adapterCanProgram(conn);
+                    case NetAdapterConstants.CMD_CANPROGRAM:
+                        await adapterCanProgram(conn);
                         break;
                     default:
-                        //System.out.println("Unkown command: " + cmd);
+                        OneWireEventSource.Log.Debug("Unknown command: " + cmd[0].ToString("X"));
                         break;
                 }
             }
             catch (OneWireException owe)
             {
-                conn.output.WriteByte(NetAdapterConstants_Fields.RET_FAILURE);
+                conn.output.WriteByte(NetAdapterConstants.RET_FAILURE);
                 conn.output.WriteString(owe.ToString());
                 await conn.output.StoreAsync();
             }
@@ -688,18 +736,23 @@ namespace com.dalsemi.onewire.adapter
         /// Closes the provided connection.
         /// </summary>
         /// <param name="conn"> The connection to send/receive data. </param>
-        private void close(NetAdapterConstants_Connection conn)
+        private void close(NetAdapterConstants.Connection conn)
         {
+            OneWireEventSource.Log.Debug("StreamSocket close +");
+
             try
             {
                 if (conn.sock != null)
                 {
-                    conn.output.DetachStream();
-                    conn.output.Dispose();
-                    conn.input.DetachStream();
+                    conn.cts.Cancel();
+
                     conn.input.Dispose();
+                    conn.output.Dispose();
                     conn.sock.Dispose();
-                    serverSocket.Dispose();
+
+                    conn.input = null;
+                    conn.output = null;
+                    conn.sock = null;
                 }
             }
             catch (System.IO.IOException)
@@ -707,475 +760,474 @@ namespace com.dalsemi.onewire.adapter
                 ;
             }
 
-            conn.sock = null;
-            conn.input = null;
-            conn.output = null;
-            serverSocket = null;
 
             // ensure that there is no exclusive use of the adapter
             adapter.endExclusive();
+
+            OneWireEventSource.Log.Debug("StreamSocket close -");
         }
 
         //--------
         //-------- Finding iButton/1-Wire device options
         //--------
 
-        private async void adapterFindFirstDevice(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterFindFirstDevice(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.findFirstDevice();
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   findFirstDevice returned " + b);
-            }
+            OneWireEventSource.Log.Debug("   findFirstDevice returned " + b);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterFindNextDevice(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterFindNextDevice(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.findNextDevice();
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   findNextDevice returned " + b);
-            }
+            OneWireEventSource.Log.Debug("   findNextDevice returned " + b);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterGetAddress(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterGetAddress(NetAdapterConstants.Connection conn)
         {
             // read in the address
             byte[] address = new byte[8];
             // call getAddress
             adapter.getAddress(address);
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   adapter.getAddress(byte[]) called, speed=" + adapter.Speed);
-            }
+            OneWireEventSource.Log.Debug("   adapter.getAddress(byte[]) called, speed=" + adapter.Speed);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBytes(address);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterSetSearchOnlyAlarmingDevices(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterSetSearchOnlyAlarmingDevices(NetAdapterConstants.Connection conn)
         {
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   setSearchOnlyAlarmingDevices called, speed=" + adapter.Speed);
-            }
+            OneWireEventSource.Log.Debug("   setSearchOnlyAlarmingDevices called, speed=" + adapter.Speed);
 
             adapter.setSearchOnlyAlarmingDevices();
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterSetNoResetSearch(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterSetNoResetSearch(NetAdapterConstants.Connection conn)
         {
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   setNoResetSearch called, speed=" + adapter.Speed);
-            }
+            OneWireEventSource.Log.Debug("   setNoResetSearch called, speed=" + adapter.Speed);
 
             adapter.setNoResetSearch();
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterSetSearchAllDevices(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterSetSearchAllDevices(NetAdapterConstants.Connection conn)
         {
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   setSearchAllDevices called, speed=" + adapter.Speed);
-            }
+            OneWireEventSource.Log.Debug("   setSearchAllDevices called, speed=" + adapter.Speed);
 
             adapter.setSearchAllDevices();
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterTargetAllFamilies(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterTargetAllFamilies(NetAdapterConstants.Connection conn)
         {
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   targetAllFamilies called, speed=" + adapter.Speed);
-            }
+            OneWireEventSource.Log.Debug("   targetAllFamilies called, speed=" + adapter.Speed);
 
             adapter.targetAllFamilies();
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterTargetFamily(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterTargetFamily(NetAdapterConstants.Connection conn)
         {
             // get the number of family codes to expect
-            int len = conn.input.ReadInt32();
-            // get the family codes
-            byte[] family = new byte[len];
-            conn.input.ReadBytes(family);
+            byte[] len = conn.ReadAsync(conn.sock, sizeof(Int32));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(len);
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   targetFamily called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      families: " + Convert.toHexString(family));
-            }
+            // get the family codes
+            byte[] family = conn.ReadAsync(conn.sock, (uint)BitConverter.ToInt32(len, 0));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(family);
+
+            OneWireEventSource.Log.Debug("   targetFamily called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      families: " + Convert.toHexString(family));
 
             // call targetFamily
             adapter.targetFamily(family);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterExcludeFamily(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterExcludeFamily(NetAdapterConstants.Connection conn)
         {
             // get the number of family codes to expect
-            int len = conn.input.ReadInt32();
-            // get the family codes
-            byte[] family = new byte[len];
-            conn.input.ReadBytes(family);
+            byte[] len = conn.ReadAsync(conn.sock, sizeof(Int32));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(len);
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   excludeFamily called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      families: " + Convert.toHexString(family));
-            }
+            // get the family codes
+            byte[] family = conn.ReadAsync(conn.sock, (uint)BitConverter.ToInt32(len, 0));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(family);
+
+            OneWireEventSource.Log.Debug("   excludeFamily called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      families: " + Convert.toHexString(family));
 
             // call excludeFamily
             adapter.excludeFamily(family);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
         //--------
         //-------- 1-Wire Network Semaphore methods
         //--------
 
-        private async void adapterBeginExclusive(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterBeginExclusive(NetAdapterConstants.Connection conn)
         {
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   adapter.beginExclusive called, speed=" + adapter.Speed);
-            }
+            OneWireEventSource.Log.Debug("   adapter.beginExclusive called, speed=" + adapter.Speed);
 
             // get blocking boolean
-            bool blocking = conn.input.ReadBoolean();
+            byte[] res = conn.ReadAsync(conn.sock, sizeof(bool));
+            bool blocking = BitConverter.ToBoolean(res, 0);
+
             // call beginExclusive
             bool b = adapter.beginExclusive(blocking);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("      adapter.beginExclusive returned " + b);
-            }
+            OneWireEventSource.Log.Debug("      adapter.beginExclusive returned " + b);
+
+            return true;
         }
 
-        private async void adapterEndExclusive(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterEndExclusive(NetAdapterConstants.Connection conn)
         {
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   adapter.endExclusive called, speed=" + adapter.Speed);
-            }
+            OneWireEventSource.Log.Debug("   adapter.endExclusive called, speed=" + adapter.Speed);
 
             // call endExclusive
             adapter.endExclusive();
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
         //--------
         //-------- Primitive 1-Wire Network data methods
         //--------
 
-        private async void adapterReset(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterReset(NetAdapterConstants.Connection conn)
         {
             int i = adapter.reset();
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   reset, speed=" + adapter.Speed + ", returned " + i);
-            }
+            OneWireEventSource.Log.Debug("   reset, speed=" + adapter.Speed + ", returned " + i);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteInt32(i);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterPutBit(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterPutBit(NetAdapterConstants.Connection conn)
         {
             // get the value of the bit
-            bool bit = conn.input.ReadBoolean();
+            byte[] res = conn.ReadAsync(conn.sock, sizeof(bool));
+            bool bit = BitConverter.ToBoolean(res, 0);
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   putBit called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      bit=" + bit);
-            }
+            OneWireEventSource.Log.Debug("   putBit called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      bit=" + bit);
 
             adapter.putBit(bit);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterPutByte(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterPutByte(NetAdapterConstants.Connection conn)
         {
             // get the value of the byte
-            byte b = conn.input.ReadByte();
+            byte[] b = conn.ReadAsync(conn.sock, sizeof(byte));
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   putByte called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      byte=" + Convert.toHexString(b));
-            }
+            OneWireEventSource.Log.Debug("   putByte called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      byte=" + Convert.toHexString(b[0]));
 
-            adapter.putByte(b);
+            adapter.putByte(b[0]);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterGetBit(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterGetBit(NetAdapterConstants.Connection conn)
         {
             bool bit = adapter.getBit; //adapter
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   getBit called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      bit=" + bit);
-            }
+            OneWireEventSource.Log.Debug("   getBit called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      bit=" + bit);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(bit);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterGetByte(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterGetByte(NetAdapterConstants.Connection conn)
         {
             byte b = (byte)adapter.Byte;
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   getByte called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      byte=" + Convert.toHexString((byte)b));
-            }
+            OneWireEventSource.Log.Debug("   getByte called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      byte=" + Convert.toHexString((byte)b));
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteByte(b);
             await conn.output.StoreAsync();
+
+            return true;
         }
-        private async void adapterGetBlock(NetAdapterConstants_Connection conn)
+
+        private async Task<bool> adapterGetBlock(NetAdapterConstants.Connection conn)
         {
             // get the number requested
-            int len = conn.input.ReadInt32();
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   getBlock called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      len=" + len);
-            }
+            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(res);
+            int len = Convert.toInt(res);
+
+            OneWireEventSource.Log.Debug("   getBlock called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      len=" + len);
 
             // get the bytes
             byte[] b = adapter.getBlock(len);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(b);
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("      returned: " + Convert.toHexString(b));
-            }
+            OneWireEventSource.Log.Debug("      returned: " + Convert.toHexString(b));
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBytes(b);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterDataBlock(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterDataBlock(NetAdapterConstants.Connection conn)
         {
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   DataBlock called, speed=" + adapter.Speed);
-            }
-            // get the number to block
-            int len = conn.input.ReadInt32();
-            // get the bytes to block
-            byte[] b = new byte[len];
-            conn.input.ReadBytes(b);
+            OneWireEventSource.Log.Debug("   DataBlock called, speed=" + adapter.Speed);
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("      " + len + " bytes");
-                OneWireEventSource.Log.Debug("      Send: " + Convert.toHexString(b));
-            }
+            // get the number to block
+            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(res);
+            int len = Convert.toInt(res);
+
+            // get the bytes to block
+            byte[] b = conn.ReadAsync(conn.sock, (uint)len);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(b);
+
+            OneWireEventSource.Log.Debug("      " + len + " bytes");
+            OneWireEventSource.Log.Debug("      Send: " + Convert.toHexString(b));
 
             // do the block
             adapter.dataBlock(b, 0, len);
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("      Recv: " + Convert.toHexString(b));
-            }
+            OneWireEventSource.Log.Debug("      Recv: " + Convert.toHexString(b));
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBytes(b);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
         //--------
         //-------- 1-Wire Network power methods
         //--------
 
-        private async void adapterSetPowerDuration(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterSetPowerDuration(NetAdapterConstants.Connection conn)
         {
             // get the time factor value
-            int timeFactor = conn.input.ReadInt32();
+            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(res);
+            int timeFactor = Convert.toInt(res);
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   setPowerDuration called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      timeFactor=" + timeFactor);
-            }
+            OneWireEventSource.Log.Debug("   setPowerDuration called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      timeFactor=" + timeFactor);
 
             // call setPowerDuration
             adapter.PowerDuration = timeFactor;
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterStartPowerDelivery(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterStartPowerDelivery(NetAdapterConstants.Connection conn)
         {
             // get the change condition value
-            int changeCondition = conn.input.ReadInt32();
+            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(res);
+            int changeCondition = Convert.toInt(res);
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   startPowerDelivery called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      changeCondition=" + changeCondition);
-            }
+            OneWireEventSource.Log.Debug("   startPowerDelivery called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      changeCondition=" + changeCondition);
 
             // call startPowerDelivery
             bool success = adapter.startPowerDelivery(changeCondition);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(success);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterSetProgramPulseDuration(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterSetProgramPulseDuration(NetAdapterConstants.Connection conn)
         {
             // get the time factor value
-            int timeFactor = conn.input.ReadInt32();
+            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(res);
+            int timeFactor = Convert.toInt(res);
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   setProgramPulseDuration called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      timeFactor=" + timeFactor);
-            }
+            OneWireEventSource.Log.Debug("   setProgramPulseDuration called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      timeFactor=" + timeFactor);
 
             // call setProgramPulseDuration
             adapter.ProgramPulseDuration = timeFactor;
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterStartProgramPulse(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterStartProgramPulse(NetAdapterConstants.Connection conn)
         {
             // get the change condition value
-            int changeCondition = conn.input.ReadInt32();
+            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(res);
+            int changeCondition = Convert.toInt(res);
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   startProgramPulse called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      changeCondition=" + changeCondition);
-            }
+            OneWireEventSource.Log.Debug("   startProgramPulse called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      changeCondition=" + changeCondition);
 
             // call startProgramPulse();
             bool success = adapter.startProgramPulse(changeCondition);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(success);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterStartBreak(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterStartBreak(NetAdapterConstants.Connection conn)
         {
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   startBreak called, speed=" + adapter.Speed);
-            }
+            OneWireEventSource.Log.Debug("   startBreak called, speed=" + adapter.Speed);
 
             // call startBreak();
             adapter.startBreak();
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterSetPowerNormal(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterSetPowerNormal(NetAdapterConstants.Connection conn)
         {
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   setPowerNormal called, speed=" + adapter.Speed);
-            }
+            OneWireEventSource.Log.Debug("   setPowerNormal called, speed=" + adapter.Speed);
 
             // call setPowerNormal
             adapter.setPowerNormal();
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
         //--------
         //-------- 1-Wire Network speed methods
         //--------
 
-        private async void adapterSetSpeed(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterSetSpeed(NetAdapterConstants.Connection conn)
         {
             // get the value of the new speed
-            int speed = conn.input.ReadInt32();
+            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(res);
+            int speed = Convert.toInt(res);
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   setSpeed called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      speed=" + speed);
-            }
+            OneWireEventSource.Log.Debug("   setSpeed called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      speed=" + speed);
 
             // do the setSpeed
             adapter.Speed = speed;
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterGetSpeed(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterGetSpeed(NetAdapterConstants.Connection conn)
         {
             // get the adapter speed
             int speed = adapter.Speed;
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   getSpeed called, speed=" + adapter.Speed);
-                OneWireEventSource.Log.Debug("      speed=" + speed);
-            }
+            OneWireEventSource.Log.Debug("   getSpeed called, speed=" + adapter.Speed);
+            OneWireEventSource.Log.Debug("      speed=" + speed);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteInt32(speed);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
 
@@ -1183,102 +1235,241 @@ namespace com.dalsemi.onewire.adapter
         //-------- Adapter feature methods
         //--------
 
-        private async void adapterCanOverdrive(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterCanOverdrive(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canOverdrive();
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   canOverdrive returned " + b);
-            }
+            OneWireEventSource.Log.Debug("   canOverdrive returned " + b);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterCanHyperdrive(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterCanHyperdrive(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canHyperdrive();
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   canHyperDrive returned " + b);
-            }
+            OneWireEventSource.Log.Debug("   canHyperDrive returned " + b);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterCanFlex(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterCanFlex(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canFlex();
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   canFlex returned " + b);
-            }
+            OneWireEventSource.Log.Debug("   canFlex returned " + b);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterCanProgram(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterCanProgram(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canProgram();
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   canProgram returned " + b);
-            }
+            OneWireEventSource.Log.Debug("   canProgram returned " + b);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterCanDeliverPower(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterCanDeliverPower(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canDeliverPower();
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   canDeliverPower returned " + b);
-            }
+            OneWireEventSource.Log.Debug("   canDeliverPower returned " + b);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterCanDeliverSmartPower(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterCanDeliverSmartPower(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canDeliverSmartPower();
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   canDeliverSmartPower returned " + b);
-            }
+            OneWireEventSource.Log.Debug("   canDeliverSmartPower returned " + b);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
+
+            return true;
         }
 
-        private async void adapterCanBreak(NetAdapterConstants_Connection conn)
+        private async Task<bool> adapterCanBreak(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canBreak();
 
-            if (NetAdapterConstants_Fields.DEBUG)
-            {
-                OneWireEventSource.Log.Debug("   canBreak returned " + b);
-            }
+            OneWireEventSource.Log.Debug("   canBreak returned " + b);
 
-            conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
+            conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
+
+            return true;
+        }
+
+        //--------
+        //-------- Inner classes
+        //--------
+
+        /// <summary>
+        /// Private inner class for servicing new connections.
+        /// Can be run in it's own thread or in the same thread.
+        /// </summary>
+        public class SocketHandler
+        {
+            private readonly NetAdapterHost outerInstance;
+
+            /// <summary>
+            /// The connection that is being serviced.
+            /// </summary>
+            private NetAdapterConstants.Connection conn = null;
+
+            /// <summary>
+            /// indicates whether or not the handler is currently running
+            /// </summary>
+            private volatile bool handlerRunning = false;
+
+
+            private async Task<bool> SetupConnection(NetAdapterHost outerInstance, NetAdapterConstants.Connection c)
+            {
+                // first thing transmitted should be version info
+                bool result = await outerInstance.sendVersionUID(c);
+                if (!result)
+                {
+                    throw new System.IO.IOException("send version failed");
+                }
+
+                // authenticate the client
+                byte[] chlg = new byte[8];
+                rand.NextBytes(chlg);
+                c.output.WriteBytes(chlg);
+                await c.output.StoreAsync();
+
+                // compute the crc of the secret and the challenge
+                int crc = CRC16.compute(outerInstance.netAdapterSecret, 0);
+                crc = CRC16.compute(chlg, crc);
+
+                byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+                if(BitConverter.IsLittleEndian)
+                    Array.Reverse(res);
+                int answer = BitConverter.ToInt32(res, 0);
+
+                if (answer != crc)
+                {
+                    c.output.WriteByte(NetAdapterConstants.RET_FAILURE);
+                    c.output.WriteString("Client Authentication Failed");
+                    await c.output.StoreAsync();
+                    throw new System.IO.IOException("authentication failed");
+                }
+                else
+                {
+                    c.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
+                    await c.output.StoreAsync();
+                }
+
+                return true;
+            }
+
+            /// <summary>
+            /// Constructor for socket servicer.  Creates the input and output
+            /// streams and send's the version of this host to the client
+            /// connection.
+            /// </summary>
+            public SocketHandler(NetAdapterHost outerInstance, StreamSocket sock)
+            {
+                this.outerInstance = outerInstance;
+
+                // set socket timeout to 10 seconds
+                //TODO sock.SoTimeout = outerInstance.timeoutInSeconds * 1000;
+
+                // create the connection object
+                this.conn = new NetAdapterConstants.Connection();
+                this.conn.sock = sock;
+                //                this.conn.sock.Control.NoDelay = true;
+
+                this.conn.cts = new CancellationTokenSource();
+                this.conn.input = new DataReader(this.conn.sock.InputStream);
+                this.conn.output = new DataWriter(this.conn.sock.OutputStream);
+
+                this.conn.input.InputStreamOptions = InputStreamOptions.Partial;
+
+                var t = Task.Run(async () => { await SetupConnection(outerInstance, this.conn); });
+                t.Wait();
+                
+            }
+
+            /// <summary>
+            /// Run method for socket Servicer.
+            /// </summary>
+            public virtual void run()
+            {
+                handlerRunning = true;
+                try
+                {
+                    var token = this.conn.cts.Token;
+
+                    while (!outerInstance.hostStopped && this.conn.sock != null)
+                    {
+                        outerInstance.processRequests(this.conn);
+                    }
+                }
+                catch (Exception t)
+                {
+                    OneWireEventSource.Log.Error(t.ToString());
+                    OneWireEventSource.Log.Error(t.StackTrace);
+                    outerInstance.close(conn);
+                }
+                handlerRunning = false;
+
+                if (!outerInstance.hostStopped && !outerInstance.singleThreaded)
+                {
+                    lock (outerInstance.hashHandlers)
+                    {
+                        // thread finished running without being stopped.
+                        // politely remove it from the hashtable.
+                        outerInstance.hashHandlers.Remove(System.Environment.CurrentManagedThreadId);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Waits for handler to finish, with a timeout.
+            /// </summary>
+            public virtual void stopHandler()
+            {
+                int i = 0;
+                int timeout = 3000;
+                while (handlerRunning && i++ < timeout)
+                {
+                    try
+                    {
+                        Thread.Sleep(10);
+                    }
+                    catch (Exception)
+                    {
+                        ;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -1286,81 +1477,28 @@ namespace com.dalsemi.onewire.adapter
         /// streams and send's the version of this host to the client
         /// connection.
         /// </summary>
-        private async void OnConnection(
+        private void OnConnection(
             StreamSocketListener sender,
             StreamSocketListenerConnectionReceivedEventArgs args)
         {
-            // create the connection object
-            conn = new NetAdapterConstants_Connection();
-            conn.sock = args.Socket;
+            OneWireEventSource.Log.Debug("Connection Established with " +
+                args.Socket.Information.RemoteAddress + ":" + args.Socket.Information.RemotePort);
 
-            OneWireEventSource.Log.Debug("Remote Address: " + args.Socket.Information.RemoteAddress);
-            OneWireEventSource.Log.Debug("Remote Port: " + args.Socket.Information.RemotePort);
-
-            conn.input = new DataReader(conn.sock.InputStream);
-            conn.output = new DataWriter(conn.sock.OutputStream);
-
-            // first thing transmitted should be version info
-            bool result = await sendVersionUID(conn);
-            if (!result)
+            SocketHandler sh = new SocketHandler(this, args.Socket);
+            if (singleThreaded)
             {
-                throw new System.IO.IOException("send version failed");
-            }
-
-            // authenticate the client
-            byte[] chlg = new byte[8];
-            rand.NextBytes(chlg);
-            conn.output.WriteBytes(chlg);
-            await conn.output.StoreAsync();
-
-            // compute the crc of the secret and the challenge
-            int crc = CRC16.compute(netAdapterSecret, 0);
-            crc = CRC16.compute(chlg, crc);
-            await conn.input.LoadAsync(4);
-            int answer = conn.input.ReadInt32();
-            if (answer != crc)
-            {
-                conn.output.WriteByte(NetAdapterConstants_Fields.RET_FAILURE);
-                conn.output.WriteString("Client Authentication Failed");
-                await conn.output.StoreAsync();
-                throw new System.IO.IOException("authentication failed");
+                // single-threaded
+                sh.run();
             }
             else
             {
-                conn.output.WriteByte(NetAdapterConstants_Fields.RET_SUCCESS);
-                await conn.output.StoreAsync();
+                // multi-threaded
+                Task t = Task.Run(() => { sh.run(); });
+                lock (hashHandlers)
+                {
+                    hashHandlers[t] = sh;
+                }
             }
-        }
-
-        //--------
-        //-------- Default Main Method, for launching server with defaults
-        //--------
-        /// <summary>
-        /// A Default Main Method, for launching NetAdapterHost getting the
-        /// default adapter with the OneWireAccessProvider and listening on
-        /// the default port specified by DEFAULT_PORT.
-        /// </summary>
-        public static void Main(string[] args)
-        {
-            DSPortAdapter adapter = OneWireAccessProvider.DefaultAdapter;
-
-            NetAdapterHost host = new NetAdapterHost(adapter, true);
-
-            OneWireEventSource.Log.Info("Starting Multicast Listener");
-            host.createMulticastListener();
-
-            OneWireEventSource.Log.Info("Starting NetAdapter Host");
-            host.StartServer();
-
-            while (true) { ; }
-
-            //if(System.in!=null)
-            //{
-            //   System.out.println("\nPress Enter to Shutdown");
-            //   (new BufferedReader(new InputStreamReader(System.in))).readLine();
-            //   host.stopHost();
-            //   System.exit(1);
-            //}
         }
 
         ~NetAdapterHost()
@@ -1394,6 +1532,41 @@ namespace com.dalsemi.onewire.adapter
         }
 
         public event EventHandler OnDispose = delegate { };
+
+        /// <summary>
+        /// Helper class describing a NetworkAdapter and its associated IP address
+        /// </summary>
+        class LocalHostItem
+        {
+            public string DisplayString
+            {
+                get;
+                private set;
+            }
+
+            public HostName LocalHost
+            {
+                get;
+                private set;
+            }
+
+            public LocalHostItem(HostName localHostName)
+            {
+                if (localHostName == null)
+                {
+                    throw new ArgumentNullException("localHostName");
+                }
+
+                if (localHostName.IPInformation == null)
+                {
+                    throw new ArgumentException("Adapter information not found");
+                }
+
+                this.LocalHost = localHostName;
+                this.DisplayString = "Address: " + localHostName.DisplayName +
+                    " Adapter: " + localHostName.IPInformation.NetworkAdapter.NetworkAdapterId;
+            }
+        }
 
     }
 }
