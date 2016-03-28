@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -32,7 +33,6 @@ namespace com.dalsemi.onewire.application.tag
 
     using com.dalsemi.onewire.adapter;
     using com.dalsemi.onewire.container;
-    using System;
     /// <summary>
     /// This class provides a default object for the Switch type of a tagged 1-Wire device.
     /// </summary>

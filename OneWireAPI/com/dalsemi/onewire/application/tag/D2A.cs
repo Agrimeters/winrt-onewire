@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.

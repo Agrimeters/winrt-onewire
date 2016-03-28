@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Xml;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000,2001 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -32,7 +33,6 @@ using System.IO;
 namespace com.dalsemi.onewire.application.tag
 {
 
-    using org.xml.sax;
     using com.dalsemi.onewire.adapter;
     using utils;
 
@@ -48,7 +48,6 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <param name="adapter"> What port adapter will serve the devices created. </param>
 	   public TAGParser(DSPortAdapter adapter)
 	   {
-          parser = XML.createSAXParser();
 		  handler = new TAGHandler();
 
 		  try
@@ -59,9 +58,6 @@ namespace com.dalsemi.onewire.application.tag
 		  {
 			 Debug.WriteLine(e);
 		  }
-
-		  parser.DocumentHandler = (DocumentHandler)handler;
-		  parser.ErrorHandler = (ErrorHandler)handler;
 	   }
 
 	   /// <summary>
@@ -70,18 +66,35 @@ namespace com.dalsemi.onewire.application.tag
 	   /// <param name="in"> The XML document to parse.
 	   /// </param>
 	   /// <returns> Vector of TaggedDevice objects. </returns>
-	   /// <exception cref="SAXException"> If a parse error occurs parsing <var>in</var>. </exception>
-	   /// <exception cref="IOException"> If an I/O error occurs while reading <var>in</var>. </exception>
 	   public virtual List<TaggedDevice> parse(Stream inp)
 	   {
-		  InputSource insource = new InputSource(inp);
+          XmlReaderSettings settings = new XmlReaderSettings() { IgnoreWhitespace = true };
 
-		  parser.parse(insource);
+          parser = XmlReader.Create(inp, settings);
 
-		  List<TaggedDevice> v = handler.TaggedDeviceList;
+          handler.startDocument();
 
-		  return v;
+          parser.MoveToContent();
+
+          do
+          {
+              switch (parser.NodeType)
+              {
+                  case XmlNodeType.Element:
+                      handler.startElement(parser.Name, parser);
+                      break;
+                  case XmlNodeType.EndElement:
+                      handler.endElement(parser.Name);
+                      break;
+              }
+
+          } while (parser.Read());
+
+          handler.endDocument();
+
+          return handler.TaggedDeviceList;
 	   }
+
 
 	   /// <summary>
 	   /// Returns the vector of Branch TaggedDevice objects described in the TAG file.
@@ -94,11 +107,8 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   get
 		   {
-    
-			  List<TaggedDevice> v = handler.AllBranches;
-    
-			  return v;
-		   }
+			  return handler.AllBranches;
+            }
 	   }
 
 	   /// <summary>
@@ -113,17 +123,14 @@ namespace com.dalsemi.onewire.application.tag
 	   {
 		   get
 		   {
-    
-			  List<OWPath> v = handler.AllBranchPaths;
-    
-			  return v;
+			  return handler.AllBranchPaths;
 		   }
 	   }
 
 
        /// <summary>
        /// Field parser </summary>
-	   private SAXParser parser;
+	   private XmlReader parser;
 
 	   /// <summary>
 	   /// Field handler </summary>

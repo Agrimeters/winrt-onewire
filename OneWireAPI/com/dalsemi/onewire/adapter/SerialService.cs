@@ -300,9 +300,19 @@ namespace com.dalsemi.onewire.adapter
                         if (t.Result > 0)
                         {
                             res = new byte[size];
-                            for (var i = 0; i < res.Length; i++)
+                            for (var i = 0; i < size; i++)
                             {
-                                res[i] = reader.ReadByte();
+                                if (reader.UnconsumedBufferLength > 0)
+                                {
+                                    res[i] = reader.ReadByte();
+                                }
+                                else
+                                {
+                                    byte[] tmp = new byte[i+1];
+                                    Array.Copy(res, 0, tmp, 0, i + 1);
+                                    return tmp;
+                                }
+
                             }
                             //debug.Debug.debug(serialPort.PortName + " Rx", result);
                             //OneWireEventSource.Log.Debug(serialPort.PortName + " Rx: " + com.dalsemi.onewire.utils.Convert.toHexString(result, " "));
@@ -313,9 +323,18 @@ namespace com.dalsemi.onewire.adapter
                 }
 
                 res = new byte[size];
-                for (var i = 0; i < res.Length; i++)
+                for (var i = 0; i < size; i++)
                 {
-                    res[i] = reader.ReadByte();
+                    if (reader.UnconsumedBufferLength > 0)
+                    {
+                        res[i] = reader.ReadByte();
+                    }
+                    else
+                    {
+                        byte[] tmp = new byte[i + 1];
+                        Array.Copy(res, 0, tmp, 0, i + 1);
+                        return tmp;
+                    }
                 }
                 //debug.Debug.debug(serialPort.PortName + " Rx", result);
                 //OneWireEventSource.Log.Debug(serialPort.PortName + " Rx: " + com.dalsemi.onewire.utils.Convert.toHexString(result, " "));
