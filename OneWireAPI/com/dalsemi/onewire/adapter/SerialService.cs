@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.SerialCommunication;
@@ -228,7 +229,7 @@ namespace com.dalsemi.onewire.adapter
 
         public virtual void flush()
         {
-            OneWireEventSource.Log.Debug("SerialService.flush");
+            //OneWireEventSource.Log.Debug("SerialService.flush");
 
             if (!PortOpen)
             {
@@ -244,9 +245,9 @@ namespace com.dalsemi.onewire.adapter
             var t = Task.Run(async () =>
             {
                 writer.WriteByte(data);
-                var count = await writer.StoreAsync();
-                //TODO debug.Debug.debug(serialPort.PortName + " Transmit", new byte[] { data });
-                OneWireEventSource.Log.Debug(serialPort.PortName + " Transmit: " + com.dalsemi.onewire.utils.Convert.toHexString(data));
+                await writer.StoreAsync();
+                //debug.Debug.debug(serialPort.PortName + " Tx", new byte[] { data });
+                //OneWireEventSource.Log.Debug(serialPort.PortName + " Tx: " + com.dalsemi.onewire.utils.Convert.toHexString(data));
             });
             t.Wait();
             if(t.Status != TaskStatus.RanToCompletion)
@@ -260,9 +261,9 @@ namespace com.dalsemi.onewire.adapter
             var t = Task.Run(async() =>
             {
                 writer.WriteBytes(data);
-                var count = await writer.StoreAsync();
-                //TODO debug.Debug.debug(serialPort.PortName + " Transmit", data);
-                OneWireEventSource.Log.Debug(serialPort.PortName + " Transmit: " + com.dalsemi.onewire.utils.Convert.toHexString(data, " "));
+                await writer.StoreAsync();
+                //debug.Debug.debug(serialPort.PortName + " Tx", data);
+                //OneWireEventSource.Log.Debug(serialPort.PortName + " Tx: " + com.dalsemi.onewire.utils.Convert.toHexString(data, " "));
             });
             t.Wait();
             if(t.Status != TaskStatus.RanToCompletion)
@@ -271,45 +272,62 @@ namespace com.dalsemi.onewire.adapter
             }
         }
 
-        public virtual byte[] readWithTimeout(int length)
+        /// <summary>
+        /// read with timeout implementation
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns>byte[]</returns>
+        public virtual byte[] readWithTimeout(uint size)
         {
-            var t = Task<byte[]>.Run(async () => 
+            try
             {
-                byte[] result = null;
-                uint bytesRead = 0;
+                // determine number of bytes to load, if any
+                byte[] res = null;
 
-                try
+                if (size > reader.UnconsumedBufferLength)
                 {
-                    bytesRead = await reader.LoadAsync((uint)length);
+                    uint len = size - reader.UnconsumedBufferLength;
 
-                    if (bytesRead != 0)
+                    var t = Task<uint>.Run(async () =>
                     {
-                        result = new byte[bytesRead];
-                        reader.ReadBytes(result);
-                        if (reader.UnconsumedBufferLength > 0)
+                        CancellationTokenSource cts = new CancellationTokenSource(1000);
+                        DataReaderLoadOperation read = reader.LoadAsync(len);
+                        return await read.AsTask<uint>(cts.Token);
+                    });
+                    t.Wait();
+                    if (t.Status == TaskStatus.RanToCompletion)
+                    {
+                        if (t.Result > 0)
                         {
-                            throw new Exception();
+                            res = new byte[size];
+                            for (var i = 0; i < res.Length; i++)
+                            {
+                                res[i] = reader.ReadByte();
+                            }
+                            //debug.Debug.debug(serialPort.PortName + " Rx", result);
+                            //OneWireEventSource.Log.Debug(serialPort.PortName + " Rx: " + com.dalsemi.onewire.utils.Convert.toHexString(result, " "));
+
                         }
-                        //TODO debug.Debug.debug(serialPort.PortName + " Receive", result);
-                        OneWireEventSource.Log.Debug(serialPort.PortName + " Receive: " + com.dalsemi.onewire.utils.Convert.toHexString(result, " "));
                     }
+                    return res;
                 }
-                catch (Exception)
+
+                res = new byte[size];
+                for (var i = 0; i < res.Length; i++)
                 {
-                    Debugger.Break();
+                    res[i] = reader.ReadByte();
                 }
-                return result;
-            });
+                //debug.Debug.debug(serialPort.PortName + " Rx", result);
+                //OneWireEventSource.Log.Debug(serialPort.PortName + " Rx: " + com.dalsemi.onewire.utils.Convert.toHexString(result, " "));
 
-            t.Wait();
-
-            if(t.Status != TaskStatus.RanToCompletion)
+                return res;
+            }
+            catch (Exception e)
             {
-                OneWireEventSource.Log.Critical("readWithTimeout failed!");
-                return null;
+                OneWireEventSource.Log.Debug("readWithTimeout(): " + e.ToString());
             }
 
-            return t.Result;
+            return null;
         }
 
         private bool exclusive = false;

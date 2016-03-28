@@ -1001,7 +1001,7 @@ namespace com.dalsemi.onewire.adapter
 				   serial.flush();
 
 				   serial.write(send_block);
-				   byte[] raw_recv = serial.readWithTimeout(send_block.Length);
+				   byte[] raw_recv = serial.readWithTimeout((uint)send_block.Length);
 
 				   byte[] recv = interpretRecvBlock(raw_recv);
 
@@ -1285,7 +1285,7 @@ namespace com.dalsemi.onewire.adapter
 				serial.write(test_buf);
 
 				// get echo
-				byte[] result = serial.readWithTimeout(test_buf.Length);
+				byte[] result = serial.readWithTimeout((uint)test_buf.Length);
 
 				serial.flush();
 

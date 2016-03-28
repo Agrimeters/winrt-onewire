@@ -2774,7 +2774,7 @@ namespace com.dalsemi.onewire.adapter
                         serial.write(pkt.buffer.ToArray());
 
                         // wait on returnLength bytes in inBound
-                        byte[] read = serial.readWithTimeout(pkt.returnLength);
+                        byte[] read = serial.readWithTimeout((uint)pkt.returnLength);
                         inBuffer.Write(read, 0, read.Length);
                     }
 

@@ -39,16 +39,16 @@ namespace com.dalsemi.onewire.adapter
 {
 
     using com.dalsemi.onewire.logging;
-
-	/// <summary>
-	/// Static class for holding all constants related to Network Adapter communications.
-	/// This interface is used by both NetAdapterHost and the NetAdapter.  In
-	/// addition, the common utility class <code>Connection</code> is defined here.
-	/// 
-	/// @author SH
-	/// @version 1.00
-	/// </summary>
-	public sealed class NetAdapterConstants
+    using System.Threading;
+    /// <summary>
+    /// Static class for holding all constants related to Network Adapter communications.
+    /// This interface is used by both NetAdapterHost and the NetAdapter.  In
+    /// addition, the common utility class <code>Connection</code> is defined here.
+    /// 
+    /// @author SH
+    /// @version 1.00
+    /// </summary>
+    public sealed class NetAdapterConstants
 	{
 	   public const int versionUID = 1;
 	   public const string DEFAULT_PORT = "6161";
@@ -117,10 +117,18 @@ namespace com.dalsemi.onewire.adapter
             /// </summary>
             public System.Threading.CancellationTokenSource cts = null;
 
-            public byte[] ReadAsync(StreamSocket socket, uint size)
+            /// <summary>
+            /// Non-blocking read implementation
+            /// </summary>
+            /// <param name="socket"></param>
+            /// <param name="size"></param>
+            /// <returns></returns>
+            public byte[] ReadNonBlocking(Connection conn, uint size)
             {
                 try
                 {
+                    StreamSocket socket = conn.sock;
+
                     IBuffer buffer = new Windows.Storage.Streams.Buffer(size);
                     var t = Task<byte[]>.Run(async () =>
                     {
@@ -135,7 +143,60 @@ namespace com.dalsemi.onewire.adapter
                 }
                 catch (Exception e)
                 {
-                    OneWireEventSource.Log.Debug("ReadAsync(): " + e.ToString());
+                    OneWireEventSource.Log.Debug("ReadNonBlocking(): " + e.ToString());
+                }
+
+                return null;
+            }
+
+            /// <summary>
+            /// Blocking read implementation
+            /// </summary>
+            /// <param name="socket"></param>
+            /// <param name="size"></param>
+            /// <returns></returns>
+            public byte[] ReadBlocking(Connection c, uint size)
+            {
+                try
+                {
+                    // determine number of bytes to load, if any
+                    byte[] res = null;
+
+                    if (size > c.input.UnconsumedBufferLength)
+                    {
+                        uint len = size - c.input.UnconsumedBufferLength;
+
+                        var t = Task<uint>.Run(async () =>
+                        {
+                            DataReaderLoadOperation read = c.input.LoadAsync(len);
+                            return await read.AsTask<uint>(this.cts.Token);
+                        });
+                        t.Wait();
+                        if (t.Status == TaskStatus.RanToCompletion)
+                        {
+                            if (t.Result > 0)
+                            {
+                                res = new byte[size];
+                                for (var i = 0; i < res.Length; i++)
+                                {
+                                    res[i] = c.input.ReadByte();
+                                }
+                            }
+                        }
+                        return res;
+                    }
+
+                    res = new byte[size];
+                    for (var i = 0; i < res.Length; i++)
+                    {
+                        res[i] = c.input.ReadByte();
+                    }
+
+                    return res;
+                }
+                catch (Exception e)
+                {
+                    OneWireEventSource.Log.Debug("ReadBlocking(): " + e.ToString());
                 }
 
                 return null;

@@ -568,7 +568,7 @@ namespace com.dalsemi.onewire.adapter
                 conn.output.WriteInt32(NetAdapterConstants.versionUID);
                 await conn.output.StoreAsync();
 
-                byte[] val = conn.ReadAsync(conn.sock, sizeof(byte));
+                byte[] val = conn.ReadBlocking(conn, sizeof(byte));
                 result = (val[0] == NetAdapterConstants.RET_SUCCESS);
             }
             catch (Exception e)
@@ -593,9 +593,7 @@ namespace com.dalsemi.onewire.adapter
             // get the next command
             //byte cmd = 0x00;
 
-            byte[] cmd = conn.ReadAsync(conn.sock, 1);
-            if (cmd == null)
-                return;
+            byte[] cmd = conn.ReadBlocking(conn, 1);
 
             OneWireEventSource.Log.Debug("\n------------------------------------------");
             OneWireEventSource.Log.Debug("CMD received: " + cmd[0].ToString("X"));
@@ -616,108 +614,108 @@ namespace com.dalsemi.onewire.adapter
                         break;
                     /* Raw Data commands */
                     case NetAdapterConstants.CMD_RESET:
-                        await adapterReset(conn);
+                        adapterReset(conn);
                         break;
                     case NetAdapterConstants.CMD_PUTBIT:
-                        await adapterPutBit(conn);
+                        adapterPutBit(conn);
                         break;
                     case NetAdapterConstants.CMD_PUTBYTE:
-                        await adapterPutByte(conn);
+                        adapterPutByte(conn);
                         break;
                     case NetAdapterConstants.CMD_GETBIT:
-                        await adapterGetBit(conn);
+                        adapterGetBit(conn);
                         break;
                     case NetAdapterConstants.CMD_GETBYTE:
-                        await adapterGetByte(conn);
+                        adapterGetByte(conn);
                         break;
                     case NetAdapterConstants.CMD_GETBLOCK:
-                        await adapterGetBlock(conn);
+                        adapterGetBlock(conn);
                         break;
                     case NetAdapterConstants.CMD_DATABLOCK:
-                        await adapterDataBlock(conn);
+                        adapterDataBlock(conn);
                         break;
                     /* Power methods */
                     case NetAdapterConstants.CMD_SETPOWERDURATION:
-                        await adapterSetPowerDuration(conn);
+                        adapterSetPowerDuration(conn);
                         break;
                     case NetAdapterConstants.CMD_STARTPOWERDELIVERY:
-                        await adapterStartPowerDelivery(conn);
+                        adapterStartPowerDelivery(conn);
                         break;
                     case NetAdapterConstants.CMD_SETPROGRAMPULSEDURATION:
-                        await adapterSetProgramPulseDuration(conn);
+                        adapterSetProgramPulseDuration(conn);
                         break;
                     case NetAdapterConstants.CMD_STARTPROGRAMPULSE:
-                        await adapterStartProgramPulse(conn);
+                        adapterStartProgramPulse(conn);
                         break;
                     case NetAdapterConstants.CMD_STARTBREAK:
-                        await adapterStartBreak(conn);
+                        adapterStartBreak(conn);
                         break;
                     case NetAdapterConstants.CMD_SETPOWERNORMAL:
-                        await adapterSetPowerNormal(conn);
+                        adapterSetPowerNormal(conn);
                         break;
                     /* Speed methods */
                     case NetAdapterConstants.CMD_SETSPEED:
-                        await adapterSetSpeed(conn);
+                        adapterSetSpeed(conn);
                         break;
                     case NetAdapterConstants.CMD_GETSPEED:
-                        await adapterGetSpeed(conn);
+                        adapterGetSpeed(conn);
                         break;
                     /* Network Semaphore methods */
                     case NetAdapterConstants.CMD_BEGINEXCLUSIVE:
-                        await adapterBeginExclusive(conn);
+                        adapterBeginExclusive(conn);
                         break;
                     case NetAdapterConstants.CMD_ENDEXCLUSIVE:
-                        await adapterEndExclusive(conn);
+                        adapterEndExclusive(conn);
                         break;
                     /* Searching methods */
                     case NetAdapterConstants.CMD_FINDFIRSTDEVICE:
-                        await adapterFindFirstDevice(conn);
+                        adapterFindFirstDevice(conn);
                         break;
                     case NetAdapterConstants.CMD_FINDNEXTDEVICE:
-                        await adapterFindNextDevice(conn);
+                        adapterFindNextDevice(conn);
                         break;
                     case NetAdapterConstants.CMD_GETADDRESS:
-                        await adapterGetAddress(conn);
+                        adapterGetAddress(conn);
                         break;
                     case NetAdapterConstants.CMD_SETSEARCHONLYALARMINGDEVICES:
-                        await adapterSetSearchOnlyAlarmingDevices(conn);
+                        adapterSetSearchOnlyAlarmingDevices(conn);
                         break;
                     case NetAdapterConstants.CMD_SETNORESETSEARCH:
-                        await adapterSetNoResetSearch(conn);
+                        adapterSetNoResetSearch(conn);
                         break;
                     case NetAdapterConstants.CMD_SETSEARCHALLDEVICES:
-                        await adapterSetSearchAllDevices(conn);
+                        adapterSetSearchAllDevices(conn);
                         break;
                     case NetAdapterConstants.CMD_TARGETALLFAMILIES:
-                        await adapterTargetAllFamilies(conn);
+                        adapterTargetAllFamilies(conn);
                         break;
                     case NetAdapterConstants.CMD_TARGETFAMILY:
-                        await adapterTargetFamily(conn);
+                        adapterTargetFamily(conn);
                         break;
                     case NetAdapterConstants.CMD_EXCLUDEFAMILY:
-                        await adapterExcludeFamily(conn);
+                        adapterExcludeFamily(conn);
                         break;
                     /* feature methods */
                     case NetAdapterConstants.CMD_CANBREAK:
-                        await adapterCanBreak(conn);
+                        adapterCanBreak(conn);
                         break;
                     case NetAdapterConstants.CMD_CANDELIVERPOWER:
-                        await adapterCanDeliverPower(conn);
+                        adapterCanDeliverPower(conn);
                         break;
                     case NetAdapterConstants.CMD_CANDELIVERSMARTPOWER:
-                        await adapterCanDeliverSmartPower(conn);
+                        adapterCanDeliverSmartPower(conn);
                         break;
                     case NetAdapterConstants.CMD_CANFLEX:
-                        await adapterCanFlex(conn);
+                        adapterCanFlex(conn);
                         break;
                     case NetAdapterConstants.CMD_CANHYPERDRIVE:
-                        await adapterCanHyperdrive(conn);
+                        adapterCanHyperdrive(conn);
                         break;
                     case NetAdapterConstants.CMD_CANOVERDRIVE:
-                        await adapterCanOverdrive(conn);
+                        adapterCanOverdrive(conn);
                         break;
                     case NetAdapterConstants.CMD_CANPROGRAM:
-                        await adapterCanProgram(conn);
+                        adapterCanProgram(conn);
                         break;
                     default:
                         OneWireEventSource.Log.Debug("Unknown command: " + cmd[0].ToString("X"));
@@ -771,7 +769,7 @@ namespace com.dalsemi.onewire.adapter
         //-------- Finding iButton/1-Wire device options
         //--------
 
-        private async Task<bool> adapterFindFirstDevice(NetAdapterConstants.Connection conn)
+        private async void adapterFindFirstDevice(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.findFirstDevice();
 
@@ -780,11 +778,9 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterFindNextDevice(NetAdapterConstants.Connection conn)
+        private async void adapterFindNextDevice(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.findNextDevice();
 
@@ -793,11 +789,9 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterGetAddress(NetAdapterConstants.Connection conn)
+        private async void adapterGetAddress(NetAdapterConstants.Connection conn)
         {
             // read in the address
             byte[] address = new byte[8];
@@ -809,11 +803,9 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBytes(address);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterSetSearchOnlyAlarmingDevices(NetAdapterConstants.Connection conn)
+        private async void adapterSetSearchOnlyAlarmingDevices(NetAdapterConstants.Connection conn)
         {
             OneWireEventSource.Log.Debug("   setSearchOnlyAlarmingDevices called, speed=" + adapter.Speed);
 
@@ -821,11 +813,9 @@ namespace com.dalsemi.onewire.adapter
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterSetNoResetSearch(NetAdapterConstants.Connection conn)
+        private async void adapterSetNoResetSearch(NetAdapterConstants.Connection conn)
         {
             OneWireEventSource.Log.Debug("   setNoResetSearch called, speed=" + adapter.Speed);
 
@@ -833,11 +823,9 @@ namespace com.dalsemi.onewire.adapter
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterSetSearchAllDevices(NetAdapterConstants.Connection conn)
+        private async void adapterSetSearchAllDevices(NetAdapterConstants.Connection conn)
         {
             OneWireEventSource.Log.Debug("   setSearchAllDevices called, speed=" + adapter.Speed);
 
@@ -845,11 +833,9 @@ namespace com.dalsemi.onewire.adapter
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterTargetAllFamilies(NetAdapterConstants.Connection conn)
+        private async void adapterTargetAllFamilies(NetAdapterConstants.Connection conn)
         {
             OneWireEventSource.Log.Debug("   targetAllFamilies called, speed=" + adapter.Speed);
 
@@ -857,19 +843,17 @@ namespace com.dalsemi.onewire.adapter
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterTargetFamily(NetAdapterConstants.Connection conn)
+        private async void adapterTargetFamily(NetAdapterConstants.Connection conn)
         {
             // get the number of family codes to expect
-            byte[] len = conn.ReadAsync(conn.sock, sizeof(Int32));
+            byte[] len = conn.ReadBlocking(conn, sizeof(Int32));
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(len);
 
             // get the family codes
-            byte[] family = conn.ReadAsync(conn.sock, (uint)BitConverter.ToInt32(len, 0));
+            byte[] family = conn.ReadBlocking(conn, (uint)BitConverter.ToInt32(len, 0));
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(family);
 
@@ -881,19 +865,17 @@ namespace com.dalsemi.onewire.adapter
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterExcludeFamily(NetAdapterConstants.Connection conn)
+        private async void adapterExcludeFamily(NetAdapterConstants.Connection conn)
         {
             // get the number of family codes to expect
-            byte[] len = conn.ReadAsync(conn.sock, sizeof(Int32));
+            byte[] len = conn.ReadBlocking(conn, sizeof(Int32));
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(len);
 
             // get the family codes
-            byte[] family = conn.ReadAsync(conn.sock, (uint)BitConverter.ToInt32(len, 0));
+            byte[] family = conn.ReadBlocking(conn, (uint)BitConverter.ToInt32(len, 0));
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(family);
 
@@ -905,20 +887,18 @@ namespace com.dalsemi.onewire.adapter
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
         //--------
         //-------- 1-Wire Network Semaphore methods
         //--------
 
-        private async Task<bool> adapterBeginExclusive(NetAdapterConstants.Connection conn)
+        private async void adapterBeginExclusive(NetAdapterConstants.Connection conn)
         {
             OneWireEventSource.Log.Debug("   adapter.beginExclusive called, speed=" + adapter.Speed);
 
             // get blocking boolean
-            byte[] res = conn.ReadAsync(conn.sock, sizeof(bool));
+            byte[] res = conn.ReadBlocking(conn, sizeof(bool));
             bool blocking = BitConverter.ToBoolean(res, 0);
 
             // call beginExclusive
@@ -929,11 +909,9 @@ namespace com.dalsemi.onewire.adapter
             await conn.output.StoreAsync();
 
             OneWireEventSource.Log.Debug("      adapter.beginExclusive returned " + b);
-
-            return true;
         }
 
-        private async Task<bool> adapterEndExclusive(NetAdapterConstants.Connection conn)
+        private async void adapterEndExclusive(NetAdapterConstants.Connection conn)
         {
             OneWireEventSource.Log.Debug("   adapter.endExclusive called, speed=" + adapter.Speed);
 
@@ -942,15 +920,13 @@ namespace com.dalsemi.onewire.adapter
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
         //--------
         //-------- Primitive 1-Wire Network data methods
         //--------
 
-        private async Task<bool> adapterReset(NetAdapterConstants.Connection conn)
+        private async void adapterReset(NetAdapterConstants.Connection conn)
         {
             int i = adapter.reset();
 
@@ -959,14 +935,12 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteInt32(i);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterPutBit(NetAdapterConstants.Connection conn)
+        private async void adapterPutBit(NetAdapterConstants.Connection conn)
         {
             // get the value of the bit
-            byte[] res = conn.ReadAsync(conn.sock, sizeof(bool));
+            byte[] res = conn.ReadBlocking(conn, sizeof(bool));
             bool bit = BitConverter.ToBoolean(res, 0);
 
             OneWireEventSource.Log.Debug("   putBit called, speed=" + adapter.Speed);
@@ -976,14 +950,12 @@ namespace com.dalsemi.onewire.adapter
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterPutByte(NetAdapterConstants.Connection conn)
+        private async void adapterPutByte(NetAdapterConstants.Connection conn)
         {
             // get the value of the byte
-            byte[] b = conn.ReadAsync(conn.sock, sizeof(byte));
+            byte[] b = conn.ReadBlocking(conn, sizeof(byte));
 
             OneWireEventSource.Log.Debug("   putByte called, speed=" + adapter.Speed);
             OneWireEventSource.Log.Debug("      byte=" + Convert.toHexString(b[0]));
@@ -992,13 +964,11 @@ namespace com.dalsemi.onewire.adapter
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterGetBit(NetAdapterConstants.Connection conn)
+        private async void adapterGetBit(NetAdapterConstants.Connection conn)
         {
-            bool bit = adapter.getBit; //adapter
+            bool bit = adapter.getBit;
 
             OneWireEventSource.Log.Debug("   getBit called, speed=" + adapter.Speed);
             OneWireEventSource.Log.Debug("      bit=" + bit);
@@ -1006,11 +976,9 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(bit);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterGetByte(NetAdapterConstants.Connection conn)
+        private async void adapterGetByte(NetAdapterConstants.Connection conn)
         {
             byte b = (byte)adapter.Byte;
 
@@ -1020,14 +988,12 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteByte(b);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterGetBlock(NetAdapterConstants.Connection conn)
+        private async void adapterGetBlock(NetAdapterConstants.Connection conn)
         {
             // get the number requested
-            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            byte[] res = conn.ReadBlocking(conn, sizeof(Int32));
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(res);
             int len = Convert.toInt(res);
@@ -1037,33 +1003,25 @@ namespace com.dalsemi.onewire.adapter
 
             // get the bytes
             byte[] b = adapter.getBlock(len);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(b);
-
             OneWireEventSource.Log.Debug("      returned: " + Convert.toHexString(b));
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBytes(b);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterDataBlock(NetAdapterConstants.Connection conn)
+        private async void adapterDataBlock(NetAdapterConstants.Connection conn)
         {
             OneWireEventSource.Log.Debug("   DataBlock called, speed=" + adapter.Speed);
 
             // get the number to block
-            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            byte[] res = conn.ReadBlocking(conn, sizeof(Int32));
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(res);
             int len = Convert.toInt(res);
 
             // get the bytes to block
-            byte[] b = conn.ReadAsync(conn.sock, (uint)len);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(b);
-
+            byte[] b = conn.ReadBlocking(conn, (uint)len);
             OneWireEventSource.Log.Debug("      " + len + " bytes");
             OneWireEventSource.Log.Debug("      Send: " + Convert.toHexString(b));
 
@@ -1075,18 +1033,16 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBytes(b);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
         //--------
         //-------- 1-Wire Network power methods
         //--------
 
-        private async Task<bool> adapterSetPowerDuration(NetAdapterConstants.Connection conn)
+        private async void adapterSetPowerDuration(NetAdapterConstants.Connection conn)
         {
             // get the time factor value
-            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            byte[] res = conn.ReadBlocking(conn, sizeof(Int32));
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(res);
             int timeFactor = Convert.toInt(res);
@@ -1099,14 +1055,12 @@ namespace com.dalsemi.onewire.adapter
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterStartPowerDelivery(NetAdapterConstants.Connection conn)
+        private async void adapterStartPowerDelivery(NetAdapterConstants.Connection conn)
         {
             // get the change condition value
-            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            byte[] res = conn.ReadBlocking(conn, sizeof(Int32));
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(res);
             int changeCondition = Convert.toInt(res);
@@ -1114,20 +1068,17 @@ namespace com.dalsemi.onewire.adapter
             OneWireEventSource.Log.Debug("   startPowerDelivery called, speed=" + adapter.Speed);
             OneWireEventSource.Log.Debug("      changeCondition=" + changeCondition);
 
-            // call startPowerDelivery
             bool success = adapter.startPowerDelivery(changeCondition);
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(success);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterSetProgramPulseDuration(NetAdapterConstants.Connection conn)
+        private async void adapterSetProgramPulseDuration(NetAdapterConstants.Connection conn)
         {
             // get the time factor value
-            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            byte[] res = conn.ReadBlocking(conn, sizeof(Int32));
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(res);
             int timeFactor = Convert.toInt(res);
@@ -1135,19 +1086,16 @@ namespace com.dalsemi.onewire.adapter
             OneWireEventSource.Log.Debug("   setProgramPulseDuration called, speed=" + adapter.Speed);
             OneWireEventSource.Log.Debug("      timeFactor=" + timeFactor);
 
-            // call setProgramPulseDuration
             adapter.ProgramPulseDuration = timeFactor;
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterStartProgramPulse(NetAdapterConstants.Connection conn)
+        private async void adapterStartProgramPulse(NetAdapterConstants.Connection conn)
         {
             // get the change condition value
-            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            byte[] res = conn.ReadBlocking(conn, sizeof(Int32));
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(res);
             int changeCondition = Convert.toInt(res);
@@ -1155,50 +1103,41 @@ namespace com.dalsemi.onewire.adapter
             OneWireEventSource.Log.Debug("   startProgramPulse called, speed=" + adapter.Speed);
             OneWireEventSource.Log.Debug("      changeCondition=" + changeCondition);
 
-            // call startProgramPulse();
             bool success = adapter.startProgramPulse(changeCondition);
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(success);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterStartBreak(NetAdapterConstants.Connection conn)
+        private async void adapterStartBreak(NetAdapterConstants.Connection conn)
         {
             OneWireEventSource.Log.Debug("   startBreak called, speed=" + adapter.Speed);
 
-            // call startBreak();
             adapter.startBreak();
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterSetPowerNormal(NetAdapterConstants.Connection conn)
+        private async void adapterSetPowerNormal(NetAdapterConstants.Connection conn)
         {
             OneWireEventSource.Log.Debug("   setPowerNormal called, speed=" + adapter.Speed);
 
-            // call setPowerNormal
             adapter.setPowerNormal();
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
         //--------
         //-------- 1-Wire Network speed methods
         //--------
 
-        private async Task<bool> adapterSetSpeed(NetAdapterConstants.Connection conn)
+        private async void adapterSetSpeed(NetAdapterConstants.Connection conn)
         {
             // get the value of the new speed
-            byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+            byte[] res = conn.ReadBlocking(conn, sizeof(Int32));
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(res);
             int speed = Convert.toInt(res);
@@ -1206,18 +1145,14 @@ namespace com.dalsemi.onewire.adapter
             OneWireEventSource.Log.Debug("   setSpeed called, speed=" + adapter.Speed);
             OneWireEventSource.Log.Debug("      speed=" + speed);
 
-            // do the setSpeed
             adapter.Speed = speed;
 
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterGetSpeed(NetAdapterConstants.Connection conn)
+        private async void adapterGetSpeed(NetAdapterConstants.Connection conn)
         {
-            // get the adapter speed
             int speed = adapter.Speed;
 
             OneWireEventSource.Log.Debug("   getSpeed called, speed=" + adapter.Speed);
@@ -1226,8 +1161,6 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteInt32(speed);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
 
@@ -1235,7 +1168,7 @@ namespace com.dalsemi.onewire.adapter
         //-------- Adapter feature methods
         //--------
 
-        private async Task<bool> adapterCanOverdrive(NetAdapterConstants.Connection conn)
+        private async void adapterCanOverdrive(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canOverdrive();
 
@@ -1244,11 +1177,9 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterCanHyperdrive(NetAdapterConstants.Connection conn)
+        private async void adapterCanHyperdrive(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canHyperdrive();
 
@@ -1257,11 +1188,9 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterCanFlex(NetAdapterConstants.Connection conn)
+        private async void adapterCanFlex(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canFlex();
 
@@ -1270,11 +1199,9 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterCanProgram(NetAdapterConstants.Connection conn)
+        private async void adapterCanProgram(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canProgram();
 
@@ -1283,11 +1210,9 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterCanDeliverPower(NetAdapterConstants.Connection conn)
+        private async void adapterCanDeliverPower(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canDeliverPower();
 
@@ -1296,11 +1221,9 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterCanDeliverSmartPower(NetAdapterConstants.Connection conn)
+        private async void adapterCanDeliverSmartPower(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canDeliverSmartPower();
 
@@ -1309,11 +1232,9 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
-        private async Task<bool> adapterCanBreak(NetAdapterConstants.Connection conn)
+        private async void adapterCanBreak(NetAdapterConstants.Connection conn)
         {
             bool b = adapter.canBreak();
 
@@ -1322,8 +1243,6 @@ namespace com.dalsemi.onewire.adapter
             conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
             conn.output.WriteBoolean(b);
             await conn.output.StoreAsync();
-
-            return true;
         }
 
         //--------
@@ -1368,7 +1287,7 @@ namespace com.dalsemi.onewire.adapter
                 int crc = CRC16.compute(outerInstance.netAdapterSecret, 0);
                 crc = CRC16.compute(chlg, crc);
 
-                byte[] res = conn.ReadAsync(conn.sock, sizeof(Int32));
+                byte[] res = conn.ReadBlocking(conn, sizeof(Int32));
                 if(BitConverter.IsLittleEndian)
                     Array.Reverse(res);
                 int answer = BitConverter.ToInt32(res, 0);
