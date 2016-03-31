@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
-using Windows.Storage.Streams;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -32,78 +30,76 @@ using Windows.Storage.Streams;
 
 namespace com.dalsemi.onewire.adapter
 {
+    /// <summary>
+    /// Raw Send Packet that contains a StingBuffer of bytes to send and
+    ///  an expected return length.
+    ///
+    ///  @version    0.00, 28 Aug 2000
+    ///  @author     DS
+    /// </summary>
+    internal class RawSendPacket : IDisposable
+    {
+        //--------
+        //-------- Variables
+        //--------
 
-	/// <summary>
-	/// Raw Send Packet that contains a StingBuffer of bytes to send and
-	///  an expected return length.
-	/// 
-	///  @version    0.00, 28 Aug 2000
-	///  @author     DS
-	/// </summary>
-	internal class RawSendPacket : IDisposable
-	{
+        /// <summary>
+        /// StringBuffer of bytes to send
+        /// </summary>
+        public MemoryStream buffer = null;
 
-	   //--------
-	   //-------- Variables
-	   //--------
+        public BinaryWriter writer = null;
 
-	   /// <summary>
-	   /// StringBuffer of bytes to send
-	   /// </summary>
-       public MemoryStream buffer = null;
-       public BinaryWriter writer = null;
+        /// <summary>
+        /// Expected length of return packet
+        /// </summary>
+        public int returnLength;
 
-	   /// <summary>
-	   /// Expected length of return packet
-	   /// </summary>
-	   public int returnLength;
+        //--------
+        //-------- Constructors
+        //--------
 
-	   //--------
-	   //-------- Constructors
-	   //--------
+        /// <summary>
+        /// Construct and initiailize the raw send packet
+        /// </summary>
+        public RawSendPacket()
+        {
+            buffer = new MemoryStream();
+            writer = new BinaryWriter(buffer);
+            returnLength = 0;
+        }
 
-	   /// <summary>
-	   /// Construct and initiailize the raw send packet
-	   /// </summary>
-	   public RawSendPacket()
-	   {
-          buffer = new MemoryStream();
-          writer = new BinaryWriter(buffer);
-		  returnLength = 0;
-	   }
+        ~RawSendPacket()
+        {
+            Dispose(false);
+        }
 
-       ~RawSendPacket()
-       {
-          Dispose(false);
-       }
+        public void Close()
+        {
+            Dispose();
+        }
 
-       public void Close()
-       {
-          Dispose();
-       }
+        public void Dispose()
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
 
-       public void Dispose()
-       {
-          Dispose(true);
-          System.GC.SuppressFinalize(this);
-       }
-
-       protected virtual void Dispose(bool disposing)
-       {
-          if(disposing)
-          {
-             if (buffer != null)
-             {
-                buffer.Dispose();
-                buffer = null;
-             }
-             if(writer != null)
-             {
-                writer.Dispose();
-                writer = null;
-             }
-          }
-       }
-	}
-
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (buffer != null)
+                {
+                    buffer.Dispose();
+                    buffer = null;
+                }
+                if (writer != null)
+                {
+                    writer.Dispose();
+                    writer = null;
+                }
+            }
+        }
+    }
 }

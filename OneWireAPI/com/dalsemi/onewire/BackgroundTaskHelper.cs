@@ -84,6 +84,5 @@ namespace com.dalsemi.onewire
             return false;
 #endif
         }
-
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
@@ -17,23 +16,28 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// The serial port name of this object (e.g. COM1, /dev/ttyS0) </summary>
         private readonly string comPortName;
+
         /// <summary>
         /// The serial port object for setting serial port parameters </summary>
         private SerialDevice serialPort = null;
+
         /// <summary>
         /// Reader
         /// </summary>
         private DataReader reader = null;
+
         /// <summary>
         /// Writer
         /// </summary>
         private DataWriter writer = null;
+
         /// <summary>
         /// The hash code of the thread that currently owns this serial port </summary>
         //private int currentThreadHash = 0;
         /// <summary>
         /// temporary array, used for converting characters to bytes </summary>
         private byte[] tempArray = new byte[128];
+
         /// <summary>
         /// Vector of thread hash codes that have done an open but no close </summary>
         private readonly List<int> users = new List<int>();
@@ -41,9 +45,11 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Vector of serial port ID strings (i.e. "COM1", "COM2", etc) </summary>
         private static readonly List<string> vPortIDs = new List<string>(2);
+
         /// <summary>
         /// static list of threadIDs to the services they are using </summary>
         private static Hashtable knownServices = new Hashtable();
+
         /// <summary>
         /// static list of all unique SerialService classes </summary>
         private static Hashtable uniqueServices = new Hashtable();
@@ -63,7 +69,6 @@ namespace com.dalsemi.onewire.adapter
         private SerialService()
         {
             this.comPortName = null;
-            
         }
 
         /// <summary>
@@ -181,7 +186,6 @@ namespace com.dalsemi.onewire.adapter
             }
         }
 
-
         public virtual bool NotifyOnDataAvailable
         {
             set
@@ -226,7 +230,6 @@ namespace com.dalsemi.onewire.adapter
             }
         }
 
-
         public virtual void flush()
         {
             //OneWireEventSource.Log.Debug("SerialService.flush");
@@ -250,7 +253,7 @@ namespace com.dalsemi.onewire.adapter
                 //OneWireEventSource.Log.Debug(serialPort.PortName + " Tx: " + com.dalsemi.onewire.utils.Convert.toHexString(data));
             });
             t.Wait();
-            if(t.Status != TaskStatus.RanToCompletion)
+            if (t.Status != TaskStatus.RanToCompletion)
             {
                 OneWireEventSource.Log.Critical("Error writing to serial port!");
             }
@@ -258,7 +261,7 @@ namespace com.dalsemi.onewire.adapter
 
         public virtual void write(byte[] data)
         {
-            var t = Task.Run(async() =>
+            var t = Task.Run(async () =>
             {
                 writer.WriteBytes(data);
                 await writer.StoreAsync();
@@ -266,7 +269,7 @@ namespace com.dalsemi.onewire.adapter
                 //OneWireEventSource.Log.Debug(serialPort.PortName + " Tx: " + com.dalsemi.onewire.utils.Convert.toHexString(data, " "));
             });
             t.Wait();
-            if(t.Status != TaskStatus.RanToCompletion)
+            if (t.Status != TaskStatus.RanToCompletion)
             {
                 OneWireEventSource.Log.Critical("Error writing to serial port!");
             }
@@ -308,15 +311,13 @@ namespace com.dalsemi.onewire.adapter
                                 }
                                 else
                                 {
-                                    byte[] tmp = new byte[i+1];
+                                    byte[] tmp = new byte[i + 1];
                                     Array.Copy(res, 0, tmp, 0, i + 1);
                                     return tmp;
                                 }
-
                             }
                             //debug.Debug.debug(serialPort.PortName + " Rx", result);
                             //OneWireEventSource.Log.Debug(serialPort.PortName + " Rx: " + com.dalsemi.onewire.utils.Convert.toHexString(result, " "));
-
                         }
                     }
                     return res;
@@ -436,7 +437,7 @@ namespace com.dalsemi.onewire.adapter
 
             try
             {
-                var t = Task<SerialDevice>.Run(async() =>
+                var t = Task<SerialDevice>.Run(async () =>
                 {
                     SerialDevice device;
 
@@ -477,7 +478,7 @@ namespace com.dalsemi.onewire.adapter
                 });
 
                 t.Wait();
-                if(t.Status != TaskStatus.RanToCompletion)
+                if (t.Status != TaskStatus.RanToCompletion)
                 {
                     throw new System.IO.IOException("Failed to open (" + comPortName + ")");
                 }
@@ -486,14 +487,14 @@ namespace com.dalsemi.onewire.adapter
 
                 // flow i/o
                 // This generates an exception on Keyspan USA-19HS
-//TODO                    serialPort.Handshake = SerialHandshake.None;
+                //TODO                    serialPort.Handshake = SerialHandshake.None;
 
                 // bug workaround
                 write((byte)0);
 
                 // settings
-                serialPort.ReadTimeout = new System.TimeSpan(0,0,0,0,100);
-                serialPort.WriteTimeout = new System.TimeSpan(0,0,0,0,100);
+                serialPort.ReadTimeout = new System.TimeSpan(0, 0, 0, 0, 100);
+                serialPort.WriteTimeout = new System.TimeSpan(0, 0, 0, 0, 100);
 
                 // set baud rate
                 serialPort.BaudRate = 9600;
@@ -578,7 +579,5 @@ namespace com.dalsemi.onewire.adapter
                 }
             }
         }
-
     }
 }
-

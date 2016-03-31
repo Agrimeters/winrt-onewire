@@ -27,82 +27,77 @@
 
 namespace com.dalsemi.onewire.container
 {
+    // imports
 
-	// imports
-	using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
+    /// <summary>
+    ///  Scratchpad interface for Memory banks that require it.
+    ///
+    ///  @version    0.00, 28 Aug 2000
+    ///  @author     DS
+    /// </summary>
+    internal interface ScratchPad
+    {
+        /// <summary>
+        /// Read the scratchpad page of memory from a NVRAM device
+        /// This method reads and returns the entire scratchpad after the byte
+        /// offset regardless of the actual ending offset
+        /// </summary>
+        /// <param name="readBuf">       byte array to place read data into
+        ///                       length of array is always pageLength. </param>
+        /// <param name="offset">        offset into readBuf to pug data </param>
+        /// <param name="len">           length in bytes to read </param>
+        /// <param name="extraInfo">     byte array to put extra info read into
+        ///                       (TA1, TA2, e/s byte)
+        ///                       length of array is always extraInfoLength.
+        ///                       Can be 'null' if extra info is not needed.
+        /// </param>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        void readScratchpad(byte[] readBuf, int offset, int len, byte[] extraInfo);
 
+        /// <summary>
+        /// Write to the scratchpad page of memory a NVRAM device.
+        /// </summary>
+        /// <param name="startAddr">     starting address </param>
+        /// <param name="writeBuf">      byte array containing data to write </param>
+        /// <param name="offset">        offset into readBuf to place data </param>
+        /// <param name="len">           length in bytes to write
+        /// </param>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        void writeScratchpad(int startAddr, byte[] writeBuf, int offset, int len);
 
-	/// <summary>
-	///  Scratchpad interface for Memory banks that require it.
-	/// 
-	///  @version    0.00, 28 Aug 2000
-	///  @author     DS
-	/// </summary>
-	internal interface ScratchPad
-	{
+        /// <summary>
+        /// Copy the scratchpad page to memory.
+        /// </summary>
+        /// <param name="startAddr">     starting address </param>
+        /// <param name="len">           length in bytes that was written already
+        /// </param>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        void copyScratchpad(int startAddr, int len);
 
-	   /// <summary>
-	   /// Read the scratchpad page of memory from a NVRAM device
-	   /// This method reads and returns the entire scratchpad after the byte
-	   /// offset regardless of the actual ending offset
-	   /// </summary>
-	   /// <param name="readBuf">       byte array to place read data into
-	   ///                       length of array is always pageLength. </param>
-	   /// <param name="offset">        offset into readBuf to pug data </param>
-	   /// <param name="len">           length in bytes to read </param>
-	   /// <param name="extraInfo">     byte array to put extra info read into
-	   ///                       (TA1, TA2, e/s byte)
-	   ///                       length of array is always extraInfoLength.
-	   ///                       Can be 'null' if extra info is not needed.
-	   /// </param>
-	   /// <exception cref="OneWireIOException"> </exception>
-	   /// <exception cref="OneWireException"> </exception>
-	   void readScratchpad(byte[] readBuf, int offset, int len, byte[] extraInfo);
+        /// <summary>
+        /// Query to get the length in bytes of extra information that
+        /// is read when read a page in the current memory bank.  See
+        /// 'hasExtraInfo()'.
+        /// </summary>
+        /// <returns>  number of bytes in Extra Information read when reading
+        ///          pages in the current memory bank. </returns>
+        int ExtraInfoLength { get; }
 
-	   /// <summary>
-	   /// Write to the scratchpad page of memory a NVRAM device.
-	   /// </summary>
-	   /// <param name="startAddr">     starting address </param>
-	   /// <param name="writeBuf">      byte array containing data to write </param>
-	   /// <param name="offset">        offset into readBuf to place data </param>
-	   /// <param name="len">           length in bytes to write
-	   /// </param>
-	   /// <exception cref="OneWireIOException"> </exception>
-	   /// <exception cref="OneWireException"> </exception>
-	   void writeScratchpad(int startAddr, byte[] writeBuf, int offset, int len);
+        /// <summary>
+        /// Check the device speed if has not been done before or if
+        /// an error was detected.
+        /// </summary>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        void checkSpeed();
 
-	   /// <summary>
-	   /// Copy the scratchpad page to memory.
-	   /// </summary>
-	   /// <param name="startAddr">     starting address </param>
-	   /// <param name="len">           length in bytes that was written already
-	   /// </param>
-	   /// <exception cref="OneWireIOException"> </exception>
-	   /// <exception cref="OneWireException"> </exception>
-	   void copyScratchpad(int startAddr, int len);
-
-	   /// <summary>
-	   /// Query to get the length in bytes of extra information that
-	   /// is read when read a page in the current memory bank.  See
-	   /// 'hasExtraInfo()'.
-	   /// </summary>
-	   /// <returns>  number of bytes in Extra Information read when reading
-	   ///          pages in the current memory bank. </returns>
-	   int ExtraInfoLength {get;}
-
-	   /// <summary>
-	   /// Check the device speed if has not been done before or if
-	   /// an error was detected.
-	   /// </summary>
-	   /// <exception cref="OneWireIOException"> </exception>
-	   /// <exception cref="OneWireException"> </exception>
-	   void checkSpeed();
-
-	   /// <summary>
-	   /// Set the flag to indicate the next 'checkSpeed()' will force
-	   /// a speed set and verify.
-	   /// </summary>
-	   void forceVerify();
-	}
-
+        /// <summary>
+        /// Set the flag to indicate the next 'checkSpeed()' will force
+        /// a speed set and verify.
+        /// </summary>
+        void forceVerify();
+    }
 }

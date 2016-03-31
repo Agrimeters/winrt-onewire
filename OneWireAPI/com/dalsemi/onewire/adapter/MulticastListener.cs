@@ -31,82 +31,82 @@ using Windows.Storage.Streams;
  * Branding Policy.
  *---------------------------------------------------------------------------
  */
+
 namespace com.dalsemi.onewire.adapter
 {
-
     using com.dalsemi.onewire.logging;
 
-	/// <summary>
-	/// Generic Mulitcast broadcast listener.  Listens for a specific message and,
-	/// in response, gives the specified reply.  Used by NetAdapterHost for
-	/// automatic discovery of host components for the network-based DSPortAdapter.
-	/// 
-	/// @author SH
-	/// @version 1.00
-	/// </summary>
-	public class MulticastListener : IDisposable
-	{
-	   /// <summary>
-	   /// timeout for socket receive </summary>
-	   private const int timeoutInSeconds = 3;
+    /// <summary>
+    /// Generic Mulitcast broadcast listener.  Listens for a specific message and,
+    /// in response, gives the specified reply.  Used by NetAdapterHost for
+    /// automatic discovery of host components for the network-based DSPortAdapter.
+    ///
+    /// @author SH
+    /// @version 1.00
+    /// </summary>
+    public class MulticastListener : IDisposable
+    {
+        /// <summary>
+        /// timeout for socket receive </summary>
+        private const int timeoutInSeconds = 3;
 
-	   /// <summary>
-	   /// multicast socket to receive datagram packets on </summary>
-	   private DatagramSocket socket = null;
+        /// <summary>
+        /// multicast socket to receive datagram packets on </summary>
+        private DatagramSocket socket = null;
 
-	   /// <summary>
-	   /// the message we're expecting to receive on the multicast socket </summary>
-	   private byte[] expectedMessage;
-	   /// <summary>
-	   /// the message we should reply with when we get the expected message </summary>
-	   private byte[] returnMessage;
+        /// <summary>
+        /// the message we're expecting to receive on the multicast socket </summary>
+        private byte[] expectedMessage;
 
-	   /// <summary>
-	   /// boolean to indicate if packet handling is active </summary>
-	   private volatile bool handlingPacket = false;
-       /// <summary>
-       /// AutoResetEvent used to stop Multicast reciever </summary>
-       private AutoResetEvent waitPacketDone = new AutoResetEvent(false);
+        /// <summary>
+        /// the message we should reply with when we get the expected message </summary>
+        private byte[] returnMessage;
 
+        /// <summary>
+        /// boolean to indicate if packet handling is active </summary>
+        private volatile bool handlingPacket = false;
 
-	   /// <summary>
-	   /// Creates a multicast listener on the specified multicast port,
-	   /// bound to the specified multicast group.  Whenever the byte[]
-	   /// pattern specified by "expectedMessage" is received, the byte[]
-	   /// pattern specifed by "returnMessage" is sent to the sender of
-	   /// the "expected message".
-	   /// </summary>
-	   /// <param name="multicastPort"> Port to bind this listener to. </param>
-	   /// <param name="multicastGroup"> Group to bind this listener to. </param>
-	   /// <param name="expectedMessage"> the message to look for </param>
-	   /// <param name="returnMessage"> the message to reply with </param>
-	   public MulticastListener(int multicastPort, string multicastGroup, byte[] expectedMessage, byte[] returnMessage)
-	   {
-		  this.expectedMessage = expectedMessage;
-		  this.returnMessage = returnMessage;
+        /// <summary>
+        /// AutoResetEvent used to stop Multicast reciever </summary>
+        private AutoResetEvent waitPacketDone = new AutoResetEvent(false);
 
-		  OneWireEventSource.Log.Debug("DEBUG: Creating Multicast Listener");
-          OneWireEventSource.Log.Debug("DEBUG:    Multicast port: " + multicastPort);
-          OneWireEventSource.Log.Debug("DEBUG:    Multicast group: " + multicastGroup);
+        /// <summary>
+        /// Creates a multicast listener on the specified multicast port,
+        /// bound to the specified multicast group.  Whenever the byte[]
+        /// pattern specified by "expectedMessage" is received, the byte[]
+        /// pattern specifed by "returnMessage" is sent to the sender of
+        /// the "expected message".
+        /// </summary>
+        /// <param name="multicastPort"> Port to bind this listener to. </param>
+        /// <param name="multicastGroup"> Group to bind this listener to. </param>
+        /// <param name="expectedMessage"> the message to look for </param>
+        /// <param name="returnMessage"> the message to reply with </param>
+        public MulticastListener(int multicastPort, string multicastGroup, byte[] expectedMessage, byte[] returnMessage)
+        {
+            this.expectedMessage = expectedMessage;
+            this.returnMessage = returnMessage;
 
-          // create multicast socket
-          socket = new DatagramSocket(); // MulticastSocket(multicastPort);
-          socket.MessageReceived += Multicast_MessageReceived;
-          socket.Control.MulticastOnly = true;
-		  handlingPacket = false;
+            OneWireEventSource.Log.Debug("DEBUG: Creating Multicast Listener");
+            OneWireEventSource.Log.Debug("DEBUG:    Multicast port: " + multicastPort);
+            OneWireEventSource.Log.Debug("DEBUG:    Multicast group: " + multicastGroup);
 
-          var t = Task.Run(async () =>
-          {
+            // create multicast socket
+            socket = new DatagramSocket(); // MulticastSocket(multicastPort);
+            socket.MessageReceived += Multicast_MessageReceived;
+            socket.Control.MulticastOnly = true;
+            handlingPacket = false;
+
+            var t = Task.Run(async () =>
+            {
               // specify IP address of adapter...
               await socket.BindEndpointAsync(new HostName("localhost"), Convert.ToString(multicastPort));
-          });
-          t.Wait();
-          
+            });
+            t.Wait();
 
-		  //join the multicast group
-          socket.JoinMulticastGroup(new HostName(multicastGroup));
+            //join the multicast group
+            socket.JoinMulticastGroup(new HostName(multicastGroup));
 
-          OneWireEventSource.Log.Debug("DEBUG: waiting for multicast packet");
+            OneWireEventSource.Log.Debug("DEBUG: waiting for multicast packet");
         }
 
         private async void Multicast_MessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
@@ -121,7 +121,6 @@ namespace com.dalsemi.onewire.adapter
             OneWireEventSource.Log.Debug("DEBUG: expecting=" + expectedMessage.Length);
             try
             {
-
                 if (length == expectedMessage.Length)
                 {
                     bool dataMatch = true;
@@ -160,16 +159,16 @@ namespace com.dalsemi.onewire.adapter
             }
         }
 
-	   /// <summary>
-	   /// Waits for datagram listener to finish, with a timeout.
-	   /// </summary>
-	   public virtual void stopListener()
-	   {
-           while (handlingPacket)
-               waitPacketDone.WaitOne();
+        /// <summary>
+        /// Waits for datagram listener to finish, with a timeout.
+        /// </summary>
+        public virtual void stopListener()
+        {
+            while (handlingPacket)
+                waitPacketDone.WaitOne();
 
-           socket.MessageReceived -= Multicast_MessageReceived;
-       }
+            socket.MessageReceived -= Multicast_MessageReceived;
+        }
 
         ~MulticastListener()
         {
@@ -193,7 +192,7 @@ namespace com.dalsemi.onewire.adapter
             {
                 if (waitPacketDone != null)
                     waitPacketDone.Dispose();
-                if (socket != null) 
+                if (socket != null)
                     socket.Dispose();
             }
         }

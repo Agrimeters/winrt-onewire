@@ -46,7 +46,7 @@ namespace com.dalsemi.onewire
                 {
                     if (st[0].StartsWith("#"))
                     {
-                        if(doDebugMessages)
+                        if (doDebugMessages)
                         {
                             Debug.WriteLine("Commented out property >> " + st[0] + "=" + st[1]);
                         }
@@ -85,8 +85,8 @@ namespace com.dalsemi.onewire
                 Stream stream = null;
                 var t = Task.Run(async () =>
                 {
-                   localFile = await localFolder.GetFileAsync(file);
-                   stream = await localFile.OpenStreamForReadAsync();
+                    localFile = await localFolder.GetFileAsync(file);
+                    stream = await localFile.OpenStreamForReadAsync();
                 });
                 t.Wait();
                 using (var reader = new StreamReader(stream))
@@ -129,7 +129,7 @@ namespace com.dalsemi.onewire
                 loadTable(props, reader);
                 result = true;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 if (doDebugMessages)
                 {
@@ -137,7 +137,7 @@ namespace com.dalsemi.onewire
                 }
             }
 
-            if(stream != null)
+            if (stream != null)
             {
                 stream.Dispose();
                 stream = null;
@@ -279,7 +279,7 @@ namespace com.dalsemi.onewire
         {
             string val;
 
-            if(!props.TryGetValue(key, out val))
+            if (!props.TryGetValue(key, out val))
                 return null;
 
             return val;

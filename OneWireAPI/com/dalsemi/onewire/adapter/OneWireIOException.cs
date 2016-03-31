@@ -27,35 +27,31 @@
 
 namespace com.dalsemi.onewire.adapter
 {
+    // imports
 
-	// imports
+    /// <summary>
+    /// This exception is thrown when there is an IO error communicating on
+    /// on the 1-Wire Network.  For instance, when a network error occurs when
+    /// calling the putBit(bool) method.
+    ///
+    /// @version    0.00, 28 Aug 2000
+    /// @author     DS
+    /// </summary>
+    public class OneWireIOException : OneWireException
+    {
+        /// <summary>
+        /// Constructs a <code>OneWireIOException</code> with no detail message.
+        /// </summary>
+        public OneWireIOException() : base()
+        {
+        }
 
-
-	/// <summary>
-	/// This exception is thrown when there is an IO error communicating on
-	/// on the 1-Wire Network.  For instance, when a network error occurs when
-	/// calling the putBit(bool) method.
-	/// 
-	/// @version    0.00, 28 Aug 2000
-	/// @author     DS
-	/// </summary>
-	public class OneWireIOException : OneWireException
-	{
-
-	   /// <summary>
-	   /// Constructs a <code>OneWireIOException</code> with no detail message.
-	   /// </summary>
-	   public OneWireIOException() : base()
-	   {
-	   }
-
-	   /// <summary>
-	   /// Constructs a <code>OneWireIOException</code> with the specified detail message.
-	   /// </summary>
-	   ///  <param name="desc">   the detail message description </param>
-	   public OneWireIOException(string desc) : base(desc)
-	   {
-	   }
-	}
-
+        /// <summary>
+        /// Constructs a <code>OneWireIOException</code> with the specified detail message.
+        /// </summary>
+        ///  <param name="desc">   the detail message description </param>
+        public OneWireIOException(string desc) : base(desc)
+        {
+        }
+    }
 }

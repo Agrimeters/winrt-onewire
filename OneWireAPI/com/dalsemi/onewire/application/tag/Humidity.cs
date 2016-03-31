@@ -27,72 +27,69 @@
 
 namespace com.dalsemi.onewire.application.tag
 {
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.container;
 
-	using com.dalsemi.onewire.adapter;
-	using com.dalsemi.onewire.container;
+    /// <summary>
+    /// This class provides a default object for the Humidity type
+    /// of a tagged 1-Wire device.
+    /// </summary>
+    public class Humidity : TaggedDevice, TaggedSensor
+    {
+        /// <summary>
+        /// Creates an object for the device.
+        /// </summary>
+        public Humidity() : base()
+        {
+        }
 
+        /// <summary>
+        /// Creates an object for the device with the supplied address and device type connected
+        /// to the supplied port adapter. </summary>
+        /// <param name="adapter"> The adapter serving the sensor. </param>
+        /// <param name="netAddress"> The 1-Wire network address of the sensor. </param>
+        public Humidity(DSPortAdapter adapter, string netAddress) : base(adapter, netAddress)
+        {
+        }
 
-	/// <summary>
-	/// This class provides a default object for the Humidity type 
-	/// of a tagged 1-Wire device.  
-	/// </summary>
-	public class Humidity : TaggedDevice, TaggedSensor
-	{
+        /// <summary>
+        /// The readSensor method returns a relative humidity reading
+        /// in %RH
+        ///
+        /// @param--none.
+        /// </summary>
+        /// <returns> String humidity in %RH </returns>
+        public virtual string readSensor()
+        {
+            HumidityContainer hc = DeviceContainer as HumidityContainer;
 
-	   /// <summary>
-	   /// Creates an object for the device.
-	   /// </summary>
-	   public Humidity() : base()
-	   {
-	   }
+            // read the device first to get the state
+            byte[] state = hc.readDevice();
 
-	   /// <summary>
-	   /// Creates an object for the device with the supplied address and device type connected
-	   /// to the supplied port adapter. </summary>
-	   /// <param name="adapter"> The adapter serving the sensor. </param>
-	   /// <param name="netAddress"> The 1-Wire network address of the sensor. </param>
-	   public Humidity(DSPortAdapter adapter, string netAddress) : base(adapter, netAddress)
-	   {
-	   }
+            // convert humidity
+            hc.doHumidityConvert(state);
 
-	   /// <summary>
-	   /// The readSensor method returns a relative humidity reading
-	   /// in %RH 
-	   /// 
-	   /// @param--none.
-	   /// </summary>
-	   /// <returns> String humidity in %RH </returns>
-	   public virtual string readSensor()
-	   {
-		  HumidityContainer hc = DeviceContainer as HumidityContainer;
+            // construct the return string
+            string return_string = (int)roundDouble(hc.getHumidity(state)) + "%";
+            if (hc.Relative)
+            {
+                return_string += "RH";
+            }
 
-		  // read the device first to get the state
-		  byte[] state = hc.readDevice();
+            return return_string;
+        }
 
-		  // convert humidity
-		  hc.doHumidityConvert(state);
-
-		  // construct the return string
-		  string return_string = (int) roundDouble(hc.getHumidity(state)) + "%";
-		  if (hc.Relative)
-		  {
-			 return_string += "RH";
-		  }
-
-		  return return_string;
-	   }
-	   /// <summary>
-	   /// The roundDouble method returns a double rounded to the 
-	   /// nearest digit in the "ones" position. 
-	   /// 
-	   /// @param--double
-	   /// </summary>
-	   /// <returns> double rounded to the nearest digit in the "ones"
-	   /// position. </returns>
-	   private double roundDouble(double d)
-	   {
-		  return (double)((int)(d + ((d > 0)? 0.5 : -0.5)));
-	   }
-	}
-
+        /// <summary>
+        /// The roundDouble method returns a double rounded to the
+        /// nearest digit in the "ones" position.
+        ///
+        /// @param--double
+        /// </summary>
+        /// <returns> double rounded to the nearest digit in the "ones"
+        /// position. </returns>
+        private double roundDouble(double d)
+        {
+            return (double)((int)(d + ((d > 0) ? 0.5 : -0.5)));
+        }
+    }
 }

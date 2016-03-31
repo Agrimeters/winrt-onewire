@@ -30,259 +30,252 @@ using System.Collections.Generic;
 
 namespace com.dalsemi.onewire.utils
 {
+    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
+    using SwitchContainer = com.dalsemi.onewire.container.SwitchContainer;
 
-	using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-	using SwitchContainer = com.dalsemi.onewire.container.SwitchContainer;
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
-	using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
+    /// <summary>
+    /// 1-Wire&#174 Network path.  Large 1-Wire networks can be sub-divided into branches
+    /// for load, location, or organizational reasons.  Once 1-Wire devices are placed
+    /// on this branches there needs to be a mechanism to reach these devices.  The
+    /// OWPath class was designed to provide a convenient method to open and close
+    /// 1-Wire paths to reach remote devices.
+    ///
+    /// <H3> Usage </H3>
+    ///
+    /// <DL>
+    /// <DD> <H4> Example</H4>
+    /// Open the path 'path' to the 1-Wire temperature device 'tc' and read the temperature:
+    /// <PRE> <CODE>
+    ///  // open a path to the temp device
+    ///  path.open();
+    ///
+    ///  // read the temp device
+    ///  byte[] state = tc.readDevice();
+    ///  tc.doTemperatureConvert(state);
+    ///  state = tc.readDevice();
+    ///  System.out.println("Temperature of " +
+    ///           address + " is " +
+    ///           tc.getTemperature(state) + " C");
+    ///
+    ///  // close the path to the device
+    ///  path.close();
+    /// </CODE> </PRE>
+    /// </DL>
+    /// </summary>
+    /// <seealso cref= com.dalsemi.onewire.utils.OWPathElement </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.SwitchContainer </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer05 </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer12 </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer1F
+    ///
+    /// @version    0.00, 12 September 2000
+    /// @author     DS </seealso>
+    public class OWPath
+    {
+        //--------
+        //-------- Variables
+        //--------
 
+        /// <summary>
+        /// Elements of the path in a Vector </summary>
+        private List<OWPathElement> elements;
 
-	/// <summary>
-	/// 1-Wire&#174 Network path.  Large 1-Wire networks can be sub-divided into branches
-	/// for load, location, or organizational reasons.  Once 1-Wire devices are placed
-	/// on this branches there needs to be a mechanism to reach these devices.  The
-	/// OWPath class was designed to provide a convenient method to open and close
-	/// 1-Wire paths to reach remote devices.
-	/// 
-	/// <H3> Usage </H3>
-	/// 
-	/// <DL>
-	/// <DD> <H4> Example</H4>
-	/// Open the path 'path' to the 1-Wire temperature device 'tc' and read the temperature:
-	/// <PRE> <CODE>
-	///  // open a path to the temp device
-	///  path.open();
-	/// 
-	///  // read the temp device
-	///  byte[] state = tc.readDevice();
-	///  tc.doTemperatureConvert(state);
-	///  state = tc.readDevice();
-	///  System.out.println("Temperature of " +
-	///           address + " is " +
-	///           tc.getTemperature(state) + " C");
-	/// 
-	///  // close the path to the device
-	///  path.close();
-	/// </CODE> </PRE>
-	/// </DL>
-	/// </summary>
-	/// <seealso cref= com.dalsemi.onewire.utils.OWPathElement </seealso>
-	/// <seealso cref= com.dalsemi.onewire.container.SwitchContainer </seealso>
-	/// <seealso cref= com.dalsemi.onewire.container.OneWireContainer05 </seealso>
-	/// <seealso cref= com.dalsemi.onewire.container.OneWireContainer12 </seealso>
-	/// <seealso cref= com.dalsemi.onewire.container.OneWireContainer1F
-	/// 
-	/// @version    0.00, 12 September 2000
-	/// @author     DS </seealso>
-	public class OWPath
-	{
+        /// <summary>
+        /// Adapter where this path is based </summary>
+        private DSPortAdapter adapter;
 
-	   //--------
-	   //-------- Variables
-	   //--------
+        //--------
+        //-------- Constructor
+        //--------
 
-	   /// <summary>
-	   /// Elements of the path in a Vector </summary>
-	   private List<OWPathElement> elements;
+        /// <summary>
+        /// Create a new 1-Wire path with no elemements.  Elements
+        /// can be added by using <CODE> copy </CODE> and/or
+        /// <CODE> add </CODE>.
+        /// </summary>
+        /// <param name="adapter"> where the path is based
+        /// </param>
+        /// <seealso cref= #copy(OWPath) copy </seealso>
+        /// <seealso cref= #add(OneWireContainer, int) add </seealso>
+        public OWPath(DSPortAdapter adapter)
+        {
+            this.adapter = adapter;
+            elements = new List<OWPathElement>(2);
+        }
 
-	   /// <summary>
-	   /// Adapter where this path is based </summary>
-	   private DSPortAdapter adapter;
+        /// <summary>
+        /// Create a new path with a starting path.  New elements
+        /// can be added with <CODE>add</CODE>.
+        /// </summary>
+        /// <param name="adapter"> where the 1-Wire path is based </param>
+        /// <param name="currentPath"> starting value of this 1-Wire path
+        /// </param>
+        /// <seealso cref= #add(OneWireContainer, int) add </seealso>
+        public OWPath(DSPortAdapter adapter, OWPath currentOWPath)
+        {
+            this.adapter = adapter;
+            elements = new List<OWPathElement>(2);
 
-	   //--------
-	   //-------- Constructor
-	   //--------
+            copy(currentOWPath);
+        }
 
-	   /// <summary>
-	   /// Create a new 1-Wire path with no elemements.  Elements
-	   /// can be added by using <CODE> copy </CODE> and/or
-	   /// <CODE> add </CODE>.
-	   /// </summary>
-	   /// <param name="adapter"> where the path is based
-	   /// </param>
-	   /// <seealso cref= #copy(OWPath) copy </seealso>
-	   /// <seealso cref= #add(OneWireContainer, int) add </seealso>
-	   public OWPath(DSPortAdapter adapter)
-	   {
-		  this.adapter = adapter;
-		  elements = new List<OWPathElement>(2);
-	   }
+        /// <summary>
+        /// Copy the elements from the provided 1-Wire path into this 1-Wire path.
+        /// </summary>
+        /// <param name="currentOWPath"> path to copy from </param>
+        public virtual void copy(OWPath currentOWPath)
+        {
+            elements.Clear();
 
-	   /// <summary>
-	   /// Create a new path with a starting path.  New elements
-	   /// can be added with <CODE>add</CODE>.
-	   /// </summary>
-	   /// <param name="adapter"> where the 1-Wire path is based </param>
-	   /// <param name="currentPath"> starting value of this 1-Wire path
-	   /// </param>
-	   /// <seealso cref= #add(OneWireContainer, int) add </seealso>
-	   public OWPath(DSPortAdapter adapter, OWPath currentOWPath)
-	   {
-		  this.adapter = adapter;
-		  elements = new List<OWPathElement>(2);
+            if (currentOWPath != null)
+            {
+                // enumerature through elements in current path
+                for (IEnumerator path_enum = currentOWPath.AllOWPathElements; path_enum.MoveNext();)
+                {
+                    // cast the enum as a OWPathElements and add to vector
+                    elements.Add((OWPathElement)path_enum.Current);
+                }
+            }
+        }
 
-		  copy(currentOWPath);
-	   }
+        /// <summary>
+        /// Add a 1-Wire path element to this 1-Wire path.
+        /// </summary>
+        /// <param name="owc"> 1-Wire device switch </param>
+        /// <param name="channel"> of device that represents this 1-Wire path element
+        /// </param>
+        /// <seealso cref= #copy(OWPath) copy </seealso>
+        public virtual void add(OneWireContainer owc, int channel)
+        {
+            elements.Add(new OWPathElement(owc, channel));
+        }
 
-	   /// <summary>
-	   /// Copy the elements from the provided 1-Wire path into this 1-Wire path.
-	   /// </summary>
-	   /// <param name="currentOWPath"> path to copy from </param>
-	   public virtual void copy(OWPath currentOWPath)
-	   {
-		  elements.Clear();
+        /// <summary>
+        /// Compare this 1-Wire path with another.
+        /// </summary>
+        /// <param name="compareOWPath"> 1-Wire path to compare to
+        /// </param>
+        /// <returns> <CODE> true </CODE> if the 1-Wire paths are the same </returns>
+        public virtual bool Equals(OWPath compareOWPath)
+        {
+            return (this.ToString().Equals(compareOWPath.ToString()));
+        }
 
-		  if (currentOWPath != null)
-		  {
-			 // enumerature through elements in current path
-			 for (IEnumerator path_enum = currentOWPath.AllOWPathElements; path_enum.MoveNext();)
-			 {
-				// cast the enum as a OWPathElements and add to vector
-				elements.Add((OWPathElement)path_enum.Current);
-			 }
-		  }
-	   }
+        /// <summary>
+        /// Get an enumeration of all of the 1-Wire path elements in
+        /// this 1-Wire path.
+        /// </summary>
+        /// <returns> enumeration of all of the 1-Wire path elements
+        /// </returns>
+        /// <seealso cref= com.dalsemi.onewire.utils.OWPathElement </seealso>
+        public virtual System.Collections.IEnumerator AllOWPathElements
+        {
+            get
+            {
+                return elements.GetEnumerator();
+            }
+        }
 
-	   /// <summary>
-	   /// Add a 1-Wire path element to this 1-Wire path.
-	   /// </summary>
-	   /// <param name="owc"> 1-Wire device switch </param>
-	   /// <param name="channel"> of device that represents this 1-Wire path element
-	   /// </param>
-	   /// <seealso cref= #copy(OWPath) copy </seealso>
-	   public virtual void add(OneWireContainer owc, int channel)
-	   {
-		  elements.Add(new OWPathElement(owc, channel));
-	   }
+        /// <summary>
+        /// Get a string representation of this 1-Wire path.
+        /// </summary>
+        /// <returns> string 1-Wire path as string </returns>
+        public override string ToString()
+        {
+            string st = "";
+            OWPathElement element;
+            OneWireContainer owc;
 
-	   /// <summary>
-	   /// Compare this 1-Wire path with another.
-	   /// </summary>
-	   /// <param name="compareOWPath"> 1-Wire path to compare to
-	   /// </param>
-	   /// <returns> <CODE> true </CODE> if the 1-Wire paths are the same </returns>
-	   public virtual bool Equals(OWPath compareOWPath)
-	   {
-		  return (this.ToString().Equals(compareOWPath.ToString()));
-	   }
+            // append 'drive'
+            try
+            {
+                st = adapter.AdapterName + "_" + adapter.PortName + "/";
+            }
+            catch (OneWireException)
+            {
+                st = adapter.AdapterName + "/";
+            }
 
-	   /// <summary>
-	   /// Get an enumeration of all of the 1-Wire path elements in
-	   /// this 1-Wire path.
-	   /// </summary>
-	   /// <returns> enumeration of all of the 1-Wire path elements
-	   /// </returns>
-	   /// <seealso cref= com.dalsemi.onewire.utils.OWPathElement </seealso>
-	   public virtual System.Collections.IEnumerator AllOWPathElements
-	   {
-		   get
-		   {
-			  return elements.GetEnumerator();
-		   }
-	   }
+            for (int i = 0; i < elements.Count; i++)
+            {
+                element = (OWPathElement)elements[i];
+                owc = element.Container;
 
-	   /// <summary>
-	   /// Get a string representation of this 1-Wire path.
-	   /// </summary>
-	   /// <returns> string 1-Wire path as string </returns>
-	   public override string ToString()
-	   {
-		  string st = "";
-		  OWPathElement element;
-		  OneWireContainer owc;
+                // append 'directory' name
+                st += owc.AddressAsString + "_" + element.Channel + "/";
+            }
 
-		  // append 'drive'
-		  try
-		  {
-			 st = adapter.AdapterName + "_" + adapter.PortName + "/";
-		  }
-		  catch (OneWireException)
-		  {
-			 st = adapter.AdapterName + "/";
-		  }
+            return st;
+        }
 
-		  for (int i = 0; i < elements.Count; i++)
-		  {
-			 element = (OWPathElement) elements[i];
-			 owc = element.Container;
+        /// <summary>
+        /// Open this 1-Wire path so that a remote device can be accessed.
+        /// </summary>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error such as
+        ///         no device present or a CRC read from the device is incorrect.  This could be
+        ///         caused by a physical interruption in the 1-Wire Network due to
+        ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
+        /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
+        ///         adapter. </exception>
+        public virtual void open()
+        {
+            OWPathElement path_element;
+            SwitchContainer sw;
+            byte[] sw_state;
 
-			 // append 'directory' name
-			 st += owc.AddressAsString + "_" + element.Channel + "/";
-		  }
+            // enumerature through elements in path
+            for (int i = 0; i < elements.Count; i++)
+            {
+                // cast the enum as a OWPathElement
+                path_element = (OWPathElement)elements[i];
 
-		  return st;
-	   }
+                // get the switch
+                sw = (SwitchContainer)path_element.Container;
 
-	   /// <summary>
-	   /// Open this 1-Wire path so that a remote device can be accessed.
-	   /// </summary>
-	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error such as
-	   ///         no device present or a CRC read from the device is incorrect.  This could be
-	   ///         caused by a physical interruption in the 1-Wire Network due to
-	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
-	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
-	   ///         adapter. </exception>
-	   public virtual void open()
-	   {
-		  OWPathElement path_element;
-		  SwitchContainer sw;
-		  byte[] sw_state;
+                // turn on the elements channel
+                sw_state = sw.readDevice();
 
-		  // enumerature through elements in path
-		  for (int i = 0; i < elements.Count; i++)
-		  {
+                sw.setLatchState(path_element.Channel, true, sw.hasSmartOn(), sw_state);
+                sw.writeDevice(sw_state);
+            }
 
-			 // cast the enum as a OWPathElement
-			 path_element = (OWPathElement) elements[i];
+            // check if not depth in path, do a reset so a resetless search will work
+            if (elements.Count == 0)
+            {
+                adapter.reset();
+            }
+        }
 
-			 // get the switch
-			 sw = (SwitchContainer) path_element.Container;
+        /// <summary>
+        /// Close each element in this 1-Wire path in reverse order.
+        /// </summary>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error such as
+        ///         no device present or a CRC read from the device is incorrect.  This could be
+        ///         caused by a physical interruption in the 1-Wire Network due to
+        ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
+        /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
+        ///         adapter. </exception>
+        public virtual void close()
+        {
+            OWPathElement path_element;
+            SwitchContainer sw;
+            byte[] sw_state;
 
-			 // turn on the elements channel
-			 sw_state = sw.readDevice();
+            // loop through elements in path in reverse order
+            for (int i = elements.Count - 1; i >= 0; i--)
+            {
+                // cast the element as a OWPathElement
+                path_element = (OWPathElement)elements[i];
 
-			 sw.setLatchState(path_element.Channel, true, sw.hasSmartOn(), sw_state);
-			 sw.writeDevice(sw_state);
-		  }
+                // get the switch
+                sw = (SwitchContainer)path_element.Container;
 
-		  // check if not depth in path, do a reset so a resetless search will work
-		  if (elements.Count == 0)
-		  {
-			 adapter.reset();
-		  }
-	   }
-
-	   /// <summary>
-	   /// Close each element in this 1-Wire path in reverse order.
-	   /// </summary>
-	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error such as
-	   ///         no device present or a CRC read from the device is incorrect.  This could be
-	   ///         caused by a physical interruption in the 1-Wire Network due to
-	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
-	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
-	   ///         adapter. </exception>
-	   public virtual void close()
-	   {
-		  OWPathElement path_element;
-		  SwitchContainer sw;
-		  byte[] sw_state;
-
-		  // loop through elements in path in reverse order
-		  for (int i = elements.Count - 1; i >= 0; i--)
-		  {
-
-			 // cast the element as a OWPathElement
-			 path_element = (OWPathElement) elements[i];
-
-			 // get the switch
-			 sw = (SwitchContainer) path_element.Container;
-
-			 // turn off the elements channel
-			 sw_state = sw.readDevice();
-			 sw.setLatchState(path_element.Channel, false, false, sw_state);
-			 sw.writeDevice(sw_state);
-		  }
-	   }
-	}
-
+                // turn off the elements channel
+                sw_state = sw.readDevice();
+                sw.setLatchState(path_element.Channel, false, false, sw_state);
+                sw.writeDevice(sw_state);
+            }
+        }
+    }
 }

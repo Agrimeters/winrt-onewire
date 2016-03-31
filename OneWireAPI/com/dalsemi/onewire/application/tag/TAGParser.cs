@@ -32,7 +32,6 @@ using System.Xml;
 
 namespace com.dalsemi.onewire.application.tag
 {
-
     using com.dalsemi.onewire.adapter;
     using utils;
 
@@ -40,101 +39,97 @@ namespace com.dalsemi.onewire.application.tag
     /// The tag parser parses tagging information.
     /// </summary>
     public class TAGParser
-	{
+    {
+        /// <summary>
+        /// Construct the tag parser.
+        /// </summary>
+        /// <param name="adapter"> What port adapter will serve the devices created. </param>
+        public TAGParser(DSPortAdapter adapter)
+        {
+            handler = new TAGHandler();
 
-	   /// <summary>
-	   /// Construct the tag parser.
-	   /// </summary>
-	   /// <param name="adapter"> What port adapter will serve the devices created. </param>
-	   public TAGParser(DSPortAdapter adapter)
-	   {
-		  handler = new TAGHandler();
-
-		  try
-		  {
-			 handler.Adapter = adapter;
-		  }
-		  catch (System.Exception e)
-		  {
-			 Debug.WriteLine(e);
-		  }
-	   }
-
-	   /// <summary>
-	   /// Returns the vector of TaggedDevice objects described in the TAG file.
-	   /// </summary>
-	   /// <param name="in"> The XML document to parse.
-	   /// </param>
-	   /// <returns> Vector of TaggedDevice objects. </returns>
-	   public virtual List<TaggedDevice> parse(Stream inp)
-	   {
-          XmlReaderSettings settings = new XmlReaderSettings() { IgnoreWhitespace = true };
-
-          parser = XmlReader.Create(inp, settings);
-
-          handler.startDocument();
-
-          parser.MoveToContent();
-
-          do
-          {
-              switch (parser.NodeType)
-              {
-                  case XmlNodeType.Element:
-                      handler.startElement(parser.Name, parser);
-                      break;
-                  case XmlNodeType.EndElement:
-                      handler.endElement(parser.Name);
-                      break;
-              }
-
-          } while (parser.Read());
-
-          handler.endDocument();
-
-          return handler.TaggedDeviceList;
-	   }
-
-
-	   /// <summary>
-	   /// Returns the vector of Branch TaggedDevice objects described in the TAG file.
-	   /// The XML should already be parsed before calling this method.
-	   /// </summary>
-	   /// <param name="in"> The XML document to parse.
-	   /// </param>
-	   /// <returns> Vector of Branch TaggedDevice objects. </returns>
-	   public virtual List<TaggedDevice> Branches
-	   {
-		   get
-		   {
-			  return handler.AllBranches;
+            try
+            {
+                handler.Adapter = adapter;
             }
-	   }
+            catch (System.Exception e)
+            {
+                Debug.WriteLine(e);
+            }
+        }
 
-	   /// <summary>
-	   /// Returns the vector of OWPath objects discovered through parsing 
-	   /// the XML file.  The XML file should already be parsed before calling 
-	   /// this method.
-	   /// </summary>
-	   /// <param name="no"> parameters.
-	   /// </param>
-	   /// <returns> Vector of OWPath objects. </returns>
-	   public virtual List<OWPath> OWPaths
-	   {
-		   get
-		   {
-			  return handler.AllBranchPaths;
-		   }
-	   }
+        /// <summary>
+        /// Returns the vector of TaggedDevice objects described in the TAG file.
+        /// </summary>
+        /// <param name="in"> The XML document to parse.
+        /// </param>
+        /// <returns> Vector of TaggedDevice objects. </returns>
+        public virtual List<TaggedDevice> parse(Stream inp)
+        {
+            XmlReaderSettings settings = new XmlReaderSettings() { IgnoreWhitespace = true };
 
+            parser = XmlReader.Create(inp, settings);
 
-       /// <summary>
-       /// Field parser </summary>
-	   private XmlReader parser;
+            handler.startDocument();
 
-	   /// <summary>
-	   /// Field handler </summary>
-	   private TAGHandler handler;
-	}
+            parser.MoveToContent();
 
+            do
+            {
+                switch (parser.NodeType)
+                {
+                    case XmlNodeType.Element:
+                        handler.startElement(parser.Name, parser);
+                        break;
+
+                    case XmlNodeType.EndElement:
+                        handler.endElement(parser.Name);
+                        break;
+                }
+            } while (parser.Read());
+
+            handler.endDocument();
+
+            return handler.TaggedDeviceList;
+        }
+
+        /// <summary>
+        /// Returns the vector of Branch TaggedDevice objects described in the TAG file.
+        /// The XML should already be parsed before calling this method.
+        /// </summary>
+        /// <param name="in"> The XML document to parse.
+        /// </param>
+        /// <returns> Vector of Branch TaggedDevice objects. </returns>
+        public virtual List<TaggedDevice> Branches
+        {
+            get
+            {
+                return handler.AllBranches;
+            }
+        }
+
+        /// <summary>
+        /// Returns the vector of OWPath objects discovered through parsing
+        /// the XML file.  The XML file should already be parsed before calling
+        /// this method.
+        /// </summary>
+        /// <param name="no"> parameters.
+        /// </param>
+        /// <returns> Vector of OWPath objects. </returns>
+        public virtual List<OWPath> OWPaths
+        {
+            get
+            {
+                return handler.AllBranchPaths;
+            }
+        }
+
+        /// <summary>
+        /// Field parser </summary>
+        private XmlReader parser;
+
+        /// <summary>
+        /// Field handler </summary>
+        private TAGHandler handler;
+    }
 }

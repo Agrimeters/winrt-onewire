@@ -66,31 +66,37 @@ namespace com.dalsemi.onewire.logging
         /// <summary>
         /// Storage file to be used to write logs
         /// </summary>
-        StorageFile _storageFile = null;
+        private StorageFile _storageFile = null;
+
         /// <summary>
         /// Name of the current event listener
         /// </summary>
-        string _name;
+        private string _name;
+
         /// <summary>
         /// The format to be used by logging.
         /// </summary>
-        string _format = "{0:yyyy-MM-dd HH\\:mm\\:ss\\:ffff}\tType: {1}\tId: {2}\tMessage: '{3}'";
+        private string _format = "{0:yyyy-MM-dd HH\\:mm\\:ss\\:ffff}\tType: {1}\tId: {2}\tMessage: '{3}'";
+
         /// <summary>
         /// Contains the local cache of the lines
         /// </summary>
-        volatile List<string> _linesCache = new List<string>();
+        private volatile List<string> _linesCache = new List<string>();
+
         /// <summary>
         /// Contains the number of lines that must be written to the log file
         /// </summary>
-        volatile int _linesToProcess;
+        private volatile int _linesToProcess;
+
         /// <summary>
         /// Contains the sync root for the lines cache
         /// </summary>
-        object _syncRoot = new object();
+        private object _syncRoot = new object();
+
         /// <summary>
         /// Contains a delay timer
         /// </summary>
-        ThreadPoolTimer _timer;
+        private ThreadPoolTimer _timer;
 
         /// <summary>
         /// Gets the log file name (without path)
@@ -167,6 +173,7 @@ namespace com.dalsemi.onewire.logging
         {
             get { return _linesToProcess != 0; }
         }
+
         /// <summary>
         /// Waits for the worker to complete
         /// </summary>
@@ -206,13 +213,12 @@ namespace com.dalsemi.onewire.logging
                 if (_timer == null)
                     _timer = ThreadPoolTimer.CreateTimer((source) => DelayedWorker(), new TimeSpan(0, 0, 0, 0, 500));
             }
-
         }
 
         /// <summary>
         /// The worker is writing the lines from the lines cache to the file
         /// </summary>
-        void DelayedWorker()
+        private void DelayedWorker()
         {
             // synchronize access to log lines in cache
             lock (_syncRoot)
@@ -281,7 +287,7 @@ namespace com.dalsemi.onewire.logging
         /// <remarks>
         /// When the log file size is more than 1 MB, the current log file is copied to the BackupLogFileName.
         /// </remarks>
-        void CheckLogFileSize()
+        private void CheckLogFileSize()
         {
             try
             {
@@ -317,7 +323,7 @@ namespace com.dalsemi.onewire.logging
         /// Waits until the status is not "Started"
         /// </summary>
         /// <param name="action">the action</param>
-        void Wait(IAsyncAction action)
+        private void Wait(IAsyncAction action)
         {
             while (action.Status == AsyncStatus.Started)
                 Task.Delay(10).Wait();
@@ -327,7 +333,7 @@ namespace com.dalsemi.onewire.logging
         /// Waits until the status is not "Started"
         /// </summary>
         /// <param name="bufferAction">the action</param>
-        void Wait(IAsyncOperation<Windows.Storage.Streams.IBuffer> bufferAction)
+        private void Wait(IAsyncOperation<Windows.Storage.Streams.IBuffer> bufferAction)
         {
             while (bufferAction.Status == AsyncStatus.Started)
                 Task.Delay(10).Wait();
@@ -337,7 +343,7 @@ namespace com.dalsemi.onewire.logging
         /// Waits until the status is not "Started"
         /// </summary>
         /// <param name="bakFileAction">the action</param>
-        void Wait(IAsyncOperation<StorageFile> bakFileAction)
+        private void Wait(IAsyncOperation<StorageFile> bakFileAction)
         {
             while (bakFileAction.Status == AsyncStatus.Started)
                 Task.Delay(10).Wait();

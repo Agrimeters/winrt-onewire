@@ -24,34 +24,33 @@
  * Branding Policy.
  *---------------------------------------------------------------------------
  */
+
 namespace com.dalsemi.onewire.application.file
 {
+    /// <summary>
+    /// <P>Signals that an attempt to open the file on a 1-Wire device denoted.</P>
+    ///
+    /// <P> This exception will be thrown by the <seealso cref="OWFileInputStream"/> and
+    /// <seealso cref="OWFileOutputStream"/> constructors when a file with the specified
+    /// pathname does not exist on the 1-Wire memory device.</P>
+    /// </summary>
+    public class OWFileNotFoundException : System.Exception
+    {
+        /// <summary>
+        /// Constructs a <code>FileNotFoundException</code> with
+        /// <code>null</code> as its error detail message.
+        /// </summary>
+        public OWFileNotFoundException() : base()
+        {
+        }
 
-	/// <summary>
-	/// <P>Signals that an attempt to open the file on a 1-Wire device denoted.</P>
-	/// 
-	/// <P> This exception will be thrown by the <seealso cref="OWFileInputStream"/> and
-	/// <seealso cref="OWFileOutputStream"/> constructors when a file with the specified
-	/// pathname does not exist on the 1-Wire memory device.</P>
-	/// </summary>
-	public class OWFileNotFoundException : System.Exception
-	{
-
-	   /// <summary>
-	   /// Constructs a <code>FileNotFoundException</code> with
-	   /// <code>null</code> as its error detail message.
-	   /// </summary>
-	   public OWFileNotFoundException() : base()
-	   {
-	   }
-
-	   /// <summary>
-	   /// Constructs a <code>FileNotFoundException</code> with the
-	   /// specified detail message.
-	   /// </summary>
-	   /// <param name="s">   the detail message. </param>
-	   public OWFileNotFoundException(string s) : base(s)
-	   {
-	   }
-	}
+        /// <summary>
+        /// Constructs a <code>FileNotFoundException</code> with the
+        /// specified detail message.
+        /// </summary>
+        /// <param name="s">   the detail message. </param>
+        public OWFileNotFoundException(string s) : base(s)
+        {
+        }
+    }
 }

@@ -27,22 +27,19 @@
 
 namespace com.dalsemi.onewire.application.tag
 {
-
-	public interface TaggedSensor
-	{
-
-	   /// <summary>
-	   /// The readSensor
-	   /// </summary>
-	   /// <returns> result of sensor reading
-	   /// </returns>
-	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error such as 
-	   ///         reading an incorrect CRC from a 1-Wire device.  This could be
-	   ///         caused by a physical interruption in the 1-Wire Network due to 
-	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
-	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire 
-	   ///         adapter </exception>
-	   string readSensor();
-	}
-
+    public interface TaggedSensor
+    {
+        /// <summary>
+        /// The readSensor
+        /// </summary>
+        /// <returns> result of sensor reading
+        /// </returns>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error such as
+        ///         reading an incorrect CRC from a 1-Wire device.  This could be
+        ///         caused by a physical interruption in the 1-Wire Network due to
+        ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
+        /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
+        ///         adapter </exception>
+        string readSensor();
+    }
 }

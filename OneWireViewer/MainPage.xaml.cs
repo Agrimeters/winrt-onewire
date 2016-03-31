@@ -29,14 +29,14 @@ namespace OneWireViewer
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             // Populate the scenario list from the SampleConfiguration.cs file
-            ScenarioControl.ItemsSource = scenarios;
+            DeviceList.ItemsSource = scenarios;
             if (Window.Current.Bounds.Width < 640)
             {
-                ScenarioControl.SelectedIndex = -1;
+                DeviceList.SelectedIndex = -1;
             }
             else
             {
-                ScenarioControl.SelectedIndex = 0;
+                DeviceList.SelectedIndex = 0;
             }
         }
 
@@ -46,13 +46,13 @@ namespace OneWireViewer
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ScenarioControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void DeviceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Clear the status block when navigating scenarios.
             NotifyUser(String.Empty, NotifyType.StatusMessage);
 
-            ListBox scenarioListBox = sender as ListBox;
-            Scenario s = scenarioListBox.SelectedItem as Scenario;
+            ListBox devListBox = sender as ListBox;
+            Scenario s = devListBox.SelectedItem as Scenario;
             if (s != null)
             {
                 ScenarioFrame.Navigate(s.ClassType);

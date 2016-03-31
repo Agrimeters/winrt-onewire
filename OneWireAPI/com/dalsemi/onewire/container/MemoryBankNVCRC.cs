@@ -29,329 +29,321 @@
 
 namespace com.dalsemi.onewire.container
 {
+    using CRC16 = com.dalsemi.onewire.utils.CRC16;
 
-	// imports
-	using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
-	using CRC16 = com.dalsemi.onewire.utils.CRC16;
+    // imports
+    using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
 
+    /// <summary>
+    /// Memory bank class for the NVRAM with build in CRC section of iButtons
+    /// and 1-Wire devices.
+    ///
+    ///  @version    0.00, 28 Aug 2000
+    ///  @author     DS
+    /// </summary>
+    internal class MemoryBankNVCRC : MemoryBankNV
+    {
+        //--------
+        //-------- Static Final Variables
+        //--------
 
-	/// <summary>
-	/// Memory bank class for the NVRAM with build in CRC section of iButtons
-	/// and 1-Wire devices.
-	/// 
-	///  @version    0.00, 28 Aug 2000
-	///  @author     DS
-	/// </summary>
-	internal class MemoryBankNVCRC : MemoryBankNV
-	{
+        /// <summary>
+        /// Write Scratchpad Command
+        /// </summary>
+        public static readonly byte READ_PAGE_WITH_CRC = unchecked((byte)0xA5);
 
-	   //--------
-	   //-------- Static Final Variables
-	   //--------
+        //--------
+        //-------- Variables
+        //--------
 
-	   /// <summary>
-	   /// Write Scratchpad Command
-	   /// </summary>
-	   public static readonly byte READ_PAGE_WITH_CRC = unchecked((byte) 0xA5);
+        /// <summary>
+        /// Flag to indicate if read-continue is possible
+        /// </summary>
+        protected internal bool readContinuePossible;
 
-	   //--------
-	   //-------- Variables
-	   //--------
+        /// <summary>
+        /// Number of extra verify byte in the read CRC page
+        /// </summary>
+        protected internal int numVerifyBytes;
 
-	   /// <summary>
-	   /// Flag to indicate if read-continue is possible
-	   /// </summary>
-	   protected internal bool readContinuePossible;
+        //--------
+        //-------- Constructor
+        //--------
 
-	   /// <summary>
-	   /// Number of extra verify byte in the read CRC page
-	   /// </summary>
-	   protected internal int numVerifyBytes;
+        /// <summary>
+        /// Memory bank contstuctor.  Requires reference to the OneWireContainer
+        /// this memory bank resides on.
+        /// </summary>
+        public MemoryBankNVCRC(OneWireContainer ibutton, ScratchPad scratch) : base(ibutton, scratch)
+        {
+            // initialize attributes of this memory bank
+            pageAutoCRC = true;
+            readContinuePossible = true;
+            numVerifyBytes = 0;
+        }
 
-	   //--------
-	   //-------- Constructor
-	   //--------
+        //--------
+        //-------- I/O methods
+        //--------
 
-	   /// <summary>
-	   /// Memory bank contstuctor.  Requires reference to the OneWireContainer
-	   /// this memory bank resides on.
-	   /// </summary>
-	   public MemoryBankNVCRC(OneWireContainer ibutton, ScratchPad scratch) : base(ibutton, scratch)
-	   {
+        /// <summary>
+        /// Read  page in the current bank with no
+        /// CRC checking (device or data). The resulting data from this API
+        /// may or may not be what is on the 1-Wire device.  It is recommends
+        /// that the data contain some kind of checking (CRC) like in the
+        /// readPagePacket() method or have the 1-Wire device provide the
+        /// CRC as in readPageCRC().  readPageCRC() however is not
+        /// supported on all memory types, see 'hasPageAutoCRC()'.
+        /// If neither is an option then this method could be called more
+        /// then once to at least verify that the same thing is read consistantly.
+        /// </summary>
+        /// <param name="page">          page number to read packet from </param>
+        /// <param name="readContinue">  if 'true' then device read is continued without
+        ///                       re-selecting.  This can only be used if the new
+        ///                       readPage() continious where the last one
+        ///                       led off and it is inside a
+        ///                       'beginExclusive/endExclusive' block. </param>
+        /// <param name="readBuf">       byte array to place read data into </param>
+        /// <param name="offset">        offset into readBuf to place data
+        /// </param>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        public override void readPage(int page, bool readContinue, byte[] readBuf, int offset)
+        {
+            // all other pages
+            readPageCRC(page, readContinue, readBuf, offset, null, extraInfoLength);
+        }
 
-		  // initialize attributes of this memory bank
-		  pageAutoCRC = true;
-		  readContinuePossible = true;
-		  numVerifyBytes = 0;
-	   }
+        /// <summary>
+        /// Read  page with extra information in the current bank with no
+        /// CRC checking (device or data). The resulting data from this API
+        /// may or may not be what is on the 1-Wire device.  It is recommends
+        /// that the data contain some kind of checking (CRC) like in the
+        /// readPagePacket() method or have the 1-Wire device provide the
+        /// CRC as in readPageCRC().  readPageCRC() however is not
+        /// supported on all memory types, see 'hasPageAutoCRC()'.
+        /// If neither is an option then this method could be called more
+        /// then once to at least verify that the same thing is read consistantly.
+        /// See the method 'hasExtraInfo()' for a description of the optional
+        /// extra information some devices have.
+        /// </summary>
+        /// <param name="page">          page number to read packet from </param>
+        /// <param name="readContinue">  if 'true' then device read is continued without
+        ///                       re-selecting.  This can only be used if the new
+        ///                       readPage() continious where the last one
+        ///                       led off and it is inside a
+        ///                       'beginExclusive/endExclusive' block. </param>
+        /// <param name="readBuf">       byte array to place read data into </param>
+        /// <param name="offset">        offset into readBuf to place data </param>
+        /// <param name="extraInfo">     byte array to put extra info read into
+        /// </param>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        public override void readPage(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
+        {
+            // check if current bank is not scratchpad bank, or not page 0
+            if (!this.extraInfo)
+            {
+                throw new OneWireException("Read extra information not supported on this memory bank");
+            }
 
-	   //--------
-	   //-------- I/O methods
-	   //--------
+            readPageCRC(page, readContinue, readBuf, offset, extraInfo, extraInfoLength);
+        }
 
-	   /// <summary>
-	   /// Read  page in the current bank with no
-	   /// CRC checking (device or data). The resulting data from this API
-	   /// may or may not be what is on the 1-Wire device.  It is recommends
-	   /// that the data contain some kind of checking (CRC) like in the
-	   /// readPagePacket() method or have the 1-Wire device provide the
-	   /// CRC as in readPageCRC().  readPageCRC() however is not
-	   /// supported on all memory types, see 'hasPageAutoCRC()'.
-	   /// If neither is an option then this method could be called more
-	   /// then once to at least verify that the same thing is read consistantly.
-	   /// </summary>
-	   /// <param name="page">          page number to read packet from </param>
-	   /// <param name="readContinue">  if 'true' then device read is continued without
-	   ///                       re-selecting.  This can only be used if the new
-	   ///                       readPage() continious where the last one
-	   ///                       led off and it is inside a
-	   ///                       'beginExclusive/endExclusive' block. </param>
-	   /// <param name="readBuf">       byte array to place read data into </param>
-	   /// <param name="offset">        offset into readBuf to place data
-	   /// </param>
-	   /// <exception cref="OneWireIOException"> </exception>
-	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPage(int page, bool readContinue, byte[] readBuf, int offset)
-	   {
+        /// <summary>
+        /// Read a Universal Data Packet and extra information.  See the
+        /// method 'readPagePacket()' for a description of the packet structure.
+        /// See the method 'hasExtraInfo()' for a description of the optional
+        /// extra information some devices have.
+        /// </summary>
+        /// <param name="page">          page number to read packet from </param>
+        /// <param name="readContinue">  if 'true' then device read is continued without
+        ///                       re-selecting.  This can only be used if the new
+        ///                       readPagePacket() continious where the last one
+        ///                       stopped and it is inside a
+        ///                       'beginExclusive/endExclusive' block. </param>
+        /// <param name="readBuf">       byte array to put data read. Must have at least
+        ///                       'getMaxPacketDataLength()' elements. </param>
+        /// <param name="offset">        offset into readBuf to place data </param>
+        /// <param name="extraInfo">     byte array to put extra info read into
+        /// </param>
+        /// <returns>  number of data bytes written to readBuf at the offset.
+        /// </returns>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        public override int readPagePacket(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
+        {
+            byte[] raw_buf = new byte[pageLength];
 
-		  // all other pages
-		  readPageCRC(page, readContinue, readBuf, offset, null, extraInfoLength);
-	   }
+            // read entire page with read page CRC
+            readPageCRC(page, readContinue, raw_buf, 0, extraInfo, extraInfoLength);
 
-	   /// <summary>
-	   /// Read  page with extra information in the current bank with no
-	   /// CRC checking (device or data). The resulting data from this API
-	   /// may or may not be what is on the 1-Wire device.  It is recommends
-	   /// that the data contain some kind of checking (CRC) like in the
-	   /// readPagePacket() method or have the 1-Wire device provide the
-	   /// CRC as in readPageCRC().  readPageCRC() however is not
-	   /// supported on all memory types, see 'hasPageAutoCRC()'.
-	   /// If neither is an option then this method could be called more
-	   /// then once to at least verify that the same thing is read consistantly.
-	   /// See the method 'hasExtraInfo()' for a description of the optional
-	   /// extra information some devices have.
-	   /// </summary>
-	   /// <param name="page">          page number to read packet from </param>
-	   /// <param name="readContinue">  if 'true' then device read is continued without
-	   ///                       re-selecting.  This can only be used if the new
-	   ///                       readPage() continious where the last one
-	   ///                       led off and it is inside a
-	   ///                       'beginExclusive/endExclusive' block. </param>
-	   /// <param name="readBuf">       byte array to place read data into </param>
-	   /// <param name="offset">        offset into readBuf to place data </param>
-	   /// <param name="extraInfo">     byte array to put extra info read into
-	   /// </param>
-	   /// <exception cref="OneWireIOException"> </exception>
-	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPage(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
-	   {
+            // check if length is realistic
+            if (raw_buf[0] > maxPacketDataLength)
+            {
+                sp.forceVerify();
 
-		  // check if current bank is not scratchpad bank, or not page 0
-		  if (!this.extraInfo)
-		  {
-			 throw new OneWireException("Read extra information not supported on this memory bank");
-		  }
+                throw new OneWireIOException("Invalid length in packet");
+            }
 
-		  readPageCRC(page, readContinue, readBuf, offset, extraInfo, extraInfoLength);
-	   }
+            // verify the CRC is correct
+            int abs_page = (startPhysicalAddress / pageLength) + page;
+            if (CRC16.compute(raw_buf, 0, raw_buf[0] + 3, abs_page) == 0x0000B001)
+            {
+                // extract the data out of the packet
+                Array.Copy(raw_buf, 1, readBuf, offset, raw_buf[0]);
 
-	   /// <summary>
-	   /// Read a Universal Data Packet and extra information.  See the
-	   /// method 'readPagePacket()' for a description of the packet structure.
-	   /// See the method 'hasExtraInfo()' for a description of the optional
-	   /// extra information some devices have.
-	   /// </summary>
-	   /// <param name="page">          page number to read packet from </param>
-	   /// <param name="readContinue">  if 'true' then device read is continued without
-	   ///                       re-selecting.  This can only be used if the new
-	   ///                       readPagePacket() continious where the last one
-	   ///                       stopped and it is inside a
-	   ///                       'beginExclusive/endExclusive' block. </param>
-	   /// <param name="readBuf">       byte array to put data read. Must have at least
-	   ///                       'getMaxPacketDataLength()' elements. </param>
-	   /// <param name="offset">        offset into readBuf to place data </param>
-	   /// <param name="extraInfo">     byte array to put extra info read into
-	   /// </param>
-	   /// <returns>  number of data bytes written to readBuf at the offset.
-	   /// </returns>
-	   /// <exception cref="OneWireIOException"> </exception>
-	   /// <exception cref="OneWireException"> </exception>
-	   public override int readPagePacket(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
-	   {
-		  byte[] raw_buf = new byte [pageLength];
+                // return the length
+                return raw_buf[0];
+            }
+            else
+            {
+                sp.forceVerify();
 
-		  // read entire page with read page CRC
-		  readPageCRC(page, readContinue, raw_buf, 0, extraInfo, extraInfoLength);
+                throw new OneWireIOException("Invalid CRC16 in packet read");
+            }
+        }
 
-		  // check if length is realistic
-		  if (raw_buf [0] > maxPacketDataLength)
-		  {
-			 sp.forceVerify();
+        /// <summary>
+        /// Read a complete memory page with CRC verification provided by the
+        /// device.  Not supported by all devices.  See the method
+        /// 'hasPageAutoCRC()'.
+        /// </summary>
+        /// <param name="page">          page number to read </param>
+        /// <param name="readContinue">  if 'true' then device read is continued without
+        ///                       re-selecting.  This can only be used if the new
+        ///                       readPagePacket() continious where the last one
+        ///                       stopped and it is inside a
+        ///                       'beginExclusive/endExclusive' block. </param>
+        /// <param name="readBuf">       byte array to put data read. Must have at least
+        ///                       'getMaxPacketDataLength()' elements. </param>
+        /// <param name="offset">        offset into readBuf to place data
+        /// </param>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset)
+        {
+            readPageCRC(page, readContinue, readBuf, offset, null, extraInfoLength);
+        }
 
-			 throw new OneWireIOException("Invalid length in packet");
-		  }
+        /// <summary>
+        /// Read a complete memory page with CRC verification provided by the
+        /// device with extra information.  Not supported by all devices.
+        /// See the method 'hasPageAutoCRC()'.
+        /// See the method 'hasExtraInfo()' for a description of the optional
+        /// extra information.
+        /// </summary>
+        /// <param name="page">          page number to read </param>
+        /// <param name="readContinue">  if 'true' then device read is continued without
+        ///                       re-selecting.  This can only be used if the new
+        ///                       readPagePacket() continious where the last one
+        ///                       stopped and it is inside a
+        ///                       'beginExclusive/endExclusive' block. </param>
+        /// <param name="readBuf">       byte array to put data read. Must have at least
+        ///                       'getMaxPacketDataLength()' elements. </param>
+        /// <param name="offset">        offset into readBuf to place data </param>
+        /// <param name="extraInfo">     byte array to put extra info read into
+        /// </param>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
+        {
+            readPageCRC(page, readContinue, readBuf, offset, extraInfo, extraInfoLength);
+        }
 
-		  // verify the CRC is correct
-		  int abs_page = (startPhysicalAddress / pageLength) + page;
-		  if (CRC16.compute(raw_buf, 0, raw_buf [0] + 3, abs_page) == 0x0000B001)
-		  {
+        /// <summary>
+        /// Read a complete memory page with CRC verification provided by the
+        /// device with extra information.  Not supported by all devices.
+        /// If not extra information available then just call with extraLength=0.
+        /// </summary>
+        /// <param name="page">          page number to read </param>
+        /// <param name="readContinue">  if 'true' then device read is continued without
+        ///                       re-selecting.  This can only be used if the new
+        ///                       readPagePacket() continious where the last one
+        ///                       stopped and it is inside a
+        ///                       'beginExclusive/endExclusive' block. </param>
+        /// <param name="readBuf">       byte array to put data read. Must have at least
+        ///                       'getMaxPacketDataLength()' elements. </param>
+        /// <param name="offset">        offset into readBuf to place data </param>
+        /// <param name="extraInfo">     byte array to put extra info read into </param>
+        /// <param name="extraLength">   length of extra information
+        /// </param>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        protected internal virtual void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo, int extraLength)
+        {
+            int last_crc = 0;
+            byte[] raw_buf;
 
-			 // extract the data out of the packet
-			 Array.Copy(raw_buf, 1, readBuf, offset, raw_buf [0]);
+            // only needs to be implemented if supported by hardware
+            if (!pageAutoCRC)
+            {
+                throw new OneWireException("Read page with CRC not supported in this memory bank");
+            }
 
-			 // return the length
-			 return raw_buf [0];
-		  }
-		  else
-		  {
-			 sp.forceVerify();
+            // attempt to put device at max desired speed
+            if (!readContinue)
+            {
+                sp.checkSpeed();
+            }
 
-			 throw new OneWireIOException("Invalid CRC16 in packet read");
-		  }
-	   }
+            // check if read exceeds memory
+            if (page > numberPages)
+            {
+                throw new OneWireException("Read exceeds memory bank end");
+            }
 
-	   /// <summary>
-	   /// Read a complete memory page with CRC verification provided by the
-	   /// device.  Not supported by all devices.  See the method
-	   /// 'hasPageAutoCRC()'.
-	   /// </summary>
-	   /// <param name="page">          page number to read </param>
-	   /// <param name="readContinue">  if 'true' then device read is continued without
-	   ///                       re-selecting.  This can only be used if the new
-	   ///                       readPagePacket() continious where the last one
-	   ///                       stopped and it is inside a
-	   ///                       'beginExclusive/endExclusive' block. </param>
-	   /// <param name="readBuf">       byte array to put data read. Must have at least
-	   ///                       'getMaxPacketDataLength()' elements. </param>
-	   /// <param name="offset">        offset into readBuf to place data
-	   /// </param>
-	   /// <exception cref="OneWireIOException"> </exception>
-	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset)
-	   {
-		  readPageCRC(page, readContinue, readBuf, offset, null, extraInfoLength);
-	   }
+            // see if need to access the device
+            if (!readContinue || !readContinuePossible)
+            {
+                // select the device
+                if (!ib.adapter.select(ib.address))
+                {
+                    sp.forceVerify();
 
-	   /// <summary>
-	   /// Read a complete memory page with CRC verification provided by the
-	   /// device with extra information.  Not supported by all devices.
-	   /// See the method 'hasPageAutoCRC()'.
-	   /// See the method 'hasExtraInfo()' for a description of the optional
-	   /// extra information.
-	   /// </summary>
-	   /// <param name="page">          page number to read </param>
-	   /// <param name="readContinue">  if 'true' then device read is continued without
-	   ///                       re-selecting.  This can only be used if the new
-	   ///                       readPagePacket() continious where the last one
-	   ///                       stopped and it is inside a
-	   ///                       'beginExclusive/endExclusive' block. </param>
-	   /// <param name="readBuf">       byte array to put data read. Must have at least
-	   ///                       'getMaxPacketDataLength()' elements. </param>
-	   /// <param name="offset">        offset into readBuf to place data </param>
-	   /// <param name="extraInfo">     byte array to put extra info read into
-	   /// </param>
-	   /// <exception cref="OneWireIOException"> </exception>
-	   /// <exception cref="OneWireException"> </exception>
-	   public override void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo)
-	   {
-		  readPageCRC(page, readContinue, readBuf, offset, extraInfo, extraInfoLength);
-	   }
+                    throw new OneWireIOException("Device select failed");
+                }
 
-	   /// <summary>
-	   /// Read a complete memory page with CRC verification provided by the
-	   /// device with extra information.  Not supported by all devices.
-	   /// If not extra information available then just call with extraLength=0.
-	   /// </summary>
-	   /// <param name="page">          page number to read </param>
-	   /// <param name="readContinue">  if 'true' then device read is continued without
-	   ///                       re-selecting.  This can only be used if the new
-	   ///                       readPagePacket() continious where the last one
-	   ///                       stopped and it is inside a
-	   ///                       'beginExclusive/endExclusive' block. </param>
-	   /// <param name="readBuf">       byte array to put data read. Must have at least
-	   ///                       'getMaxPacketDataLength()' elements. </param>
-	   /// <param name="offset">        offset into readBuf to place data </param>
-	   /// <param name="extraInfo">     byte array to put extra info read into </param>
-	   /// <param name="extraLength">   length of extra information
-	   /// </param>
-	   /// <exception cref="OneWireIOException"> </exception>
-	   /// <exception cref="OneWireException"> </exception>
-	   protected internal virtual void readPageCRC(int page, bool readContinue, byte[] readBuf, int offset, byte[] extraInfo, int extraLength)
-	   {
-		  int last_crc = 0;
-		  byte[] raw_buf;
+                // build start reading memory block
+                raw_buf = new byte[3];
+                raw_buf[0] = READ_PAGE_WITH_CRC;
 
-		  // only needs to be implemented if supported by hardware
-		  if (!pageAutoCRC)
-		  {
-			 throw new OneWireException("Read page with CRC not supported in this memory bank");
-		  }
+                int addr = page * pageLength + startPhysicalAddress;
 
-		  // attempt to put device at max desired speed
-		  if (!readContinue)
-		  {
-			 sp.checkSpeed();
-		  }
+                raw_buf[1] = unchecked((byte)(addr & 0xFF));
+                raw_buf[2] = unchecked((byte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
 
-		  // check if read exceeds memory
-		  if (page > numberPages)
-		  {
-			 throw new OneWireException("Read exceeds memory bank end");
-		  }
+                // perform CRC16 on first part
+                last_crc = CRC16.compute(raw_buf, 0, raw_buf.Length, last_crc);
 
-		  // see if need to access the device
-		  if (!readContinue || !readContinuePossible)
-		  {
+                // do the first block for command, TA1, TA2
+                ib.adapter.dataBlock(raw_buf, 0, 3);
+            }
 
-			 // select the device
-			 if (!ib.adapter.select(ib.address))
-			 {
-				sp.forceVerify();
+            // pre-fill with 0xFF
+            raw_buf = new byte[pageLength + extraLength + 2 + numVerifyBytes];
 
-				throw new OneWireIOException("Device select failed");
-			 }
+            Array.Copy(ffBlock, 0, raw_buf, 0, raw_buf.Length);
 
-			 // build start reading memory block
-			 raw_buf = new byte [3];
-			 raw_buf [0] = READ_PAGE_WITH_CRC;
+            // send block to read data + extra info? + crc
+            ib.adapter.dataBlock(raw_buf, 0, raw_buf.Length);
 
-			 int addr = page * pageLength + startPhysicalAddress;
+            // check the CRC
+            if (CRC16.compute(raw_buf, 0, raw_buf.Length - numVerifyBytes, last_crc) != 0x0000B001)
+            {
+                sp.forceVerify();
 
-			 raw_buf [1] = unchecked((byte)(addr & 0xFF));
-			 raw_buf [2] = unchecked((byte)(((int)((uint)(addr & 0xFFFF) >> 8)) & 0xFF));
+                throw new OneWireIOException("Invalid CRC16 read from device");
+            }
 
-			 // perform CRC16 on first part
-			 last_crc = CRC16.compute(raw_buf, 0, raw_buf.Length, last_crc);
+            // extract the page data
+            Array.Copy(raw_buf, 0, readBuf, offset, pageLength);
 
-			 // do the first block for command, TA1, TA2
-			 ib.adapter.dataBlock(raw_buf, 0, 3);
-		  }
-
-		  // pre-fill with 0xFF 
-		  raw_buf = new byte [pageLength + extraLength + 2 + numVerifyBytes];
-
-		  Array.Copy(ffBlock, 0, raw_buf, 0, raw_buf.Length);
-
-		  // send block to read data + extra info? + crc
-		  ib.adapter.dataBlock(raw_buf, 0, raw_buf.Length);
-
-		  // check the CRC
-		  if (CRC16.compute(raw_buf, 0, raw_buf.Length - numVerifyBytes, last_crc) != 0x0000B001)
-		  {
-			 sp.forceVerify();
-
-			 throw new OneWireIOException("Invalid CRC16 read from device");
-		  }
-
-		  // extract the page data
-		  Array.Copy(raw_buf, 0, readBuf, offset, pageLength);
-
-		  // optional extract the extra info
-		  if (extraInfo != null)
-		  {
-			 Array.Copy(raw_buf, pageLength, extraInfo, 0, extraLength);
-		  }
-	   }
-	}
-
+            // optional extract the extra info
+            if (extraInfo != null)
+            {
+                Array.Copy(raw_buf, pageLength, extraInfo, 0, extraLength);
+            }
+        }
+    }
 }

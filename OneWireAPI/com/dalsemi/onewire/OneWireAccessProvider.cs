@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics;
-using Windows.Storage;
 using System.Reflection;
 using Windows.Devices.Enumeration;
 
@@ -35,13 +33,11 @@ using Windows.Devices.Enumeration;
 // OneWireAccessProvider.java
 namespace com.dalsemi.onewire
 {
-
     // imports
     using com.dalsemi.onewire.adapter;
     using System.Collections.Generic;
     using System.IO;
-    using System.Threading.Tasks;
-    using Windows.Devices.SerialCommunication;
+
     /// <summary>
     /// The OneWireAccessProvider class manages the Dallas Semiconductor
     /// adapter class derivatives of <code>DSPortAdapter</code>.  An enumeration of all
@@ -49,9 +45,9 @@ namespace com.dalsemi.onewire
     /// member function <code>EnumerateAllAdapters</code>.  This enables an
     /// application to be adapter independent. There are also facilities to get a system
     /// appropriate default adapter/port combination.<para>
-    /// 
+    ///
     /// <H3> Usage </H3>
-    /// 
+    ///
     /// <DL>
     /// <DD> <H4> Example 1</H4>
     /// Get an instance of the default 1-Wire adapter.  The adapter will be ready
@@ -60,11 +56,11 @@ namespace com.dalsemi.onewire
     ///  try
     ///  {
     ///     DSPortAdapter adapter = OneWireAccessProvider.getDefaultAdapter();
-    /// 
+    ///
     ///     System.out.println("Adapter: " + adapter.getAdapterName() + " Port: " + adapter.getPortName());
-    /// 
+    ///
     ///     // use the adapter ...
-    /// 
+    ///
     ///  }
     ///  catch(Exception e)
     ///  {
@@ -72,38 +68,38 @@ namespace com.dalsemi.onewire
     ///  }
     /// </CODE> </PRE>
     /// </DL>
-    /// 
+    ///
     /// <DL>
     /// <DD> <H4> Example 2</H4>
     /// Enumerate through the available adapters and ports.
     /// <PRE> <CODE>
     ///  DSPortAdapter adapter;
     ///  String        port;
-    /// 
+    ///
     ///  // get the adapters
     ///  for (Enumeration adapter_enum = OneWireAccessProvider.enumerateAllAdapters();
     ///                                  adapter_enum.hasMoreElements(); )
     ///  {
     ///     // cast the enum as a DSPortAdapter
     ///     adapter = ( DSPortAdapter ) adapter_enum.nextElement();
-    /// 
+    ///
     ///     System.out.print("Adapter: " + adapter.getAdapterName() + " with ports: ");
-    /// 
+    ///
     ///     // get the ports
     ///     for (Enumeration port_enum = adapter.getPortNames();
     ///             port_enum.hasMoreElements(); )
     ///     {
     ///        // cast the enum as a String
     ///        port = ( String ) port_enum.nextElement();
-    /// 
+    ///
     ///        System.out.print(port + " ");
     ///     }
-    /// 
+    ///
     ///     System.out.println();
     ///  }
     /// </CODE> </PRE>
     /// </DL>
-    /// 
+    ///
     /// <DL>
     /// <DD> <H4> Example 3</H4>
     /// Display the default adapter name and port without getting an instance of the adapter.
@@ -114,36 +110,37 @@ namespace com.dalsemi.onewire
     ///                      OneWireAccessProvider.getProperty("onewire.port.default"));
     /// </CODE> </PRE>
     /// </DL>
-    /// 
+    ///
     /// </para>
     /// </summary>
     /// <seealso cref= com.dalsemi.onewire.adapter.DSPortAdapter
-    /// 
+    ///
     /// @version    0.00, 30 August 2000
     /// @author     DS </seealso>
     public class OneWireAccessProvider
-	{
+    {
+        /// <summary>
+        /// Smart default port
+        /// </summary>
+        //NeverUsed private static string smartDefaultPort = "COM1";
 
-	   /// <summary>
-	   /// Smart default port
-	   /// </summary>
-	   //NeverUsed private static string smartDefaultPort = "COM1";
+        /// <summary>
+        /// Override adapter variables
+        /// </summary>
+        private static bool useOverrideAdapter = false;
 
-	   /// <summary>
-	   /// Override adapter variables
-	   /// </summary>
-	   private static bool useOverrideAdapter = false;
-	   private static DSPortAdapter overrideAdapter = null;
+        private static DSPortAdapter overrideAdapter = null;
 
-	   /// <summary>
-	   /// System Version String
-	   /// </summary>
-	   private const string owapi_version = "1.10";
+        /// <summary>
+        /// System Version String
+        /// </summary>
+        private const string owapi_version = "1.10";
 
         /// <summary>
         /// Local filesystem property file
         /// </summary>
         private static Properties onewire_properties = null;
+
         /// <summary>
         /// Flag used to check for onewire.properties file once
         /// </summary>
@@ -153,222 +150,221 @@ namespace com.dalsemi.onewire
         /// Local resource property table
         /// </summary>
         private static Properties onewire_defaults = null;
+
         /// <summary>
         /// Flag used to check for onewire_properties resource fule once
         /// </summary>
         private static bool onewire_defaults_present = true;
 
-
         /// <summary>
         /// Don't allow anyone to instantiate.
         /// </summary>
         private OneWireAccessProvider()
-	   {
-	   }
+        {
+        }
 
-	   /// <summary>
-	   /// Returns a version string, representing the release number on official releases,
-	   /// or release number and release date on incrememental releases.
-	   /// </summary>
-	   /// <returns> Current OneWireAPI version </returns>
-	   public static string Version
-	   {
-		   get
-		   {
-			  return owapi_version;
-		   }
-	   }
+        /// <summary>
+        /// Returns a version string, representing the release number on official releases,
+        /// or release number and release date on incrememental releases.
+        /// </summary>
+        /// <returns> Current OneWireAPI version </returns>
+        public static string Version
+        {
+            get
+            {
+                return owapi_version;
+            }
+        }
 
-	   /// <summary>
-	   /// Main method returns current version info, and default adapter setting.
-	   /// </summary>
-	   /// <param name="args"> cmd-line arguments, ignored for now. </param>
-	   public static void Main(string[] args)
-	   {
-		  Debug.WriteLine("1-Wire API for C# (WinRT), v" + owapi_version);
-		  Debug.WriteLine("Copyright (C) 1999-2006 Dallas Semiconductor Corporation, All Rights Reserved.");
-          Debug.WriteLine("");
-		  Debug.WriteLine("Default Adapter: " + getProperty("onewire.adapter.default"));
-		  Debug.WriteLine("   Default Port: " + getProperty("onewire.port.default"));
-		  Debug.WriteLine("");
-		  Debug.WriteLine("Download latest API and examples from:");
-		  Debug.WriteLine("http://www.maxim-ic.com/products/ibutton/software/1wire/1wire_api.cfm");
-		  Debug.WriteLine("");
-	   }
+        /// <summary>
+        /// Main method returns current version info, and default adapter setting.
+        /// </summary>
+        /// <param name="args"> cmd-line arguments, ignored for now. </param>
+        public static void Main(string[] args)
+        {
+            Debug.WriteLine("1-Wire API for C# (WinRT), v" + owapi_version);
+            Debug.WriteLine("Copyright (C) 1999-2006 Dallas Semiconductor Corporation, All Rights Reserved.");
+            Debug.WriteLine("");
+            Debug.WriteLine("Default Adapter: " + getProperty("onewire.adapter.default"));
+            Debug.WriteLine("   Default Port: " + getProperty("onewire.port.default"));
+            Debug.WriteLine("");
+            Debug.WriteLine("Download latest API and examples from:");
+            Debug.WriteLine("http://www.maxim-ic.com/products/ibutton/software/1wire/1wire_api.cfm");
+            Debug.WriteLine("");
+        }
 
-	   /// <summary>
-	   /// Gets an <code>Enumeration</code> of all 1-Wire
-	   /// adapter types supported.  Using this enumeration with the port enumeration for
-	   /// each adapter, a search can be done to find all available hardware adapters.
-	   /// </summary>
-	   /// <returns>  <code>Enumeration</code> of <code>DSPortAdapters</code> in the system </returns>
-	   public static IEnumerator enumerateAllAdapters()
-	   {
-		  List<DSPortAdapter> adapter_vector = new List<DSPortAdapter>(3);
-		  DSPortAdapter adapter_instance;
-		  bool serial_loaded = false;
-          bool usb_loaded = false;
+        /// <summary>
+        /// Gets an <code>Enumeration</code> of all 1-Wire
+        /// adapter types supported.  Using this enumeration with the port enumeration for
+        /// each adapter, a search can be done to find all available hardware adapters.
+        /// </summary>
+        /// <returns>  <code>Enumeration</code> of <code>DSPortAdapters</code> in the system </returns>
+        public static IEnumerator enumerateAllAdapters()
+        {
+            List<DSPortAdapter> adapter_vector = new List<DSPortAdapter>(3);
+            DSPortAdapter adapter_instance;
+            bool serial_loaded = false;
+            bool usb_loaded = false;
 
-          // check for override
-          if (useOverrideAdapter)
-		  {
-			 adapter_vector.Add(overrideAdapter);
-			 return (adapter_vector.GetEnumerator());
-		  }
+            // check for override
+            if (useOverrideAdapter)
+            {
+                adapter_vector.Add(overrideAdapter);
+                return (adapter_vector.GetEnumerator());
+            }
 
-          // DS2490 - USB
-          try
-          {
-              // add it to the enum
-              adapter_instance = (DSPortAdapter)new UsbAdapter();
+            // DS2490 - USB
+            try
+            {
+                // add it to the enum
+                adapter_instance = (DSPortAdapter)new UsbAdapter();
 
-              // check if any serial ports are available
-              if (adapter_instance.PortNames.MoveNext())
-              {
-                  adapter_vector.Add(adapter_instance);
-                  usb_loaded = true;
-              }
-          }
-          catch (System.Exception)
-          {
-              // DRAIN
-          }
+                // check if any serial ports are available
+                if (adapter_instance.PortNames.MoveNext())
+                {
+                    adapter_vector.Add(adapter_instance);
+                    usb_loaded = true;
+                }
+            }
+            catch (System.Exception)
+            {
+                // DRAIN
+            }
 
-          // DS2480B - Serial
-          try
-          {
-              adapter_instance = (DSPortAdapter)new USerialAdapter();
+            // DS2480B - Serial
+            try
+            {
+                adapter_instance = (DSPortAdapter)new USerialAdapter();
 
-			  // check if any serial ports are available
- 			  if (!adapter_instance.PortNames.MoveNext())
-              {
-			      Debug.WriteLine("Warning: serial communications API not setup properly, no ports in enumeration ");
-				  Debug.WriteLine("Pure-C# DS9097U adapter will not work, not added to adapter enum");
-			  }
-			  else
-			  {
-			      adapter_vector.Add(adapter_instance);
-			      serial_loaded = true;
-			  }
-		  }
-		  catch (System.Exception)
-		  {
-			 // DRAIN
-		  }
+                // check if any serial ports are available
+                if (!adapter_instance.PortNames.MoveNext())
+                {
+                    Debug.WriteLine("Warning: serial communications API not setup properly, no ports in enumeration ");
+                    Debug.WriteLine("Pure-C# DS9097U adapter will not work, not added to adapter enum");
+                }
+                else
+                {
+                    adapter_vector.Add(adapter_instance);
+                    serial_loaded = true;
+                }
+            }
+            catch (System.Exception)
+            {
+                // DRAIN
+            }
 
-		  if ((!usb_loaded) && (!serial_loaded))
-		  {
-		      Debug.WriteLine("");
-			  Debug.WriteLine("Standard drivers for 1-Wire are not found.");
-			  Debug.WriteLine("Please download the latest drivers from http://www.ibutton.com ");
-			  Debug.WriteLine("");
-		  }
+            if ((!usb_loaded) && (!serial_loaded))
+            {
+                Debug.WriteLine("");
+                Debug.WriteLine("Standard drivers for 1-Wire are not found.");
+                Debug.WriteLine("Please download the latest drivers from http://www.ibutton.com ");
+                Debug.WriteLine("");
+            }
 
-          // get the network adapter
-          try
-		  {
-             adapter_instance = (DSPortAdapter)new NetAdapter();
-             adapter_vector.Add(adapter_instance);
-		  }
-		  catch (System.Exception)
-		  {
-			 // DRAIN
-		  }
+            // get the network adapter
+            try
+            {
+                adapter_instance = (DSPortAdapter)new NetAdapter();
+                adapter_vector.Add(adapter_instance);
+            }
+            catch (System.Exception)
+            {
+                // DRAIN
+            }
 
-          // check for no adapters
-          if (adapter_vector.Count == 0)
-		  {
-			 Debug.WriteLine("No 1-Wire adapter classes found");
-		  }
+            // check for no adapters
+            if (adapter_vector.Count == 0)
+            {
+                Debug.WriteLine("No 1-Wire adapter classes found");
+            }
 
-		  return (adapter_vector.GetEnumerator());
-	   }
+            return (adapter_vector.GetEnumerator());
+        }
 
-	   /// <summary>
-	   /// Finds, opens, and verifies the specified adapter on the
-	   /// indicated port.
-	   /// </summary>
-	   /// <param name="adapterName"> string name of the adapter (match to result
-	   ///             of call to getAdapterName() method in DSPortAdapter) </param>
-	   /// <param name="portName"> string name of the port used in the method
-	   ///             selectPort() in DSPortAdapter
-	   /// </param>
-	   /// <returns>  <code>DSPortAdapter</code> if adapter present
-	   /// </returns>
-	   /// <exception cref="OneWireIOException"> when communcation with the adapter fails </exception>
-	   /// <exception cref="OneWireException"> when the port or adapter not present </exception>
-	   public static DSPortAdapter getAdapter(string adapterName, string portName)
-	   {
-		  DSPortAdapter adapter , found_adapter = null;
+        /// <summary>
+        /// Finds, opens, and verifies the specified adapter on the
+        /// indicated port.
+        /// </summary>
+        /// <param name="adapterName"> string name of the adapter (match to result
+        ///             of call to getAdapterName() method in DSPortAdapter) </param>
+        /// <param name="portName"> string name of the port used in the method
+        ///             selectPort() in DSPortAdapter
+        /// </param>
+        /// <returns>  <code>DSPortAdapter</code> if adapter present
+        /// </returns>
+        /// <exception cref="OneWireIOException"> when communcation with the adapter fails </exception>
+        /// <exception cref="OneWireException"> when the port or adapter not present </exception>
+        public static DSPortAdapter getAdapter(string adapterName, string portName)
+        {
+            DSPortAdapter adapter, found_adapter = null;
 
-		  // check for override
-		  if (useOverrideAdapter)
-		  {
-			 return overrideAdapter;
-		  }
+            // check for override
+            if (useOverrideAdapter)
+            {
+                return overrideAdapter;
+            }
 
-		  // enumerature through available adapters to find the correct one
-		  for (System.Collections.IEnumerator adapter_enum = enumerateAllAdapters(); adapter_enum.MoveNext();)
-		  {
-			 // cast the enum as a DSPortAdapter
-			 adapter = (DSPortAdapter) adapter_enum.Current;
-             
-			 // see if this is the type of adapter we want
-			 if ((found_adapter != null) || (!adapter.AdapterName.Equals(adapterName)))
-			 {
-				// not this adapter, then just cleanup
-				try
-				{
-				   adapter.freePort();
-				}
-				catch (System.Exception)
-				{
-				   // DRAIN
-				}
-				continue;
-			 }
+            // enumerature through available adapters to find the correct one
+            for (System.Collections.IEnumerator adapter_enum = enumerateAllAdapters(); adapter_enum.MoveNext();)
+            {
+                // cast the enum as a DSPortAdapter
+                adapter = (DSPortAdapter)adapter_enum.Current;
 
-			 // attempt to open and verify the adapter
-			 if (adapter.selectPort(portName))
-			 {
-				adapter.beginExclusive(true);
+                // see if this is the type of adapter we want
+                if ((found_adapter != null) || (!adapter.AdapterName.Equals(adapterName)))
+                {
+                    // not this adapter, then just cleanup
+                    try
+                    {
+                        adapter.freePort();
+                    }
+                    catch (System.Exception)
+                    {
+                        // DRAIN
+                    }
+                    continue;
+                }
 
-				try
-				{
-				   // check for the adapter
-				   if (adapter.adapterDetected())
-				   {
-					  found_adapter = adapter;
-				   }
-				   else
-				   {
+                // attempt to open and verify the adapter
+                if (adapter.selectPort(portName))
+                {
+                    adapter.beginExclusive(true);
 
-					  // close the port just opened
-					  adapter.freePort();
+                    try
+                    {
+                        // check for the adapter
+                        if (adapter.adapterDetected())
+                        {
+                            found_adapter = adapter;
+                        }
+                        else
+                        {
+                            // close the port just opened
+                            adapter.freePort();
 
-					  throw new OneWireException("Port found \"" + portName + "\" but Adapter \"" + adapterName + "\" not detected");
-				   }
-				}
-				finally
-				{
-				   adapter.endExclusive();
-				}
-			 }
-			 else
-			 {
-				throw new OneWireException("Specified port \"" + portName + "\" could not be selected for adapter \"" + adapterName + "\"");
-			 }
-		  }
+                            throw new OneWireException("Port found \"" + portName + "\" but Adapter \"" + adapterName + "\" not detected");
+                        }
+                    }
+                    finally
+                    {
+                        adapter.endExclusive();
+                    }
+                }
+                else
+                {
+                    throw new OneWireException("Specified port \"" + portName + "\" could not be selected for adapter \"" + adapterName + "\"");
+                }
+            }
 
-		  // if adapter found then return it
-		  if (found_adapter != null)
-		  {
-			 return found_adapter;
-		  }
+            // if adapter found then return it
+            if (found_adapter != null)
+            {
+                return found_adapter;
+            }
 
-		  // adapter by that name not found
-		  throw new OneWireException("Specified adapter name \"" + adapterName + "\" is not known");
-	   }
+            // adapter by that name not found
+            throw new OneWireException("Specified adapter name \"" + adapterName + "\" is not known");
+        }
 
         /// <summary>
         /// Finds, opens, and verifies the default adapter and
@@ -389,7 +385,7 @@ namespace com.dalsemi.onewire
         ///      <li> TINI, TINIExternalAdapter on port serial1
         ///      </ul>
         /// </ul>
-        /// 
+        ///
         /// </para>
         /// </summary>
         /// <returns>  <code>DSPortAdapter</code> if default adapter present
@@ -397,26 +393,26 @@ namespace com.dalsemi.onewire
         /// <exception cref="OneWireIOException"> when communcation with the adapter fails </exception>
         /// <exception cref="OneWireException"> when the port or adapter not present </exception>
         public static DSPortAdapter DefaultAdapter
-	   {
-		   get
-		   {
-			  if (useOverrideAdapter)
-			  {
-				  return overrideAdapter;
-			  }
-    
-			  return getAdapter(getProperty("onewire.adapter.default"), getProperty("onewire.port.default"));
-		   }
-	   }
+        {
+            get
+            {
+                if (useOverrideAdapter)
+                {
+                    return overrideAdapter;
+                }
+
+                return getAdapter(getProperty("onewire.adapter.default"), getProperty("onewire.port.default"));
+            }
+        }
 
         private static void loadTable(Dictionary<string, string> table, StreamReader reader)
-        { 
+        {
             while (!reader.EndOfStream)
             {
                 string line = reader.ReadLine();
                 string[] st = line.Split(new char[] { '=' });
 
-                if (st.Length< 2)
+                if (st.Length < 2)
                     continue;
                 else if (st.Length == 2)
                 {
@@ -447,7 +443,7 @@ namespace com.dalsemi.onewire
         /// <li> 'smart' default if property is 'onewire.adapter.default'
         ///      or 'onewire.port.default'
         /// </ul>
-        /// 
+        ///
         /// </para>
         /// </summary>
         /// <param name="propName"> string name of the property to read
@@ -490,7 +486,7 @@ namespace com.dalsemi.onewire
                     {
                         onewire_properties = new Properties();
 
-                        if(onewire_properties.loadLocalFile("onewire.properties"))
+                        if (onewire_properties.loadLocalFile("onewire.properties"))
                         {
                             ret_str = onewire_properties.getProperty(propName);
                         }
@@ -514,7 +510,7 @@ namespace com.dalsemi.onewire
                     {
                         onewire_defaults = new Properties();
                         Assembly asm = typeof(OneWireAccessProvider).GetTypeInfo().Assembly;
-                        if(!onewire_defaults.loadResourceFile(asm, "OneWireAPI.Resources.onewire_properties"))
+                        if (!onewire_defaults.loadResourceFile(asm, "OneWireAPI.Resources.onewire_properties"))
                         {
                             onewire_defaults = null;
                             onewire_defaults_present = false;
@@ -566,26 +562,25 @@ namespace com.dalsemi.onewire
         /// <seealso cref=    #getDefaultAdapter </seealso>
         /// <seealso cref=    #clearUseOverridingAdapter </seealso>
         public static DSPortAdapter UseOverridingAdapter
-	   {
-		   set
-		   {
-				useOverrideAdapter = true;
-				overrideAdapter = value;
-		   }
-	   }
+        {
+            set
+            {
+                useOverrideAdapter = true;
+                overrideAdapter = value;
+            }
+        }
 
-	   /// <summary>
-	   /// Clears the overriding adapter.  The operation of
-	   /// getAdapter and getDefaultAdapter will be returned to normal.
-	   /// </summary>
-	   /// <seealso cref=    #getAdapter </seealso>
-	   /// <seealso cref=    #getDefaultAdapter </seealso>
-	   /// <seealso cref=    #setUseOverridingAdapter </seealso>
-	   public static void clearUseOverridingAdapter()
-	   {
-			useOverrideAdapter = false;
-			overrideAdapter = null;
-	   }
-	}
-
+        /// <summary>
+        /// Clears the overriding adapter.  The operation of
+        /// getAdapter and getDefaultAdapter will be returned to normal.
+        /// </summary>
+        /// <seealso cref=    #getAdapter </seealso>
+        /// <seealso cref=    #getDefaultAdapter </seealso>
+        /// <seealso cref=    #setUseOverridingAdapter </seealso>
+        public static void clearUseOverridingAdapter()
+        {
+            useOverrideAdapter = false;
+            overrideAdapter = null;
+        }
+    }
 }

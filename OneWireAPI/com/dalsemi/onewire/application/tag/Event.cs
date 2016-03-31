@@ -27,64 +27,61 @@
 
 namespace com.dalsemi.onewire.application.tag
 {
-
     using com.dalsemi.onewire.adapter;
-	using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.container;
 
-	/// <summary>
-	/// This class provides a default object for the Event type of a tagged 1-Wire device.
-	/// </summary>
-	public class Event : TaggedDevice, TaggedSensor
-	{
+    /// <summary>
+    /// This class provides a default object for the Event type of a tagged 1-Wire device.
+    /// </summary>
+    public class Event : TaggedDevice, TaggedSensor
+    {
+        /// <summary>
+        /// Creates an object for the device.
+        /// </summary>
+        public Event() : base()
+        {
+        }
 
-	   /// <summary>
-	   /// Creates an object for the device.
-	   /// </summary>
-	   public Event() : base()
-	   {
-	   }
+        /// <summary>
+        /// Creates an object for the device with the supplied address and device type connected
+        /// to the supplied port adapter. </summary>
+        /// <param name="adapter"> The adapter serving the sensor. </param>
+        /// <param name="netAddress"> The 1-Wire network address of the sensor.
+        ///  </param>
+        public Event(DSPortAdapter adapter, string netAddress) : base(adapter, netAddress)
+        {
+        }
 
-	   /// <summary>
-	   /// Creates an object for the device with the supplied address and device type connected
-	   /// to the supplied port adapter. </summary>
-	   /// <param name="adapter"> The adapter serving the sensor. </param>
-	   /// <param name="netAddress"> The 1-Wire network address of the sensor.
-	   ///  </param>
-	   public Event(DSPortAdapter adapter, string netAddress) : base(adapter, netAddress)
-	   {
-	   }
+        /// <summary>
+        /// The readSensor method returns the "max" string if the Sensor (a
+        /// switch) has had activity since last time it was checked for activity.
+        /// @param--none.
+        /// </summary>
+        /// <returns> String  The "max" string associated with this Sensor. </returns>
+        public virtual string readSensor()
+        {
+            string returnString = "";
+            byte[] switchState;
+            SwitchContainer Container;
+            Container = DeviceContainer as SwitchContainer;
 
-	   /// <summary>
-	   /// The readSensor method returns the "max" string if the Sensor (a 
-	   /// switch) has had activity since last time it was checked for activity.
-	   /// @param--none.
-	   /// </summary>
-	   /// <returns> String  The "max" string associated with this Sensor. </returns>
-	   public virtual string readSensor()
-	   {
-		  string returnString = "";
-		  byte[] switchState;
-		  SwitchContainer Container;
-		  Container = DeviceContainer as SwitchContainer;
+            if (Container.hasActivitySensing()) // if there is any activity, read it.
+            {
+                switchState = Container.readDevice();
+                if (Container.getSensedActivity(Channel, switchState))
+                {
+                    returnString = Max;
+                    // for future accurate readings, clear activity.
+                    Container.clearActivity();
+                    switchState = Container.readDevice(); // throw away the reading
+                }
+            }
+            else
+            {
+                returnString = "";
+            }
 
-		  if (Container.hasActivitySensing()) // if there is any activity, read it.
-		  {
-			 switchState = Container.readDevice();
-			 if (Container.getSensedActivity(Channel,switchState))
-			 {
-				returnString = Max;
-				// for future accurate readings, clear activity.
-				Container.clearActivity();
-				switchState = Container.readDevice(); // throw away the reading
-			 }
-		  }
-		  else
-		  {
-			 returnString = "";
-		  }
-
-		  return returnString;
-	   }
-	}
-
+            return returnString;
+        }
+    }
 }

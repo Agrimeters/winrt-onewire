@@ -8,13 +8,7 @@
         accepted.
             </TextBlock>
             <TextBlock Style="{StaticResource BasicTextStyle}" VerticalAlignment="Bottom">Service name:</TextBlock>
-            <TextBox x:Name="ServiceNameForListener" Text="22112"/>
             <TextBlock Style="{StaticResource BasicTextStyle}">Optional settings:</TextBlock>
-            <RadioButton x:Name="BindToAny" Checked="BindToAny_Checked" Unchecked="BindToAny_Unchecked">Bind to any address</RadioButton>
-            <RadioButton x:Name="BindToAddress">Bind to specific address (select from below list of IPv4 or IPv6)</RadioButton>
-            <RadioButton x:Name="BindToAdapter">Bind to adapter (select an adapter based on the GUIDs below)</RadioButton>
-            <ComboBox x:Name="AdapterList" AllowDrop="True" IsEnabled="False"/>
-            <Button x:Name="StartListener" Content="Listen" Click="StartListener_Click"/>
             <!-- Add Storyboards to the visual states below as necessary for supporting the various layouts -->
             <VisualStateManager.VisualStateGroups>
                 <VisualStateGroup>

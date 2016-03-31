@@ -27,66 +27,62 @@
 
 namespace com.dalsemi.onewire.application.tag
 {
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.container;
 
-	using com.dalsemi.onewire.adapter;
-	using com.dalsemi.onewire.container;
+    /// <summary>
+    /// This class provides a default object for the Level type of a tagged 1-Wire device.
+    /// </summary>
+    public class Level : TaggedDevice, TaggedSensor
+    {
+        /// <summary>
+        /// Creates an object for the device.
+        /// </summary>
+        public Level() : base()
+        {
+        }
 
+        /// <summary>
+        /// Creates an object for the device with the supplied address and device type connected
+        /// to the supplied port adapter. </summary>
+        /// <param name="adapter"> The adapter serving the sensor. </param>
+        /// <param name="netAddress"> The 1-Wire network address of the sensor.
+        ///  </param>
+        public Level(DSPortAdapter adapter, string netAddress) : base(adapter, netAddress)
+        {
+        }
 
-	/// <summary>
-	/// This class provides a default object for the Level type of a tagged 1-Wire device.
-	/// </summary>
-	public class Level : TaggedDevice, TaggedSensor
-	{
+        /// <summary>
+        /// The readSensor method returns the <max> or <min> string of the Sensor (in
+        /// this case, a switch).  The elements <max> and <min> represent conducting
+        /// and non-conducting states of the switch, respectively.
+        ///
+        /// @param--none.
+        /// </summary>
+        /// <returns> String  The <max> string is associated with the conducting switch state,
+        ///                 and the <min> string is associated with the non-conducting state
+        ///                 of the 1-Wire switch. </returns>
+        public virtual string readSensor()
+        {
+            string returnString = "";
+            byte[] switchState;
+            int switchChannel = Channel;
+            SwitchContainer Container;
+            Container = DeviceContainer as SwitchContainer;
 
-	   /// <summary>
-	   /// Creates an object for the device.
-	   /// </summary>
-	   public Level() : base()
-	   {
-	   }
-
-	   /// <summary>
-	   /// Creates an object for the device with the supplied address and device type connected
-	   /// to the supplied port adapter. </summary>
-	   /// <param name="adapter"> The adapter serving the sensor. </param>
-	   /// <param name="netAddress"> The 1-Wire network address of the sensor.
-	   ///  </param>
-	   public Level(DSPortAdapter adapter, string netAddress) : base(adapter, netAddress)
-	   {
-	   }
-
-	   /// <summary>
-	   /// The readSensor method returns the <max> or <min> string of the Sensor (in 
-	   /// this case, a switch).  The elements <max> and <min> represent conducting 
-	   /// and non-conducting states of the switch, respectively. 
-	   /// 
-	   /// @param--none.
-	   /// </summary>
-	   /// <returns> String  The <max> string is associated with the conducting switch state,
-	   ///                 and the <min> string is associated with the non-conducting state 
-	   ///                 of the 1-Wire switch. </returns>
-	   public virtual string readSensor()
-	   {
-		  string returnString = "";
-		  byte[] switchState;
-		  int switchChannel = Channel;
-		  SwitchContainer Container;
-		  Container = DeviceContainer as SwitchContainer;
-
-		  if (Container.hasLevelSensing()) // if it can sense levels, read it.
-		  {
-			 switchState = Container.readDevice();
-			 if (Container.getLevel(switchChannel, switchState))
-			 {
-				returnString = Max;
-			 }
-			 else
-			 {
-				returnString = Min;
-			 }
-		  }
-		  return returnString;
-	   }
-	}
-
+            if (Container.hasLevelSensing()) // if it can sense levels, read it.
+            {
+                switchState = Container.readDevice();
+                if (Container.getLevel(switchChannel, switchState))
+                {
+                    returnString = Max;
+                }
+                else
+                {
+                    returnString = Min;
+                }
+            }
+            return returnString;
+        }
+    }
 }

@@ -27,53 +27,50 @@
 
 namespace com.dalsemi.onewire.utils
 {
+    /// <summary>
+    /// Utilities for bit operations on an array.
+    ///
+    /// @version    0.00, 27 August 2000
+    /// @author     DS
+    /// </summary>
+    public class Bit
+    {
+        /// <summary>
+        /// Write the bit state in a byte array.
+        /// </summary>
+        /// <param name="state"> new state of the bit 1, 0 </param>
+        /// <param name="index"> bit index into byte array </param>
+        /// <param name="offset"> byte offset into byte array to start </param>
+        /// <param name="buf"> byte array to manipulate </param>
+        public static void arrayWriteBit(int state, int index, int offset, byte[] buf)
+        {
+            int nbyt = ((int)((uint)index >> 3));
+            int nbit = index - (nbyt << 3);
 
-	/// <summary>
-	/// Utilities for bit operations on an array.
-	/// 
-	/// @version    0.00, 27 August 2000
-	/// @author     DS
-	/// </summary>
-	public class Bit
-	{
+            if (state == 1)
+            {
+                buf[nbyt + offset] |= (byte)(0x01 << nbit);
+            }
+            else
+            {
+                buf[nbyt + offset] &= (byte)(~(0x01 << nbit));
+            }
+        }
 
-	   /// <summary>
-	   /// Write the bit state in a byte array.
-	   /// </summary>
-	   /// <param name="state"> new state of the bit 1, 0 </param>
-	   /// <param name="index"> bit index into byte array </param>
-	   /// <param name="offset"> byte offset into byte array to start </param>
-	   /// <param name="buf"> byte array to manipulate </param>
-	   public static void arrayWriteBit(int state, int index, int offset, byte[] buf)
-	   {
-		  int nbyt = ((int)((uint)index >> 3));
-		  int nbit = index - (nbyt << 3);
+        /// <summary>
+        /// Read a bit state in a byte array.
+        /// </summary>
+        /// <param name="index"> bit index into byte array </param>
+        /// <param name="offset"> byte offset into byte array to start </param>
+        /// <param name="buf"> byte array to read from
+        /// </param>
+        /// <returns> bit state 1 or 0 </returns>
+        public static int arrayReadBit(int index, int offset, byte[] buf)
+        {
+            int nbyt = ((int)((uint)index >> 3));
+            int nbit = index - (nbyt << 3);
 
-		  if (state == 1)
-		  {
-			 buf [nbyt + offset] |= (byte)(0x01 << nbit);
-		  }
-		  else
-		  {
-			 buf [nbyt + offset] &= (byte)(~(0x01 << nbit));
-		  }
-	   }
-
-	   /// <summary>
-	   /// Read a bit state in a byte array.
-	   /// </summary>
-	   /// <param name="index"> bit index into byte array </param>
-	   /// <param name="offset"> byte offset into byte array to start </param>
-	   /// <param name="buf"> byte array to read from
-	   /// </param>
-	   /// <returns> bit state 1 or 0 </returns>
-	   public static int arrayReadBit(int index, int offset, byte[] buf)
-	   {
-		  int nbyt = ((int)((uint)index >> 3));
-		  int nbit = index - (nbyt << 3);
-
-		  return (((int)((uint)buf [nbyt + offset] >> nbit)) & 0x01);
-	   }
-	}
-
+            return (((int)((uint)buf[nbyt + offset] >> nbit)) & 0x01);
+        }
+    }
 }

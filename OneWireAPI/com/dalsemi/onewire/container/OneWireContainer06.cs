@@ -30,215 +30,212 @@ using System.Collections.Generic;
 
 namespace com.dalsemi.onewire.container
 {
+    // imports
+    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
 
-	// imports
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+    /// <summary>
+    /// <P> 1-Wire container for 512 byte memory iButton, DS1993.  This container
+    /// encapsulates the functionality of the iButton family
+    /// type <B>06</B> (hex)</P>
+    ///
+    /// <P> This iButton is primarily used as a read/write portable memory device. </P>
+    ///
+    /// <H3> Features </H3>
+    /// <UL>
+    ///   <LI> 4096 bits (512 bytes) of read/write nonvolatile memory
+    ///   <LI> 256-bit (32-byte) scratchpad ensures integrity of data
+    ///        transfer
+    ///   <LI> Memory partitioned into 256-bit (32-byte) pages for
+    ///        packetizing data
+    ///   <LI> Data integrity assured with strict read/write
+    ///        protocols
+    ///   <LI> Operating temperature range from -40&#176C to
+    ///        +70&#176C
+    ///   <LI> Over 10 years of data retention
+    /// </UL>
+    ///
+    /// <H3> Memory </H3>
+    ///
+    /// <P> The memory can be accessed through the objects that are returned
+    /// from the <seealso cref="#getMemoryBanks() getMemoryBanks"/> method. </P>
+    ///
+    /// The following is a list of the MemoryBank instances that are returned:
+    ///
+    /// <UL>
+    ///   <LI> <B> Scratchpad </B>
+    ///      <UL>
+    ///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>,
+    ///                   <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>
+    ///         <LI> <I> Size </I> 32 starting at physical address 0
+    ///         <LI> <I> Features</I> Read/Write not-general-purpose volatile
+    ///         <LI> <I> Pages</I> 1 pages of length 32 bytes
+    ///         <LI> <I> Extra information for each page</I>  Target address, offset, length 3
+    ///      </UL>
+    ///   <LI> <B> Main Memory </B>
+    ///      <UL>
+    ///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>,
+    ///                  <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>
+    ///         <LI> <I> Size </I> 512 starting at physical address 0
+    ///         <LI> <I> Features</I> Read/Write general-purpose non-volatile
+    ///         <LI> <I> Pages</I> 16 pages of length 32 bytes giving 29 bytes Packet data payload
+    ///      </UL>
+    /// </UL>
+    ///
+    /// <H3> Usage </H3>
+    ///
+    /// <DL>
+    /// <DD> See the usage example in
+    /// <seealso cref="com.dalsemi.onewire.container.OneWireContainer OneWireContainer"/>
+    /// to enumerate the MemoryBanks.
+    /// <DD> See the usage examples in
+    /// <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/> and
+    /// <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>
+    /// for bank specific operations.
+    /// </DL>
+    ///
+    /// <H3> DataSheet </H3>
+    /// <DL>
+    /// <DD><A HREF="http://pdfserv.maxim-ic.com/arpdf/DS1992-DS1994.pdf"> http://pdfserv.maxim-ic.com/arpdf/DS1992-DS1994.pdf</A>
+    /// </DL>
+    /// </summary>
+    /// <seealso cref= com.dalsemi.onewire.container.MemoryBank </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.PagedMemoryBank
+    ///
+    /// @version    0.00, 28 Aug 2000
+    /// @author     DS </seealso>
+    public class OneWireContainer06 : OneWireContainer
+    {
+        //--------
+        //-------- Constructors
+        //--------
 
-	/// <summary>
-	/// <P> 1-Wire container for 512 byte memory iButton, DS1993.  This container
-	/// encapsulates the functionality of the iButton family 
-	/// type <B>06</B> (hex)</P>
-	/// 
-	/// <P> This iButton is primarily used as a read/write portable memory device. </P>
-	/// 
-	/// <H3> Features </H3> 
-	/// <UL>
-	///   <LI> 4096 bits (512 bytes) of read/write nonvolatile memory
-	///   <LI> 256-bit (32-byte) scratchpad ensures integrity of data
-	///        transfer
-	///   <LI> Memory partitioned into 256-bit (32-byte) pages for
-	///        packetizing data
-	///   <LI> Data integrity assured with strict read/write
-	///        protocols
-	///   <LI> Operating temperature range from -40&#176C to
-	///        +70&#176C
-	///   <LI> Over 10 years of data retention
-	/// </UL>
-	/// 
-	/// <H3> Memory </H3> 
-	/// 
-	/// <P> The memory can be accessed through the objects that are returned
-	/// from the <seealso cref="#getMemoryBanks() getMemoryBanks"/> method. </P>
-	/// 
-	/// The following is a list of the MemoryBank instances that are returned: 
-	/// 
-	/// <UL>
-	///   <LI> <B> Scratchpad </B> 
-	///      <UL> 
-	///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>, 
-	///                   <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>
-	///         <LI> <I> Size </I> 32 starting at physical address 0
-	///         <LI> <I> Features</I> Read/Write not-general-purpose volatile
-	///         <LI> <I> Pages</I> 1 pages of length 32 bytes 
-	///         <LI> <I> Extra information for each page</I>  Target address, offset, length 3
-	///      </UL> 
-	///   <LI> <B> Main Memory </B>
-	///      <UL> 
-	///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>, 
-	///                  <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>
-	///         <LI> <I> Size </I> 512 starting at physical address 0
-	///         <LI> <I> Features</I> Read/Write general-purpose non-volatile
-	///         <LI> <I> Pages</I> 16 pages of length 32 bytes giving 29 bytes Packet data payload
-	///      </UL> 
-	/// </UL>
-	/// 
-	/// <H3> Usage </H3> 
-	/// 
-	/// <DL> 
-	/// <DD> See the usage example in 
-	/// <seealso cref="com.dalsemi.onewire.container.OneWireContainer OneWireContainer"/>
-	/// to enumerate the MemoryBanks.
-	/// <DD> See the usage examples in 
-	/// <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/> and
-	/// <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>
-	/// for bank specific operations.
-	/// </DL>
-	/// 
-	/// <H3> DataSheet </H3> 
-	/// <DL>
-	/// <DD><A HREF="http://pdfserv.maxim-ic.com/arpdf/DS1992-DS1994.pdf"> http://pdfserv.maxim-ic.com/arpdf/DS1992-DS1994.pdf</A>
-	/// </DL>
-	/// </summary>
-	/// <seealso cref= com.dalsemi.onewire.container.MemoryBank </seealso>
-	/// <seealso cref= com.dalsemi.onewire.container.PagedMemoryBank
-	/// 
-	/// @version    0.00, 28 Aug 2000
-	/// @author     DS </seealso>
-	public class OneWireContainer06 : OneWireContainer
-	{
+        /// <summary>
+        /// Create an empty container that is not complete until after a call
+        /// to <code>setupContainer</code>. <para>
+        ///
+        /// This is one of the methods to construct a container.  The others are
+        /// through creating a OneWireContainer with parameters.
+        ///
+        /// </para>
+        /// </summary>
+        /// <seealso cref= #setupContainer(com.dalsemi.onewire.adapter.DSPortAdapter,byte[]) super.setupContainer() </seealso>
+        public OneWireContainer06() : base()
+        {
+        }
 
-	   //--------
-	   //-------- Constructors
-	   //--------
+        /// <summary>
+        /// Create a container with the provided adapter instance
+        /// and the address of the iButton or 1-Wire device.<para>
+        ///
+        /// This is one of the methods to construct a container.  The other is
+        /// through creating a OneWireContainer with NO parameters.
+        ///
+        /// </para>
+        /// </summary>
+        /// <param name="sourceAdapter">     adapter instance used to communicate with
+        /// this iButton </param>
+        /// <param name="newAddress">        <seealso cref="com.dalsemi.onewire.utils.Address Address"/>
+        ///                           of this 1-Wire device
+        /// </param>
+        /// <seealso cref= #OneWireContainer06() OneWireContainer06 </seealso>
+        /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
+        public OneWireContainer06(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
+        {
+        }
 
-	   /// <summary>
-	   /// Create an empty container that is not complete until after a call 
-	   /// to <code>setupContainer</code>. <para>
-	   /// 
-	   /// This is one of the methods to construct a container.  The others are
-	   /// through creating a OneWireContainer with parameters.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <seealso cref= #setupContainer(com.dalsemi.onewire.adapter.DSPortAdapter,byte[]) super.setupContainer() </seealso>
-	   public OneWireContainer06() : base()
-	   {
-	   }
+        /// <summary>
+        /// Create a container with the provided adapter instance
+        /// and the address of the iButton or 1-Wire device.<para>
+        ///
+        /// This is one of the methods to construct a container.  The other is
+        /// through creating a OneWireContainer with NO parameters.
+        ///
+        /// </para>
+        /// </summary>
+        /// <param name="sourceAdapter">     adapter instance used to communicate with
+        /// this 1-Wire device </param>
+        /// <param name="newAddress">        <seealso cref="com.dalsemi.onewire.utils.Address Address"/>
+        ///                            of this 1-Wire device
+        /// </param>
+        /// <seealso cref= #OneWireContainer06() OneWireContainer06 </seealso>
+        /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
+        public OneWireContainer06(DSPortAdapter sourceAdapter, long newAddress) : base(sourceAdapter, newAddress)
+        {
+        }
 
-	   /// <summary>
-	   /// Create a container with the provided adapter instance
-	   /// and the address of the iButton or 1-Wire device.<para>
-	   /// 
-	   /// This is one of the methods to construct a container.  The other is
-	   /// through creating a OneWireContainer with NO parameters.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="sourceAdapter">     adapter instance used to communicate with
-	   /// this iButton </param>
-	   /// <param name="newAddress">        <seealso cref="com.dalsemi.onewire.utils.Address Address"/>  
-	   ///                           of this 1-Wire device
-	   /// </param>
-	   /// <seealso cref= #OneWireContainer06() OneWireContainer06 </seealso>
-	   /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
-	   public OneWireContainer06(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
-	   {
-	   }
+        /// <summary>
+        /// Create a container with the provided adapter instance
+        /// and the address of the iButton or 1-Wire device.<para>
+        ///
+        /// This is one of the methods to construct a container.  The other is
+        /// through creating a OneWireContainer with NO parameters.
+        ///
+        /// </para>
+        /// </summary>
+        /// <param name="sourceAdapter">     adapter instance used to communicate with
+        /// this 1-Wire device </param>
+        /// <param name="newAddress">        <seealso cref="com.dalsemi.onewire.utils.Address Address"/>
+        ///                            of this 1-Wire device
+        /// </param>
+        /// <seealso cref= #OneWireContainer06() OneWireContainer06 </seealso>
+        /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
+        public OneWireContainer06(DSPortAdapter sourceAdapter, string newAddress) : base(sourceAdapter, newAddress)
+        {
+        }
 
-	   /// <summary>
-	   /// Create a container with the provided adapter instance
-	   /// and the address of the iButton or 1-Wire device.<para>
-	   /// 
-	   /// This is one of the methods to construct a container.  The other is
-	   /// through creating a OneWireContainer with NO parameters.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="sourceAdapter">     adapter instance used to communicate with
-	   /// this 1-Wire device </param>
-	   /// <param name="newAddress">        <seealso cref="com.dalsemi.onewire.utils.Address Address"/>
-	   ///                            of this 1-Wire device
-	   /// </param>
-	   /// <seealso cref= #OneWireContainer06() OneWireContainer06 </seealso>
-	   /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
-	   public OneWireContainer06(DSPortAdapter sourceAdapter, long newAddress) : base(sourceAdapter, newAddress)
-	   {
-	   }
+        //--------
+        //-------- Methods
+        //--------
 
-	   /// <summary>
-	   /// Create a container with the provided adapter instance
-	   /// and the address of the iButton or 1-Wire device.<para>
-	   /// 
-	   /// This is one of the methods to construct a container.  The other is
-	   /// through creating a OneWireContainer with NO parameters.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="sourceAdapter">     adapter instance used to communicate with
-	   /// this 1-Wire device </param>
-	   /// <param name="newAddress">        <seealso cref="com.dalsemi.onewire.utils.Address Address"/>
-	   ///                            of this 1-Wire device
-	   /// </param>
-	   /// <seealso cref= #OneWireContainer06() OneWireContainer06 </seealso>
-	   /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
-	   public OneWireContainer06(DSPortAdapter sourceAdapter, string newAddress) : base(sourceAdapter, newAddress)
-	   {
-	   }
+        /// <summary>
+        /// Get the Dallas Semiconductor part number of the iButton
+        /// or 1-Wire Device as a string.  For example 'DS1992'.
+        /// </summary>
+        /// <returns> iButton or 1-Wire device name </returns>
+        public override string Name
+        {
+            get
+            {
+                return "DS1993";
+            }
+        }
 
-	   //--------
-	   //-------- Methods
-	   //--------
+        /// <summary>
+        /// Get a short description of the function of this iButton
+        /// or 1-Wire Device type.
+        /// </summary>
+        /// <returns> device description </returns>
+        public override string Description
+        {
+            get
+            {
+                return "4096 bit read/write nonvolatile memory partitioned " + "into sixteen pages of 256 bits each. ";
+            }
+        }
 
-	   /// <summary>
-	   /// Get the Dallas Semiconductor part number of the iButton
-	   /// or 1-Wire Device as a string.  For example 'DS1992'.
-	   /// </summary>
-	   /// <returns> iButton or 1-Wire device name </returns>
-	   public override string Name
-	   {
-		   get
-		   {
-			  return "DS1993";
-		   }
-	   }
+        /// <summary>
+        /// Get an enumeration of memory bank instances that implement one or more
+        /// of the following interfaces:
+        /// <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>,
+        /// <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>,
+        /// and <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>. </summary>
+        /// <returns> <CODE>Enumeration</CODE> of memory banks  </returns>
+        public override IEnumerator MemoryBanks
+        {
+            get
+            {
+                List<object> bank_vector = new List<object>(2);
 
-	   /// <summary>
-	   /// Get a short description of the function of this iButton 
-	   /// or 1-Wire Device type.
-	   /// </summary>
-	   /// <returns> device description </returns>
-	   public override string Description
-	   {
-		   get
-		   {
-			  return "4096 bit read/write nonvolatile memory partitioned " + "into sixteen pages of 256 bits each. ";
-		   }
-	   }
+                // scratchpad
+                MemoryBankScratch scratch = new MemoryBankScratch(this);
 
-	   /// <summary>
-	   /// Get an enumeration of memory bank instances that implement one or more
-	   /// of the following interfaces:
-	   /// <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>, 
-	   /// <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>, 
-	   /// and <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>. </summary>
-	   /// <returns> <CODE>Enumeration</CODE> of memory banks  </returns>
-	   public override IEnumerator MemoryBanks
-	   {
-		   get
-		   {
-			  List<object> bank_vector = new List<object>(2);
-    
-			  // scratchpad
-			  MemoryBankScratch scratch = new MemoryBankScratch(this);
-    
-			  bank_vector.Add(scratch);
-    
-			  // NVRAM
-			  bank_vector.Add(new MemoryBankNV(this, scratch));
-    
-			  return bank_vector.GetEnumerator();
-		   }
-	   }
-	}
+                bank_vector.Add(scratch);
 
+                // NVRAM
+                bank_vector.Add(new MemoryBankNV(this, scratch));
+
+                return bank_vector.GetEnumerator();
+            }
+        }
+    }
 }

@@ -40,10 +40,10 @@ namespace com.dalsemi.onewire.adapter
     /// The USerialAdapter class implememts the DSPortAdapter interface
     /// for a DS2480 based serial adapter such as the DS9097U-009 or
     /// DS9097U-S09. <para>
-    /// 
+    ///
     /// Instances of valid USerialAdapter's are retrieved from methods in
     /// <seealso cref="com.dalsemi.onewire.OneWireAccessProvider OneWireAccessProvider"/>.
-    /// 
+    ///
     /// <P>The DSPortAdapter methods can be organized into the following categories: </P>
     /// <UL>
     ///   <LI> <B> Information </B>
@@ -155,18 +155,17 @@ namespace com.dalsemi.onewire.adapter
     ///        <LI> <seealso cref="#registerOneWireContainerClass(int, Class) registerOneWireContainerClass"/>
     ///     </UL>
     ///  </UL>
-    /// 
+    ///
     /// </para>
     /// </summary>
     /// <seealso cref= com.dalsemi.onewire.OneWireAccessProvider </seealso>
     /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer
-    /// 
+    ///
     ///  @version    0.10, 24 Aug 2001
     ///  @author     DS
     ///  </seealso>
     public class USerialAdapter : DSPortAdapter, IDisposable
     {
-
         //--------
         //-------- Finals
         //--------
@@ -234,6 +233,7 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Flag to indicate have a local begin/end Exclusive use of serial </summary>
         private bool haveLocalUse;
+
         private object syncObject;
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace com.dalsemi.onewire.adapter
 
         /// <summary>
         /// Constructs a DS9097U serial adapter class
-        /// 
+        ///
         /// </summary>
         public USerialAdapter()
         {
@@ -341,7 +341,6 @@ namespace com.dalsemi.onewire.adapter
         /// <exception cref="OneWireException"> If port does not exist </exception>
         public override bool selectPort(string newPortName)
         {
-
             // find the port reference
             serial = SerialService.getSerialService(newPortName);
             //( SerialService ) serailServiceHash.get(newPortName);
@@ -354,7 +353,6 @@ namespace com.dalsemi.onewire.adapter
 
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
@@ -369,7 +367,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -421,7 +418,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -445,7 +441,6 @@ namespace com.dalsemi.onewire.adapter
 
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
                 uAdapterPresent();
@@ -458,7 +453,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -486,14 +480,12 @@ namespace com.dalsemi.onewire.adapter
 
                 try
                 {
-
                     // acquire exclusive use of the port
                     beginLocalExclusive();
 
                     // only check if the port is aquired
                     if (uAdapterPresent())
                     {
-
                         // perform a reset to read the version
                         if (uState.revision == 0)
                         {
@@ -511,7 +503,6 @@ namespace com.dalsemi.onewire.adapter
                 }
                 finally
                 {
-
                     // release local exclusive use of port
                     endLocalExclusive();
                 }
@@ -536,7 +527,6 @@ namespace com.dalsemi.onewire.adapter
         {
             get
             {
-
                 // get a reference to the current oneWire State
                 OneWireState preserved_mstate = owState;
 
@@ -544,14 +534,12 @@ namespace com.dalsemi.onewire.adapter
 
                 try
                 {
-
                     // acquire exclusive use of the port
                     beginLocalExclusive();
 
                     // only check if the port is aquired
                     if (uAdapterPresent())
                     {
-
                         // set the search to find all of the available DS1982's
                         this.setSearchAllDevices();
                         this.targetAllFamilies();
@@ -570,7 +558,6 @@ namespace com.dalsemi.onewire.adapter
                             // select this device
                             if (select(address))
                             {
-
                                 // create a buffer to read the first page
                                 byte[] read_buffer = new byte[37];
                                 int cnt = 0;
@@ -598,11 +585,9 @@ namespace com.dalsemi.onewire.adapter
                                 // check the first CRC
                                 if (CRC8.compute(read_buffer, 3, 1, crc8) == 0)
                                 {
-
                                     // compute the next CRC8 with data from device
                                     if (CRC8.compute(read_buffer, 4, 33, 0) == 0)
                                     {
-
                                         // now loop to see if all data is 0xFF
                                         for (i = 4; i < 36; i++)
                                         {
@@ -629,12 +614,10 @@ namespace com.dalsemi.onewire.adapter
                 }
                 catch (OneWireException)
                 {
-
                     // Drain.
                 }
                 finally
                 {
-
                     // restore the old state
                     owState = preserved_mstate;
 
@@ -711,14 +694,12 @@ namespace com.dalsemi.onewire.adapter
         {
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
                 // only check if the port is aquired
                 if (uAdapterPresent())
                 {
-
                     // perform a reset to read the program available flag
                     if (uState.revision == 0)
                     {
@@ -735,7 +716,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -770,7 +750,6 @@ namespace com.dalsemi.onewire.adapter
         ///         adapter </exception>
         public override bool canDeliverSmartPower()
         {
-
             // regardless of adapter, the class does not support it
             return false;
         }
@@ -804,7 +783,6 @@ namespace com.dalsemi.onewire.adapter
         /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
         public override bool findFirstDevice()
         {
-
             // reset the current search
             owState.searchLastDiscrepancy = 0;
             owState.searchFamilyLastDiscrepancy = 0;
@@ -830,7 +808,6 @@ namespace com.dalsemi.onewire.adapter
 
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
@@ -847,7 +824,6 @@ namespace com.dalsemi.onewire.adapter
                 // check for 'first' and only 1 target
                 if ((owState.searchLastDiscrepancy == 0) && (owState.searchLastDevice == false) && (owState.searchIncludeFamilies.Length == 1))
                 {
-
                     // set the search to find the 1 target first
                     owState.searchLastDiscrepancy = 64;
 
@@ -870,13 +846,11 @@ namespace com.dalsemi.onewire.adapter
                 // loop until the correct type is found or no more devices
                 do
                 {
-
                     // perform a search and keep the result
                     search_result = search(owState);
 
                     if (search_result)
                     {
-
                         // check if not in exclude list
                         bool is_excluded = false;
 
@@ -893,7 +867,6 @@ namespace com.dalsemi.onewire.adapter
                         // if not in exclude list then check for include list
                         if (!is_excluded)
                         {
-
                             // loop through the include list
                             bool is_included = false;
 
@@ -938,7 +911,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -990,14 +962,12 @@ namespace com.dalsemi.onewire.adapter
         {
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
                 // make sure adapter is present
                 if (uAdapterPresent())
                 {
-
                     // check for pending power conditions
                     if (owState.oneWireLevel != LEVEL_NORMAL)
                     {
@@ -1025,7 +995,6 @@ namespace com.dalsemi.onewire.adapter
                     // perform a search
                     if (search(onewire_state))
                     {
-
                         // compare the found device with the desired device
                         for (int i = 0; i < 8; i++)
                         {
@@ -1049,7 +1018,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -1074,14 +1042,12 @@ namespace com.dalsemi.onewire.adapter
         {
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
                 // make sure adapter is present
                 if (uAdapterPresent())
                 {
-
                     // check for pending power conditions
                     if (owState.oneWireLevel != LEVEL_NORMAL)
                     {
@@ -1109,7 +1075,6 @@ namespace com.dalsemi.onewire.adapter
                     // perform a search
                     if (search(onewire_state))
                     {
-
                         // compare the found device with the desired device
                         for (int i = 0; i < 8; i++)
                         {
@@ -1133,7 +1098,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -1193,7 +1157,6 @@ namespace com.dalsemi.onewire.adapter
         /// <seealso cref=    #excludeFamily(byte[]) </seealso>
         public override void targetAllFamilies()
         {
-
             // clear the include and exclude family search lists
             owState.searchIncludeFamilies = new byte[0];
             owState.searchExcludeFamilies = new byte[0];
@@ -1209,7 +1172,6 @@ namespace com.dalsemi.onewire.adapter
         /// <seealso cref=    #targetAllFamilies </seealso>
         public override void targetFamily(int familyID)
         {
-
             // replace include family array with 1 element array
             owState.searchIncludeFamilies = new byte[1];
             owState.searchIncludeFamilies[0] = (byte)familyID;
@@ -1225,7 +1187,6 @@ namespace com.dalsemi.onewire.adapter
         /// <seealso cref=    #targetAllFamilies </seealso>
         public override void targetFamily(byte[] familyID)
         {
-
             // replace include family array with new array
             owState.searchIncludeFamilies = new byte[familyID.Length];
 
@@ -1243,7 +1204,6 @@ namespace com.dalsemi.onewire.adapter
         /// <seealso cref=    #targetAllFamilies </seealso>
         public override void excludeFamily(int familyID)
         {
-
             // replace exclude family array with 1 element array
             owState.searchExcludeFamilies = new byte[1];
             owState.searchExcludeFamilies[0] = (byte)familyID;
@@ -1259,7 +1219,6 @@ namespace com.dalsemi.onewire.adapter
         /// <seealso cref=    #targetAllFamilies </seealso>
         public override void excludeFamily(byte[] familyID)
         {
-
             // replace exclude family array with new array
             owState.searchExcludeFamilies = new byte[familyID.Length];
 
@@ -1279,7 +1238,7 @@ namespace com.dalsemi.onewire.adapter
         /// a delay in the special case that another thread has already been
         /// granted exclusive access and this access has not yet been
         /// relinquished. <para>
-        /// 
+        ///
         /// </para>
         /// </summary>
         /// <param name="blocking"> <code>true</code> if want to block waiting
@@ -1311,7 +1270,6 @@ namespace com.dalsemi.onewire.adapter
         /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
         private void beginLocalExclusive()
         {
-
             // check if there is no such port
             if (serial == null)
             {
@@ -1377,14 +1335,12 @@ namespace com.dalsemi.onewire.adapter
         {
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
                 // make sure adapter is present
                 if (uAdapterPresent())
                 {
-
                     // check for pending power conditions
                     if (owState.oneWireLevel != LEVEL_NORMAL)
                     {
@@ -1402,7 +1358,6 @@ namespace com.dalsemi.onewire.adapter
                     // check if just started power delivery
                     if (owState.levelChangeOnNextBit)
                     {
-
                         // clear the primed condition
                         owState.levelChangeOnNextBit = false;
 
@@ -1430,7 +1385,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -1449,14 +1403,12 @@ namespace com.dalsemi.onewire.adapter
             {
                 try
                 {
-
                     // acquire exclusive use of the port
                     beginLocalExclusive();
 
                     // make sure adapter is present
                     if (uAdapterPresent())
                     {
-
                         // check for pending power conditions
                         if (owState.oneWireLevel != LEVEL_NORMAL)
                         {
@@ -1474,7 +1426,6 @@ namespace com.dalsemi.onewire.adapter
                         // check if just started power delivery
                         if (owState.levelChangeOnNextBit)
                         {
-
                             // clear the primed condition
                             owState.levelChangeOnNextBit = false;
 
@@ -1506,7 +1457,6 @@ namespace com.dalsemi.onewire.adapter
                 }
                 finally
                 {
-
                     // release local exclusive use of port
                     endLocalExclusive();
                 }
@@ -1613,7 +1563,6 @@ namespace com.dalsemi.onewire.adapter
         /// <exception cref="OneWireException"> on a setup error with the 1-Wire adapter </exception>
         public override void getBlock(byte[] arr, int off, int len)
         {
-
             // set block to read 0xFF
             for (int i = off; i < len; i++)
             {
@@ -1642,14 +1591,12 @@ namespace com.dalsemi.onewire.adapter
 
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
                 // make sure adapter is present
                 if (uAdapterPresent())
                 {
-
                     // check for pending power conditions
                     if (owState.oneWireLevel != LEVEL_NORMAL)
                     {
@@ -1702,7 +1649,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -1731,14 +1677,12 @@ namespace com.dalsemi.onewire.adapter
         {
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
                 // make sure adapter is present
                 if (uAdapterPresent())
                 {
-
                     // check for pending power conditions
                     if (owState.oneWireLevel != LEVEL_NORMAL)
                     {
@@ -1777,7 +1721,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -1791,12 +1734,12 @@ namespace com.dalsemi.onewire.adapter
         /// Sets the duration to supply power to the 1-Wire Network.
         /// This method takes a time parameter that indicates the program
         /// pulse length when the method startPowerDelivery().<para>
-        /// 
+        ///
         /// Note: to avoid getting an exception,
         /// use the canDeliverPower() and canDeliverSmartPower()
         /// </para>
         /// method to check it's availability. <para>
-        /// 
+        ///
         /// </para>
         /// </summary>
         /// <param name="timeFactor">
@@ -1833,12 +1776,12 @@ namespace com.dalsemi.onewire.adapter
         /// This method takes a time parameter that indicates whether the
         /// power delivery should be done immediately, or after certain
         /// conditions have been met. <para>
-        /// 
+        ///
         /// Note: to avoid getting an exception,
         /// use the canDeliverPower() and canDeliverSmartPower()
         /// </para>
         /// method to check it's availability. <para>
-        /// 
+        ///
         /// </para>
         /// </summary>
         /// <param name="changeCondition">
@@ -1859,7 +1802,6 @@ namespace com.dalsemi.onewire.adapter
         {
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
@@ -1875,11 +1817,9 @@ namespace com.dalsemi.onewire.adapter
                 }
                 else if (changeCondition == CONDITION_NOW)
                 {
-
                     // make sure adapter is present
                     if (uAdapterPresent())
                     {
-
                         // check for pending power conditions
                         if (owState.oneWireLevel != LEVEL_NORMAL)
                         {
@@ -1927,7 +1867,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -1938,12 +1877,12 @@ namespace com.dalsemi.onewire.adapter
         /// 1-Wire Network.
         /// This method takes a time parameter that indicates the program
         /// pulse length when the method startProgramPulse().<para>
-        /// 
+        ///
         /// Note: to avoid getting an exception,
         /// use the canDeliverPower() method to check it's
         /// </para>
         /// availability. <para>
-        /// 
+        ///
         /// </para>
         /// </summary>
         /// <param name="timeFactor">
@@ -1971,12 +1910,12 @@ namespace com.dalsemi.onewire.adapter
         /// This method takes a time parameter that indicates whether the
         /// power delivery should be done immediately, or after certain
         /// conditions have been met. <para>
-        /// 
+        ///
         /// Note: to avoid getting an exception,
         /// use the canProgram() method to check it's
         /// </para>
         /// availability. <para>
-        /// 
+        ///
         /// </para>
         /// </summary>
         /// <param name="changeCondition">
@@ -1996,7 +1935,6 @@ namespace com.dalsemi.onewire.adapter
         ///         or the adapter does not support this operation </exception>
         public override bool startProgramPulse(int changeCondition)
         {
-
             // check if adapter supports program
             if (!uState.programVoltageAvailable)
             {
@@ -2011,7 +1949,6 @@ namespace com.dalsemi.onewire.adapter
 
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
@@ -2034,7 +1971,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -2052,7 +1988,6 @@ namespace com.dalsemi.onewire.adapter
         {
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
@@ -2068,7 +2003,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -2088,17 +2022,14 @@ namespace com.dalsemi.onewire.adapter
         {
             try
             {
-
                 // acquire exclusive use of the port
                 beginLocalExclusive();
 
                 if (owState.oneWireLevel == LEVEL_POWER_DELIVERY)
                 {
-
                     // make sure adapter is present
                     if (uAdapterPresent())
                     {
-
                         // flush out the com buffer
                         serial.flush();
 
@@ -2145,7 +2076,6 @@ namespace com.dalsemi.onewire.adapter
                 }
                 else if (owState.oneWireLevel == LEVEL_BREAK)
                 {
-
                     // restore power
                     serial.DTR = true;
                     serial.RTS = true;
@@ -2171,7 +2101,6 @@ namespace com.dalsemi.onewire.adapter
             }
             finally
             {
-
                 // release local exclusive use of port
                 endLocalExclusive();
             }
@@ -2184,7 +2113,7 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// This method takes an int representing the new speed of data
         /// transfer on the 1-Wire Network. <para>
-        /// 
+        ///
         /// </para>
         /// </summary>
         /// <param name="speed">
@@ -2208,14 +2137,12 @@ namespace com.dalsemi.onewire.adapter
             {
                 try
                 {
-
                     // acquire exclusive use of the port
                     beginLocalExclusive();
 
                     // check for valid value
                     if ((value == SPEED_REGULAR) || (value == SPEED_OVERDRIVE) || (value == SPEED_FLEX))
                     {
-
                         // change 1-Wire value
                         owState.oneWireSpeed = (byte)value;
 
@@ -2236,7 +2163,6 @@ namespace com.dalsemi.onewire.adapter
                 }
                 finally
                 {
-
                     // release local exclusive use of port
                     endLocalExclusive();
                 }
@@ -2246,7 +2172,6 @@ namespace com.dalsemi.onewire.adapter
                 return owState.oneWireSpeed;
             }
         }
-
 
         //--------
         //-------- Support methods
@@ -2266,7 +2191,6 @@ namespace com.dalsemi.onewire.adapter
             // make sure adapter is present
             if (uAdapterPresent())
             {
-
                 // check for pending power conditions
                 if (owState.oneWireLevel != LEVEL_NORMAL)
                 {
@@ -2393,7 +2317,6 @@ namespace com.dalsemi.onewire.adapter
         {
             set
             {
-
                 // get the desired baud rate for this value
                 int baud = UPacketBuilder.getDesiredBaud(value, owState.oneWireSpeed, maxBaud);
 
@@ -2413,16 +2336,18 @@ namespace com.dalsemi.onewire.adapter
 
                 switch (baud)
                 {
-
                     case 115200:
                         ubaud = UAdapterState.BAUD_115200;
                         break;
+
                     case 57600:
                         ubaud = UAdapterState.BAUD_57600;
                         break;
+
                     case 19200:
                         ubaud = UAdapterState.BAUD_19200;
                         break;
+
                     case 9600:
                     default:
                         ubaud = UAdapterState.BAUD_9600;
@@ -2455,22 +2380,22 @@ namespace com.dalsemi.onewire.adapter
                     serial.readWithTimeout(2);
 
                     //serial.BaudRate = baud;
-//                    Debug.WriteLine("Baud Rate Switched to " + serial.BaudRate);
+                    //                    Debug.WriteLine("Baud Rate Switched to " + serial.BaudRate);
 
                     // delay to let things settle
                     //sleep(5);
                     //serial.flush();
 
                     // set the baud rate
-//                    sleep(5); //solaris hack!!!
-//                    serial.BaudRate = baud;
+                    //                    sleep(5); //solaris hack!!!
+                    //                    serial.BaudRate = baud;
                 }
                 catch (IOException ioe)
                 {
                     throw new OneWireIOException(ioe.ToString());
                 }
 
-//                uState.ubaud = ubaud;
+                //                uState.ubaud = ubaud;
 
                 // delay to let things settle
                 sleep(5);
@@ -2499,7 +2424,7 @@ namespace com.dalsemi.onewire.adapter
                     // check the result
                     if (result_array.Length == 1)
                     {
-                        if (((result_array[baud_offset] & 0xF1) == 0) && (((result_array[baud_offset] & 0x0E)>>1) == uState.ubaud))
+                        if (((result_array[baud_offset] & 0xF1) == 0) && (((result_array[baud_offset] & 0x0E) >> 1) == uState.ubaud))
                         {
                             if (doDebugMessages)
                                 Debug.WriteLine("Success, baud changed and DS2480 is there");
@@ -2556,13 +2481,11 @@ namespace com.dalsemi.onewire.adapter
                 // attempt to verify
                 if (!uVerify())
                 {
-
                     // do a master reset and try again
                     uMasterReset();
 
                     if (!uVerify())
                     {
-
                         // do a power reset and try again
                         uPowerReset();
 
@@ -2641,7 +2564,6 @@ namespace com.dalsemi.onewire.adapter
             // try to aquire the port
             try
             {
-
                 // set the baud rate
                 serial.BaudRate = 9600;
 
@@ -2753,7 +2675,6 @@ namespace com.dalsemi.onewire.adapter
                     // loop to send all of the packets
                     for (IEnumerator packet_enum = tempBuild.Packets; packet_enum.MoveNext();)
                     {
-
                         // get the next packet
                         RawSendPacket pkt = (RawSendPacket)packet_enum.Current;
 
@@ -2791,7 +2712,6 @@ namespace com.dalsemi.onewire.adapter
             }
             catch (IOException e)
             {
-
                 // need to check on adapter
                 adapterPresent = false;
 
@@ -2805,7 +2725,6 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         private void sleep(long msTime)
         {
-
             // provided debug on standard out
             if (doDebugMessages)
             {
@@ -2831,7 +2750,6 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         static USerialAdapter()
         {
-
             /*
             // create a SerialServices instance for each port available and put in hash
             Enumeration        com_enum = CommPortIdentifier.getPortIdentifiers();
@@ -2841,7 +2759,6 @@ namespace com.dalsemi.onewire.adapter
             // loop through all of the serial port elements
             while (com_enum.NextElement())
             {
-
                // get the next com port
                port_id = ( CommPortIdentifier ) com_enum.Current;
 
@@ -2909,8 +2826,8 @@ namespace com.dalsemi.onewire.adapter
             {
                 if (uBuild != null)
                 {
-                   uBuild.Dispose();
-                   uBuild = null;
+                    uBuild.Dispose();
+                    uBuild = null;
                 }
 
                 try
@@ -2923,7 +2840,5 @@ namespace com.dalsemi.onewire.adapter
                 }
             }
         }
-
     }
-
 }

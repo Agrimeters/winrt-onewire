@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Usb;
-using System.Diagnostics;
 using Windows.Foundation;
 using Windows.Storage.Streams;
-using System.Threading;
 
 namespace com.dalsemi.onewire.adapter
-{ 
+{
     /// <summary>
     /// UsbAdapterIo class handles low level IO with USB device
     /// </summary>
@@ -25,6 +22,7 @@ namespace com.dalsemi.onewire.adapter
         /// Flag to enable debug messages
         /// </summary>
         private bool doDebugMessages = true;
+
         /// <summary>
         /// Normal Search, all devices participate </summary>
         private const byte NORMAL_SEARCH_CMD = 0xF0;
@@ -32,38 +30,47 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Conditional Search, only 'alarming' devices participate </summary>
         private const byte ALARM_SEARCH_CMD = 0xEC;
+
         /// <summary>
         /// Object used for lock
         /// </summary>
         private Object syncObject;
+
         /// <summary>
         /// handle of USB Device
         /// </summary>
         public UsbDevice usbDevice { get; private set; }
+
         /// <summary>
         /// Instance ID used to open device
         /// </summary>
         private string deviceId { get; set; }
+
         /// <summary>
         /// USB State
         /// </summary>
         private UsbAdapterState usbState { get; set; }
+
         /// <summary>
         /// OneWire State
         /// </summary>
         private OneWireState owState { get; set; }
+
         /// <summary>
         /// Event used to read interrupt only once
         /// </summary>
         private AutoResetEvent ReadResultWait;
+
         /// <summary>
         /// Pipe index of the pipe we that we registered for. Only valid if registeredInterrupt is true
         /// </summary>
         private UInt32 registeredInterruptPipeIndex;
+
         /// <summary>
         /// Registered Interrupt
         /// </summary>
         private bool registeredInterrupt;
+
         /// <summary>
         /// Interupt Event Handler
         /// </summary>
@@ -103,7 +110,7 @@ namespace com.dalsemi.onewire.adapter
             if (RESULT_SUCCESS != ReadStatus(out DeviceDetected))
                 PrintErrorResult();
 
-//TODO            usbState.PrintState();
+            //TODO            usbState.PrintState();
         }
 
         /// <summary>
@@ -120,7 +127,7 @@ namespace com.dalsemi.onewire.adapter
             if (RESULT_SUCCESS != ReadStatus(out DeviceDetected))
                 PrintErrorResult();
 
-//TODO            usbState.PrintState();
+            //TODO            usbState.PrintState();
             return LastError;
         }
 
@@ -138,7 +145,7 @@ namespace com.dalsemi.onewire.adapter
             if (RESULT_SUCCESS != ReadStatus(out DeviceDetected))
                 PrintErrorResult();
 
-//TODO            usbState.PrintState();
+            //TODO            usbState.PrintState();
             return LastError;
         }
 
@@ -156,7 +163,7 @@ namespace com.dalsemi.onewire.adapter
             if (RESULT_SUCCESS != ReadStatus(out DeviceDetected))
                 PrintErrorResult();
 
-//TODO            usbState.PrintState();
+            //TODO            usbState.PrintState();
             return LastError;
         }
 
@@ -177,7 +184,7 @@ namespace com.dalsemi.onewire.adapter
             if (RESULT_SUCCESS != ReadResult(out DeviceDetected))
                 PrintErrorResult();
 
-//TODO            usbState.PrintState();
+            //TODO            usbState.PrintState();
 
             return LastError;
         }
@@ -205,13 +212,13 @@ namespace com.dalsemi.onewire.adapter
 
         /// <summary>
         /// Pulse
-        /// 
-        /// This command is used to generate a strong pullup to 5V in 
-        /// order to provide extra power for an attached iButton device, 
-        /// e.g., temperature sensor, EEPROM, SHA-1, or crypto iButton. 
+        ///
+        /// This command is used to generate a strong pullup to 5V in
+        /// order to provide extra power for an attached iButton device,
+        /// e.g., temperature sensor, EEPROM, SHA-1, or crypto iButton.
         /// The pulse duration is determined by the value in the mode register.
-        /// 
-        /// The HALT EXECUTION WHEN DONE or HALT EXECUTION WHEN IDLE control 
+        ///
+        /// The HALT EXECUTION WHEN DONE or HALT EXECUTION WHEN IDLE control
         /// commands are used to terminate an infinite duration pulse.
         /// </summary>
         public ErrorResult Comm_Pulse(string description, out bool DeviceDetected)
@@ -232,13 +239,13 @@ namespace com.dalsemi.onewire.adapter
 
         /// <summary>
         /// Pulse
-        /// 
-        /// This command is used to generate a strong pullup to 5V in 
-        /// order to provide extra power for an attached iButton device, 
-        /// e.g., temperature sensor, EEPROM, SHA-1, or crypto iButton. 
+        ///
+        /// This command is used to generate a strong pullup to 5V in
+        /// order to provide extra power for an attached iButton device,
+        /// e.g., temperature sensor, EEPROM, SHA-1, or crypto iButton.
         /// The pulse duration is determined by the value in the mode register.
-        /// 
-        /// The HALT EXECUTION WHEN DONE or HALT EXECUTION WHEN IDLE control 
+        ///
+        /// The HALT EXECUTION WHEN DONE or HALT EXECUTION WHEN IDLE control
         /// commands are used to terminate an infinite duration pulse.
         /// </summary>
         public ErrorResult Comm_SearchAccess(string description, bool alarm_only, ushort num_devices, out bool DeviceDetected)
@@ -247,48 +254,48 @@ namespace com.dalsemi.onewire.adapter
                 Ds2490.CMD_TYPE.COMM,
                 Ds2490.COMM.SEARCH_ACCESS |
                 Ds2490.COMM.IM |  // Execute Immediate
-                Ds2490.COMM.SM |  // searches for and reports ROM Ids without really 
+                Ds2490.COMM.SM |  // searches for and reports ROM Ids without really
                                   //accessing a particular device.
-                Ds2490.COMM.F |   // clears the buffers in case an error occurred 
-                                  // during the execution of the previous command; 
+                Ds2490.COMM.F |   // clears the buffers in case an error occurred
+                                  // during the execution of the previous command;
                                   // requires that ICP = 0 in the previous command.
                 Ds2490.COMM.RTS | // returns the discrepancy information to the host
-                                  // if SM = 1 and there are more devices than could 
+                                  // if SM = 1 and there are more devices than could
                                   // be discovered in the current pass.
                 Ds2490.COMM.NTF,  // return ErrorResult
 
                 (ushort)
-                ((num_devices << 8) |  // the maximum number of devices 
+                ((num_devices << 8) |  // the maximum number of devices
                                        // to be discovered in a single
-                                       // command call.  A value of 0x00 
+                                       // command call.  A value of 0x00
                                        // indicates that all devices on the 1-Wire
                                        // Network are to be discovered.
                 ((alarm_only) ? ALARM_SEARCH_CMD : NORMAL_SEARCH_CMD)),
-                                       // 1-Wire command (Search ROM or 
-                                       // Conditional Search ROM)
+            // 1-Wire command (Search ROM or
+            // Conditional Search ROM)
             "USB Communication: Pulse - " + description);
 
             if (RESULT_SUCCESS != ReadResult(out DeviceDetected))
                 PrintErrorResult();
 
-//TODO            usbState.PrintState();
+            //TODO            usbState.PrintState();
 
             return LastError;
         }
 
-    /// <summary>
-    /// Enable Pulse
-    /// 
-    /// This command is used to enable or disable a 1-Wire strong pullup pulse to 5V.
-    /// One bit position in the parameter byte is used to control the enabled/disabled
-    /// state for the pulse. The pulse is enabled when the respective bit is set to a 1
-    /// and disabled when set to a 0. The DS2490 power-up default state for strong 
-    /// pullup is disabled
-    /// </summary>
-    /// <param name="rail">Pass in Ds2490.ENABLEPULSE_PRGE, or Ds2490.ENABLEPULSE_SPUE</param>
-    /// <param name="description"></param>
-    /// <returns></returns>
-    public ErrorResult Mode_EnablePulse(byte rail, string description, out bool DeviceDetected)
+        /// <summary>
+        /// Enable Pulse
+        ///
+        /// This command is used to enable or disable a 1-Wire strong pullup pulse to 5V.
+        /// One bit position in the parameter byte is used to control the enabled/disabled
+        /// state for the pulse. The pulse is enabled when the respective bit is set to a 1
+        /// and disabled when set to a 0. The DS2490 power-up default state for strong
+        /// pullup is disabled
+        /// </summary>
+        /// <param name="rail">Pass in Ds2490.ENABLEPULSE_PRGE, or Ds2490.ENABLEPULSE_SPUE</param>
+        /// <param name="description"></param>
+        /// <returns></returns>
+        public ErrorResult Mode_EnablePulse(byte rail, string description, out bool DeviceDetected)
         {
             SendCommand(
                 Ds2490.CMD_TYPE.MODE,
@@ -300,7 +307,7 @@ namespace com.dalsemi.onewire.adapter
             if (RESULT_SUCCESS != Status)
                 PrintErrorResult();
 
-//TODO            usbState.PrintState();
+            //TODO            usbState.PrintState();
 
             return LastError;
         }
@@ -451,7 +458,7 @@ namespace com.dalsemi.onewire.adapter
         /// <param name="nResultRegisters"></param>
         public ErrorResult ReadStatus(out bool DeviceDetected)
         {
-            lock(syncObject)
+            lock (syncObject)
             {
                 interruptEventHandler = new TypedEventHandler<UsbInterruptInPipe, UsbInterruptInEventArgs>(this.OnStatusChangeEventOnce);
 
@@ -516,7 +523,7 @@ namespace com.dalsemi.onewire.adapter
 
         /// <summary>
         /// Register for the interrupt that is triggered when the device sends an interrupt to us
-        /// 
+        ///
         /// The DefaultInterface on the the device is the first interface on the device. We navigate to
         /// the InterruptInPipes because that collection contains all the interrupt in pipes for the
         /// selected interface setting.
@@ -613,39 +620,46 @@ namespace com.dalsemi.onewire.adapter
             /// more ROM ID bits during a SEARCH ACCESS command.
             /// </summary>
             NRS = 0x01,
+
             /// <summary>
             /// A value of 1 indicates that a 1-WIRE RESET revealed a short to the 1-Wire
             /// bus or the SET PATH command could not successfully connect a branch due
             /// to a short.
             /// </summary>
             SH = 0x02,
+
             /// <summary>
             /// A value of 1 indicates that a 1-WIRE RESET revealed an Alarming Presence Pulse.
             /// </summary>
             APP = 0x04,
+
             /// <summary>
             /// During a PULSE with TYPE=1 or WRITE EPROM command the 12V programming pulse
             /// not seen on 1-Wire bus
             /// </summary>
             VPP = 0x08,
+
             /// <summary>
             /// A value of 1 indicates an error with one of the following: Error when reading
             /// the confirmation byte with a SET PATH command. There was a difference between
             /// the byte written and then read back with a BYTE I/O command
             /// </summary>
             CMP = 0x10,
+
             /// <summary>
-            /// A value of 1 indicates that a CRC error occurred when executing one of the 
-            /// following commands: WRITE SRAM PAGE, READ CRC PROT PAGE, or READ REDIRECT PAGE W/CRC. 
+            /// A value of 1 indicates that a CRC error occurred when executing one of the
+            /// following commands: WRITE SRAM PAGE, READ CRC PROT PAGE, or READ REDIRECT PAGE W/CRC.
             /// </summary>
             CRC = 0x20,
+
             /// <summary>
-            /// A value of 1 indicates that a READ REDIRECT PAGE WITH/CRC encountered 
+            /// A value of 1 indicates that a READ REDIRECT PAGE WITH/CRC encountered
             /// a page that is redirected.
             /// </summary>
             RDP = 0x40,
+
             /// <summary>
-            /// A value of 1 indicates that a SEARCH ACCESS with SM = 1 ended sooner than 
+            /// A value of 1 indicates that a SEARCH ACCESS with SM = 1 ended sooner than
             /// expected reporting less ROM ID’s than specified in the “number of devices”
             /// parameter.
             /// </summary>

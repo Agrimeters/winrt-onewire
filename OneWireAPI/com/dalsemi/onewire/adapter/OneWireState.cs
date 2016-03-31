@@ -27,175 +27,171 @@
 
 namespace com.dalsemi.onewire.adapter
 {
+    /// <summary>
+    /// 1-Wire Network State contains the current 1-Wire Network state information
+    ///
+    /// @version    0.00, 28 Aug 2000
+    /// @author     DS
+    /// </summary>
+    internal class OneWireState
+    {
+        //--------
+        //-------- Variables
+        //--------
 
-	/// <summary>
-	/// 1-Wire Network State contains the current 1-Wire Network state information
-	/// 
-	/// @version    0.00, 28 Aug 2000
-	/// @author     DS
-	/// </summary>
-	internal class OneWireState
-	{
+        /// <summary>
+        /// This is the current logical speed that the 1-Wire Network is operating at. <para>
+        /// The valid values for this are:
+        /// <ul>
+        /// <li> SPEED_REGULAR
+        /// <li> SPEED_FLEX
+        /// <li> SPEED_OVERDRIVE
+        /// <li> SPEED_HYPERDRIVE
+        /// </ul>
+        /// </para>
+        /// </summary>
+        public byte oneWireSpeed;
 
-	   //--------
-	   //-------- Variables
-	   //--------
+        /// <summary>
+        /// This is the current logical 1-Wire Network pullup level.<para>
+        /// The valid values are:
+        /// <ul>
+        /// <li> LEVEL_NORMAL
+        /// <li> LEVEL_POWER_DELIVERY
+        /// <li> LEVEL_BREAK
+        /// <li> LEVEL_PROGRAM
+        /// </ul>
+        /// </para>
+        /// </summary>
+        public byte oneWireLevel;
 
-	   /// <summary>
-	   /// This is the current logical speed that the 1-Wire Network is operating at. <para>
-	   /// The valid values for this are:
-	   /// <ul>
-	   /// <li> SPEED_REGULAR
-	   /// <li> SPEED_FLEX
-	   /// <li> SPEED_OVERDRIVE
-	   /// <li> SPEED_HYPERDRIVE
-	   /// </ul>
-	   /// </para>
-	   /// </summary>
-	   public byte oneWireSpeed;
+        /// <summary>
+        /// True if programming voltage is available
+        /// </summary>
+        public bool canProgram;
 
-	   /// <summary>
-	   /// This is the current logical 1-Wire Network pullup level.<para>
-	   /// The valid values are:
-	   /// <ul>
-	   /// <li> LEVEL_NORMAL
-	   /// <li> LEVEL_POWER_DELIVERY
-	   /// <li> LEVEL_BREAK
-	   /// <li> LEVEL_PROGRAM
-	   /// </ul>
-	   /// </para>
-	   /// </summary>
-	   public byte oneWireLevel;
+        /// <summary>
+        /// True if a level change is primed to occur on the next bit
+        /// of communication.
+        /// </summary>
+        public bool levelChangeOnNextBit;
 
-	   /// <summary>
-	   /// True if programming voltage is available
-	   /// </summary>
-	   public bool canProgram;
+        /// <summary>
+        /// True if a level change is primed to occur on the next byte
+        /// of communication.
+        /// </summary>
+        public bool levelChangeOnNextByte;
 
-	   /// <summary>
-	   /// True if a level change is primed to occur on the next bit
-	   /// of communication.
-	   /// </summary>
-	   public bool levelChangeOnNextBit;
+        /// <summary>
+        /// The new level value that is primed to change on the next bit
+        /// or byte depending on the flags, levelChangeOnNextBit and
+        /// levelChangeOnNextByte. <para>
+        /// The valid values are:
+        /// <ul>
+        /// <li> LEVEL_NORMAL
+        /// <li> LEVEL_STRONGPULLUP
+        /// <li> LEVEL_BREAK
+        /// <li> LEVEL_PROGRAM
+        /// </ul>
+        /// </para>
+        /// </summary>
+        public byte primedLevelValue;
 
-	   /// <summary>
-	   /// True if a level change is primed to occur on the next byte
-	   /// of communication.
-	   /// </summary>
-	   public bool levelChangeOnNextByte;
+        /// <summary>
+        /// The amount of time that the 'level' value will be on for. <para>
+        /// The valid values are:
+        /// <ul>
+        /// <li>   0 (DELIVERY_HALF_SECOND) provide power for 1/2 second.
+        /// <li>   1 (DELIVERY_ONE_SECOND) provide power for 1 second.
+        /// <li>   2 (DELIVERY_TWO_SECONDS) provide power for 2 seconds.
+        /// <li>   3 (DELIVERY_FOUR_SECONDS) provide power for 4 seconds.
+        /// <li>   4 (DELIVERY_SMART_DONE) provide power until the
+        ///          the device is no longer drawing significant power.
+        /// <li>   5 (DELIVERY_INFINITE) provide power until the
+        ///          setBusNormal() method is called.
+        /// </ul>
+        /// </para>
+        /// </summary>
+        public int levelTimeFactor;
 
-	   /// <summary>
-	   /// The new level value that is primed to change on the next bit
-	   /// or byte depending on the flags, levelChangeOnNextBit and
-	   /// levelChangeOnNextByte. <para>
-	   /// The valid values are:
-	   /// <ul>
-	   /// <li> LEVEL_NORMAL
-	   /// <li> LEVEL_STRONGPULLUP
-	   /// <li> LEVEL_BREAK
-	   /// <li> LEVEL_PROGRAM
-	   /// </ul>
-	   /// </para>
-	   /// </summary>
-	   public byte primedLevelValue;
+        /// <summary>
+        /// Value of the last discrepancy during the last search for an iButton.
+        /// </summary>
+        public int searchLastDiscrepancy;
 
-	   /// <summary>
-	   /// The amount of time that the 'level' value will be on for. <para>
-	   /// The valid values are:
-	   /// <ul>
-	   /// <li>   0 (DELIVERY_HALF_SECOND) provide power for 1/2 second.
-	   /// <li>   1 (DELIVERY_ONE_SECOND) provide power for 1 second.
-	   /// <li>   2 (DELIVERY_TWO_SECONDS) provide power for 2 seconds.
-	   /// <li>   3 (DELIVERY_FOUR_SECONDS) provide power for 4 seconds.
-	   /// <li>   4 (DELIVERY_SMART_DONE) provide power until the
-	   ///          the device is no longer drawing significant power.
-	   /// <li>   5 (DELIVERY_INFINITE) provide power until the
-	   ///          setBusNormal() method is called.
-	   /// </ul>
-	   /// </para>
-	   /// </summary>
-	   public int levelTimeFactor;
+        /// <summary>
+        /// Value of the last discrepancy in the family code during the last
+        /// search for an iButton.
+        /// </summary>
+        public int searchFamilyLastDiscrepancy;
 
-	   /// <summary>
-	   /// Value of the last discrepancy during the last search for an iButton.
-	   /// </summary>
-	   public int searchLastDiscrepancy;
+        /// <summary>
+        /// Flag to indicate that the last device found is the last device in a
+        /// search sequence on the 1-Wire Network.
+        /// </summary>
+        public bool searchLastDevice;
 
-	   /// <summary>
-	   /// Value of the last discrepancy in the family code during the last
-	   /// search for an iButton.
-	   /// </summary>
-	   public int searchFamilyLastDiscrepancy;
+        /// <summary>
+        /// ID number of the current iButton found.
+        /// </summary>
+        public byte[] ID;
 
-	   /// <summary>
-	   /// Flag to indicate that the last device found is the last device in a
-	   /// search sequence on the 1-Wire Network.
-	   /// </summary>
-	   public bool searchLastDevice;
+        /// <summary>
+        /// Array of iButton families to include in any search.
+        /// </summary>
+        public byte[] searchIncludeFamilies;
 
-	   /// <summary>
-	   /// ID number of the current iButton found.
-	   /// </summary>
-	   public byte[] ID;
+        /// <summary>
+        /// Array of iButton families to exclude in any search.
+        /// </summary>
+        public byte[] searchExcludeFamilies;
 
-	   /// <summary>
-	   /// Array of iButton families to include in any search.
-	   /// </summary>
-	   public byte[] searchIncludeFamilies;
+        /// <summary>
+        /// Flag to indicate the conditional search is to be performed so that
+        /// only iButtons in an alarm state will be found.
+        /// </summary>
+        public bool searchOnlyAlarmingButtons;
 
-	   /// <summary>
-	   /// Array of iButton families to exclude in any search.
-	   /// </summary>
-	   public byte[] searchExcludeFamilies;
+        /// <summary>
+        /// Flag to indicate next search will not be preceeded by a 1-Wire reset
+        /// </summary>
+        public bool skipResetOnSearch;
 
-	   /// <summary>
-	   /// Flag to indicate the conditional search is to be performed so that
-	   /// only iButtons in an alarm state will be found.
-	   /// </summary>
-	   public bool searchOnlyAlarmingButtons;
+        //--------
+        //-------- Constructors
+        //--------
 
-	   /// <summary>
-	   /// Flag to indicate next search will not be preceeded by a 1-Wire reset
-	   /// </summary>
-	   public bool skipResetOnSearch;
+        /// <summary>
+        /// Construct the initial state of the 1-Wire Network.
+        /// </summary>
+        public OneWireState()
+        {
+            // speed, level
+            oneWireSpeed = DSPortAdapter.SPEED_REGULAR;
+            oneWireLevel = DSPortAdapter.LEVEL_NORMAL;
 
-	   //--------
-	   //-------- Constructors
-	   //--------
+            // level primed
+            levelChangeOnNextBit = false;
+            levelChangeOnNextByte = false;
+            primedLevelValue = DSPortAdapter.LEVEL_NORMAL;
+            levelTimeFactor = DSPortAdapter.DELIVERY_INFINITE;
 
-	   /// <summary>
-	   /// Construct the initial state of the 1-Wire Network.
-	   /// </summary>
-	   public OneWireState()
-	   {
+            // adapter abilities
+            canProgram = false;
 
-		  // speed, level
-		  oneWireSpeed = DSPortAdapter.SPEED_REGULAR;
-		  oneWireLevel = DSPortAdapter.LEVEL_NORMAL;
+            // search options
+            searchIncludeFamilies = new byte[0];
+            searchExcludeFamilies = new byte[0];
+            searchOnlyAlarmingButtons = false;
+            skipResetOnSearch = false;
 
-		  // level primed
-		  levelChangeOnNextBit = false;
-		  levelChangeOnNextByte = false;
-		  primedLevelValue = DSPortAdapter.LEVEL_NORMAL;
-		  levelTimeFactor = DSPortAdapter.DELIVERY_INFINITE;
+            // new iButton object
+            ID = new byte[8];
 
-		  // adapter abilities
-		  canProgram = false;
-
-		  // search options 
-		  searchIncludeFamilies = new byte [0];
-		  searchExcludeFamilies = new byte [0];
-		  searchOnlyAlarmingButtons = false;
-		  skipResetOnSearch = false;
-
-		  // new iButton object
-		  ID = new byte [8];
-
-		  // search state
-		  searchLastDiscrepancy = 0;
-		  searchFamilyLastDiscrepancy = 0;
-		  searchLastDevice = false;
-	   }
-	}
-
+            // search state
+            searchLastDiscrepancy = 0;
+            searchFamilyLastDiscrepancy = 0;
+            searchLastDevice = false;
+        }
+    }
 }

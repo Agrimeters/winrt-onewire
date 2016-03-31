@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -27,154 +26,155 @@ using System.Collections.Generic;
  * Branding Policy.
  *---------------------------------------------------------------------------
  */
+
 namespace com.dalsemi.onewire.application.monitor
 {
+    using Address = com.dalsemi.onewire.utils.Address;
+    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
+    using OWPath = com.dalsemi.onewire.utils.OWPath;
 
+    /// <summary>
+    /// Represents a group of 1-Wire addresses that have either
+    /// arrived to or departed from the 1-Wire network.
+    ///
+    /// @author SH
+    /// @version 1.00
+    /// </summary>
+    public class DeviceMonitorEvent
+    {
+        /// <summary>
+        /// enum for arrival/departure event types </summary>
+        public const int ARRIVAL = 0, DEPARTURE = 1;
 
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
-	using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-	using Address = com.dalsemi.onewire.utils.Address;
-	using OWPath = com.dalsemi.onewire.utils.OWPath;
+        /// <summary>
+        /// The type of event (ARRIVAL|DEPARTURE) </summary>
+        protected internal int eventType = -1;
 
-	/// <summary>
-	/// Represents a group of 1-Wire addresses that have either
-	/// arrived to or departed from the 1-Wire network.
-	/// 
-	/// @author SH
-	/// @version 1.00
-	/// </summary>
-	public class DeviceMonitorEvent
-	{
-	   /// <summary>
-	   /// enum for arrival/departure event types </summary>
-	   public const int ARRIVAL = 0, DEPARTURE = 1;
+        /// <summary>
+        /// The monitor which generated the event </summary>
+        protected internal AbstractDeviceMonitor monitor = null;
 
-	   /// <summary>
-	   /// The type of event (ARRIVAL|DEPARTURE) </summary>
-	   protected internal int eventType = -1;
-	   /// <summary>
-	   /// The monitor which generated the event </summary>
-	   protected internal AbstractDeviceMonitor monitor = null;
-	   /// <summary>
-	   /// The DSPortAdapter the monitor was using at the time of event </summary>
-	   protected internal DSPortAdapter adapter = null;
-	   /// <summary>
-	   /// Vector of addresses for devices </summary>
-	   protected internal List<long> vDeviceAddress = null;
+        /// <summary>
+        /// The DSPortAdapter the monitor was using at the time of event </summary>
+        protected internal DSPortAdapter adapter = null;
 
-	   /// <summary>
-	   /// Creates a new DeviceMonitor event with the specified characteristics.
-	   /// </summary>
-	   /// <param name="eventType"> The type of event (ARRIVAL | DEPARTURE) </param>
-	   /// <param name="source"> The monitor which generated the event </param>
-	   /// <param name="adapter"> The DSPortAdapter the monitor was using </param>
-	   /// <param name="addresses"> Vector of addresses for devices </param>
-	   internal DeviceMonitorEvent(int eventType, AbstractDeviceMonitor source, DSPortAdapter adapter, List<long> addresses)
-	   {
+        /// <summary>
+        /// Vector of addresses for devices </summary>
+        protected internal List<long> vDeviceAddress = null;
 
-		  if (eventType != ARRIVAL && eventType != DEPARTURE)
-		  {
-			 throw new System.ArgumentException("Invalid event type: " + eventType);
-		  }
-		  this.eventType = eventType;
-		  this.monitor = source;
-		  this.adapter = adapter;
-		  this.vDeviceAddress = addresses;
-	   }
+        /// <summary>
+        /// Creates a new DeviceMonitor event with the specified characteristics.
+        /// </summary>
+        /// <param name="eventType"> The type of event (ARRIVAL | DEPARTURE) </param>
+        /// <param name="source"> The monitor which generated the event </param>
+        /// <param name="adapter"> The DSPortAdapter the monitor was using </param>
+        /// <param name="addresses"> Vector of addresses for devices </param>
+        internal DeviceMonitorEvent(int eventType, AbstractDeviceMonitor source, DSPortAdapter adapter, List<long> addresses)
+        {
+            if (eventType != ARRIVAL && eventType != DEPARTURE)
+            {
+                throw new System.ArgumentException("Invalid event type: " + eventType);
+            }
+            this.eventType = eventType;
+            this.monitor = source;
+            this.adapter = adapter;
+            this.vDeviceAddress = addresses;
+        }
 
-	   /// <summary>
-	   /// Returns the event type (ARRIVAL | DEPARTURE)
-	   /// </summary>
-	   /// <returns> the event type (ARRIVAL | DEPARTURE) </returns>
-	   public virtual int EventType
-	   {
-		   get
-		   {
-			  return this.eventType;
-		   }
-	   }
+        /// <summary>
+        /// Returns the event type (ARRIVAL | DEPARTURE)
+        /// </summary>
+        /// <returns> the event type (ARRIVAL | DEPARTURE) </returns>
+        public virtual int EventType
+        {
+            get
+            {
+                return this.eventType;
+            }
+        }
 
-	   /// <summary>
-	   /// Returns the monitor which generated this event
-	   /// </summary>
-	   /// <returns> the monitor which generated this event </returns>
-	   public virtual AbstractDeviceMonitor Monitor
-	   {
-		   get
-		   {
-			  return this.monitor;
-		   }
-	   }
+        /// <summary>
+        /// Returns the monitor which generated this event
+        /// </summary>
+        /// <returns> the monitor which generated this event </returns>
+        public virtual AbstractDeviceMonitor Monitor
+        {
+            get
+            {
+                return this.monitor;
+            }
+        }
 
-	   /// <summary>
-	   /// Returns DSPortAdapter the monitor was using when the event was generated
-	   /// </summary>
-	   /// <returns> DSPortAdapter the monitor was using </returns>
-	   public virtual DSPortAdapter Adapter
-	   {
-		   get
-		   {
-			  return this.adapter;
-		   }
-	   }
+        /// <summary>
+        /// Returns DSPortAdapter the monitor was using when the event was generated
+        /// </summary>
+        /// <returns> DSPortAdapter the monitor was using </returns>
+        public virtual DSPortAdapter Adapter
+        {
+            get
+            {
+                return this.adapter;
+            }
+        }
 
-	   /// <summary>
-	   /// Returns the number of devices associated with this event
-	   /// </summary>
-	   /// <returns> the number of devices associated with this event </returns>
-	   public virtual int DeviceCount
-	   {
-		   get
-		   {
-			  return this.vDeviceAddress.Count;
-		   }
-	   }
+        /// <summary>
+        /// Returns the number of devices associated with this event
+        /// </summary>
+        /// <returns> the number of devices associated with this event </returns>
+        public virtual int DeviceCount
+        {
+            get
+            {
+                return this.vDeviceAddress.Count;
+            }
+        }
 
-	   /// <summary>
-	   /// Returns the OneWireContainer for the address at the specified index
-	   /// </summary>
-	   /// <returns> the OneWireContainer for the address at the specified index </returns>
-	   public virtual OneWireContainer getContainerAt(int index)
-	   {
-		  long? longAddress = (long?)this.vDeviceAddress[index];
-		  return AbstractDeviceMonitor.getDeviceContainer(adapter, longAddress.Value);
-	   }
+        /// <summary>
+        /// Returns the OneWireContainer for the address at the specified index
+        /// </summary>
+        /// <returns> the OneWireContainer for the address at the specified index </returns>
+        public virtual OneWireContainer getContainerAt(int index)
+        {
+            long? longAddress = (long?)this.vDeviceAddress[index];
+            return AbstractDeviceMonitor.getDeviceContainer(adapter, longAddress.Value);
+        }
 
-	   /// <summary>
-	   /// Returns the Path object for the device at the specified index
-	   /// </summary>
-	   /// <returns> the Path object for the device at the specified index </returns>
-	   public virtual OWPath getPathForContainerAt(int index)
-	   {
-		  long? longAddress = (long?)this.vDeviceAddress[index];
-		  return this.monitor.getDevicePath(longAddress.Value);
-	   }
+        /// <summary>
+        /// Returns the Path object for the device at the specified index
+        /// </summary>
+        /// <returns> the Path object for the device at the specified index </returns>
+        public virtual OWPath getPathForContainerAt(int index)
+        {
+            long? longAddress = (long?)this.vDeviceAddress[index];
+            return this.monitor.getDevicePath(longAddress.Value);
+        }
 
-	   /// <summary>
-	   /// Returns the device address at the specified index as a primitive long.
-	   /// </summary>
-	   /// <returns> the device address at the specified index </returns>
-	   public virtual long getAddressAsLongAt(int index)
-	   {
-		  return ((long?)this.vDeviceAddress[index]).Value;
-	   }
+        /// <summary>
+        /// Returns the device address at the specified index as a primitive long.
+        /// </summary>
+        /// <returns> the device address at the specified index </returns>
+        public virtual long getAddressAsLongAt(int index)
+        {
+            return ((long?)this.vDeviceAddress[index]).Value;
+        }
 
-	   /// <summary>
-	   /// Returns the device address at the specified index as a byte array.
-	   /// </summary>
-	   /// <returns> the device address at the specified index </returns>
-	   public virtual byte[] getAddressAt(int index)
-	   {
-		  return Address.toByteArray(getAddressAsLongAt(index));
-	   }
+        /// <summary>
+        /// Returns the device address at the specified index as a byte array.
+        /// </summary>
+        /// <returns> the device address at the specified index </returns>
+        public virtual byte[] getAddressAt(int index)
+        {
+            return Address.toByteArray(getAddressAsLongAt(index));
+        }
 
-	   /// <summary>
-	   /// Returns the device address at the specified index as a String.
-	   /// </summary>
-	   /// <returns> the device address at the specified index </returns>
-	   public virtual string getAddressAsStringAt(int index)
-	   {
-		  return Address.ToString(getAddressAsLongAt(index));
-	   }
-	}
+        /// <summary>
+        /// Returns the device address at the specified index as a String.
+        /// </summary>
+        /// <returns> the device address at the specified index </returns>
+        public virtual string getAddressAsStringAt(int index)
+        {
+            return Address.ToString(getAddressAsLongAt(index));
+        }
+    }
 }

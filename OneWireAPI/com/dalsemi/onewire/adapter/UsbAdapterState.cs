@@ -5,20 +5,20 @@
  */
 
 using System;
-using Windows.Storage.Streams;
 using System.Diagnostics;
+using Windows.Storage.Streams;
 
 namespace com.dalsemi.onewire.adapter
 {
-	/// <summary>
-	/// UsbAdapterState contains the communication state of the DS2490
-	///  based USB adapter.
-    ///	
-	///  @version    0.00, 1 Mar 2016
-	///  @author     JW
-	/// </summary>
-	internal class UsbAdapterState
-	{
+    /// <summary>
+    /// UsbAdapterState contains the communication state of the DS2490
+    ///  based USB adapter.
+    ///
+    ///  @version    0.00, 1 Mar 2016
+    ///  @author     JW
+    /// </summary>
+    internal class UsbAdapterState
+    {
         private Object syncObject;
 
         //------- DS2490 speed modes
@@ -26,9 +26,11 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// 65us time slot (15.4kbps) </summary>
         public const byte BUSCOMSPEED_REGULAR = 0x00;
+
         /// <summary>
         /// 65us to 72us time slot (13.9kbps to 15.4kbps) </summary>
         public const byte BUSCOMSPEED_FLEX = 0x01;
+
         /// <summary>
         /// 10us time slot (100kbps) </summary>
 	    public const byte BUSCOMSPEED_OVERDRIVE = 0x02;
@@ -38,24 +40,31 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Pull down slew rate, 15V/us </summary>
         public const byte SLEWRATE_15Vus = 0x00;
+
         /// <summary>
         /// Pull down slew rate, 2.2V/us </summary>
         public const byte SLEWRATE_2p2Vus = 0x01;
+
         /// <summary>
         /// Pull down slew rate, 1.65V/us </summary>
         public const byte SLEWRATE_1p65Vus = 0x02;
+
         /// <summary>
         /// Pull down slew rate, 1.37V/us </summary>
         public const byte SLEWRATE_1p37Vus = 0x03;
+
         /// <summary>
         /// Pull down slew rate, 1.1V/us </summary>
         public const byte SLEWRATE_1p1Vus = 0x04;
+
         /// <summary>
         /// Pull down slew rate, 0.83V/us </summary>
         public const byte SLEWRATE_0p83Vus = 0x05;
+
         /// <summary>
         /// Pull down slew rate, 0.7V/us </summary>
         public const byte SLEWRATE_0p7Vus = 0x06;
+
         /// <summary>
         /// Pull down slew rate, 0.55V/us </summary>
         public const byte SLEWRATE_0p55Vus = 0x07;
@@ -65,24 +74,31 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Flexible Speed Write-1 Low Time, 4us </summary>
         public const byte FLEXWRITE1LOWTIME_4us = 0;
+
         /// <summary>
         /// Flexible Speed Write-1 Low Time, 5us </summary>
         public const byte FLEXWRITE1LOWTIME_5us = 1;
+
         /// <summary>
         /// Flexible Speed Write-1 Low Time, 6us </summary>
         public const byte FLEXWRITE1LOWTIME_6us = 2;
+
         /// <summary>
         /// Flexible Speed Write-1 Low Time, 7us </summary>
         public const byte FLEXWRITE1LOWTIME_7us = 3;
+
         /// <summary>
         /// Flexible Speed Write-1 Low Time, 8us </summary>
         public const byte FLEXWRITE1LOWTIME_8us = 4;
+
         /// <summary>
         /// Flexible Speed Write-1 Low Time, 9us </summary>
         public const byte FLEXWRITE1LOWTIME_9us = 5;
+
         /// <summary>
         /// Flexible Speed Write-1 Low Time, 10us </summary>
         public const byte FLEXWRITE1LOWTIME_10us = 6;
+
         /// <summary>
         /// Flexible Speed Write-1 Low Time, 11us </summary>
         public const byte FLEXWRITE1LOWTIME_11us = 7;
@@ -92,30 +108,36 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Data Sample Offset/Write-0 Recovery Time, 10us </summary>
         public const byte DSOW0RECOVERYTIME_10us = 0;
+
         /// <summary>
         /// Data Sample Offset/Write-0 Recovery Time, 12us </summary>
         public const byte DSOW0RECOVERYTIME_12us = 1;
+
         /// <summary>
         /// Data Sample Offset/Write-0 Recovery Time, 14us </summary>
         public const byte DSOW0RECOVERYTIME_14us = 2;
+
         /// <summary>
         /// Data Sample Offset/Write-0 Recovery Time, 16us </summary>
         public const byte DSOW0RECOVERYTIME_16us = 3;
+
         /// <summary>
         /// Data Sample Offset/Write-0 Recovery Time, 18us </summary>
         public const byte DSOW0RECOVERYTIME_18us = 4;
+
         /// <summary>
         /// Data Sample Offset/Write-0 Recovery Time, 20us </summary>
         public const byte DSOW0RECOVERYTIME_20us = 5;
+
         /// <summary>
         /// Data Sample Offset/Write-0 Recovery Time, 22us </summary>
         public const byte DSOW0RECOVERYTIME_22us = 6;
+
         /// <summary>
         /// Data Sample Offset/Write-0 Recovery Time, 24us </summary>
         public const byte DSOW0RECOVERYTIME_24us = 7;
 
         ////------- DS2490 modes
-
 
         //--------
         //-------- Variables
@@ -124,13 +146,12 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Parameter settings for the three logical modes
         /// </summary>
-//TODO        public UParameterSettings[] uParameters;
+        //TODO        public UParameterSettings[] uParameters;
 
- 	    /// <summary>
-	    /// The OneWire State object reference
-	    /// </summary>
-	    public OneWireState oneWireState;
-
+        /// <summary>
+        /// The OneWire State object reference
+        /// </summary>
+        public OneWireState oneWireState;
 
         /// <summary>
         /// Strong Pullup to 5V
@@ -195,7 +216,6 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         public byte DSOW0RecoveryTime;
 
-
         [Flags]
         private enum EnableFlags
         {
@@ -203,6 +223,7 @@ namespace com.dalsemi.onewire.adapter
             /// Strong Pullup to 5V enabled
             /// </summary>
             SPUE = 0x01,
+
             /// <summary>
             /// Dynamic 1-Wire bus speed change through a Communication command is enabled
             /// </summary>
@@ -214,63 +235,68 @@ namespace com.dalsemi.onewire.adapter
         {
             /// <summary>
             /// Strong Pullup Active
-            /// if set to 1, the strong pullup to 5V is currently active, 
+            /// if set to 1, the strong pullup to 5V is currently active,
             /// if set to 0, it is inactive
             /// </summary>
             SPUA = 0x01,
+
             /// <summary>
             /// Programming Voltage (12V) Present
-            /// if set to 1, the 12V programming rail is active, 
+            /// if set to 1, the 12V programming rail is active,
             /// if set to 0, it is inactive
             /// </summary>
             PVP = 0x04,
+
             /// <summary>
             /// Power Mode
-            /// if set to 1, the DS2490 is powered from USB and external sources, 
-            /// if set to 0, all DS2490 power is provided from USB. 
+            /// if set to 1, the DS2490 is powered from USB and external sources,
+            /// if set to 0, all DS2490 power is provided from USB.
             /// </summary>
             PMOD = 0x08,
+
             /// <summary>
             /// Halt
             /// if set to 1, the DS2490 is currently halted, if set to 0, the device is not halted.
             /// </summary>
             HALT = 0x10,
+
             /// <summary>
             /// Idle
             /// if set to 1, the DS2490 is currently idle, if set to 0, the device is not idle.
             /// </summary>
             IDLE = 0x20,
+
             /// <summary>
             /// EP0 FIFO Status
-            /// If EP0F is set to 1, the Endpoint 0 FIFO was full when a new control transfer 
-            /// setup packet was received. This is an error condition in that the setup packet 
-            /// received is discarded due to the full condition. To recover from this state the 
-            /// USB host must send a CTL_RESET_DEVICE command; the device will also recover with 
-            /// a power on reset cycle. Note that the DS2490 will accept and process a 
-            /// CTL_RESET_DEVICE command if the EP0F = 1 state occurs. If EP0F = 0, no FIFO error 
-            /// condition exists. 
+            /// If EP0F is set to 1, the Endpoint 0 FIFO was full when a new control transfer
+            /// setup packet was received. This is an error condition in that the setup packet
+            /// received is discarded due to the full condition. To recover from this state the
+            /// USB host must send a CTL_RESET_DEVICE command; the device will also recover with
+            /// a power on reset cycle. Note that the DS2490 will accept and process a
+            /// CTL_RESET_DEVICE command if the EP0F = 1 state occurs. If EP0F = 0, no FIFO error
+            /// condition exists.
             /// </summary>
             EP0F = 0x80
         }
 
         /// <summary>
         /// Strong Pullup Active
-        /// if set to 1, the strong pullup to 5V is currently active, 
-        /// if set to 0, it is inactive. 
+        /// if set to 1, the strong pullup to 5V is currently active,
+        /// if set to 0, it is inactive.
         /// </summary>
         public bool StrongPullup1;
 
         /// <summary>
         /// Programming Voltage Present
-        /// if set to 1, the 12V programming rail is active, 
-        /// if set to 0, it is inactive. 
+        /// if set to 1, the 12V programming rail is active,
+        /// if set to 0, it is inactive.
         /// </summary>
         public bool ProgrammingVoltagePresent;
 
         /// <summary>
         /// Power Mode
-        /// if set to 1, the DS2490 is powered from USB and external sources, 
-        /// if set to 0, all DS2490 power is provided from USB. 
+        /// if set to 1, the DS2490 is powered from USB and external sources,
+        /// if set to 0, all DS2490 power is provided from USB.
         /// </summary>
         public bool PowerMode;
 
@@ -288,13 +314,13 @@ namespace com.dalsemi.onewire.adapter
 
         /// <summary>
         /// EP0 FIFO Status
-        /// If EP0F is set to 1, the Endpoint 0 FIFO was full when a new control transfer 
-        /// setup packet was received. This is an error condition in that the setup packet 
-        /// received is discarded due to the full condition. To recover from this state the 
-        /// USB host must send a CTL_RESET_DEVICE command; the device will also recover with 
-        /// a power on reset cycle. Note that the DS2490 will accept and process a 
-        /// CTL_RESET_DEVICE command if the EP0F = 1 state occurs. If EP0F = 0, no FIFO error 
-        /// condition exists. 
+        /// If EP0F is set to 1, the Endpoint 0 FIFO was full when a new control transfer
+        /// setup packet was received. This is an error condition in that the setup packet
+        /// received is discarded due to the full condition. To recover from this state the
+        /// USB host must send a CTL_RESET_DEVICE command; the device will also recover with
+        /// a power on reset cycle. Note that the DS2490 will accept and process a
+        /// CTL_RESET_DEVICE command if the EP0F = 1 state occurs. If EP0F = 0, no FIFO error
+        /// condition exists.
         /// </summary>
         public bool Ep0Fifo;
 
@@ -317,7 +343,7 @@ namespace com.dalsemi.onewire.adapter
         public byte OneWireWriteBufferStatus;
 
         /// <summary>
-        /// Number of data bytes currently contained in the 128-byte 
+        /// Number of data bytes currently contained in the 128-byte
         /// command FIFO used to read data from the 1-Wire bus
         /// </summary>
         public byte OneWireReadBufferStatus;
@@ -364,22 +390,21 @@ namespace com.dalsemi.onewire.adapter
         /// Construct the state of the USB interface with the defaults
         /// </summary>
         public UsbAdapterState(OneWireState newOneWireState)
-	    {
+        {
             syncObject = new object();
 
             // get a pointer to the OneWire state object
             oneWireState = newOneWireState;
 
-		    // Power-On defaults
+            // Power-On defaults
             StrongPullup = false;
             DynamicSpeedChange = false;
-		    BusCommSpeed = BUSCOMSPEED_REGULAR;
+            BusCommSpeed = BUSCOMSPEED_REGULAR;
             ReqBusCommSpeed = -1;
             StrongPullupDuration = GetPullUpDurationByte(.512);
             PulldownSlewRateControl = SLEWRATE_0p83Vus;
             Write1LowTime = FLEXWRITE1LOWTIME_8us;
             DSOW0RecoveryTime = DSOW0RECOVERYTIME_18us;
-
 
             //// create the three speed logical parameter settings
             //uParameters = new UParameterSettings [3];
@@ -387,7 +412,7 @@ namespace com.dalsemi.onewire.adapter
             //uParameters [1] = new UParameterSettings();
             //uParameters [2] = new UParameterSettings();
 
-            //// adjust flex time 
+            //// adjust flex time
             //uParameters [DSPortAdapter.SPEED_FLEX].pullDownSlewRate = UParameterSettings.SLEWRATE_0p83Vus;
             //uParameters [DSPortAdapter.SPEED_FLEX].write1LowTime = UParameterSettings.WRITE1TIME_12us;
             //uParameters [DSPortAdapter.SPEED_FLEX].sampleOffsetTime = UParameterSettings.SAMPLEOFFSET_TIME_10us;
@@ -405,7 +430,7 @@ namespace com.dalsemi.onewire.adapter
                 EnableFlags enableflags = (EnableFlags)m.ReadByte();
 
                 StrongPullup = ((enableflags & EnableFlags.SPUE) == EnableFlags.SPUE) ? true : false;
-                oneWireState.oneWireLevel = (byte)((StrongPullup == true) ? 
+                oneWireState.oneWireLevel = (byte)((StrongPullup == true) ?
                     DSPortAdapter.LEVEL_POWER_DELIVERY : DSPortAdapter.LEVEL_NORMAL);
                 DynamicSpeedChange = ((enableflags & EnableFlags.SPCE) == EnableFlags.SPCE) ? true : false;
                 BusCommSpeed = m.ReadByte();
@@ -468,9 +493,11 @@ namespace com.dalsemi.onewire.adapter
                     case BUSCOMSPEED_REGULAR:
                         Debug.WriteLine("1-Wire Speed: REGULAR");
                         break;
+
                     case BUSCOMSPEED_OVERDRIVE:
                         Debug.WriteLine("1-Wire Speed: OVERDRIVE");
                         break;
+
                     case BUSCOMSPEED_FLEX:
                         Debug.WriteLine("1-Wire Speed: FLEXIBLE");
                         break;
@@ -484,24 +511,31 @@ namespace com.dalsemi.onewire.adapter
                     case 0x00:
                         Debug.WriteLine("15V/us");
                         break;
+
                     case 0x01:
                         Debug.WriteLine("2.20V/us");
                         break;
+
                     case 0x02:
                         Debug.WriteLine("1.65V/us");
                         break;
+
                     case 0x03:
                         Debug.WriteLine("1.37V/us");
                         break;
+
                     case 0x04:
                         Debug.WriteLine("1.10V/us");
                         break;
+
                     case 0x05:
                         Debug.WriteLine("0.83V/us");
                         break;
+
                     case 0x06:
                         Debug.WriteLine("0.70V/us");
                         break;
+
                     case 0x07:
                         Debug.WriteLine("0.55V/us");
                         break;
@@ -512,24 +546,31 @@ namespace com.dalsemi.onewire.adapter
                     case 0x00:
                         Debug.WriteLine("4us");
                         break;
+
                     case 0x01:
                         Debug.WriteLine("5us");
                         break;
+
                     case 0x02:
                         Debug.WriteLine("6us");
                         break;
+
                     case 0x03:
                         Debug.WriteLine("7us");
                         break;
+
                     case 0x04:
                         Debug.WriteLine("8us");
                         break;
+
                     case 0x05:
                         Debug.WriteLine("9us");
                         break;
+
                     case 0x06:
                         Debug.WriteLine("10us");
                         break;
+
                     case 0x07:
                         Debug.WriteLine("11us");
                         break;
@@ -540,24 +581,31 @@ namespace com.dalsemi.onewire.adapter
                     case 0x00:
                         Debug.WriteLine("10us");
                         break;
+
                     case 0x01:
                         Debug.WriteLine("12us");
                         break;
+
                     case 0x02:
                         Debug.WriteLine("14us");
                         break;
+
                     case 0x03:
                         Debug.WriteLine("16us");
                         break;
+
                     case 0x04:
                         Debug.WriteLine("18us");
                         break;
+
                     case 0x05:
                         Debug.WriteLine("20us");
                         break;
+
                     case 0x06:
                         Debug.WriteLine("22us");
                         break;
+
                     case 0x07:
                         Debug.WriteLine("24us");
                         break;
@@ -576,6 +624,5 @@ namespace com.dalsemi.onewire.adapter
                 Debug.WriteLine("1-Wire Read Buffer Status: " + OneWireReadBufferStatus);
             }
         }
-
     }
 }

@@ -30,361 +30,357 @@ using System.Collections.Generic;
 
 namespace com.dalsemi.onewire.container
 {
+    // imports
+    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
 
-	// imports
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+    /// <summary>
+    /// <P> 1-Wire container for 512 byte Add-Only memory (EPROM) iButton, DS1983 and 1-Wire Chip, DS2503.
+    /// This container encapsulates the functionality of the 1-Wire family
+    /// type <B>13</B> (hex)</P>
+    ///
+    /// <P> The iButton package for this device is primarily used as a read/write portable memory device.
+    /// The 1-Wire Chip version is used for small non-volatile storage. </P>
+    ///
+    /// <H3> Features </H3>
+    /// <UL>
+    ///   <LI> 4096 bits (512 bytes) Electrically Programmable Read-Only
+    ///        Memory (EPROM) communicates with
+    ///        the economy of one signal plus ground
+    ///   <LI> EPROM partitioned into 256-bit (32-byte) pages
+    ///        for randomly accessing packetized data
+    ///   <LI> Each memory page can be permanently
+    ///        write-protected to prevent tampering
+    ///   <LI> Device is an "add only" memory where
+    ///        additional data can be programmed into
+    ///        EPROM without disturbing existing data
+    ///   <LI> Architecture allows software to patch data by
+    ///        superseding an old page in favor of a newly
+    ///        programmed page
+    ///   <LI> Reads over a wide voltage range of 2.8V to
+    ///        6.0V from -40&#176C to +85&#176C; programs at
+    ///        11.5V to 12.0V from -40&#176C to +50&#176C
+    /// </UL>
+    ///
+    /// <H3> Alternate Names </H3>
+    /// <UL>
+    ///   <LI> D2503
+    /// </UL>
+    ///
+    /// <H3> Memory </H3>
+    ///
+    /// <P> The memory can be accessed through the objects that are returned
+    /// from the <seealso cref="#getMemoryBanks() getMemoryBanks"/> method. </P>
+    ///
+    /// The following is a list of the MemoryBank instances that are returned:
+    ///
+    /// <UL>
+    ///   <LI> <B> Main Memory </B>
+    ///      <UL>
+    ///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>,
+    ///                  <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>,
+    ///                  <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>
+    ///         <LI> <I> Size </I> 512 starting at physical address 0
+    ///         <LI> <I> Features</I> Write-once general-purpose non-volatile needs-program-pulse
+    ///         <LI> <I> Pages</I> 16 pages of length 32 bytes giving 29 bytes Packet data payload
+    ///         <LI> <I> Page Features </I> page-device-CRC pages-redirectable pages-lockable redirection-lockable
+    ///         <LI> <I> Extra information for each page </I>  Inverted redirection page, length 1
+    ///      </UL>
+    ///   <LI> <B> Write protect pages </B>
+    ///      <UL>
+    ///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>,
+    ///                  <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>,
+    ///                  <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>
+    ///         <LI> <I> Size </I> 8 starting at physical address 0 (in STATUS memory area)
+    ///         <LI> <I> Features</I> Write-once not-general-purpose non-volatile needs-program-pulse
+    ///         <LI> <I> Pages</I> 1 pages of length 8 bytes
+    ///         <LI> <I> Page Features </I> page-device-CRC
+    ///      </UL>
+    ///   <LI> <B> Write protect redirection </B>
+    ///      <UL>
+    ///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>,
+    ///                  <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>,
+    ///                  <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>
+    ///         <LI> <I> Size </I> 8 starting at physical address 32 (in STATUS memory area)
+    ///         <LI> <I> Features</I> Write-once not-general-purpose non-volatile needs-program-pulse
+    ///         <LI> <I> Pages</I> 1 pages of length 8 bytes
+    ///         <LI> <I> Page Features </I> page-device-CRC
+    ///      </UL>
+    ///   <LI> <B> Bitmap of used pages for file structure </B>
+    ///      <UL>
+    ///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>,
+    ///                  <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>,
+    ///                  <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>
+    ///         <LI> <I> Size </I> 8 starting at physical address 64 (in STATUS memory area)
+    ///         <LI> <I> Features</I> Write-once not-general-purpose non-volatile needs-program-pulse
+    ///         <LI> <I> Pages</I> 1 pages of length 8 bytes
+    ///         <LI> <I> Page Features </I> page-device-CRC
+    ///      </UL>
+    ///   <LI> <B> Page redirection bytes </B>
+    ///      <UL>
+    ///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>,
+    ///                  <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>,
+    ///                  <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>
+    ///         <LI> <I> Size </I> 16 starting at physical address 256 (in STATUS memory area)
+    ///         <LI> <I> Features</I> Write-once not-general-purpose non-volatile needs-program-pulse
+    ///         <LI> <I> Pages</I> 2 pages of length 8 bytes
+    ///         <LI> <I> Page Features </I> page-device-CRC
+    ///      </UL>
+    /// </UL>
+    ///
+    /// <H3> Usage </H3>
+    ///
+    /// <DL>
+    /// <DD> See the usage example in
+    /// <seealso cref="com.dalsemi.onewire.container.OneWireContainer OneWireContainer"/>
+    /// to enumerate the MemoryBanks.
+    /// <DD> See the usage examples in
+    /// <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>,
+    /// <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>, and
+    /// <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>
+    /// for bank specific operations.
+    /// </DL>
+    ///
+    /// <H3> DataSheets </H3>
+    /// <DL>
+    /// <DD>(not available)
+    /// </DL>
+    /// </summary>
+    /// <seealso cref= com.dalsemi.onewire.container.MemoryBank </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.PagedMemoryBank </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.OTPMemoryBank </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer09 </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer0B </seealso>
+    /// <seealso cref= com.dalsemi.onewire.container.OneWireContainer0F
+    ///
+    /// @version    0.00, 28 Aug 2000
+    /// @author     DS </seealso>
+    public class OneWireContainer13 : OneWireContainer
+    {
+        //--------
+        //-------- Constructors
+        //--------
 
+        /// <summary>
+        /// Create an empty container that is not complete until after a call
+        /// to <code>setupContainer</code>. <para>
+        ///
+        /// This is one of the methods to construct a container.  The others are
+        /// through creating a OneWireContainer with parameters.
+        ///
+        /// </para>
+        /// </summary>
+        /// <seealso cref= #setupContainer(com.dalsemi.onewire.adapter.DSPortAdapter,byte[]) super.setupContainer() </seealso>
+        public OneWireContainer13() : base()
+        {
+        }
 
-	/// <summary>
-	/// <P> 1-Wire container for 512 byte Add-Only memory (EPROM) iButton, DS1983 and 1-Wire Chip, DS2503. 
-	/// This container encapsulates the functionality of the 1-Wire family 
-	/// type <B>13</B> (hex)</P>
-	/// 
-	/// <P> The iButton package for this device is primarily used as a read/write portable memory device.  
-	/// The 1-Wire Chip version is used for small non-volatile storage. </P>
-	/// 
-	/// <H3> Features </H3> 
-	/// <UL>
-	///   <LI> 4096 bits (512 bytes) Electrically Programmable Read-Only
-	///        Memory (EPROM) communicates with
-	///        the economy of one signal plus ground
-	///   <LI> EPROM partitioned into 256-bit (32-byte) pages
-	///        for randomly accessing packetized data
-	///   <LI> Each memory page can be permanently
-	///        write-protected to prevent tampering
-	///   <LI> Device is an "add only" memory where
-	///        additional data can be programmed into
-	///        EPROM without disturbing existing data
-	///   <LI> Architecture allows software to patch data by
-	///        superseding an old page in favor of a newly
-	///        programmed page
-	///   <LI> Reads over a wide voltage range of 2.8V to
-	///        6.0V from -40&#176C to +85&#176C; programs at
-	///        11.5V to 12.0V from -40&#176C to +50&#176C
-	/// </UL>
-	/// 
-	/// <H3> Alternate Names </H3>
-	/// <UL>
-	///   <LI> D2503
-	/// </UL>
-	/// 
-	/// <H3> Memory </H3> 
-	/// 
-	/// <P> The memory can be accessed through the objects that are returned
-	/// from the <seealso cref="#getMemoryBanks() getMemoryBanks"/> method. </P>
-	/// 
-	/// The following is a list of the MemoryBank instances that are returned: 
-	/// 
-	/// <UL>
-	///   <LI> <B> Main Memory </B>
-	///      <UL> 
-	///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>, 
-	///                  <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>, 
-	///                  <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/> 
-	///         <LI> <I> Size </I> 512 starting at physical address 0
-	///         <LI> <I> Features</I> Write-once general-purpose non-volatile needs-program-pulse
-	///         <LI> <I> Pages</I> 16 pages of length 32 bytes giving 29 bytes Packet data payload
-	///         <LI> <I> Page Features </I> page-device-CRC pages-redirectable pages-lockable redirection-lockable
-	///         <LI> <I> Extra information for each page </I>  Inverted redirection page, length 1
-	///      </UL> 
-	///   <LI> <B> Write protect pages </B>
-	///      <UL> 
-	///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>, 
-	///                  <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>, 
-	///                  <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/> 
-	///         <LI> <I> Size </I> 8 starting at physical address 0 (in STATUS memory area)
-	///         <LI> <I> Features</I> Write-once not-general-purpose non-volatile needs-program-pulse
-	///         <LI> <I> Pages</I> 1 pages of length 8 bytes
-	///         <LI> <I> Page Features </I> page-device-CRC 
-	///      </UL> 
-	///   <LI> <B> Write protect redirection </B>
-	///      <UL> 
-	///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>, 
-	///                  <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>, 
-	///                  <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/> 
-	///         <LI> <I> Size </I> 8 starting at physical address 32 (in STATUS memory area)
-	///         <LI> <I> Features</I> Write-once not-general-purpose non-volatile needs-program-pulse
-	///         <LI> <I> Pages</I> 1 pages of length 8 bytes
-	///         <LI> <I> Page Features </I> page-device-CRC 
-	///      </UL> 
-	///   <LI> <B> Bitmap of used pages for file structure </B>
-	///      <UL> 
-	///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>, 
-	///                  <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>, 
-	///                  <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/> 
-	///         <LI> <I> Size </I> 8 starting at physical address 64 (in STATUS memory area)
-	///         <LI> <I> Features</I> Write-once not-general-purpose non-volatile needs-program-pulse
-	///         <LI> <I> Pages</I> 1 pages of length 8 bytes
-	///         <LI> <I> Page Features </I> page-device-CRC 
-	///      </UL> 
-	///   <LI> <B> Page redirection bytes </B>
-	///      <UL> 
-	///         <LI> <I> Implements </I> <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>, 
-	///                  <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>, 
-	///                  <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/> 
-	///         <LI> <I> Size </I> 16 starting at physical address 256 (in STATUS memory area)
-	///         <LI> <I> Features</I> Write-once not-general-purpose non-volatile needs-program-pulse
-	///         <LI> <I> Pages</I> 2 pages of length 8 bytes
-	///         <LI> <I> Page Features </I> page-device-CRC 
-	///      </UL> 
-	/// </UL>
-	/// 
-	/// <H3> Usage </H3> 
-	/// 
-	/// <DL> 
-	/// <DD> See the usage example in 
-	/// <seealso cref="com.dalsemi.onewire.container.OneWireContainer OneWireContainer"/>
-	/// to enumerate the MemoryBanks.
-	/// <DD> See the usage examples in 
-	/// <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>, 
-	/// <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>, and
-	/// <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>
-	/// for bank specific operations.
-	/// </DL>
-	/// 
-	/// <H3> DataSheets </H3> 
-	/// <DL>
-	/// <DD>(not available)
-	/// </DL>
-	/// </summary>
-	/// <seealso cref= com.dalsemi.onewire.container.MemoryBank </seealso>
-	/// <seealso cref= com.dalsemi.onewire.container.PagedMemoryBank </seealso>
-	/// <seealso cref= com.dalsemi.onewire.container.OTPMemoryBank </seealso>
-	/// <seealso cref= com.dalsemi.onewire.container.OneWireContainer09 </seealso>
-	/// <seealso cref= com.dalsemi.onewire.container.OneWireContainer0B </seealso>
-	/// <seealso cref= com.dalsemi.onewire.container.OneWireContainer0F
-	/// 
-	/// @version    0.00, 28 Aug 2000
-	/// @author     DS </seealso>
-	public class OneWireContainer13 : OneWireContainer
-	{
+        /// <summary>
+        /// Create a container with the provided adapter instance
+        /// and the address of the iButton or 1-Wire device.<para>
+        ///
+        /// This is one of the methods to construct a container.  The other is
+        /// through creating a OneWireContainer with NO parameters.
+        ///
+        /// </para>
+        /// </summary>
+        /// <param name="sourceAdapter">     adapter instance used to communicate with
+        /// this iButton </param>
+        /// <param name="newAddress">        <seealso cref="com.dalsemi.onewire.utils.Address Address"/>
+        ///                           of this 1-Wire device
+        /// </param>
+        /// <seealso cref= #OneWireContainer13() OneWireContainer13 </seealso>
+        /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
+        public OneWireContainer13(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
+        {
+        }
 
-	   //--------
-	   //-------- Constructors
-	   //--------
+        /// <summary>
+        /// Create a container with the provided adapter instance
+        /// and the address of the iButton or 1-Wire device.<para>
+        ///
+        /// This is one of the methods to construct a container.  The other is
+        /// through creating a OneWireContainer with NO parameters.
+        ///
+        /// </para>
+        /// </summary>
+        /// <param name="sourceAdapter">     adapter instance used to communicate with
+        /// this 1-Wire device </param>
+        /// <param name="newAddress">        <seealso cref="com.dalsemi.onewire.utils.Address Address"/>
+        ///                            of this 1-Wire device
+        /// </param>
+        /// <seealso cref= #OneWireContainer13() OneWireContainer13 </seealso>
+        /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
+        public OneWireContainer13(DSPortAdapter sourceAdapter, long newAddress) : base(sourceAdapter, newAddress)
+        {
+        }
 
-	   /// <summary>
-	   /// Create an empty container that is not complete until after a call 
-	   /// to <code>setupContainer</code>. <para>
-	   /// 
-	   /// This is one of the methods to construct a container.  The others are
-	   /// through creating a OneWireContainer with parameters.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <seealso cref= #setupContainer(com.dalsemi.onewire.adapter.DSPortAdapter,byte[]) super.setupContainer() </seealso>
-	   public OneWireContainer13() : base()
-	   {
-	   }
+        /// <summary>
+        /// Create a container with the provided adapter instance
+        /// and the address of the iButton or 1-Wire device.<para>
+        ///
+        /// This is one of the methods to construct a container.  The other is
+        /// through creating a OneWireContainer with NO parameters.
+        ///
+        /// </para>
+        /// </summary>
+        /// <param name="sourceAdapter">     adapter instance used to communicate with
+        /// this 1-Wire device </param>
+        /// <param name="newAddress">        <seealso cref="com.dalsemi.onewire.utils.Address Address"/>
+        ///                            of this 1-Wire device
+        /// </param>
+        /// <seealso cref= #OneWireContainer13() OneWireContainer13 </seealso>
+        /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
+        public OneWireContainer13(DSPortAdapter sourceAdapter, string newAddress) : base(sourceAdapter, newAddress)
+        {
+        }
 
-	   /// <summary>
-	   /// Create a container with the provided adapter instance
-	   /// and the address of the iButton or 1-Wire device.<para>
-	   /// 
-	   /// This is one of the methods to construct a container.  The other is
-	   /// through creating a OneWireContainer with NO parameters.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="sourceAdapter">     adapter instance used to communicate with
-	   /// this iButton </param>
-	   /// <param name="newAddress">        <seealso cref="com.dalsemi.onewire.utils.Address Address"/>  
-	   ///                           of this 1-Wire device
-	   /// </param>
-	   /// <seealso cref= #OneWireContainer13() OneWireContainer13 </seealso>
-	   /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
-	   public OneWireContainer13(DSPortAdapter sourceAdapter, byte[] newAddress) : base(sourceAdapter, newAddress)
-	   {
-	   }
+        //--------
+        //-------- Methods
+        //--------
 
-	   /// <summary>
-	   /// Create a container with the provided adapter instance
-	   /// and the address of the iButton or 1-Wire device.<para>
-	   /// 
-	   /// This is one of the methods to construct a container.  The other is
-	   /// through creating a OneWireContainer with NO parameters.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="sourceAdapter">     adapter instance used to communicate with
-	   /// this 1-Wire device </param>
-	   /// <param name="newAddress">        <seealso cref="com.dalsemi.onewire.utils.Address Address"/>
-	   ///                            of this 1-Wire device
-	   /// </param>
-	   /// <seealso cref= #OneWireContainer13() OneWireContainer13 </seealso>
-	   /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
-	   public OneWireContainer13(DSPortAdapter sourceAdapter, long newAddress) : base(sourceAdapter, newAddress)
-	   {
-	   }
+        /// <summary>
+        /// Get the Dallas Semiconductor part number of the iButton
+        /// or 1-Wire Device as a string.  For example 'DS1992'.
+        /// </summary>
+        /// <returns> iButton or 1-Wire device name </returns>
+        public override string Name
+        {
+            get
+            {
+                return "DS1983";
+            }
+        }
 
-	   /// <summary>
-	   /// Create a container with the provided adapter instance
-	   /// and the address of the iButton or 1-Wire device.<para>
-	   /// 
-	   /// This is one of the methods to construct a container.  The other is
-	   /// through creating a OneWireContainer with NO parameters.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="sourceAdapter">     adapter instance used to communicate with
-	   /// this 1-Wire device </param>
-	   /// <param name="newAddress">        <seealso cref="com.dalsemi.onewire.utils.Address Address"/>
-	   ///                            of this 1-Wire device
-	   /// </param>
-	   /// <seealso cref= #OneWireContainer13() OneWireContainer13 </seealso>
-	   /// <seealso cref= com.dalsemi.onewire.utils.Address utils.Address </seealso>
-	   public OneWireContainer13(DSPortAdapter sourceAdapter, string newAddress) : base(sourceAdapter, newAddress)
-	   {
-	   }
+        /// <summary>
+        /// Get the alternate Dallas Semiconductor part numbers or names.
+        /// A 'family' of 1-Wire Network devices may have more than one part number
+        /// depending on packaging.  There can also be nicknames such as
+        /// 'Crypto iButton'.
+        /// </summary>
+        /// <returns> 1-Wire device alternate names </returns>
+        public override string AlternateNames
+        {
+            get
+            {
+                return "DS2503";
+            }
+        }
 
-	   //--------
-	   //-------- Methods
-	   //--------
+        /// <summary>
+        /// Get a short description of the function of this iButton
+        /// or 1-Wire Device type.
+        /// </summary>
+        /// <returns> device description </returns>
+        public override string Description
+        {
+            get
+            {
+                return "4096 bit Electrically Programmable Read Only Memory " + "(EPROM) partitioned into sixteen 256 bit pages." + "Each memory page can be permanently write-protected " + "to prevent tampering.  Architecture allows software " + "to patch data by supersending a used page in favor of " + "a newly programmed page.";
+            }
+        }
 
-	   /// <summary>
-	   /// Get the Dallas Semiconductor part number of the iButton
-	   /// or 1-Wire Device as a string.  For example 'DS1992'.
-	   /// </summary>
-	   /// <returns> iButton or 1-Wire device name </returns>
-	   public override string Name
-	   {
-		   get
-		   {
-			  return "DS1983";
-		   }
-	   }
+        /// <summary>
+        /// Get an enumeration of memory bank instances that implement one or more
+        /// of the following interfaces:
+        /// <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>,
+        /// <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>,
+        /// and <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>. </summary>
+        /// <returns> <CODE>Enumeration</CODE> of memory banks  </returns>
+        public override IEnumerator MemoryBanks
+        {
+            get
+            {
+                List<MemoryBankEPROM> bank_vector = new List<MemoryBankEPROM>(5);
 
-	   /// <summary>
-	   /// Get the alternate Dallas Semiconductor part numbers or names.
-	   /// A 'family' of 1-Wire Network devices may have more than one part number
-	   /// depending on packaging.  There can also be nicknames such as
-	   /// 'Crypto iButton'.
-	   /// </summary>
-	   /// <returns> 1-Wire device alternate names </returns>
-	   public override string AlternateNames
-	   {
-		   get
-		   {
-			  return "DS2503";
-		   }
-	   }
+                // EPROM main bank
+                MemoryBankEPROM mn = new MemoryBankEPROM(this);
 
-	   /// <summary>
-	   /// Get a short description of the function of this iButton 
-	   /// or 1-Wire Device type.
-	   /// </summary>
-	   /// <returns> device description </returns>
-	   public override string Description
-	   {
-		   get
-		   {
-			  return "4096 bit Electrically Programmable Read Only Memory " + "(EPROM) partitioned into sixteen 256 bit pages." + "Each memory page can be permanently write-protected " + "to prevent tampering.  Architecture allows software " + "to patch data by supersending a used page in favor of " + "a newly programmed page.";
-		   }
-	   }
+                mn.numberPages = 16;
+                mn.size = 512;
 
-	   /// <summary>
-	   /// Get an enumeration of memory bank instances that implement one or more
-	   /// of the following interfaces:
-	   /// <seealso cref="com.dalsemi.onewire.container.MemoryBank MemoryBank"/>, 
-	   /// <seealso cref="com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank"/>, 
-	   /// and <seealso cref="com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank"/>. </summary>
-	   /// <returns> <CODE>Enumeration</CODE> of memory banks  </returns>
-	   public override IEnumerator MemoryBanks
-	   {
-		   get
-		   {
-			  List<MemoryBankEPROM> bank_vector = new List<MemoryBankEPROM>(5);
-    
-			  // EPROM main bank
-			  MemoryBankEPROM mn = new MemoryBankEPROM(this);
-    
-			  mn.numberPages = 16;
-			  mn.size = 512;
-    
-			  bank_vector.Add(mn);
-    
-			  // EPROM status write protect pages bank
-			  MemoryBankEPROM wp = new MemoryBankEPROM(this);
-    
-			  wp.bankDescription = "Write protect pages";
-			  wp.numberPages = 1;
-			  wp.size = 8;
-			  wp.pageLength = 8;
-			  wp.generalPurposeMemory = false;
-			  wp.extraInfo = false;
-			  wp.extraInfoLength = 0;
-			  wp.extraInfoDescription = null;
-			  wp.crcAfterAddress = false;
-			  wp.READ_PAGE_WITH_CRC = MemoryBankEPROM.STATUS_READ_PAGE_COMMAND;
-			  wp.WRITE_MEMORY_COMMAND = MemoryBankEPROM.STATUS_WRITE_COMMAND;
-    
-			  bank_vector.Add(wp);
-    
-			  // EPROM status write protect redirection bank
-			  MemoryBankEPROM wpr = new MemoryBankEPROM(this);
-    
-			  wpr.bankDescription = "Write protect redirection";
-			  wpr.numberPages = 1;
-			  wpr.size = 8;
-			  wpr.pageLength = 8;
-			  wpr.generalPurposeMemory = false;
-			  wpr.extraInfo = false;
-			  wpr.extraInfoLength = 0;
-			  wpr.extraInfoDescription = null;
-			  wpr.crcAfterAddress = false;
-			  wpr.READ_PAGE_WITH_CRC = MemoryBankEPROM.STATUS_READ_PAGE_COMMAND;
-			  wpr.WRITE_MEMORY_COMMAND = MemoryBankEPROM.STATUS_WRITE_COMMAND;
-			  wpr.startPhysicalAddress = 32;
-    
-			  bank_vector.Add(wpr);
-    
-			  // EPROM status bitmap
-			  MemoryBankEPROM bm = new MemoryBankEPROM(this);
-    
-			  bm.bankDescription = "Bitmap of used pages for file structure";
-			  bm.numberPages = 1;
-			  bm.size = 8;
-			  bm.pageLength = 8;
-			  bm.generalPurposeMemory = false;
-			  bm.extraInfo = false;
-			  bm.extraInfoLength = 0;
-			  bm.extraInfoDescription = null;
-			  bm.crcAfterAddress = false;
-			  bm.startPhysicalAddress = 64;
-			  bm.READ_PAGE_WITH_CRC = MemoryBankEPROM.STATUS_READ_PAGE_COMMAND;
-			  bm.WRITE_MEMORY_COMMAND = MemoryBankEPROM.STATUS_WRITE_COMMAND;
-    
-			  bank_vector.Add(bm);
-    
-			  // EPROM status redirection
-			  MemoryBankEPROM rd = new MemoryBankEPROM(this);
-    
-			  rd.bankDescription = "Page redirection bytes";
-			  rd.generalPurposeMemory = false;
-			  rd.numberPages = 2;
-			  rd.size = 16;
-			  rd.pageLength = 8;
-			  rd.extraInfo = false;
-			  rd.extraInfoLength = 0;
-			  rd.extraInfoDescription = null;
-			  rd.crcAfterAddress = false;
-			  rd.startPhysicalAddress = 256;
-			  rd.READ_PAGE_WITH_CRC = MemoryBankEPROM.STATUS_READ_PAGE_COMMAND;
-			  rd.WRITE_MEMORY_COMMAND = MemoryBankEPROM.STATUS_WRITE_COMMAND;
-    
-			  bank_vector.Add(rd);
-    
-			  // setup OTP features in main memory
-			  mn.mbLock = wp;
-			  mn.mbRedirect = rd;
-			  mn.mbLockRedirect = wpr;
-			  mn._redirectPage = true;
-			  mn._lockPage = true;
-			  mn._lockRedirectPage = true;
-    
-			  return bank_vector.GetEnumerator();
-		   }
-	   }
-	}
+                bank_vector.Add(mn);
 
+                // EPROM status write protect pages bank
+                MemoryBankEPROM wp = new MemoryBankEPROM(this);
+
+                wp.bankDescription = "Write protect pages";
+                wp.numberPages = 1;
+                wp.size = 8;
+                wp.pageLength = 8;
+                wp.generalPurposeMemory = false;
+                wp.extraInfo = false;
+                wp.extraInfoLength = 0;
+                wp.extraInfoDescription = null;
+                wp.crcAfterAddress = false;
+                wp.READ_PAGE_WITH_CRC = MemoryBankEPROM.STATUS_READ_PAGE_COMMAND;
+                wp.WRITE_MEMORY_COMMAND = MemoryBankEPROM.STATUS_WRITE_COMMAND;
+
+                bank_vector.Add(wp);
+
+                // EPROM status write protect redirection bank
+                MemoryBankEPROM wpr = new MemoryBankEPROM(this);
+
+                wpr.bankDescription = "Write protect redirection";
+                wpr.numberPages = 1;
+                wpr.size = 8;
+                wpr.pageLength = 8;
+                wpr.generalPurposeMemory = false;
+                wpr.extraInfo = false;
+                wpr.extraInfoLength = 0;
+                wpr.extraInfoDescription = null;
+                wpr.crcAfterAddress = false;
+                wpr.READ_PAGE_WITH_CRC = MemoryBankEPROM.STATUS_READ_PAGE_COMMAND;
+                wpr.WRITE_MEMORY_COMMAND = MemoryBankEPROM.STATUS_WRITE_COMMAND;
+                wpr.startPhysicalAddress = 32;
+
+                bank_vector.Add(wpr);
+
+                // EPROM status bitmap
+                MemoryBankEPROM bm = new MemoryBankEPROM(this);
+
+                bm.bankDescription = "Bitmap of used pages for file structure";
+                bm.numberPages = 1;
+                bm.size = 8;
+                bm.pageLength = 8;
+                bm.generalPurposeMemory = false;
+                bm.extraInfo = false;
+                bm.extraInfoLength = 0;
+                bm.extraInfoDescription = null;
+                bm.crcAfterAddress = false;
+                bm.startPhysicalAddress = 64;
+                bm.READ_PAGE_WITH_CRC = MemoryBankEPROM.STATUS_READ_PAGE_COMMAND;
+                bm.WRITE_MEMORY_COMMAND = MemoryBankEPROM.STATUS_WRITE_COMMAND;
+
+                bank_vector.Add(bm);
+
+                // EPROM status redirection
+                MemoryBankEPROM rd = new MemoryBankEPROM(this);
+
+                rd.bankDescription = "Page redirection bytes";
+                rd.generalPurposeMemory = false;
+                rd.numberPages = 2;
+                rd.size = 16;
+                rd.pageLength = 8;
+                rd.extraInfo = false;
+                rd.extraInfoLength = 0;
+                rd.extraInfoDescription = null;
+                rd.crcAfterAddress = false;
+                rd.startPhysicalAddress = 256;
+                rd.READ_PAGE_WITH_CRC = MemoryBankEPROM.STATUS_READ_PAGE_COMMAND;
+                rd.WRITE_MEMORY_COMMAND = MemoryBankEPROM.STATUS_WRITE_COMMAND;
+
+                bank_vector.Add(rd);
+
+                // setup OTP features in main memory
+                mn.mbLock = wp;
+                mn.mbRedirect = rd;
+                mn.mbLockRedirect = wpr;
+                mn._redirectPage = true;
+                mn._lockPage = true;
+                mn._lockRedirectPage = true;
+
+                return bank_vector.GetEnumerator();
+            }
+        }
+    }
 }

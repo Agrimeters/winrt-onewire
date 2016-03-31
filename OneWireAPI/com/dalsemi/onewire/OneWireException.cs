@@ -29,38 +29,34 @@
 
 namespace com.dalsemi.onewire
 {
+    // imports
 
-	// imports
+    /// <summary>
+    /// This is the general exception thrown by the iButton and 1-Wire
+    /// operations.
+    ///
+    /// @version    0.00, 21 August 2000
+    /// @author     DS
+    /// </summary>
+    public class OneWireException : Exception
+    {
+        //--------
+        //-------- Contructor
+        //--------
 
+        /// <summary>
+        /// Constructs a <code>OneWireException</code> with no detail message.
+        /// </summary>
+        public OneWireException() : base()
+        {
+        }
 
-	/// <summary>
-	/// This is the general exception thrown by the iButton and 1-Wire
-	/// operations.
-	/// 
-	/// @version    0.00, 21 August 2000
-	/// @author     DS
-	/// </summary>
-	public class OneWireException : Exception
-	{
-
-	   //--------
-	   //-------- Contructor
-	   //--------
-
-	   /// <summary>
-	   /// Constructs a <code>OneWireException</code> with no detail message.
-	   /// </summary>
-	   public OneWireException() : base()
-	   {
-	   }
-
-	   /// <summary>
-	   /// Constructs a <code>OneWireException</code> with the specified detail message.
-	   /// </summary>
-	   /// <param name="desc">   the detail message description </param>
-	   public OneWireException(string desc) : base(desc)
-	   {
-	   }
-	}
-
+        /// <summary>
+        /// Constructs a <code>OneWireException</code> with the specified detail message.
+        /// </summary>
+        /// <param name="desc">   the detail message description </param>
+        public OneWireException(string desc) : base(desc)
+        {
+        }
+    }
 }

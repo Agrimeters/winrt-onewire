@@ -27,53 +27,49 @@
 
 namespace com.dalsemi.onewire.application.tag
 {
+    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
 
-	using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+    /// <summary>
+    /// This class provides a default object for the Contact type of a tagged 1-Wire device.
+    /// </summary>
+    public class Contact : TaggedDevice, TaggedSensor
+    {
+        /// <summary>
+        /// Creates an object for the device.
+        /// </summary>
+        public Contact() : base()
+        {
+        }
 
+        /// <summary>
+        /// Creates an object for the device with the supplied address and device type connected
+        /// to the supplied port adapter. </summary>
+        /// <param name="adapter"> The adapter serving the sensor. </param>
+        /// <param name="NetAddress"> The 1-Wire network address of the sensor. </param>
+        /// <param name="netAddress"> </param>
+        public Contact(DSPortAdapter adapter, string netAddress) : base(adapter, netAddress)
+        {
+        }
 
-	/// <summary>
-	/// This class provides a default object for the Contact type of a tagged 1-Wire device.
-	/// </summary>
-	public class Contact : TaggedDevice, TaggedSensor
-	{
+        /// <summary>
+        /// The readSensor method returns the "max" string if the Sensor is
+        /// present or the "min" string if the Sensor is not present.
+        /// @param--none.
+        /// </summary>
+        /// <returns> The "max" string if sensor is present or "min" string if not. </returns>
+        public virtual string readSensor()
+        {
+            string returnString = "";
 
-	   /// <summary>
-	   /// Creates an object for the device.
-	   /// </summary>
-	   public Contact() : base()
-	   {
-	   }
-
-	   /// <summary>
-	   /// Creates an object for the device with the supplied address and device type connected
-	   /// to the supplied port adapter. </summary>
-	   /// <param name="adapter"> The adapter serving the sensor. </param>
-	   /// <param name="NetAddress"> The 1-Wire network address of the sensor. </param>
-	   /// <param name="netAddress"> </param>
-	   public Contact(DSPortAdapter adapter, string netAddress) : base(adapter, netAddress)
-	   {
-	   }
-
-	   /// <summary>
-	   /// The readSensor method returns the "max" string if the Sensor is
-	   /// present or the "min" string if the Sensor is not present.
-	   /// @param--none.
-	   /// </summary>
-	   /// <returns> The "max" string if sensor is present or "min" string if not. </returns>
-	   public virtual string readSensor()
-	   {
-		  string returnString = "";
-
-		  if (DeviceContainer.Present)
-		  {
-			 returnString = Max;
-		  }
-		  else
-		  {
-			 returnString = Min;
-		  }
-		  return returnString;
-	   }
-	}
-
+            if (DeviceContainer.Present)
+            {
+                returnString = Max;
+            }
+            else
+            {
+                returnString = Min;
+            }
+            return returnString;
+        }
+    }
 }

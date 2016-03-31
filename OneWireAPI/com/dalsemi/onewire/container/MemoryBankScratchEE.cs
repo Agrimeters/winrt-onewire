@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -30,184 +29,176 @@ using System.Threading;
 
 namespace com.dalsemi.onewire.container
 {
+    // imports
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.utils;
 
-	// imports
-	using com.dalsemi.onewire.adapter;
-	using com.dalsemi.onewire.utils;
+    /// <summary>
+    /// Memory bank class for the Scratchpad section of EEPROM iButtons and
+    /// 1-Wire devices.
+    ///
+    ///  @version    0.00, 28 Aug 2000
+    ///  @author     DS
+    /// </summary>
+    internal class MemoryBankScratchEE : MemoryBankScratch
+    {
+        /// <summary>
+        /// Copy Scratchpad Delay length
+        /// </summary>
+        protected internal byte COPY_DELAY_LEN;
 
+        /// <summary>
+        /// Mask for ES byte during copy scratchpad
+        /// </summary>
+        protected internal byte ES_MASK;
 
+        /// <summary>
+        /// Number of bytes to read for verification (only last one will be checked).
+        /// </summary>
+        protected internal int numVerificationBytes = 1;
 
-	/// <summary>
-	/// Memory bank class for the Scratchpad section of EEPROM iButtons and
-	/// 1-Wire devices.
-	/// 
-	///  @version    0.00, 28 Aug 2000
-	///  @author     DS
-	/// </summary>
-	internal class MemoryBankScratchEE : MemoryBankScratch
-	{
-	   /// <summary>
-	   /// Copy Scratchpad Delay length
-	   /// </summary>
-	   protected internal byte COPY_DELAY_LEN;
+        //--------
+        //-------- Constructor
+        //--------
 
-	   /// <summary>
-	   /// Mask for ES byte during copy scratchpad
-	   /// </summary>
-	   protected internal byte ES_MASK;
+        /// <summary>
+        /// Memory bank contstuctor.  Requires reference to the OneWireContainer
+        /// this memory bank resides on.
+        /// </summary>
+        public MemoryBankScratchEE(OneWireContainer ibutton) : base(ibutton)
+        {
+            // default copy scratchpad delay
+            COPY_DELAY_LEN = (byte)5;
 
-	   /// <summary>
-	   /// Number of bytes to read for verification (only last one will be checked).
-	   /// </summary>
-	   protected internal int numVerificationBytes = 1;
+            // default ES mask for copy scratchpad
+            ES_MASK = 0;
+        }
 
-	   //--------
-	   //-------- Constructor
-	   //--------
+        //--------
+        //-------- ScratchPad methods
+        //--------
 
-	   /// <summary>
-	   /// Memory bank contstuctor.  Requires reference to the OneWireContainer
-	   /// this memory bank resides on.
-	   /// </summary>
-	   public MemoryBankScratchEE(OneWireContainer ibutton) : base(ibutton)
-	   {
+        /// <summary>
+        /// Write to the scratchpad page of memory a NVRAM device.
+        /// </summary>
+        /// <param name="startAddr">     starting address </param>
+        /// <param name="writeBuf">      byte array containing data to write </param>
+        /// <param name="offset">        offset into readBuf to place data </param>
+        /// <param name="len">           length in bytes to write
+        /// </param>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        public override void writeScratchpad(int startAddr, byte[] writeBuf, int offset, int len)
+        {
+            bool calcCRC = false;
 
-		  // default copy scratchpad delay
-		  COPY_DELAY_LEN = (byte) 5;
+            // select the device
+            if (!ib.adapter.select(ib.address))
+            {
+                forceVerify();
 
-		  // default ES mask for copy scratchpad 
-		  ES_MASK = 0;
-	   }
+                throw new OneWireIOException("Device select failed");
+            }
 
-	   //--------
-	   //-------- ScratchPad methods
-	   //--------
+            // build block to send
+            byte[] raw_buf = new byte[37];
 
-	   /// <summary>
-	   /// Write to the scratchpad page of memory a NVRAM device.
-	   /// </summary>
-	   /// <param name="startAddr">     starting address </param>
-	   /// <param name="writeBuf">      byte array containing data to write </param>
-	   /// <param name="offset">        offset into readBuf to place data </param>
-	   /// <param name="len">           length in bytes to write
-	   /// </param>
-	   /// <exception cref="OneWireIOException"> </exception>
-	   /// <exception cref="OneWireException"> </exception>
-	   public override void writeScratchpad(int startAddr, byte[] writeBuf, int offset, int len)
-	   {
-		  bool calcCRC = false;
+            raw_buf[0] = WRITE_SCRATCHPAD_COMMAND;
+            raw_buf[1] = (byte)(startAddr & 0xFF);
+            raw_buf[2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
 
-		  // select the device
-		  if (!ib.adapter.select(ib.address))
-		  {
-			 forceVerify();
+            Array.Copy(writeBuf, offset, raw_buf, 3, len);
 
-			 throw new OneWireIOException("Device select failed");
-		  }
+            // check if full page (can utilize CRC)
+            if (((startAddr + len) % pageLength) == 0)
+            {
+                Array.Copy(ffBlock, 0, raw_buf, len + 3, 2);
 
-		  // build block to send
-		  byte[] raw_buf = new byte [37];
+                calcCRC = true;
+            }
 
-		  raw_buf [0] = WRITE_SCRATCHPAD_COMMAND;
-		  raw_buf [1] = (byte)(startAddr & 0xFF);
-		  raw_buf [2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
+            // send block, return result
+            ib.adapter.dataBlock(raw_buf, 0, len + 3 + ((calcCRC) ? 2 : 0));
 
-		  Array.Copy(writeBuf, offset, raw_buf, 3, len);
+            // check crc
+            if (calcCRC)
+            {
+                if (CRC16.compute(raw_buf, 0, len + 5, 0) != 0x0000B001)
+                {
+                    forceVerify();
 
-		  // check if full page (can utilize CRC)
-		  if (((startAddr + len) % pageLength) == 0)
-		  {
-			 Array.Copy(ffBlock, 0, raw_buf, len + 3, 2);
+                    throw new OneWireIOException("Invalid CRC16 read from device");
+                }
+            }
+        }
 
-			 calcCRC = true;
-		  }
+        /// <summary>
+        /// Copy the scratchpad page to memory.
+        /// </summary>
+        /// <param name="startAddr">     starting address </param>
+        /// <param name="len">           length in bytes that was written already
+        /// </param>
+        /// <exception cref="OneWireIOException"> </exception>
+        /// <exception cref="OneWireException"> </exception>
+        public override void copyScratchpad(int startAddr, int len)
+        {
+            // select the device
+            if (!ib.adapter.select(ib.address))
+            {
+                forceVerify();
 
-		  // send block, return result 
-		  ib.adapter.dataBlock(raw_buf, 0, len + 3 + ((calcCRC) ? 2 : 0));
+                throw new OneWireIOException("Device select failed");
+            }
 
-		  // check crc
-		  if (calcCRC)
-		  {
-			 if (CRC16.compute(raw_buf, 0, len + 5, 0) != 0x0000B001)
-			 {
-				forceVerify();
+            // build block to send
+            byte[] raw_buf = new byte[3];
 
-				throw new OneWireIOException("Invalid CRC16 read from device");
-			 }
-		  }
-	   }
+            raw_buf[0] = COPY_SCRATCHPAD_COMMAND;
+            raw_buf[1] = (byte)(startAddr & 0xFF);
+            raw_buf[2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
 
-	   /// <summary>
-	   /// Copy the scratchpad page to memory.
-	   /// </summary>
-	   /// <param name="startAddr">     starting address </param>
-	   /// <param name="len">           length in bytes that was written already
-	   /// </param>
-	   /// <exception cref="OneWireIOException"> </exception>
-	   /// <exception cref="OneWireException"> </exception>
-	   public override void copyScratchpad(int startAddr, int len)
-	   {
+            // send block (command, address)
+            ib.adapter.dataBlock(raw_buf, 0, 3);
 
-		  // select the device
-		  if (!ib.adapter.select(ib.address))
-		  {
-			 forceVerify();
+            try
+            {
+                // setup strong pullup
+                ib.adapter.PowerDuration = DSPortAdapter.DELIVERY_INFINITE;
+                ib.adapter.startPowerDelivery(DSPortAdapter.CONDITION_AFTER_BYTE);
 
-			 throw new OneWireIOException("Device select failed");
-		  }
+                // send the offset and start power delivery
+                ib.adapter.putByte((byte)(((startAddr + len - 1) & (pageLength - 1))) | ES_MASK);
 
-		  // build block to send
-		  byte[] raw_buf = new byte [3];
+                // delay for ms
+                Thread.Sleep(COPY_DELAY_LEN);
 
-		  raw_buf [0] = COPY_SCRATCHPAD_COMMAND;
-		  raw_buf [1] = (byte)(startAddr & 0xFF);
-		  raw_buf [2] = (byte)(((int)((uint)(startAddr & 0xFFFF) >> 8)) & 0xFF);
+                // disable power
+                ib.adapter.setPowerNormal();
 
-		  // send block (command, address)
-		  ib.adapter.dataBlock(raw_buf, 0, 3);
+                // check if complete
+                byte rslt = 0;
+                if (numVerificationBytes == 1)
+                {
+                    rslt = (byte)ib.adapter.Byte;
+                }
+                else
+                {
+                    raw_buf = new byte[numVerificationBytes];
+                    ib.adapter.getBlock(raw_buf, 0, numVerificationBytes);
+                    rslt = raw_buf[numVerificationBytes - 1];
+                }
 
-		  try
-		  {
+                if (((byte)(rslt & 0x0F0) != (byte)0xA0) && ((byte)(rslt & 0x0F0) != 0x50))
+                {
+                    forceVerify();
 
-			 // setup strong pullup
-			 ib.adapter.PowerDuration = DSPortAdapter.DELIVERY_INFINITE;
-			 ib.adapter.startPowerDelivery(DSPortAdapter.CONDITION_AFTER_BYTE);
-
-
-			 // send the offset and start power delivery
-			 ib.adapter.putByte((byte)(((startAddr + len - 1) & (pageLength - 1))) | ES_MASK);
-
-			 // delay for ms
-			 Thread.Sleep(COPY_DELAY_LEN);
-
-			 // disable power
-			 ib.adapter.setPowerNormal();
-
-			 // check if complete
-			 byte rslt = 0;
-			 if (numVerificationBytes == 1)
-			 {
-				rslt = (byte) ib.adapter.Byte;
-			 }
-			 else
-			 {
-				raw_buf = new byte[numVerificationBytes];
-				ib.adapter.getBlock(raw_buf, 0, numVerificationBytes);
-				rslt = raw_buf[numVerificationBytes - 1];
-			 }
-
-			 if (((byte)(rslt & 0x0F0) != (byte) 0xA0) && ((byte)(rslt & 0x0F0) != 0x50))
-			 {
-				forceVerify();
-
-				throw new OneWireIOException("Copy scratchpad complete not found");
-			 }
-		  }
-		  catch (InterruptedException)
-		  {
-		  }
-		  ;
-	   }
-	}
-
+                    throw new OneWireIOException("Copy scratchpad complete not found");
+                }
+            }
+            catch (InterruptedException)
+            {
+            }
+           ;
+        }
+    }
 }

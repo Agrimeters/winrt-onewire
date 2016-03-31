@@ -29,37 +29,34 @@
 
 namespace com.dalsemi.onewire.application.tag
 {
+    public interface TaggedActuator
+    {
+        /// <summary>
+        /// Get the possible selection states of this actuator
+        /// </summary>
+        /// <returns> result of sensor reading </returns>
+        List<string> Selections { get; }
 
-	public interface TaggedActuator
-	{
+        /// <summary>
+        /// Set the selectionof this actuator
+        /// </summary>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error such as
+        ///         reading an incorrect CRC from a 1-Wire device.  This could be
+        ///         caused by a physical interruption in the 1-Wire Network due to
+        ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
+        /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
+        ///         adapter </exception>
+        string Selection { set; }
 
-	   /// <summary>
-	   /// Get the possible selection states of this actuator
-	   /// </summary>
-	   /// <returns> result of sensor reading </returns>
-	   List<string> Selections { get; }
-
-	   /// <summary>
-	   /// Set the selectionof this actuator
-	   /// </summary>
-	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error such as 
-	   ///         reading an incorrect CRC from a 1-Wire device.  This could be
-	   ///         caused by a physical interruption in the 1-Wire Network due to 
-	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
-	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire 
-	   ///         adapter </exception>
-	   string Selection {set;}
-
-	   /// <summary>
-	   /// Initialize the actuator
-	   /// </summary>
-	   /// <exception cref="OneWireIOException"> on a 1-Wire communication error such as 
-	   ///         reading an incorrect CRC from a 1-Wire device.  This could be
-	   ///         caused by a physical interruption in the 1-Wire Network due to 
-	   ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
-	   /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire 
-	   ///         adapter </exception>
-	   void initActuator();
-	}
-
+        /// <summary>
+        /// Initialize the actuator
+        /// </summary>
+        /// <exception cref="OneWireIOException"> on a 1-Wire communication error such as
+        ///         reading an incorrect CRC from a 1-Wire device.  This could be
+        ///         caused by a physical interruption in the 1-Wire Network due to
+        ///         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'. </exception>
+        /// <exception cref="OneWireException"> on a communication or setup error with the 1-Wire
+        ///         adapter </exception>
+        void initActuator();
+    }
 }

@@ -29,132 +29,129 @@
 
 namespace com.dalsemi.onewire.application.tag
 {
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.container;
 
-	using com.dalsemi.onewire.adapter;
-	using com.dalsemi.onewire.container;
+    /// <summary>
+    /// This class provides a default object for the D2A type of a tagged 1-Wire device.
+    /// </summary>
+    public class D2A : TaggedDevice, TaggedActuator
+    {
+        /// <summary>
+        /// Creates an object for the device.
+        /// </summary>
+        public D2A() : base()
+        {
+            ActuatorSelections = new List<string>();
+        }
 
-	/// <summary>
-	/// This class provides a default object for the D2A type of a tagged 1-Wire device.
-	/// </summary>
-	public class D2A : TaggedDevice, TaggedActuator
-	{
-	   /// <summary>
-	   /// Creates an object for the device.
-	   /// </summary>
-	   public D2A() : base()
-	   {
-		  ActuatorSelections = new List<string>();
-	   }
+        /// <summary>
+        /// Creates an object for the device with the supplied address connected
+        /// to the supplied port adapter. </summary>
+        /// <param name="adapter"> The adapter serving the actuator. </param>
+        /// <param name="netAddress"> The 1-Wire network address of the actuator. </param>
+        public D2A(DSPortAdapter adapter, string netAddress) : base(adapter, netAddress)
+        {
+            ActuatorSelections = new List<string>();
+        }
 
-	   /// <summary>
-	   /// Creates an object for the device with the supplied address connected
-	   /// to the supplied port adapter. </summary>
-	   /// <param name="adapter"> The adapter serving the actuator. </param>
-	   /// <param name="netAddress"> The 1-Wire network address of the actuator. </param>
-	   public D2A(DSPortAdapter adapter, string netAddress) : base(adapter, netAddress)
-	   {
-		  ActuatorSelections = new List<string>();
-	   }
+        /// <summary>
+        /// Get the possible selection states of this actuator
+        /// </summary>
+        /// <returns> Vector of Strings representing selection states. </returns>
+        public virtual List<string> Selections
+        {
+            get
+            {
+                return ActuatorSelections;
+            }
+        }
 
-	   /// <summary>
-	   /// Get the possible selection states of this actuator
-	   /// </summary>
-	   /// <returns> Vector of Strings representing selection states. </returns>
-	   public virtual List<string> Selections
-	   {
-		   get
-		   {
-			  return ActuatorSelections;
-		   }
-	   }
+        /// <summary>
+        /// Set the selection of this actuator
+        /// </summary>
+        /// <param name="The"> selection string.
+        /// </param>
+        /// <exception cref="OneWireException">
+        ///  </exception>
+        public virtual string Selection
+        {
+            set
+            {
+                PotentiometerContainer pc = DeviceContainer as PotentiometerContainer;
+                int Index = 0;
+                Index = ActuatorSelections.IndexOf(value);
+                // must first read the device
+                byte[] state = pc.readDevice();
+                // set current wiper number from xml tag "channel"
+                pc.setCurrentWiperNumber(Channel, state);
+                // now, write to device to set the wiper number
+                pc.writeDevice(state);
 
-	   /// <summary>
-	   /// Set the selection of this actuator
-	   /// </summary>
-	   /// <param name="The"> selection string.
-	   /// </param>
-	   /// <exception cref="OneWireException">
-	   ///  </exception>
-	   public virtual string Selection
-	   {
-		   set
-		   {
-			  PotentiometerContainer pc = DeviceContainer as PotentiometerContainer;
-			  int Index = 0;
-			  Index = ActuatorSelections.IndexOf(value);
-			  // must first read the device
-			  byte[] state = pc.readDevice();
-			  // set current wiper number from xml tag "channel"
-			  pc.setCurrentWiperNumber(Channel, state);
-			  // now, write to device to set the wiper number
-			  pc.writeDevice(state);
-    
-			  if (Index > -1) // means value is in the vector
-			  {
-				 // write wiper position to part
-				 state = pc.readDevice(); // read it first
-                 pc.setWiperPosition(Index); // set wiper position in state variable
-				 pc.writeDevice(state);
-			  }
-		   }
-	   }
+                if (Index > -1) // means value is in the vector
+                {
+                    // write wiper position to part
+                    state = pc.readDevice(); // read it first
+                    pc.setWiperPosition(Index); // set wiper position in state variable
+                    pc.writeDevice(state);
+                }
+            }
+        }
 
-	   // Selections for the D2A actuator:
-	   // element 0 ->   Means change to the first wiper position.
-	   //                
-	   // element 1 ->   Means change to the second wiper position. 
-	   //              
-	   //    .
-	   //    .
-	   //    .
-	   // last element 255? -> Means change to the last wiper position.
+        // Selections for the D2A actuator:
+        // element 0 ->   Means change to the first wiper position.
+        //
+        // element 1 ->   Means change to the second wiper position.
+        //
+        //    .
+        //    .
+        //    .
+        // last element 255? -> Means change to the last wiper position.
 
-	   /// <summary>
-	   /// Initializes the actuator </summary>
-	   /// <param name="Init"> The initialization string.
-	   /// </param>
-	   /// <exception cref="OneWireException">
-	   ///  </exception>
-	   public virtual void initActuator()
-	   {
-		  PotentiometerContainer pc = (PotentiometerContainer) DeviceContainer;
-		  int numOfWiperSettings;
-		  int resistance;
-		  double offset = 0.6; // this seems about right...
-		  double wiperResistance;
-		  string selectionString;
-		  // initialize the ActuatorSelections Vector
-		  // must first read the device
-		  byte[] state = pc.readDevice();
-		  // set current wiper number from xml tag "channel"
-		  pc.setCurrentWiperNumber(Channel, state);
-		  // now, write to device to set the wiper number
-		  pc.writeDevice(state);
-		  // now, extract some values to initialize the ActuatorSelections
-		  // get the number of wiper positions
-		  numOfWiperSettings = pc.numberOfWiperSettings(state);
-		  // get the resistance value in k-Ohms
-		  resistance = pc.potentiometerResistance(state);
-		  // calculate wiper resistance
-		  wiperResistance = (double)((double)(resistance - offset) / (double)numOfWiperSettings);
-		  // add the values to the ActuatorSelections Vector
-		  selectionString = resistance + " k-Ohms"; // make sure the first
-		  ActuatorSelections.Add(selectionString); // element is the entire resistance
-		  for (int i = (numOfWiperSettings - 2); i > -1; i--)
-		  {
-			 double newWiperResistance = (double)(wiperResistance * (double)i);
-			 // round the values before putting them in drop-down list
-			 int roundedWiperResistance = (int)((newWiperResistance + offset) * 10000);
-			 selectionString = (double)((double)roundedWiperResistance / 10000.0) + " k-Ohms";
-			 ActuatorSelections.Add(selectionString);
-		  }
-	   }
+        /// <summary>
+        /// Initializes the actuator </summary>
+        /// <param name="Init"> The initialization string.
+        /// </param>
+        /// <exception cref="OneWireException">
+        ///  </exception>
+        public virtual void initActuator()
+        {
+            PotentiometerContainer pc = (PotentiometerContainer)DeviceContainer;
+            int numOfWiperSettings;
+            int resistance;
+            double offset = 0.6; // this seems about right...
+            double wiperResistance;
+            string selectionString;
+            // initialize the ActuatorSelections Vector
+            // must first read the device
+            byte[] state = pc.readDevice();
+            // set current wiper number from xml tag "channel"
+            pc.setCurrentWiperNumber(Channel, state);
+            // now, write to device to set the wiper number
+            pc.writeDevice(state);
+            // now, extract some values to initialize the ActuatorSelections
+            // get the number of wiper positions
+            numOfWiperSettings = pc.numberOfWiperSettings(state);
+            // get the resistance value in k-Ohms
+            resistance = pc.potentiometerResistance(state);
+            // calculate wiper resistance
+            wiperResistance = (double)((double)(resistance - offset) / (double)numOfWiperSettings);
+            // add the values to the ActuatorSelections Vector
+            selectionString = resistance + " k-Ohms"; // make sure the first
+            ActuatorSelections.Add(selectionString); // element is the entire resistance
+            for (int i = (numOfWiperSettings - 2); i > -1; i--)
+            {
+                double newWiperResistance = (double)(wiperResistance * (double)i);
+                // round the values before putting them in drop-down list
+                int roundedWiperResistance = (int)((newWiperResistance + offset) * 10000);
+                selectionString = (double)((double)roundedWiperResistance / 10000.0) + " k-Ohms";
+                ActuatorSelections.Add(selectionString);
+            }
+        }
 
-	   /// <summary>
-	   /// Keeps the selections of this actuator
-	   /// </summary>
-	   private List<string> ActuatorSelections;
-	}
-
-
+        /// <summary>
+        /// Keeps the selections of this actuator
+        /// </summary>
+        private List<string> ActuatorSelections;
+    }
 }

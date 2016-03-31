@@ -27,18 +27,17 @@
 
 namespace com.dalsemi.onewire.application.file
 {
-
-	/// <summary>
-	/// Represents a failed 1-Wire memory sync operation.
-	/// </summary>
-	public class OWSyncFailedException : System.Exception
-	{
-	   /// <summary>
-	   /// Constructs a SyncFailedException with a the given message.
-	   /// </summary>
-	   /// <param name="desc">  a String describing the exception. </param>
-	   public OWSyncFailedException(string desc) : base(desc)
-	   {
-	   }
-	}
+    /// <summary>
+    /// Represents a failed 1-Wire memory sync operation.
+    /// </summary>
+    public class OWSyncFailedException : System.Exception
+    {
+        /// <summary>
+        /// Constructs a SyncFailedException with a the given message.
+        /// </summary>
+        /// <param name="desc">  a String describing the exception. </param>
+        public OWSyncFailedException(string desc) : base(desc)
+        {
+        }
+    }
 }

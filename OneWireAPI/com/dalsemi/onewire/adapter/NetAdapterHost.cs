@@ -46,13 +46,13 @@ namespace com.dalsemi.onewire.adapter
     /// <P>NetAdapterHost is the host (or server) component for a network-based
     /// DSPortAdapter.  It actually wraps the hardware DSPortAdapter and handles
     /// connections from outside sources (NetAdapter) who want to access it.</P>
-    /// 
+    ///
     /// <P>NetAdapterHost is designed to be run in a thread, waiting for incoming
     /// connections.  You can run this in the same thread as your main program or
     /// you can establish the connections yourself (presumably using some higher
     /// level of security) and then call the <code>handleConnection(Socket)</code> </summary>
     /// {<seealso cref= #handleConnection(Socket)}.</P>
-    /// 
+    ///
     /// <P>Once a NetAdapter is connected with the host, a version check is performed
     /// followed by a simple authentication step.  The authentication is dependent
     /// upon a secret shared between the NetAdapter and the host.  Both will use
@@ -64,18 +64,18 @@ namespace com.dalsemi.onewire.adapter
     /// </ul>
     /// Optionally, the secret can be set by calling the <code>setSecret(String)</code> </seealso>
     /// {<seealso cref= #setSecret(String)}</P>
-    /// 
+    ///
     /// <P>The NetAdapter and NetAdapterHost support multicast broadcasts for
     /// automatic discovery of compatible servers on your LAN.  To start the
     /// multicast listener for this NetAdapterHost, call the
     /// <code>createMulticastListener()</code> method </seealso>
     /// {<seealso cref= #createMulticastListener()}.</P>
-    /// 
+    ///
     /// <P>For information on creating the client component, see the JavaDocs
     /// for the  <seealso cref="com.dalsemi.onewire.adapter.NetAdapter NetAdapter"/>.
     /// </seealso>
     /// <seealso cref= NetAdapter
-    /// 
+    ///
     /// @author SH
     /// @version    1.00, 9 Jan 2002 </seealso>
     public class NetAdapterHost : IDisposable
@@ -128,7 +128,7 @@ namespace com.dalsemi.onewire.adapter
         /// <P>Creates an instance of a NetAdapterHost which wraps the provided
         /// adapter.  The host listens on the default port as specified by
         /// NetAdapterConstants.</P>
-        /// 
+        ///
         /// <P>Note that the secret used for authentication is the value specified
         /// in the onewire.properties file as "NetAdapter.secret=mySecret".
         /// To set the secret to another value, use the
@@ -146,7 +146,7 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// <P>Creates a single-threaded instance of a NetAdapterHost which wraps the
         /// provided adapter.  The host listens on the specified port.</P>
-        /// 
+        ///
         /// <P>Note that the secret used for authentication is the value specified
         /// in the onewire.properties file as "NetAdapter.secret=mySecret".
         /// To set the secret to another value, use the
@@ -166,7 +166,7 @@ namespace com.dalsemi.onewire.adapter
         /// <P>Creates an (optionally multithreaded) instance of a NetAdapterHost
         /// which wraps the provided adapter.  The listen port is set to the
         /// default port as defined in NetAdapterConstants.</P>
-        /// 
+        ///
         /// <P>Note that the secret used for authentication is the value specified
         /// in the onewire.properties file as "NetAdapter.secret=mySecret".
         /// To set the secret to another value, use the
@@ -186,7 +186,7 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// <P>Creates an (optionally multi-threaded) instance of a NetAdapterHost which
         /// wraps the provided adapter.  The host listens on the specified port.</P>
-        /// 
+        ///
         /// <P>Note that the secret used for authentication is the value specified
         /// in the onewire.properties file as "NetAdapter.secret=mySecret".
         /// To set the secret to another value, use the
@@ -232,7 +232,7 @@ namespace com.dalsemi.onewire.adapter
         /// <P>Creates an instance of a NetAdapterHost which wraps the provided
         /// adapter.  The host listens on the default port as specified by
         /// NetAdapterConstants.</P>
-        /// 
+        ///
         /// <P>Note that the secret used for authentication is the value specified
         /// in the onewire.properties file as "NetAdapter.secret=mySecret".
         /// To set the secret to another value, use the
@@ -251,7 +251,7 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// <P>Creates an (optionally multi-threaded) instance of a NetAdapterHost which
         /// wraps the provided adapter.  The host listens on the specified port.</P>
-        /// 
+        ///
         /// <P>Note that the secret used for authentication is the value specified
         /// in the onewire.properties file as "NetAdapter.secret=mySecret".
         /// To set the secret to another value, use the
@@ -353,7 +353,6 @@ namespace com.dalsemi.onewire.adapter
                 multicastListener = new MulticastListener(port, group, versionBytes, listenPortBytes);
             }
         }
-
 
         /// <summary>
         /// Run method for threaded NetAdapterHost.  Maintains server socket which
@@ -482,7 +481,6 @@ namespace com.dalsemi.onewire.adapter
                     return;
                 }
 
-
                 bool valid_address = false;
 
                 if (hostName.CanonicalName.Equals("127.0.0.1"))
@@ -503,7 +501,6 @@ namespace com.dalsemi.onewire.adapter
                     }
                 }
 
-
                 if (!valid_address)
                 {
                     OneWireEventSource.Log.Critical("Error: Invalid host name specified: " + HostNameForServer);
@@ -520,7 +517,6 @@ namespace com.dalsemi.onewire.adapter
                 this.serverSocket = new StreamSocketListener();
                 this.serverSocket.ConnectionReceived += OnConnection;
                 this.serverSocket.Control.KeepAlive = false;
-
 
                 if (selectedLocalHost != null)
                 {
@@ -594,9 +590,11 @@ namespace com.dalsemi.onewire.adapter
             //byte cmd = 0x00;
 
             byte[] cmd = conn.ReadBlocking(conn, 1);
+            if (cmd.Equals(null))
+                return;
 
             OneWireEventSource.Log.Debug("\n------------------------------------------");
-            OneWireEventSource.Log.Debug("CMD received: " + cmd[0].ToString("X"));
+            //OneWireEventSource.Log.Debug("CMD received: " + cmd[0].ToString("X"));
 
             try
             {
@@ -609,6 +607,7 @@ namespace com.dalsemi.onewire.adapter
                         conn.output.WriteByte(NetAdapterConstants.RET_SUCCESS);
                         await conn.output.StoreAsync();
                         break;
+
                     case NetAdapterConstants.CMD_CLOSECONNECTION:
                         close(conn);
                         break;
@@ -616,21 +615,27 @@ namespace com.dalsemi.onewire.adapter
                     case NetAdapterConstants.CMD_RESET:
                         adapterReset(conn);
                         break;
+
                     case NetAdapterConstants.CMD_PUTBIT:
                         adapterPutBit(conn);
                         break;
+
                     case NetAdapterConstants.CMD_PUTBYTE:
                         adapterPutByte(conn);
                         break;
+
                     case NetAdapterConstants.CMD_GETBIT:
                         adapterGetBit(conn);
                         break;
+
                     case NetAdapterConstants.CMD_GETBYTE:
                         adapterGetByte(conn);
                         break;
+
                     case NetAdapterConstants.CMD_GETBLOCK:
                         adapterGetBlock(conn);
                         break;
+
                     case NetAdapterConstants.CMD_DATABLOCK:
                         adapterDataBlock(conn);
                         break;
@@ -638,18 +643,23 @@ namespace com.dalsemi.onewire.adapter
                     case NetAdapterConstants.CMD_SETPOWERDURATION:
                         adapterSetPowerDuration(conn);
                         break;
+
                     case NetAdapterConstants.CMD_STARTPOWERDELIVERY:
                         adapterStartPowerDelivery(conn);
                         break;
+
                     case NetAdapterConstants.CMD_SETPROGRAMPULSEDURATION:
                         adapterSetProgramPulseDuration(conn);
                         break;
+
                     case NetAdapterConstants.CMD_STARTPROGRAMPULSE:
                         adapterStartProgramPulse(conn);
                         break;
+
                     case NetAdapterConstants.CMD_STARTBREAK:
                         adapterStartBreak(conn);
                         break;
+
                     case NetAdapterConstants.CMD_SETPOWERNORMAL:
                         adapterSetPowerNormal(conn);
                         break;
@@ -657,6 +667,7 @@ namespace com.dalsemi.onewire.adapter
                     case NetAdapterConstants.CMD_SETSPEED:
                         adapterSetSpeed(conn);
                         break;
+
                     case NetAdapterConstants.CMD_GETSPEED:
                         adapterGetSpeed(conn);
                         break;
@@ -664,6 +675,7 @@ namespace com.dalsemi.onewire.adapter
                     case NetAdapterConstants.CMD_BEGINEXCLUSIVE:
                         adapterBeginExclusive(conn);
                         break;
+
                     case NetAdapterConstants.CMD_ENDEXCLUSIVE:
                         adapterEndExclusive(conn);
                         break;
@@ -671,27 +683,35 @@ namespace com.dalsemi.onewire.adapter
                     case NetAdapterConstants.CMD_FINDFIRSTDEVICE:
                         adapterFindFirstDevice(conn);
                         break;
+
                     case NetAdapterConstants.CMD_FINDNEXTDEVICE:
                         adapterFindNextDevice(conn);
                         break;
+
                     case NetAdapterConstants.CMD_GETADDRESS:
                         adapterGetAddress(conn);
                         break;
+
                     case NetAdapterConstants.CMD_SETSEARCHONLYALARMINGDEVICES:
                         adapterSetSearchOnlyAlarmingDevices(conn);
                         break;
+
                     case NetAdapterConstants.CMD_SETNORESETSEARCH:
                         adapterSetNoResetSearch(conn);
                         break;
+
                     case NetAdapterConstants.CMD_SETSEARCHALLDEVICES:
                         adapterSetSearchAllDevices(conn);
                         break;
+
                     case NetAdapterConstants.CMD_TARGETALLFAMILIES:
                         adapterTargetAllFamilies(conn);
                         break;
+
                     case NetAdapterConstants.CMD_TARGETFAMILY:
                         adapterTargetFamily(conn);
                         break;
+
                     case NetAdapterConstants.CMD_EXCLUDEFAMILY:
                         adapterExcludeFamily(conn);
                         break;
@@ -699,24 +719,31 @@ namespace com.dalsemi.onewire.adapter
                     case NetAdapterConstants.CMD_CANBREAK:
                         adapterCanBreak(conn);
                         break;
+
                     case NetAdapterConstants.CMD_CANDELIVERPOWER:
                         adapterCanDeliverPower(conn);
                         break;
+
                     case NetAdapterConstants.CMD_CANDELIVERSMARTPOWER:
                         adapterCanDeliverSmartPower(conn);
                         break;
+
                     case NetAdapterConstants.CMD_CANFLEX:
                         adapterCanFlex(conn);
                         break;
+
                     case NetAdapterConstants.CMD_CANHYPERDRIVE:
                         adapterCanHyperdrive(conn);
                         break;
+
                     case NetAdapterConstants.CMD_CANOVERDRIVE:
                         adapterCanOverdrive(conn);
                         break;
+
                     case NetAdapterConstants.CMD_CANPROGRAM:
                         adapterCanProgram(conn);
                         break;
+
                     default:
                         OneWireEventSource.Log.Debug("Unknown command: " + cmd[0].ToString("X"));
                         break;
@@ -757,7 +784,6 @@ namespace com.dalsemi.onewire.adapter
             { //drain
                 ;
             }
-
 
             // ensure that there is no exclusive use of the adapter
             adapter.endExclusive();
@@ -1163,7 +1189,6 @@ namespace com.dalsemi.onewire.adapter
             await conn.output.StoreAsync();
         }
 
-
         //--------
         //-------- Adapter feature methods
         //--------
@@ -1267,7 +1292,6 @@ namespace com.dalsemi.onewire.adapter
             /// </summary>
             private volatile bool handlerRunning = false;
 
-
             private async Task<bool> SetupConnection(NetAdapterHost outerInstance, NetAdapterConstants.Connection c)
             {
                 // first thing transmitted should be version info
@@ -1288,7 +1312,7 @@ namespace com.dalsemi.onewire.adapter
                 crc = CRC16.compute(chlg, crc);
 
                 byte[] res = conn.ReadBlocking(conn, sizeof(Int32));
-                if(BitConverter.IsLittleEndian)
+                if (BitConverter.IsLittleEndian)
                     Array.Reverse(res);
                 int answer = BitConverter.ToInt32(res, 0);
 
@@ -1333,7 +1357,6 @@ namespace com.dalsemi.onewire.adapter
 
                 var t = Task.Run(async () => { await SetupConnection(outerInstance, this.conn); });
                 t.Wait();
-                
             }
 
             /// <summary>
@@ -1455,7 +1478,7 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Helper class describing a NetworkAdapter and its associated IP address
         /// </summary>
-        class LocalHostItem
+        private class LocalHostItem
         {
             public string DisplayString
             {
@@ -1486,6 +1509,5 @@ namespace com.dalsemi.onewire.adapter
                     " Adapter: " + localHostName.IPInformation.NetworkAdapter.NetworkAdapterId;
             }
         }
-
     }
 }

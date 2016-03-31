@@ -28,6 +28,5 @@
   <Library Name="OneWireAPI">
 
   	<!-- add directives for your library here -->
-
   </Library>
 </Directives>

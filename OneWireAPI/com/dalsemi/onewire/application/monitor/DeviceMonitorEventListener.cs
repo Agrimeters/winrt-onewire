@@ -24,34 +24,34 @@
  * Branding Policy.
  *---------------------------------------------------------------------------
  */
+
 namespace com.dalsemi.onewire.application.monitor
 {
+    /// <summary>
+    /// Interface for classes which will listen to device monitor
+    /// events such as arrivals, departures, and network exceptions.
+    ///
+    /// @author SH
+    /// @version 1.00
+    /// </summary>
+    public interface DeviceMonitorEventListener
+    {
+        /// <summary>
+        /// Arrival event
+        /// </summary>
+        /// <param name="dme"> arrival event </param>
+        void deviceArrival(DeviceMonitorEvent dme);
 
-	/// <summary>
-	/// Interface for classes which will listen to device monitor
-	/// events such as arrivals, departures, and network exceptions.
-	/// 
-	/// @author SH
-	/// @version 1.00
-	/// </summary>
-	public interface DeviceMonitorEventListener
-	{
-	   /// <summary>
-	   /// Arrival event
-	   /// </summary>
-	   /// <param name="dme"> arrival event </param>
-	   void deviceArrival(DeviceMonitorEvent dme);
+        /// <summary>
+        /// Depart event
+        /// </summary>
+        /// <param name="dme"> departure event </param>
+        void deviceDeparture(DeviceMonitorEvent dme);
 
-	   /// <summary>
-	   /// Depart event
-	   /// </summary>
-	   /// <param name="dme"> departure event </param>
-	   void deviceDeparture(DeviceMonitorEvent dme);
-
-	   /// <summary>
-	   /// Exception event
-	   /// </summary>
-	   /// <param name="dme"> an exception generated during search. </param>
-	   void networkException(DeviceMonitorException dme);
-	}
+        /// <summary>
+        /// Exception event
+        /// </summary>
+        /// <param name="dme"> an exception generated during search. </param>
+        void networkException(DeviceMonitorException dme);
+    }
 }

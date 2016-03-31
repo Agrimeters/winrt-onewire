@@ -27,185 +27,181 @@
 
 namespace com.dalsemi.onewire.utils
 {
+    /// <summary>
+    /// CRC8 is a class to contain an implementation of the
+    /// Cyclic-Redundency-Check CRC8 for the iButton.  The CRC8 is used
+    /// in the 1-Wire Network address of all iButtons and 1-Wire
+    /// devices.
+    /// <para>
+    /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
+    ///
+    /// @version    0.00, 28 Aug 2000
+    /// @author     DS
+    ///
+    /// </para>
+    /// </summary>
+    public class CRC8
+    {
+        //--------
+        //-------- Variables
+        //--------
 
-	/// <summary>
-	/// CRC8 is a class to contain an implementation of the
-	/// Cyclic-Redundency-Check CRC8 for the iButton.  The CRC8 is used
-	/// in the 1-Wire Network address of all iButtons and 1-Wire
-	/// devices.
-	/// <para>
-	/// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
-	/// 
-	/// @version    0.00, 28 Aug 2000
-	/// @author     DS
-	/// 
-	/// </para>
-	/// </summary>
-	public class CRC8
-	{
+        /// <summary>
+        /// CRC 8 lookup table
+        /// </summary>
+        private static byte[] dscrc_table;
 
-	   //--------
-	   //-------- Variables
-	   //--------
+        /*
+         * Create the lookup table
+         */
 
-	   /// <summary>
-	   /// CRC 8 lookup table
-	   /// </summary>
-	   private static byte[] dscrc_table;
+        static CRC8()
+        {
+            //Translated from the assembly code in iButton Standards, page 129.
+            dscrc_table = new byte[256];
 
-	   /*
-	    * Create the lookup table
-	    */
-	   static CRC8()
-	   {
+            int acc;
+            int crc;
 
-		  //Translated from the assembly code in iButton Standards, page 129.
-		  dscrc_table = new byte [256];
+            for (int i = 0; i < 256; i++)
+            {
+                acc = i;
+                crc = 0;
 
-		  int acc;
-		  int crc;
+                for (int j = 0; j < 8; j++)
+                {
+                    if (((acc ^ crc) & 0x01) == 0x01)
+                    {
+                        crc = ((crc ^ 0x18) >> 1) | 0x80;
+                    }
+                    else
+                    {
+                        crc = crc >> 1;
+                    }
 
-		  for (int i = 0; i < 256; i++)
-		  {
-			 acc = i;
-			 crc = 0;
+                    acc = acc >> 1;
+                }
 
-			 for (int j = 0; j < 8; j++)
-			 {
-				if (((acc ^ crc) & 0x01) == 0x01)
-				{
-				   crc = ((crc ^ 0x18) >> 1) | 0x80;
-				}
-				else
-				{
-				   crc = crc >> 1;
-				}
+                dscrc_table[i] = (byte)crc;
+            }
+        }
 
-				acc = acc >> 1;
-			 }
+        //--------
+        //-------- Constructor
+        //--------
 
-			 dscrc_table [i] = (byte) crc;
-		  }
-	   }
+        /// <summary>
+        /// Private constructor to prevent instantiation.
+        /// </summary>
+        private CRC8()
+        {
+        }
 
-	   //--------
-	   //-------- Constructor
-	   //--------
+        //--------
+        //-------- Methods
+        //--------
 
-	   /// <summary>
-	   /// Private constructor to prevent instantiation.
-	   /// </summary>
-	   private CRC8()
-	   {
-	   }
+        /// <summary>
+        /// Perform the CRC8 on the data element based on the provided seed.
+        /// <para>
+        /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
+        ///
+        /// </para>
+        /// </summary>
+        /// <param name="dataToCrc">   data element on which to perform the CRC8 </param>
+        /// <param name="seed">        seed the CRC8 with this value </param>
+        /// <returns>  CRC8 value </returns>
+        public static int compute(int dataToCRC, int seed)
+        {
+            return (dscrc_table[(seed ^ dataToCRC) & 0x0FF] & 0x0FF);
+        }
 
-	   //--------
-	   //-------- Methods
-	   //--------
+        /// <summary>
+        /// Perform the CRC8 on the data element based on a zero seed.
+        /// <para>
+        /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
+        ///
+        /// </para>
+        /// </summary>
+        /// <param name="dataToCrc">   data element on which to perform the CRC8 </param>
+        /// <returns>  CRC8 value </returns>
+        public static int compute(int dataToCRC)
+        {
+            return (dscrc_table[dataToCRC & 0x0FF] & 0x0FF);
+        }
 
-	   /// <summary>
-	   /// Perform the CRC8 on the data element based on the provided seed.
-	   /// <para>
-	   /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="dataToCrc">   data element on which to perform the CRC8 </param>
-	   /// <param name="seed">        seed the CRC8 with this value </param>
-	   /// <returns>  CRC8 value </returns>
-	   public static int compute(int dataToCRC, int seed)
-	   {
-		  return (dscrc_table [(seed ^ dataToCRC) & 0x0FF] & 0x0FF);
-	   }
+        /// <summary>
+        /// Perform the CRC8 on an array of data elements based on a
+        /// zero seed.
+        /// <para>
+        /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
+        ///
+        /// </para>
+        /// </summary>
+        /// <param name="dataToCrc">   array of data elements on which to perform the CRC8 </param>
+        /// <returns>  CRC8 value </returns>
+        public static int compute(byte[] dataToCrc)
+        {
+            return compute(dataToCrc, 0, dataToCrc.Length);
+        }
 
-	   /// <summary>
-	   /// Perform the CRC8 on the data element based on a zero seed.
-	   /// <para>
-	   /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="dataToCrc">   data element on which to perform the CRC8 </param>
-	   /// <returns>  CRC8 value </returns>
-	   public static int compute(int dataToCRC)
-	   {
-		  return (dscrc_table [dataToCRC & 0x0FF] & 0x0FF);
-	   }
+        /// <summary>
+        /// Perform the CRC8 on an array of data elements based on a
+        /// zero seed.
+        /// <para>
+        /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
+        ///
+        /// </para>
+        /// </summary>
+        /// <param name="dataToCrc">   array of data elements on which to perform the CRC8 </param>
+        /// <param name="off">         offset into array </param>
+        /// <param name="len">         length of data to crc </param>
+        /// <returns>  CRC8 value </returns>
+        public static int compute(byte[] dataToCrc, int off, int len)
+        {
+            return compute(dataToCrc, off, len, 0);
+        }
 
-	   /// <summary>
-	   /// Perform the CRC8 on an array of data elements based on a
-	   /// zero seed.
-	   /// <para>
-	   /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="dataToCrc">   array of data elements on which to perform the CRC8 </param>
-	   /// <returns>  CRC8 value </returns>
-	   public static int compute(byte[] dataToCrc)
-	   {
-		  return compute(dataToCrc, 0, dataToCrc.Length);
-	   }
+        /// <summary>
+        /// Perform the CRC8 on an array of data elements based on the
+        /// provided seed.
+        /// <para>
+        /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
+        ///
+        /// </para>
+        /// </summary>
+        /// <param name="dataToCrc">   array of data elements on which to perform the CRC8 </param>
+        /// <param name="off">         offset into array </param>
+        /// <param name="len">         length of data to crc </param>
+        /// <param name="seed">        seed to use for CRC8 </param>
+        /// <returns>  CRC8 value </returns>
+        public static int compute(byte[] dataToCrc, int off, int len, int seed)
+        {
+            // loop to do the crc on each data element
+            int CRC8 = seed;
 
-	   /// <summary>
-	   /// Perform the CRC8 on an array of data elements based on a
-	   /// zero seed.
-	   /// <para>
-	   /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="dataToCrc">   array of data elements on which to perform the CRC8 </param>
-	   /// <param name="off">         offset into array </param>
-	   /// <param name="len">         length of data to crc </param>
-	   /// <returns>  CRC8 value </returns>
-	   public static int compute(byte[] dataToCrc, int off, int len)
-	   {
-		  return compute(dataToCrc, off, len, 0);
-	   }
+            for (int i = 0; i < len; i++)
+            {
+                CRC8 = dscrc_table[(CRC8 ^ dataToCrc[i + off]) & 0x0FF];
+            }
 
-	   /// <summary>
-	   /// Perform the CRC8 on an array of data elements based on the
-	   /// provided seed.
-	   /// <para>
-	   /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="dataToCrc">   array of data elements on which to perform the CRC8 </param>
-	   /// <param name="off">         offset into array </param>
-	   /// <param name="len">         length of data to crc </param>
-	   /// <param name="seed">        seed to use for CRC8 </param>
-	   /// <returns>  CRC8 value </returns>
-	   public static int compute(byte[] dataToCrc, int off, int len, int seed)
-	   {
+            return (CRC8 & 0x0FF);
+        }
 
-		  // loop to do the crc on each data element
-		  int CRC8 = seed;
-
-		  for (int i = 0; i < len; i++)
-		  {
-			 CRC8 = dscrc_table [(CRC8 ^ dataToCrc [i + off]) & 0x0FF];
-		  }
-
-		  return (CRC8 & 0x0FF);
-	   }
-
-	   /// <summary>
-	   /// Perform the CRC8 on an array of data elements based on the
-	   /// provided seed.
-	   /// <para>
-	   /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
-	   /// 
-	   /// </para>
-	   /// </summary>
-	   /// <param name="dataToCrc">   array of data elements on which to perform the CRC8 </param>
-	   /// <param name="seed">        seed to use for CRC8 </param>
-	   /// <returns>  CRC8 value </returns>
-	   public static int compute(byte[] dataToCrc, int seed)
-	   {
-		  return compute(dataToCrc, 0, dataToCrc.Length, seed);
-	   }
-	}
-
+        /// <summary>
+        /// Perform the CRC8 on an array of data elements based on the
+        /// provided seed.
+        /// <para>
+        /// CRC8 is based on the polynomial = X^8 + X^5 + X^4 + 1.
+        ///
+        /// </para>
+        /// </summary>
+        /// <param name="dataToCrc">   array of data elements on which to perform the CRC8 </param>
+        /// <param name="seed">        seed to use for CRC8 </param>
+        /// <returns>  CRC8 value </returns>
+        public static int compute(byte[] dataToCrc, int seed)
+        {
+            return compute(dataToCrc, 0, dataToCrc.Length, seed);
+        }
+    }
 }
