@@ -273,7 +273,7 @@ namespace com.dalsemi.onewire.adapter
                 ((alarm_only) ? ALARM_SEARCH_CMD : NORMAL_SEARCH_CMD)),
             // 1-Wire command (Search ROM or
             // Conditional Search ROM)
-            "USB Communication: Pulse - " + description);
+            "USB Communication: SearchAccess - " + description);
 
             if (RESULT_SUCCESS != ReadResult(out DeviceDetected))
                 PrintErrorResult();
@@ -382,11 +382,62 @@ namespace com.dalsemi.onewire.adapter
         /// <param name="index"></param>
         /// <param name="description"></param>
         /// <returns></returns>
+        public async Task<byte[]> BulkEp_Read(int index, string description)
+        {
+            try
+            {
+                if (usbDevice == null)
+                {
+                    throw new System.IO.IOException("Port Not Open");
+                }
+
+                var stream = usbDevice.DefaultInterface.BulkInPipes[index].InputStream;
+                using (var reader = new DataReader(stream))
+                {
+                    await reader.LoadAsync(usbState.OneWireReadBufferStatus);
+
+                    byte[] result = new byte[usbState.OneWireReadBufferStatus];
+
+                    reader.ReadBytes(result);
+
+                    if (doDebugMessages)
+                    {
+                        Debug.WriteLine("DEBUG: BulkEp_Read - " + description);
+                        for (int i = 0; i < result.Length; i++)
+                            Debug.Write(" " + result[i].ToString("X"));
+                        Debug.WriteLine("");
+                    }
+
+                    return result;
+                }
+            }
+            catch (System.IO.IOException e)
+            {
+                if (doDebugMessages)
+                {
+                    Debug.WriteLine("BulkEp_Read: " + description + ": " + e);
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// General function to issue command to DS2490 USB device
+        /// </summary>
+        /// <param name="req"></param>
+        /// <param name="value"></param>
+        /// <param name="index"></param>
+        /// <param name="description"></param>
+        /// <returns></returns>
         public async Task<uint> BulkEp_Write(int index, byte[] data, string description)
         {
             if (doDebugMessages)
             {
-                Debug.WriteLine("DEBUG: " + description);
+                Debug.WriteLine("DEBUG: BulkEp_Write - " + description);
+                for (int i = 0; i < data.Length; i++)
+                    Debug.Write(" " + data[i].ToString("X"));
+                Debug.WriteLine("");
             }
 
             try

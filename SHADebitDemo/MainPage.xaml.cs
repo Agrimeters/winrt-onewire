@@ -25,6 +25,11 @@ namespace SHADebitDemo
         public MainPage()
         {
             this.InitializeComponent();
+
+            initcopr.Main1(null);
+            initrov.Main2(null);
+            initrov33.Main3(null);
+            SHADebitDemo1.Main0(null);
         }
     }
 }

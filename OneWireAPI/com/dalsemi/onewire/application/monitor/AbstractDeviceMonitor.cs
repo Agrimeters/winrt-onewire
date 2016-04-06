@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -32,7 +33,6 @@ namespace com.dalsemi.onewire.application.monitor
     using com.dalsemi.onewire.adapter;
     using com.dalsemi.onewire.container;
     using com.dalsemi.onewire.utils;
-    using System.Collections.Generic;
 
     /// <summary>
     /// <P>Abstract super-class for 1-Wire Monitors, a optionally-threadable

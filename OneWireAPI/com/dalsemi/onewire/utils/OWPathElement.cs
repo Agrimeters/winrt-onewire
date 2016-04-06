@@ -27,7 +27,7 @@
 
 namespace com.dalsemi.onewire.utils
 {
-    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
+    using com.dalsemi.onewire.container;
 
     /// <summary>
     /// 1-Wire&#174 Network path element.  Instances of this class are

@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
+using Windows.Networking.Sockets;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 2002 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -36,8 +38,6 @@ namespace com.dalsemi.onewire.adapter
 {
     using com.dalsemi.onewire;
     using com.dalsemi.onewire.utils;
-    using System.Threading.Tasks;
-    using Windows.Networking.Sockets;
 
     /// <summary>
     /// <P>NetAdapterSim is the host (or server) component for a network-based

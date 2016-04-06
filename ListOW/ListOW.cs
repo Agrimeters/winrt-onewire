@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Diagnostics;
+using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
 
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999,2000 Dallas Semiconductor Corporation, All Rights Reserved.
@@ -30,66 +31,62 @@ using System.Diagnostics;
  */
 
 using OneWireAccessProvider = com.dalsemi.onewire.OneWireAccessProvider;
-using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
 using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-
 
 /// <summary>
 /// Minimal demo to list device found on default 1-Wire port
-/// 
+///
 /// @version    0.00, 28 August 2000
 /// @author     DS
 /// </summary>
 public class ListOW1
 {
+    /// <summary>
+    /// Method main
+    ///
+    /// </summary>
+    /// <param name="args">
+    ///  </param>
+    public static void Main1(string[] args)
+    {
+        OneWireContainer owd;
 
-   /// <summary>
-   /// Method main
-   /// 
-   /// </summary>
-   /// <param name="args">
-   ///  </param>
-   public static void Main1(string[] args)
-   {
-	  OneWireContainer owd;
+        try
+        {
+            // get the default adapter
+            DSPortAdapter adapter = OneWireAccessProvider.DefaultAdapter;
 
-	  try
-	  {
+            Debug.WriteLine("");
+            Debug.WriteLine("Adapter: " + adapter.AdapterName + " Port: " + adapter.PortName);
+            Debug.WriteLine("");
 
-		 // get the default adapter  
-		 DSPortAdapter adapter = OneWireAccessProvider.DefaultAdapter;
+            // get exclusive use of adapter
+            adapter.beginExclusive(true);
 
-		 Debug.WriteLine("");
-		 Debug.WriteLine("Adapter: " + adapter.AdapterName + " Port: " + adapter.PortName);
-		 Debug.WriteLine("");
+            // clear any previous search restrictions
+            adapter.setSearchAllDevices();
+            adapter.targetAllFamilies();
+            adapter.Speed = DSPortAdapter.SPEED_REGULAR;
 
-		 // get exclusive use of adapter
-		 adapter.beginExclusive(true);
+            // enumerate through all the 1-Wire devices found
+            for (System.Collections.IEnumerator owd_enum = adapter.AllDeviceContainers; owd_enum.MoveNext();)
+            {
+                owd = (OneWireContainer)owd_enum.Current;
 
-		 // clear any previous search restrictions
-		 adapter.setSearchAllDevices();
-		 adapter.targetAllFamilies();
-		 adapter.Speed = DSPortAdapter.SPEED_REGULAR;
+                Debug.WriteLine(owd.AddressAsString);
+            }
 
-		 // enumerate through all the 1-Wire devices found
-		 for (System.Collections.IEnumerator owd_enum = adapter.AllDeviceContainers; owd_enum.MoveNext();)
-		 {
-			owd = (OneWireContainer) owd_enum.Current;
+            // end exclusive use of adapter
+            adapter.endExclusive();
 
-			Debug.WriteLine(owd.AddressAsString);
-		 }
+            // free port used by adapter
+            adapter.freePort();
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine(e);
+        }
 
-		 // end exclusive use of adapter
-		 adapter.endExclusive();
-
-		 // free port used by adapter
-		 adapter.freePort();
-	  }
-	  catch (Exception e)
-	  {
-		 Debug.WriteLine(e);
-	  }
-
-	  return;
-   }
+        return;
+    }
 }

@@ -29,10 +29,9 @@
 
 namespace com.dalsemi.onewire.application.monitor
 {
-    using Address = com.dalsemi.onewire.utils.Address;
-    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
-    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-    using OWPath = com.dalsemi.onewire.utils.OWPath;
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.utils;
 
     /// <summary>
     /// Represents a group of 1-Wire addresses that have either

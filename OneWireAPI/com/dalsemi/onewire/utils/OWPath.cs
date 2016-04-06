@@ -30,9 +30,8 @@ using System.Collections.Generic;
 
 namespace com.dalsemi.onewire.utils
 {
-    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
-    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-    using SwitchContainer = com.dalsemi.onewire.container.SwitchContainer;
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.container;
 
     /// <summary>
     /// 1-Wire&#174 Network path.  Large 1-Wire networks can be sub-divided into branches

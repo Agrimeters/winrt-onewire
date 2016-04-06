@@ -348,10 +348,13 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         public override void freePort()
         {
-            if (UsbIo.usbDevice != null)
+            if (UsbIo != null)
             {
-                UsbIo.usbDevice.Dispose();
-                UsbIo = null;
+                if (UsbIo.usbDevice != null)
+                {
+                    UsbIo.usbDevice.Dispose();
+                    UsbIo = null;
+                }
             }
         }
 
@@ -472,52 +475,36 @@ namespace com.dalsemi.onewire.adapter
         /// <exception cref="OneWireIOException"> on a 1-Wire communication error </exception>
         private byte[] UsbTransaction(UsbPacketBuilder tempBuild, bool alarm_only)
         {
-            int offset;
             byte[] ret_buffer = null;
 
             try
             {
-                using (MemoryStream inBuffer = new MemoryStream())
+                // loop to send all of the packets
+                for (IEnumerator packet_enum = tempBuild.Packets; packet_enum.MoveNext();)
                 {
-                    // loop to send all of the packets
-                    for (IEnumerator packet_enum = tempBuild.Packets; packet_enum.MoveNext();)
+                    // get the next packet
+                    RawSendPacket pkt = (RawSendPacket)packet_enum.Current;
+
+                    // bogus packet to indicate need to wait for long DS2480 alarm reset
+                    if ((pkt.buffer.Length == 0) && (pkt.returnLength == 0))
                     {
-                        // get the next packet
-                        RawSendPacket pkt = (RawSendPacket)packet_enum.Current;
-
-                        // bogus packet to indicate need to wait for long DS2480 alarm reset
-                        if ((pkt.buffer.Length == 0) && (pkt.returnLength == 0))
-                        {
-                            Thread.Sleep(6);
-
-                            continue;
-                        }
-
-                        // remember number of bytes in input
-                        offset = (int)inBuffer.Length;
-
-                        // send the packet
-                        var t = Task.Run(async () =>
-                        {
-                            pkt.writer.Flush();
-                            await UsbIo.BulkEp_Write(0, pkt.buffer.ToArray(),
-                                "Write EP2, count=" + pkt.buffer.Length);
-                        });
-                        t.Wait();
+                        Thread.Sleep(6);
+                        continue;
                     }
 
-                    // read the return packet
-                    ret_buffer = new byte[inBuffer.Length];
-
-                    ret_buffer = inBuffer.ToArray();
-
-                    // check for extra bytes in inBuffer
-                    extraBytesReceived = (inBuffer.Length > tempBuild.totalReturnLength);
+                    // send the packet
+                    var t = Task.Run(async () =>
+                    {
+                        pkt.writer.Flush();
+                        await UsbIo.BulkEp_Write(0, pkt.buffer.ToArray(),
+                            "USB Transaction: Write EP, count=" + pkt.buffer.Length);
+                    });
+                    t.Wait();
                 }
 
                 // Issue Search Command
                 bool DeviceDetected;
-                ErrorResult result = UsbIo.Comm_SearchAccess("UsbTransaction: ", alarm_only, 1, out DeviceDetected);
+                ErrorResult result = UsbIo.Comm_SearchAccess("UsbTransaction", alarm_only, 1, out DeviceDetected);
 
                 if (ErrorResult.NRS == (result & ErrorResult.NRS))
                 {
@@ -525,9 +512,10 @@ namespace com.dalsemi.onewire.adapter
                     Debugger.Break();
                 }
 
+                int i;
                 do
                 {
-                    for (var i = 0; i < 200; i++)
+                    for (i = 0; i < 200; i++)
                     {
                         result = UsbIo.ReadStatus(out DeviceDetected);
                         if (ErrorResult.NRS == (result & ErrorResult.NRS))
@@ -545,7 +533,16 @@ namespace com.dalsemi.onewire.adapter
                     }
                 } while (!UsbState.Idle);
 
-                Debugger.Break();
+                // we have something to read
+                if (UsbState.OneWireReadBufferStatus > 0)
+                {
+                    // send the packet
+                    var t = Task.Run(async () =>
+                    {
+                        ret_buffer = await UsbIo.BulkEp_Read(0, "USB Transaction: Read EP");
+                    });
+                    t.Wait();
+                }
 
                 return ret_buffer;
             }
@@ -609,10 +606,12 @@ namespace com.dalsemi.onewire.adapter
                 Debug.WriteLine("DEBUG: UsbMasterReset");
             }
 
+            bool DeviceDetected;
+
             UsbIo.Control_ResetDevice();
-            //            PowerDuration = DSPortAdapter.DELIVERY_INFINITE;
-            //            UsbIo.Comm_SetDuration(Ds2490.COMM.TYPE, 0x40, "12V pullup, 512us");
-            //            UsbIo.Mode_Pulse(Ds2490.ENABLEPULSE_PRGE, 0x00, "Disable 5V Strong PU, Enable 12V Program Pulse");
+            PowerDuration = DSPortAdapter.DELIVERY_INFINITE;
+            UsbIo.Comm_SetDuration(Ds2490.COMM.TYPE, 0x40, "12V pullup, 512us", out DeviceDetected);
+            UsbIo.Mode_EnablePulse(Ds2490.ENABLEPULSE_PRGE, "Disable 5V Strong PU, Enable 12V Program Pulse", out DeviceDetected);
         }
 
         /// <summary>
@@ -805,7 +804,7 @@ namespace com.dalsemi.onewire.adapter
                     }
 
                     // skip the current type if not last device
-                    if (!owState.searchLastDevice && (owState.searchFamilyLastDiscrepancy != 0))
+                    if ((!owState.searchLastDevice) && (owState.searchFamilyLastDiscrepancy != 0))
                     {
                         owState.searchLastDiscrepancy = owState.searchFamilyLastDiscrepancy;
                         owState.searchFamilyLastDiscrepancy = 0;
@@ -1175,19 +1174,15 @@ namespace com.dalsemi.onewire.adapter
                     reset_offset = oneWireReset();
                 }
 
+                UsbBuild.restart();
+
                 // add search sequence based on mState
                 int search_offset = UsbBuild.search(mState);
 
                 // send/receive the search
                 byte[] result_array = UsbTransaction(UsbBuild, mState.searchOnlyAlarmingButtons);
 
-                // interpret search result and return
-                if (!mState.skipResetOnSearch)
-                {
-                    UsbBuild.interpretOneWireReset(result_array[reset_offset]);
-                }
-
-                return UsbBuild.interpretSearch(mState, result_array, search_offset);
+                return UsbBuild.interpretSearch(mState, result_array, 0);
             }
             else
             {
@@ -1875,14 +1870,18 @@ namespace com.dalsemi.onewire.adapter
                         // change 1-Wire value
                         owState.oneWireSpeed = (byte)value;
 
-                        // set adapter to communicate at this new value (regular == flex for now)
+                        // set adapter to communicate at this new value
                         if (value == SPEED_OVERDRIVE)
                         {
                             UsbState.ReqBusCommSpeed = (sbyte)UsbAdapterState.BUSCOMSPEED_OVERDRIVE;
                         }
-                        else
+                        else if (value == SPEED_FLEX)
                         {
                             UsbState.ReqBusCommSpeed = (sbyte)UsbAdapterState.BUSCOMSPEED_FLEX;
+                        }
+                        else if (value == SPEED_REGULAR)
+                        {
+                            UsbState.ReqBusCommSpeed = (sbyte)UsbAdapterState.BUSCOMSPEED_REGULAR;
                         }
                     }
                     else

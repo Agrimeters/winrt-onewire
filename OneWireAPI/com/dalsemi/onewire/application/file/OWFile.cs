@@ -29,8 +29,7 @@
 
 namespace com.dalsemi.onewire.application.file
 {
-    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-    using PagedMemoryBank = com.dalsemi.onewire.container.PagedMemoryBank;
+    using com.dalsemi.onewire.container;
 
     /// <summary>
     /// An abstract representation of file and directory pathnames on 1-Wire devices.

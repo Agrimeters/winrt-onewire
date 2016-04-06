@@ -442,57 +442,26 @@ namespace com.dalsemi.onewire.adapter
         public virtual int search(OneWireState mState)
         {
             // create the search sequence character array
-            byte[] search_sequence = new byte[16];
+            byte[] search_sequence = new byte[8];
 
             // get a copy of the current ID
-            byte[] id = new byte[8];
-
             for (int i = 0; i < 8; i++)
-            {
-                id[i] = (byte)(mState.ID[i] & 0xFF);
-            }
-
-            // clear the string
-            for (int i = 0; i < 16; i++)
-            {
-                search_sequence[i] = (byte)0;
-            }
-
-            // provide debug output
-            if (doDebugMessages)
-            {
-                Debug.WriteLine("DEBUG: UsbPacketbuilder-search [" + ((int)id.Length).ToString("x") + "]");
-            }
+                search_sequence[i] = mState.ID[i];
 
             // only modify bits if not the first search
             if (mState.searchLastDiscrepancy != 0xFF)
             {
-                // set the bits in the added buffer
-                for (int i = 0; i < 64; i++)
-                {
-                    // before last discrepancy (go direction based on ID)
-                    if (i < (mState.searchLastDiscrepancy - 1))
-                    {
-                        bitWrite(search_sequence, (i * 2 + 1), bitRead(id, i));
-                    }
+                if (mState.searchLastDiscrepancy > 0)
+                    bitWrite(search_sequence, mState.searchLastDiscrepancy - 1, true);
 
-                    // at last discrepancy (go 1's direction)
-                    else if (i == (mState.searchLastDiscrepancy - 1))
-                    {
-                        bitWrite(search_sequence, (i * 2 + 1), true);
-                    }
-
-                    // after last discrepancy so leave zeros
-                }
+                for (int i = mState.searchLastDiscrepancy; i < 64; i++)
+                    bitWrite(search_sequence, i, false);
             }
-
-            // remember this position
-            int return_position = totalReturnLength;
 
             // add this sequence
             packet.writer.Write(search_sequence);
 
-            return return_position;
+            return totalReturnLength;
         }
 
         /// <summary>
@@ -614,67 +583,6 @@ namespace com.dalsemi.onewire.adapter
         }
 
         /// <summary>
-        /// Interpret the reset response byte from a U adapter
-        /// </summary>
-        /// <param name="resetResponse">  reset response byte from U
-        /// </param>
-        /// <returns> the number representing the result of a 1-Wire reset </returns>
-        public virtual int interpretOneWireReset(byte resetResponse)
-        {
-            // make sure the response byte structure is correct
-            if ((resetResponse & 0xC0) == 0xC0)
-            {
-                // retrieve the chip version and program voltage state
-                //TODO UsbState.revision = (byte)(UsbAdapterState.CHIP_VERSION_MASK & resetResponse);
-                //TODO              UsbState.programVoltageAvailable = ((UsbAdapterState.PROGRAM_VOLTAGE_MASK & resetResponse) != 0);
-
-                // provide debug output
-                if (doDebugMessages)
-                {
-                    Debug.WriteLine("DEBUG: UsbPacketbuilder-reset response " + ((int)resetResponse & 0x00FF).ToString("x"));
-                }
-
-                // convert the response byte to the OneWire reset result
-                switch (resetResponse & RESPONSE_RESET_MASK)
-                {
-                    case RESPONSE_RESET_SHORT:
-                        return DSPortAdapter.RESET_SHORT;
-
-                    case RESPONSE_RESET_PRESENCE:
-
-                        // if in long alarm check, record this as a non alarm reset
-                        //TODO
-                        //if (UsbState.longAlarmCheck)
-                        //{
-                        //// check if can give up checking
-                        //if (UsbState.lastAlarmCount++ > UsbAdapterState.MAX_ALARM_COUNT)
-                        //{
-                        //UsbState.longAlarmCheck = false;
-                        //}
-                        //}
-
-                        return DSPortAdapter.RESET_PRESENCE;
-
-                    case RESPONSE_RESET_ALARM:
-
-                        // alarm presense so go into DS2480 long alarm check mode
-                        //TODO				   UsbState.longAlarmCheck = true;
-                        //TODO				   UsbState.lastAlarmCount = 0;
-
-                        return DSPortAdapter.RESET_ALARM;
-
-                    case RESPONSE_RESET_NOPRESENCE:
-                    default:
-                        return DSPortAdapter.RESET_NOPRESENCE;
-                }
-            }
-            else
-            {
-                return DSPortAdapter.RESET_NOPRESENCE;
-            }
-        }
-
-        /// <summary>
         /// Interpret the bit response byte from a U adapter
         /// </summary>
         /// <param name="bitResponse">  bit response byte from U
@@ -696,8 +604,6 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Interpret the search response and set the 1-Wire state accordingly.
         /// </summary>
-        /// <param name="bitResponse">  bit response byte from U
-        /// </param>
         /// <param name="mState"> </param>
         /// <param name="searchResponse"> </param>
         /// <param name="responseOffset">
@@ -706,69 +612,51 @@ namespace com.dalsemi.onewire.adapter
         ///                 interpreting the search results </returns>
         public virtual bool interpretSearch(OneWireState mState, byte[] searchResponse, int responseOffset)
         {
-            byte[] temp_id = new byte[8];
-
-            // change byte offset to bit offset
-            int bit_offset = responseOffset * 8;
-
-            // set the temp Last Descrep to none
-            int temp_last_descrepancy = 0xFF;
-            int temp_last_family_descrepancy = 0;
-
-            // interpret the search response sequence
-            for (int i = 0; i < 64; i++)
-            {
-                // get the SerialNum bit
-                bitWrite(temp_id, i, bitRead(searchResponse, (i * 2) + 1 + bit_offset));
-
-                // check LastDiscrepancy
-                if (bitRead(searchResponse, i * 2 + bit_offset) && !bitRead(searchResponse, i * 2 + 1 + bit_offset))
-                {
-                    temp_last_descrepancy = i + 1;
-
-                    // check LastFamilyDiscrepancy
-                    if (i < 8)
-                    {
-                        temp_last_family_descrepancy = i + 1;
-                    }
-                }
-            }
+            bool rt = false;
 
             // check
             byte[] id = new byte[8];
 
             for (int i = 0; i < 8; i++)
-            {
-                id[i] = temp_id[i];
-            }
+                id[i] = searchResponse[i];
 
-            // check results
-            if ((!Address.isValid(id)) || (temp_last_descrepancy == 63) || (temp_id[0] == 0))
-            {
-                return false;
-            }
+            // set the temp Last Descrep to none
+            int temp_last_descrepancy = 0xFF;
 
-            // successful search
-            else
+            if (Address.isValid(id) && id[0] != 0)
             {
-                // check for lastone
-                if ((temp_last_descrepancy == mState.searchLastDiscrepancy) || (temp_last_descrepancy == 0xFF))
+                if (searchResponse.Length == 8)
                 {
                     mState.searchLastDevice = true;
+                }
+                else
+                {
+                    for (int i = 0; i < 64; i++)
+                    {
+                        // if descrepancy
+                        if (bitRead(searchResponse, 64 + i) &&
+                            (bitRead(searchResponse, i) == false))
+                        {
+                            temp_last_descrepancy = i + 1;
+                        }
+                    }
                 }
 
                 // copy the ID number to the buffer
                 for (int i = 0; i < 8; i++)
-                {
-                    mState.ID[i] = temp_id[i];
-                }
+                    mState.ID[i] = id[i];
 
-                // set the count
-                mState.searchLastDiscrepancy = temp_last_descrepancy;
-                mState.searchFamilyLastDiscrepancy = temp_last_family_descrepancy;
-
-                return true;
+                rt = true;
             }
+            else
+            {
+                for (int i = 0; i < 8; i++)
+                    mState.ID[i] = 0;
+            }
+
+            mState.searchLastDiscrepancy = temp_last_descrepancy;
+
+            return rt;
         }
 
         /// <summary>

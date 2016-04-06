@@ -27,7 +27,7 @@
 
 namespace com.dalsemi.onewire.application.tag
 {
-    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+    using com.dalsemi.onewire.adapter;
 
     /// <summary>
     /// This class provides a default object for the Contact type of a tagged 1-Wire device.

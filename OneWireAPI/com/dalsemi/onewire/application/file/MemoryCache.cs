@@ -31,16 +31,9 @@ using System.Diagnostics;
 
 namespace com.dalsemi.onewire.application.file
 {
-    using Bit = com.dalsemi.onewire.utils.Bit;
-    using CRC16 = com.dalsemi.onewire.utils.CRC16;
-
-    // imports
-    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
-    using MemoryBank = com.dalsemi.onewire.container.MemoryBank;
-    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-    using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
-    using OTPMemoryBank = com.dalsemi.onewire.container.OTPMemoryBank;
-    using PagedMemoryBank = com.dalsemi.onewire.container.PagedMemoryBank;
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.utils;
 
     /// <summary>
     /// Class to provide read/write cache services to a 1-Wire memory

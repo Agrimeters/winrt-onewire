@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Windows.Networking;
+using Windows.Networking.Connectivity;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 
@@ -37,10 +41,6 @@ namespace com.dalsemi.onewire.adapter
     using com.dalsemi.onewire;
     using com.dalsemi.onewire.logging;
     using com.dalsemi.onewire.utils;
-    using System.Collections.Generic;
-    using System.Threading;
-    using Windows.Networking;
-    using Windows.Networking.Connectivity;
 
     /// <summary>
     /// <P>NetAdapterHost is the host (or server) component for a network-based

@@ -1,5 +1,7 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using Windows.Devices.Enumeration;
 
@@ -35,8 +37,6 @@ namespace com.dalsemi.onewire
 {
     // imports
     using com.dalsemi.onewire.adapter;
-    using System.Collections.Generic;
-    using System.IO;
 
     /// <summary>
     /// The OneWireAccessProvider class manages the Dallas Semiconductor

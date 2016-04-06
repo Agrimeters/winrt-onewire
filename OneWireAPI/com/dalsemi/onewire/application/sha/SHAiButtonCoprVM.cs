@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Text;
 
-//using System.Diagnostics;
-
 /*---------------------------------------------------------------------------
  * Copyright (C) 1999-2001 Dallas Semiconductor Corporation, All Rights Reserved.
  *
@@ -36,7 +34,7 @@ namespace com.dalsemi.onewire.application.sha
     using com.dalsemi.onewire.application.file;
     using com.dalsemi.onewire.container;
     using com.dalsemi.onewire.logging;
-    using utils;
+    using com.dalsemi.onewire.utils;
 
     /// <summary>
     /// <P>Class for simulating an instance of a SHA iButton Coprocessor involved
@@ -69,10 +67,7 @@ namespace com.dalsemi.onewire.application.sha
         /// <summary>
         /// 8 8-byte Secrets for this simulated SHAiButton
         /// </summary>
-        //ORIGINAL LINE: protected internal byte[][] secretPage = new byte[8][8];
         protected internal byte[][] secretPage;
-
-        //= RectangularArrays.ReturnRectangularByteArray(8, 8);
 
         /// <summary>
         /// 1-Wire Address for this simulated device
@@ -169,11 +164,9 @@ namespace com.dalsemi.onewire.application.sha
             Array.Copy(l_initialSignature, 0, this.initialSignature, 0, 20);
             Array.Copy(l_signingChlg, 0, this.signingChallenge, 0, 3);
 
-            secretPage = new byte[8][]
-            {
-              new byte[8], new byte[8], new byte[8], new byte[8],
-              new byte[8], new byte[8], new byte[8], new byte[8]
-            };
+            secretPage = new byte[8][];
+            for (int i = 0; i < 8; i++)
+                secretPage[i] = new byte[8];
 
             //Check to see if this coprocessor's authentication secret
             //is appropriately padded to be used with a DS1961S

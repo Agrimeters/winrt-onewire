@@ -33,7 +33,7 @@ using System.Xml;
 namespace com.dalsemi.onewire.application.tag
 {
     using com.dalsemi.onewire.adapter;
-    using utils;
+    using com.dalsemi.onewire.utils;
 
     /// <summary>
     /// The tag parser parses tagging information.

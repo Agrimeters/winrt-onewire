@@ -34,14 +34,9 @@ using System.Text;
 
 namespace com.dalsemi.onewire.application.file
 {
-    using Address = com.dalsemi.onewire.utils.Address;
-
-    //using Convert = com.dalsemi.onewire.utils.Convert;
-    using Bit = com.dalsemi.onewire.utils.Bit;
-    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
-    using OneWireContainer = com.dalsemi.onewire.container.OneWireContainer;
-    using OneWireIOException = com.dalsemi.onewire.adapter.OneWireIOException;
-    using PagedMemoryBank = com.dalsemi.onewire.container.PagedMemoryBank;
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.utils;
 
     /// <summary>
     /// Instances of the 1-Wire file descriptor class serve as an opaque handle
@@ -2823,7 +2818,7 @@ namespace com.dalsemi.onewire.application.file
 
                 if (((byte)(name[4] & 0x7F) != (byte)EXT_DIRECTORY) && ((byte)name[4] != (byte)EXT_UNKNOWN))
                 {
-                    build_buffer.Append("." + Convert.ToString((int)name[4] & 0x7F));
+                    build_buffer.Append("." + System.Convert.ToString((int)name[4] & 0x7F));
                 }
             }
 

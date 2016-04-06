@@ -29,7 +29,7 @@
 
 namespace com.dalsemi.onewire.application.monitor
 {
-    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
+    using com.dalsemi.onewire.adapter;
 
     /// <summary>
     /// Represents an encapsulated exception from a particular Device Monitor.

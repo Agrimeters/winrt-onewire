@@ -30,9 +30,9 @@ using System.Text;
 
 namespace com.dalsemi.onewire.application.sha
 {
-    using DSPortAdapter = com.dalsemi.onewire.adapter.DSPortAdapter;
-    using IOHelper = com.dalsemi.onewire.utils.IOHelper;
-    using OneWireContainer18 = com.dalsemi.onewire.container.OneWireContainer18;
+    using com.dalsemi.onewire.adapter;
+    using com.dalsemi.onewire.container;
+    using com.dalsemi.onewire.utils;
 
     /// <summary>
     /// <P>Class representing DS1963S (or DS2421), family-code 0x18, SHA iButtons as a user

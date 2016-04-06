@@ -869,8 +869,6 @@ namespace com.dalsemi.onewire.adapter
         /// <summary>
         /// Interpret the search response and set the 1-Wire state accordingly.
         /// </summary>
-        /// <param name="bitResponse">  bit response byte from U
-        /// </param>
         /// <param name="mState"> </param>
         /// <param name="searchResponse"> </param>
         /// <param name="responseOffset">
