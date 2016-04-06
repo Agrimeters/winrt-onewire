@@ -2,9 +2,16 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Resources;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Devices.Enumeration;
+
+//using Windows.Devices.I2c; //IoT only...
+using Windows.Devices.Usb;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage.Streams;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -12,13 +19,6 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-
-//using Windows.Devices.I2c; //IoT only...
-using Windows.Devices.Usb;
-using Windows.Devices.Enumeration;
-using System.Reflection;
-using Windows.Storage.Streams;
-using System.Resources;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 

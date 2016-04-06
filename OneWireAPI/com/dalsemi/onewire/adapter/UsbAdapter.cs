@@ -329,7 +329,7 @@ namespace com.dalsemi.onewire.adapter
                 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
                 if (doDebugMessages)
                 {
-                    Debug.WriteLine("SerialService.openPort: Port Openend (" + portName + ")");
+                    Debug.WriteLine("UsbAdapter.openPort: Port Openend (" + portName + ")");
                 }
                 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
             }
@@ -1876,14 +1876,14 @@ namespace com.dalsemi.onewire.adapter
                         {
                             UsbState.ReqBusCommSpeed = (sbyte)UsbAdapterState.BUSCOMSPEED_OVERDRIVE;
                         }
-                        else if (value == SPEED_FLEX)
+                        else //if (value == SPEED_FLEX)
                         {
                             UsbState.ReqBusCommSpeed = (sbyte)UsbAdapterState.BUSCOMSPEED_FLEX;
                         }
-                        else if (value == SPEED_REGULAR)
-                        {
-                            UsbState.ReqBusCommSpeed = (sbyte)UsbAdapterState.BUSCOMSPEED_REGULAR;
-                        }
+                        //else if (value == SPEED_REGULAR)
+                        //{
+                        //    UsbState.ReqBusCommSpeed = (sbyte)UsbAdapterState.BUSCOMSPEED_REGULAR;
+                        //}
                     }
                     else
                     {
