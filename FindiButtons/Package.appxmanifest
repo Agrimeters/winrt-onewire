@@ -11,7 +11,7 @@
     Publisher="CN=joel"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="e412660b-b47a-4549-9c70-4f1af1716ba0" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="e412660b-b47a-4549-9c70-4f1af1716ba0" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
 
   <Properties>
     <DisplayName>FindiButtons</DisplayName>
@@ -24,7 +24,7 @@
   </Dependencies>
 
   <Resources>
-    <Resource Language="x-generate"/>
+    <Resource Language="x-generate" />
   </Resources>
 
   <Applications>
@@ -37,7 +37,7 @@
         Square44x44Logo="Assets\Square44x44Logo.png"
         Description="FindiButtons"
         BackgroundColor="transparent">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
     </Application>
@@ -46,10 +46,14 @@
   <Capabilities>
     <Capability Name="internetClientServer" />
     <Capability Name="privateNetworkClientServer" />
-
     <DeviceCapability Name="serialcommunication">
       <Device Id="any">
         <Function Type="name:serialPort" />
+      </Device>
+    </DeviceCapability>
+    <DeviceCapability Name="usb">
+      <Device Id="vidpid:04FA 2490">
+        <Function Type="name:vendorSpecific" />
       </Device>
     </DeviceCapability>
   </Capabilities>

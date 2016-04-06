@@ -40,7 +40,7 @@ namespace com.dalsemi.onewire.adapter
     // imports
     using com.dalsemi.onewire.container;
     using com.dalsemi.onewire.utils;
-
+    using logging;
     using ErrorResult = UsbAdapterIo.ErrorResult;
 
     /// <summary>
@@ -236,14 +236,15 @@ namespace com.dalsemi.onewire.adapter
                     string aqs = UsbDevice.GetDeviceSelector(Ds2490.DeviceVid, Ds2490.DevicePid);
                     var myDevices = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(aqs, null);
                     DeviceInformationCollection DeviceList = myDevices;
-                    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                    if (doDebugMessages)
+
+                    List<string> list = new List<string>();
+                    foreach (var item in DeviceList)
                     {
-                        foreach (var item in DeviceList)
-                            Debug.WriteLine("\t" + item.Id);
+                        list.Add(item.Id);
+                        OneWireEventSource.Log.Debug("\t" + item.Id);
                     }
-                    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-                    return ((IEnumerable<DeviceInformation>)DeviceList).GetEnumerator();
+
+                    return (list.GetEnumerator());
                 });
 
                 t.Wait();
