@@ -1,7 +1,7 @@
-﻿onewire.adapter.default=UsbAdapter
-onewire.port.default=USB\VID_04FA&PID_2490\6&f0f8e95&0&6
-#onewire.adapter.default=DS9097U
-#onewire.port.default=COM9
+﻿#onewire.adapter.default=UsbAdapter
+#onewire.port.default=USB\VID_04FA&PID_2490\6&f0f8e95&0&6
+onewire.adapter.default=DS9097U
+onewire.port.default=COM9
 #onewire.serial.forcebitsonly=false
 onewire.serial.maxbaud=115200
 onewire.debug=true

@@ -301,6 +301,8 @@ namespace com.dalsemi.onewire.adapter
             {
                 var t = Task<UsbDevice>.Run(async () =>
                 {
+                    UsbDevice device = null;
+
                     // Input -> @"USB\VID_04FA&PID_2490\6&F0F8E95&0&2"
                     string[] st = portName.Split(new char[] { '\\' });
                     StringBuilder deviceInstance = new StringBuilder();
@@ -315,7 +317,34 @@ namespace com.dalsemi.onewire.adapter
                     // Output -> @"\\?\USB#VID_04FA&PID_2490#6&f0f8e95&0&2#{dee824ef-729b-4a0e-9c14-b7117d33a817}"
 
                     deviceId = deviceInstance.ToString();
-                    return await UsbDevice.FromIdAsync(deviceId);
+                    device = await UsbDevice.FromIdAsync(deviceId);
+
+                    if (device == null)
+                    {
+                        var deviceAccessStatus = DeviceAccessInformation.CreateFromId(deviceId).CurrentStatus;
+                        if (deviceAccessStatus == DeviceAccessStatus.DeniedByUser)
+                        {
+                            OneWireEventSource.Log.Critical("Access to the device was blocked by the user : " + deviceId);
+                        }
+                        else if (deviceAccessStatus == DeviceAccessStatus.DeniedBySystem)
+                        {
+                            OneWireEventSource.Log.Critical("Possible failure with Package.appamnifgest declaration");
+                            OneWireEventSource.Log.Critical("Check your Package.appxmanifest Capabilities section:");
+                            OneWireEventSource.Log.Critical("<DeviceCapability Name = \"usb\">");
+                            OneWireEventSource.Log.Critical("  <Device Id = \"vidpid:04FA 2490\">");
+                            OneWireEventSource.Log.Critical("    <Function Type = \"name:vendorSpecific\"/>");
+                            OneWireEventSource.Log.Critical("  </Device>");
+                            OneWireEventSource.Log.Critical("</DeviceCapability>");
+                        }
+                        else
+                        {
+                            OneWireEventSource.Log.Critical("Unkown error, possibly open by another app : " + deviceId);
+                        }
+
+                        throw new System.IO.IOException("Failed to open (" + deviceId + ") check log file!");
+                    }
+
+                    return device;
                 });
 
                 t.Wait();
@@ -412,7 +441,8 @@ namespace com.dalsemi.onewire.adapter
             vpp = UsbState.ProgrammingVoltagePresent;
 
             // check if 1-Wire bus is shorted
-            UsbIo.Comm_OneWireReset(out DeviceDetected);
+            UsbIo.Comm_OneWireReset();
+            UsbIo.ReadResult(out DeviceDetected);
             if (0 != UsbIo.LastError)
             {
                 ErrorResult err = UsbIo.LastError;
@@ -1474,67 +1504,221 @@ namespace com.dalsemi.onewire.adapter
         }
 
         /// <summary>
-        /// This method does nothing in <code>DumbAdapter</code>.
+        /// Sends a byte to the 1-Wire Network.
         /// </summary>
         /// <param name="byteValue">  the byte value to send to the 1-Wire Network. </param>
         public override void putByte(int byteValue)
         {
-            throw new NotImplementedException();
+            byte[] temp_block = new byte[1];
+
+            temp_block[0] = (byte)byteValue;
+
+            dataBlock(temp_block, 0, 1);
+
+            // check to make sure echo was what was sent
+            if (temp_block[0] != (byte)byteValue)
+            {
+                throw new OneWireIOException("Error short on 1-Wire during putByte");
+            }
         }
 
         /// <summary>
-        /// This method does nothing in <code>DumbAdapter</code>.
+        /// Gets a byte from the 1-Wire Network.
         /// </summary>
         /// <returns> the value 0x0ff </returns>
         public override int Byte
         {
             get
             {
-                throw new NotImplementedException();
+                byte[] temp_block = new byte[1];
+
+                temp_block[0] = (byte)0xFF;
+
+                dataBlock(temp_block, 0, 1);
+
+                if (temp_block.Length == 1)
+                {
+                    return (temp_block[0] & 0xFF);
+                }
+                else
+                {
+                    throw new OneWireIOException("Error communicating with adapter");
+                }
             }
         }
 
         /// <summary>
-        /// This method does nothing in <code>DumbAdapter</code>.
+        /// Get a block of data from the 1-Wire Network.
         /// </summary>
         /// <param name="len">  length of data bytes to receive
         /// </param>
         /// <returns> a new byte array of length <code>len</code> </returns>
         public override byte[] getBlock(int len)
         {
-            throw new NotImplementedException();
+            byte[] temp_block = new byte[len];
+
+            // set block to read 0xFF
+            for (int i = 0; i < len; i++)
+            {
+                temp_block[i] = (byte)0xFF;
+            }
+
+            getBlock(temp_block, len);
+
+            return temp_block;
         }
 
         /// <summary>
-        /// This method does nothing in <code>DumbAdapter</code>.
+        /// Get a block of data from the 1-Wire Network and write it into
+        /// the provided array.
         /// </summary>
         /// <param name="arr">     array in which to write the received bytes </param>
         /// <param name="len">     length of data bytes to receive </param>
         public override void getBlock(byte[] arr, int len)
         {
-            throw new NotImplementedException();
+            getBlock(arr, 0, len);
         }
 
         /// <summary>
-        /// This method does nothing in <code>DumbAdapter</code>.
+        /// Get a block of data from the 1-Wire Network and write it into
+        /// the provided array.
         /// </summary>
         /// <param name="arr">     array in which to write the received bytes </param>
         /// <param name="off">     offset into the array to start </param>
         /// <param name="len">     length of data bytes to receive </param>
         public override void getBlock(byte[] arr, int off, int len)
         {
-            throw new NotImplementedException();
+            // set block to read 0xFF
+            for (int i = off; i < len; i++)
+            {
+                arr[i] = 0xFF;
+            }
+
+            dataBlock(arr, off, len);
         }
 
         /// <summary>
-        /// This method does nothing in <code>DumbAdapter</code>.
+        /// Sends a block of data and returns the data received in the same array.
+        /// This method is used when sending a block that contains reads and writes.
+        /// The 'read' portions of the data block need to be pre-loaded with 0xFF's.
+        /// It starts sending data from the index at offset 'off' for length 'len'.
         /// </summary>
         /// <param name="dataBlock">  array of data to transfer to and from the 1-Wire Network. </param>
         /// <param name="off">        offset into the array of data to start </param>
         /// <param name="len">        length of data to send / receive starting at 'off' </param>
         public override void dataBlock(byte[] dataBlock, int off, int len)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // acquire exclusive use of the port
+                beginLocalExclusive();
+
+                // make sure adapter is present
+                if (uAdapterPresent())
+                {
+                    // check for pending power conditions
+                    if (owState.oneWireLevel != LEVEL_NORMAL)
+                    {
+                        setPowerNormal();
+                    }
+
+                    // check for primed byte
+                    if ((len == 1) && owState.levelChangeOnNextByte)
+                    {
+                        owState.levelChangeOnNextByte = false;
+
+                        var t_write = Task<uint>.Run(async () =>
+                        {
+                            return await UsbIo.BulkEp_Write(off, dataBlock, "dataBlock Write");
+                        });
+                        t_write.Wait();
+
+                        int i;
+                        bool DeviceDetected;
+                        ErrorResult result;
+                        do
+                        {
+                            for (i = 0; i < 200; i++)
+                            {
+                                result = UsbIo.ReadStatus(out DeviceDetected);
+                                if (ErrorResult.NRS == (result & ErrorResult.NRS))
+                                {
+                                    Debug.WriteLine("Nothing found!");
+                                    Debugger.Break();
+                                }
+                                else
+                                {
+                                    UsbIo.PrintErrorResult();
+                                    break;
+                                }
+                            }
+                        } while (UsbState.OneWireReadBufferStatus == 0);
+
+                        // read the packet
+                        var t_read = Task<byte[]>.Run(async () =>
+                        {
+                            return await UsbIo.BulkEp_Read(0, "dataBlock Read");
+                        });
+                        t_read.Wait();
+
+                        dataBlock = t_read.Result;
+
+                        // set new level state
+                        owState.oneWireLevel = LEVEL_POWER_DELIVERY;
+                    }
+                    else
+                    {
+                        var t_write = Task<uint>.Run(async () =>
+                        {
+                            return await UsbIo.BulkEp_Write(off, dataBlock, "dataBlock Write");
+                        });
+                        t_write.Wait();
+
+                        int i;
+                        bool DeviceDetected;
+                        ErrorResult result;
+                        do
+                        {
+                            for (i = 0; i < 200; i++)
+                            {
+                                result = UsbIo.ReadStatus(out DeviceDetected);
+                                if (ErrorResult.NRS == (result & ErrorResult.NRS))
+                                {
+                                    Debug.WriteLine("Nothing found!");
+                                    Debugger.Break();
+                                }
+                                else
+                                {
+                                    UsbIo.PrintErrorResult();
+                                    break;
+                                }
+                            }
+                        } while (UsbState.OneWireReadBufferStatus == 0);
+
+                        // read the packet
+                        var t_read = Task<byte[]>.Run(async () =>
+                        {
+                            return await UsbIo.BulkEp_Read(0, "dataBlock Read");
+                        });
+                        t_read.Wait();
+
+                        dataBlock = t_read.Result;
+                    }
+                }
+                else
+                {
+                    throw new OneWireIOException("Error communicating with adapter");
+                }
+            }
+            catch (IOException ioe)
+            {
+                throw new OneWireIOException(ioe.ToString());
+            }
+            finally
+            {
+                // release local exclusive use of port
+                endLocalExclusive();
+            }
         }
 
         /// <summary>
@@ -1574,7 +1758,9 @@ namespace com.dalsemi.onewire.adapter
 
                     bool DeviceDetect;
 
-                    ErrorResult result = UsbIo.Comm_OneWireReset(out DeviceDetect);
+                    UsbIo.Comm_OneWireReset();
+                    ErrorResult result = UsbIo.ReadResult(out DeviceDetect);
+                    //                    result = UsbIo.ReadStatus(out DeviceDetect);
 
                     if (DeviceDetect)
                     {
@@ -1808,9 +1994,21 @@ namespace com.dalsemi.onewire.adapter
         public virtual int oneWireReset()
         {
             bool DeviceDetected;
+            ErrorResult result;
+            try
+            {
+                // disable strong pull ups prior to reset
+                UsbIo.Comm_OneWireReset();
+                result = UsbIo.ReadResult(out DeviceDetected);
+                Debug.WriteLine(result.ToString("X"));
+            }
+            catch (System.Exception)
+            {
+                ;
+            }
 
-            // disable strong pull ups prior to reset
-            UsbIo.Comm_OneWireReset(out DeviceDetected);
+            //TODO
+            return DSPortAdapter.RESET_PRESENCE;
 
             //// append the reset command at the current speed
             //packet.writer.Write((byte)(FUNCTION_RESET | UsbState.uSpeedMode)); //TODO .Append

@@ -46,11 +46,13 @@
   <Capabilities>
     <Capability Name="internetClientServer" />
     <Capability Name="privateNetworkClientServer" />
+
     <DeviceCapability Name="serialcommunication">
       <Device Id="any">
         <Function Type="name:serialPort" />
       </Device>
     </DeviceCapability>
+
     <DeviceCapability Name="usb">
       <Device Id="vidpid:04FA 2490">
         <Function Type="name:vendorSpecific" />

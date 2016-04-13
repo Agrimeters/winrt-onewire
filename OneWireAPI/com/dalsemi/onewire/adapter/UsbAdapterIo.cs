@@ -194,20 +194,20 @@ namespace com.dalsemi.onewire.adapter
         /// </summary>
         /// <param name="DeviceDetect"></param>
         /// <returns>Error Result</returns>
-        public ErrorResult Comm_OneWireReset(out bool DeviceDetected)
+        public void Comm_OneWireReset() //ErrorResult
         {
             SendCommand(
                 Ds2490.CMD_TYPE.COMM,
-                Ds2490.COMM.ONEWIRE_RESET | Ds2490.COMM.F | Ds2490.COMM.IM | Ds2490.COMM.SE | Ds2490.COMM.NTF,
+                Ds2490.COMM.ONEWIRE_RESET | Ds2490.COMM.F | Ds2490.COMM.IM | Ds2490.COMM.SE, // | Ds2490.COMM.NTF,
                 (usbState.ReqBusCommSpeed != -1) ? (byte)usbState.ReqBusCommSpeed : usbState.BusCommSpeed,
                 "USB Communication: One-Wire Reset");
 
-            if (RESULT_SUCCESS != ReadResult(out DeviceDetected))
-                PrintErrorResult();
+            //if (RESULT_SUCCESS != ReadResult(out DeviceDetected))
+            //    PrintErrorResult();
 
             //TODO            usbState.PrintState();
 
-            return LastError;
+            //return LastError;
         }
 
         /// <summary>

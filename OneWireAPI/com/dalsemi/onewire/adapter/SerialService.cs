@@ -342,6 +342,10 @@ namespace com.dalsemi.onewire.adapter
 
                 return res;
             }
+            catch (System.Threading.Tasks.TaskCanceledException e)
+            {
+                OneWireEventSource.Log.Debug("readWithTimeout() Timeout!\r\n" + e.ToString());
+            }
             catch (Exception e)
             {
                 OneWireEventSource.Log.Debug("readWithTimeout(): " + e.ToString());
@@ -440,6 +444,7 @@ namespace com.dalsemi.onewire.adapter
                 var t = Task<SerialDevice>.Run(async () =>
                 {
                     SerialDevice device;
+                    DeviceInformation devInfo = null;
 
                     if (comPortName.Contains("\\"))
                     {
@@ -450,7 +455,7 @@ namespace com.dalsemi.onewire.adapter
                     }
                     else
                     {
-                        var devInfo = await GetDeviceInformation(comPortName);
+                        devInfo = await GetDeviceInformation(comPortName);
 
                         if (devInfo == null)
                             throw new System.IO.IOException("Failed to open PortName: " + comPortName);
@@ -460,14 +465,27 @@ namespace com.dalsemi.onewire.adapter
 
                     if (device == null)
                     {
-                        OneWireEventSource.Log.Critical("Your Package.appxmanifest Capabilities section is missing:");
-                        OneWireEventSource.Log.Critical("<DeviceCapability Name = \"serialcommunication\">");
-                        OneWireEventSource.Log.Critical("  <Device Id = \"any\">");
-                        OneWireEventSource.Log.Critical("    <Function Type = \"name:serialPort\"/>");
-                        OneWireEventSource.Log.Critical("  </Device>");
-                        OneWireEventSource.Log.Critical("</DeviceCapability>");
+                        var deviceAccessStatus = DeviceAccessInformation.CreateFromId(devInfo.Id).CurrentStatus;
+                        if (deviceAccessStatus == DeviceAccessStatus.DeniedByUser)
+                        {
+                            OneWireEventSource.Log.Critical("Access to the device was blocked by the user : " + devInfo.Id);
+                        }
+                        else if (deviceAccessStatus == DeviceAccessStatus.DeniedBySystem)
+                        {
+                            OneWireEventSource.Log.Critical("Possible failure with Package.appamnifgest declaration");
+                            OneWireEventSource.Log.Critical("Check your Package.appxmanifest Capabilities section:");
+                            OneWireEventSource.Log.Critical("<DeviceCapability Name = \"serialcommunication\">");
+                            OneWireEventSource.Log.Critical("  <Device Id = \"any\">");
+                            OneWireEventSource.Log.Critical("    <Function Type = \"name:serialPort\"/>");
+                            OneWireEventSource.Log.Critical("  </Device>");
+                            OneWireEventSource.Log.Critical("</DeviceCapability>");
+                        }
+                        else
+                        {
+                            OneWireEventSource.Log.Critical("Unkown error, possibly open by another app : " + devInfo.Id);
+                        }
 
-                        throw new System.IO.IOException("Failed to open (" + comPortName + ") due to Package.appxmanifest problem!");
+                        throw new System.IO.IOException("Failed to open (" + comPortName + ") check log file!");
                     }
 
                     writer = new DataWriter(device.OutputStream);
